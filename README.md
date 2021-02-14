@@ -1,4 +1,4 @@
-# fruitfairy
+# Fruit Fairy
 
 SE Senior Project SJSU Spring 2021 - Fruit Fairy 
 
