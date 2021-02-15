@@ -33,10 +33,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             ),
           ),
           child: Container(
-            color: Color(0xAAFFFFFF),
+            color: Colors.white.withOpacity(0.50),
             padding: EdgeInsets.symmetric(
               horizontal: 30.0,
-              vertical: 80.0,
+              vertical: 100.0,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -46,17 +46,16 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 45.0,
-                    color: Color(0xFF000000),
+                    color: Colors.black,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: 30.0),
+                SizedBox(height: 40.0),
                 Text(
                   'Solve Food Waste One Donation\nAt A Time',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 40.0,
-                    color: Color(0x77000000),
                   ),
                 ),
               ],

@@ -8,8 +8,11 @@ class LoginScreen extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: Container(
-          child: Text(
-            'asdasd',
+          color: Color(0xFFF05e5c),
+          child: Center(
+            child: Text(
+              'Sign In/Sign Up Screen',
+            ),
           ),
         ),
       ),
