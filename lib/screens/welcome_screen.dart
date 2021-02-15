@@ -42,7 +42,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'FRUIT FAIRYsss',
+                  'FRUIT FAIRY',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 45.0,
