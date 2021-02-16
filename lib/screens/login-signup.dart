@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fruitfairy/screens/login_screen.dart';
 import 'package:fruitfairy/widgets/roundedbutton.dart';
 import 'package:flutter_circular_text/circular_text.dart';
 
@@ -50,7 +51,12 @@ class LoginSignUpScreen extends StatelessWidget {
                 height: 150.0,
               ),
               RoundedButton(
-                  label: 'Sign In', color: Colors.white, onPressed: () {}),
+                  label: 'Sign In',
+                  color: Colors.white,
+                  onPressed: () {
+                    Navigator.of(context).pushNamed(LoginScreen.id);
+                  },
+                  ),
               RoundedButton(
                   label: 'Sign Up', color: Colors.white, onPressed: () {}),
             ],
