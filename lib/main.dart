@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fruitfairy/screens/welcome_screen.dart';
-import 'package:fruitfairy/screens/login_screen.dart';
+import 'package:fruitfairy/screens/login-signup.dart';
 
 void main() => runApp(FruitFairy());
 
@@ -12,7 +12,7 @@ class FruitFairy extends StatelessWidget {
       initialRoute: WelcomeScreen.id,
       routes: {
         WelcomeScreen.id: (context) => WelcomeScreen(),
-        LoginScreen.id: (context) => LoginScreen(),
+        LoginSignUpScreen.id: (context) => LoginSignUpScreen(),
       },
     );
   }
