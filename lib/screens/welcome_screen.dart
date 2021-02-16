@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fruitfairy/screens/login_screen.dart';
+import 'package:fruitfairy/screens/login-signup.dart';
 
 class WelcomeScreen extends StatefulWidget {
   static const String id = 'welcome_screen';
@@ -12,7 +12,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   void transition() async {
     await Future.delayed(Duration(seconds: 3));
     Navigator.of(context).pop();
-    Navigator.of(context).pushNamed(LoginScreen.id);
+    Navigator.of(context).pushNamed(LoginSignUpScreen.id);
   }
 
   @override
