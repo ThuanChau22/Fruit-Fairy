@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:fruitfairy/widgets/roundedbutton.dart';
+import 'package:fruitfairy/screens/signup_donor_screen.dart';
+import 'package:fruitfairy/widgets/rounded_button.dart';
 
-class CreateAccount extends StatelessWidget {
-  static const String id = 'create_account';
+class SignUpRoleScreen extends StatelessWidget {
+  static const String id = 'signup_role_screen';
 
   @override
   Widget build(BuildContext context) {
@@ -17,19 +18,22 @@ class CreateAccount extends StatelessWidget {
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-           // crossAxisAlignment: CrossAxisAlignment.stretch,
+            // crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               RoundedButton(
                 label: 'Donor',
                 color: Colors.white,
-                //ToDo: redirect to other screen
-                onPressed: null,
+                onPressed: () {
+                  Navigator.pushNamed(context, SignUpDonorScreen.id);
+                },
               ),
-              SizedBox(height: 24.0,),
+              SizedBox(
+                height: 24.0,
+              ),
               RoundedButton(
                 label: 'Charity',
                 color: Colors.white,
-                //ToDo: missing pressing function
+                //ToDo: redirect to sign up charity screen
                 onPressed: null,
               ),
             ],

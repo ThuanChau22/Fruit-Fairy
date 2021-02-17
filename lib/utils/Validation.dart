@@ -18,7 +18,7 @@ class Validate {
     return '';
   }
 
-  /// Validate email
+  /// Validate email on signup
   /// Return empty String on correct [email]
   static String email({String email}) {
     if (email.isEmpty) {
@@ -32,7 +32,7 @@ class Validate {
     return '';
   }
 
-  /// Validate password
+  /// Validate password on signup
   /// Return empty String on correct [password]
   static String password({String password}) {
     if (password.isEmpty) {
@@ -63,5 +63,17 @@ class Validate {
       return 'Passwords do not match\n';
     }
     return '';
+  }
+
+  /// Simple check email on signin
+  /// Return empty String on correct [email]
+  static String checkEmail({String email}) {
+    return email.trim().isEmpty ? 'Please enter Email\n' : '';
+  }
+
+  /// Simple check password on signin
+  /// Return empty String on correct [password]
+  static String checkPassword({String password}) {
+    return password.isEmpty ? 'Please enter Password\n' : '';
   }
 }

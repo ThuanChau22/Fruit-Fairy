@@ -9,14 +9,14 @@ import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class SignUpScreen extends StatefulWidget {
-  static const String id = 'signup_screen';
+class SignUpDonorScreen extends StatefulWidget {
+  static const String id = 'signup_donor_screen';
 
   @override
-  _SignUpScreenState createState() => _SignUpScreenState();
+  _SignUpDonorScreenState createState() => _SignUpDonorScreenState();
 }
 
-class _SignUpScreenState extends State<SignUpScreen> {
+class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -33,7 +33,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   String _emailError = '';
   String _passwordError = '';
   String _confirmPasswordError = '';
-  String _signInError = '';
+  String _signUpError = '';
 
   int _firstNameCount = 0;
   int _lastNameCount = 0;
@@ -60,7 +60,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
         confirmPassword: _confirmPassword,
       );
     });
-    // print('errors: ${errors.isNotEmpty ? errors : null}');
     return errors.isEmpty;
   }
 
@@ -83,11 +82,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
         });
         Navigator.of(context).pop();
         Navigator.of(context).pop();
+        Navigator.of(context).pop();
         Navigator.of(context).pushNamed(HomeScreen.id);
       }
     } catch (e) {
       setState(() {
-        _signInError = e.message;
+        _signUpError = e.message;
       });
     } finally {
       setState(() => _showSpinner = false);
@@ -190,7 +190,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   SizedBox(height: 15.0),
                   Text(
-                    _signInError,
+                    _signUpError,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.red,
