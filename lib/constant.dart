@@ -15,3 +15,9 @@ const kTextFieldDecoration = InputDecoration(
     borderRadius: BorderRadius.all(Radius.circular(32.0)),
   ),
 );
+
+const kUserDB = 'users';
+const kEmailField = 'email';
+const kFirstNameField = 'firstname';
+const kLastNameField = 'lastname';
+const kPhoneField = 'phone';
