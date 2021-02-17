@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 
+/// Color Theme
+const kBackroundColor = Color(0xFFF05e5c);
+const kAppBarColor = Color(0xFF800000);
+const kLabelColor = Colors.white;
+const kErrorColor = Colors.white;
+
 const kTextFieldDecoration = InputDecoration(
   hintText: 'Enter a value',
   contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
@@ -16,6 +22,7 @@ const kTextFieldDecoration = InputDecoration(
   ),
 );
 
+/// Database fields
 const kUserDB = 'users';
 const kEmailField = 'email';
 const kFirstNameField = 'firstname';
