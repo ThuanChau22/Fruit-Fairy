@@ -99,6 +99,7 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
     return Scaffold(
       body: SafeArea(
         child: ModalProgressHUD(
+          opacity: 0.5,
           inAsyncCall: _showSpinner,
           child: ScrollableLayout(
             child: Container(
