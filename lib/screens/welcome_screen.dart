@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:fruitfairy/screens/login_screen.dart';
+import 'package:fruitfairy/screens/sign_option_screen.dart';
+import 'package:fruitfairy/screens/home_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class WelcomeScreen extends StatefulWidget {
   static const String id = 'welcome_screen';
@@ -9,16 +11,22 @@ class WelcomeScreen extends StatefulWidget {
 }
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
-  void transition() async {
-    await Future.delayed(Duration(seconds: 3));
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  void getCurrentUser() async {
+    await Future.delayed(Duration(seconds: 2));
     Navigator.of(context).pop();
-    Navigator.of(context).pushNamed(LoginScreen.id);
+    if (_auth.currentUser == null) {
+      Navigator.of(context).pushNamed(SignOptionScreen.id);
+    } else {
+      Navigator.of(context).pushNamed(HomeScreen.id);
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    transition();
+    getCurrentUser();
   }
 
   @override
