@@ -41,31 +41,32 @@ class LoginSignUpScreen extends StatelessWidget {
                       ],
                       radius: 105.0,
                       position: CircularTextPosition.outside,
-                      backgroundPaint: Paint()..color = Color(0xFFF05e5c),
+                      backgroundPaint: Paint()..color = Colors.transparent,
                     ),
                     CircleAvatar(
-                      radius: 80.0,
+                      radius: 95.0,
                       backgroundImage: AssetImage('images/Fairy-Fruit.png'),
                       backgroundColor: Colors.green.shade100,
                     ),
                   ],
                 ),
               ),
-
               SizedBox(
                 height: 150.0,
               ),
               RoundedButton(
-                  label: 'Sign In',
+                label: 'Sign In',
+                color: Colors.white,
+                onPressed: () {
+                  Navigator.of(context).pushNamed(LoginScreen.id);
+                },
+              ),
+              RoundedButton(
+                  label: 'Sign Up',
                   color: Colors.white,
                   onPressed: () {
-                    Navigator.of(context).pushNamed(LoginScreen.id);
-                  },
-                  ),
-              RoundedButton(
-                  label: 'Sign Up', color: Colors.white, onPressed: () {
-                Navigator.of(context).pushNamed(CreateAccount.id);
-              }),
+                    Navigator.of(context).pushNamed(CreateAccount.id);
+                  }),
             ],
           ),
         ),

@@ -40,7 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             style: TextStyle(
                               fontFamily: 'Pacifico',
                               color: Colors.white,
-                              fontSize: 40.0,
+                              fontSize: 30.0,
                             ),
                           ),
                           space: 10,
@@ -49,12 +49,12 @@ class _LoginScreenState extends State<LoginScreen> {
                           direction: CircularTextDirection.clockwise,
                         ),
                       ],
-                      radius: 105.0,
+                      radius: 95.0,
                       position: CircularTextPosition.outside,
-                      backgroundPaint: Paint()..color = Color(0xFFF05e5c),
+                      backgroundPaint: Paint()..color = Colors.transparent,
                     ),
                     CircleAvatar(
-                      radius: 100.0,
+                      radius: 85.0,
                       backgroundImage: AssetImage('images/Fairy-Fruit.png'),
                       backgroundColor: Colors.green.shade100,
                     ),
@@ -82,7 +82,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 keyboardType: TextInputType.emailAddress,
                 textAlign: TextAlign.left,
                 onChanged: (value) {},
-                decoration: kTextFieldDecoration.copyWith(hintText: 'Email'),
+                decoration: kTextFieldDecoration.copyWith(hintText: 'Enter Email'),
               ),
               SizedBox(
                 height: 8.0,
@@ -91,7 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 obscureText: true,
                 textAlign: TextAlign.left,
                 onChanged: (value) {},
-                decoration: kTextFieldDecoration.copyWith(hintText: 'Password'),
+                decoration: kTextFieldDecoration.copyWith(hintText: 'Enter Password'),
               ),
               SizedBox(
                 height: 24.0,
