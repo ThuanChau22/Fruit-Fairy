@@ -16,7 +16,7 @@ class _SignOptionScreenState extends State<SignOptionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kBackroundColor,
+      backgroundColor: kBackgroundColor,
       body: SafeArea(
         child: ScrollableLayout(
           child: Center(
