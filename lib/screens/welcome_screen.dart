@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:fruitfairy/screens/login_screen.dart';
+import 'package:fruitfairy/screens/sign_option_screen.dart';
+import 'package:fruitfairy/screens/home_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class WelcomeScreen extends StatefulWidget {
   static const String id = 'welcome_screen';
@@ -9,16 +11,22 @@ class WelcomeScreen extends StatefulWidget {
 }
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
-  void transition() async {
-    await Future.delayed(Duration(seconds: 3));
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  void getCurrentUser() async {
+    await Future.delayed(Duration(seconds: 2));
     Navigator.of(context).pop();
-    Navigator.of(context).pushNamed(LoginScreen.id);
+    if (_auth.currentUser == null) {
+      Navigator.of(context).pushNamed(SignOptionScreen.id);
+    } else {
+      Navigator.of(context).pushNamed(HomeScreen.id);
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    transition();
+    getCurrentUser();
   }
 
   @override
@@ -33,10 +41,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             ),
           ),
           child: Container(
-            color: Color(0xAAFFFFFF),
+            color: Colors.white.withOpacity(0.50),
             padding: EdgeInsets.symmetric(
               horizontal: 30.0,
-              vertical: 80.0,
+              vertical: 100.0,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -46,17 +54,16 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 45.0,
-                    color: Color(0xFF000000),
+                    color: Colors.black,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: 30.0),
+                SizedBox(height: 40.0),
                 Text(
                   'Solve Food Waste One Donation\nAt A Time',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 40.0,
-                    color: Color(0x77000000),
                   ),
                 ),
               ],
