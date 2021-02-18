@@ -41,35 +41,47 @@ class _SignOptionScreenState extends State<SignOptionScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Hero(
-                  tag: FruitFairyLogo.id,
-                  child: FruitFairyLogo(
-                    fontSize: 40.0,
-                    radius: 95.0,
-                  ),
-                ),
+                animatedLogo(),
                 SizedBox(height: 24.0),
-                RoundedButton(
-                  label: 'Sign In',
-                  labelColor: kBackroundColor,
-                  backgroundColor: kLabelColor,
-                  onPressed: () {
-                    Navigator.of(context).pushNamed(SignInScreen.id);
-                  },
-                ),
-                RoundedButton(
-                  label: 'Sign Up',
-                  labelColor: kBackroundColor,
-                  backgroundColor: kLabelColor,
-                  onPressed: () {
-                    Navigator.of(context).pushNamed(SignUpRoleScreen.id);
-                  },
-                ),
+                signInButton(context),
+                signUpButton(context),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Hero animatedLogo() {
+    return Hero(
+      tag: FruitFairyLogo.id,
+      child: FruitFairyLogo(
+        fontSize: 40.0,
+        radius: 95.0,
+      ),
+    );
+  }
+
+  RoundedButton signInButton(BuildContext context) {
+    return RoundedButton(
+      label: 'Sign In',
+      labelColor: kBackroundColor,
+      backgroundColor: kLabelColor,
+      onPressed: () {
+        Navigator.of(context).pushNamed(SignInScreen.id);
+      },
+    );
+  }
+
+  RoundedButton signUpButton(BuildContext context) {
+    return RoundedButton(
+      label: 'Sign Up',
+      labelColor: kBackroundColor,
+      backgroundColor: kLabelColor,
+      onPressed: () {
+        Navigator.of(context).pushNamed(SignUpRoleScreen.id);
+      },
     );
   }
 }

@@ -22,34 +22,46 @@ class SignUpRoleScreen extends StatelessWidget {
           child: Center(
             child: Column(
               children: [
-                Hero(
-                  tag: FruitFairyLogo.id,
-                  child: FruitFairyLogo(
-                    fontSize: 25.0,
-                    radius: 60.0,
-                  ),
-                ),
+                animatedLogo(),
                 SizedBox(height: 24.0),
-                RoundedButton(
-                  label: 'Donor',
-                  labelColor: kBackroundColor,
-                  backgroundColor: kLabelColor,
-                  onPressed: () {
-                    Navigator.pushNamed(context, SignUpDonorScreen.id);
-                  },
-                ),
-                RoundedButton(
-                  label: 'Charity',
-                  labelColor: kBackroundColor,
-                  backgroundColor: kLabelColor,
-                  //ToDo: redirect to sign up charity screen
-                  onPressed: null,
-                ),
+                donorButton(context),
+                charityButton(context),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Hero animatedLogo() {
+    return Hero(
+      tag: FruitFairyLogo.id,
+      child: FruitFairyLogo(
+        fontSize: 25.0,
+        radius: 60.0,
+      ),
+    );
+  }
+
+  RoundedButton donorButton(BuildContext context) {
+    return RoundedButton(
+      label: 'Donor',
+      labelColor: kBackroundColor,
+      backgroundColor: kLabelColor,
+      onPressed: () {
+        Navigator.of(context).pushNamed(SignUpDonorScreen.id);
+      },
+    );
+  }
+
+  RoundedButton charityButton(BuildContext context) {
+    return RoundedButton(
+      label: 'Charity',
+      labelColor: kBackroundColor,
+      backgroundColor: kLabelColor,
+      //ToDo: redirect to sign up charity screen
+      onPressed: null,
     );
   }
 }

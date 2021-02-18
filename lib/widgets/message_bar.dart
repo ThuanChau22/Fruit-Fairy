@@ -6,13 +6,14 @@ class MessageBar {
 
   MessageBar({
     @required this.scaffoldContext,
-    @required this.message,
+    this.message,
   });
 
   void show() {
     Scaffold.of(scaffoldContext).showSnackBar(
       SnackBar(
         backgroundColor: Color.fromRGBO(255, 255, 255, 0.25),
+        duration: Duration(seconds: 5),
         content: Text(
           message,
           textAlign: TextAlign.center,
@@ -23,5 +24,9 @@ class MessageBar {
         ),
       ),
     );
+  }
+
+  void hide() {
+    Scaffold.of(scaffoldContext).hideCurrentSnackBar();
   }
 }

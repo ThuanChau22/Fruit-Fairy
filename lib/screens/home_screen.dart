@@ -19,7 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   bool _showSpinner = false;
   String _name = '';
-  BuildContext scaffoldContext;
+  BuildContext _scaffoldContext;
 
   void getCurrentUser() async {
     setState(() => _showSpinner = true);
@@ -29,12 +29,8 @@ class _HomeScreenState extends State<HomeScreen> {
         Map<String, dynamic> data =
             (await _firestore.collection(kUserDB).doc(user.uid).get()).data();
         setState(() {
-          _name = data[kFirstNameField] + data[kLastNameField];
+          _name = data[kFirstNameField] + ' ' + data[kLastNameField];
         });
-        MessageBar(
-          scaffoldContext: scaffoldContext,
-          message: 'Sign in successfully',
-        ).show();
       }
     } catch (e) {
       print(e.message);
@@ -46,13 +42,15 @@ class _HomeScreenState extends State<HomeScreen> {
   void _signOut() async {
     setState(() => _showSpinner = true);
     MessageBar(
-      scaffoldContext: scaffoldContext,
+      scaffoldContext: _scaffoldContext,
       message: 'Signing out',
     ).show();
     try {
       await _auth.signOut();
-      Navigator.of(context).pop();
-      Navigator.of(context).pushNamed(SignOptionScreen.id);
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        SignOptionScreen.id,
+        (route) => false,
+      );
       Navigator.of(context).pushNamed(SignInScreen.id);
     } catch (e) {
       print(e);
@@ -77,13 +75,15 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.account_circle_outlined),
-            onPressed: _signOut,
+            onPressed: () {
+              _signOut();
+            },
           ),
         ],
       ),
       body: Builder(
         builder: (BuildContext context) {
-          scaffoldContext = context;
+          _scaffoldContext = context;
           return SafeArea(
             child: ModalProgressHUD(
               opacity: 0.5,

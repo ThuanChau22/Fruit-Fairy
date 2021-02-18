@@ -9,6 +9,7 @@ class InputField extends StatelessWidget {
   final TextInputType keyboardType;
   final bool obscureText;
   final Function onChanged;
+  final Function onTap;
 
   InputField({
     @required this.label,
@@ -16,13 +17,15 @@ class InputField extends StatelessWidget {
     @required this.onChanged,
     this.characterCount = 0,
     this.errorMessage = '',
-    this.obscureText = false,
     this.keyboardType,
+    this.obscureText = false,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextField(
+      cursorColor: kLabelColor,
       keyboardType: keyboardType,
       obscureText: obscureText,
       style: TextStyle(
@@ -32,15 +35,18 @@ class InputField extends StatelessWidget {
         labelText: label,
         labelStyle: TextStyle(
           color: kLabelColor,
-          fontSize: 20,
+          fontSize: 16,
         ),
         errorText: errorMessage.isNotEmpty ? errorMessage : null,
         errorStyle: TextStyle(
           color: kErrorColor,
-          fontSize: 15,
+          fontSize: 16,
         ),
         counterText: characterCount > 0 ? '$characterCount' : null,
         helperText: '',
+        helperStyle: TextStyle(
+          color: kLabelColor,
+        ),
         errorMaxLines: 2,
         contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
         filled: true,
@@ -66,6 +72,7 @@ class InputField extends StatelessWidget {
         ),
       ),
       onChanged: onChanged,
+      onTap: onTap,
     );
   }
 }
