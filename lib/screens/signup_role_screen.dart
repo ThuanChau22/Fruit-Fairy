@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/screens/signup_donor_screen.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 
@@ -8,11 +9,11 @@ class SignUpRoleScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF05e5c),
+      backgroundColor: kBackroundColor,
       appBar: AppBar(
         centerTitle: true,
         title: Text('Create Account'),
-        backgroundColor: Color(0xFFF05e5c),
+        backgroundColor: kBackroundColor,
       ),
       body: SafeArea(
         child: Center(
