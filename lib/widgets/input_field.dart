@@ -25,15 +25,26 @@ class InputField extends StatelessWidget {
     return TextField(
       keyboardType: keyboardType,
       obscureText: obscureText,
+      style: TextStyle(
+        color: kLabelColor,
+      ),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: TextStyle(color: kLabelColor),
+        labelStyle: TextStyle(
+          color: kLabelColor,
+          fontSize: 20,
+        ),
         errorText: errorMessage.isNotEmpty ? errorMessage : null,
-        errorStyle: TextStyle(color: kErrorColor),
+        errorStyle: TextStyle(
+          color: kErrorColor,
+          fontSize: 15,
+        ),
         counterText: characterCount > 0 ? '$characterCount' : null,
         helperText: '',
         errorMaxLines: 2,
         contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+        filled: true,
+        fillColor: Color.fromRGBO(255, 255, 255, 0.15),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.all(Radius.circular(32.0)),
         ),

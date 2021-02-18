@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:fruitfairy/constant.dart';
-import 'package:fruitfairy/utils/Validation.dart';
+import 'package:fruitfairy/utils/validation.dart';
+import 'package:fruitfairy/widgets/fruit_fairy_logo.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
-import 'package:fruitfairy/widgets/scrollable_layout.dart';
+import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
+import 'package:fruitfairy/widgets/scrollable_layout.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
-import 'package:flutter_circular_text/circular_text/model.dart';
-import 'package:flutter_circular_text/circular_text/widget.dart';
 
 class SignInScreen extends StatefulWidget {
   static const String id = 'signin_screen';
@@ -25,7 +25,8 @@ class _SignInScreenState extends State<SignInScreen> {
 
   String _emailError = '';
   String _passwordError = '';
-  String _signInError = '';
+
+  BuildContext scaffoldContext;
 
   bool _isValid() {
     String errors = '';
@@ -57,7 +58,10 @@ class _SignInScreenState extends State<SignInScreen> {
         Navigator.of(context).pushNamed(HomeScreen.id);
       }
     } catch (e) {
-      _signInError = 'Incorrect Email/Password. Please try again!';
+      MessageBar(
+        scaffoldContext: scaffoldContext,
+        message: 'Incorrect Email/Password. Please try again!',
+      ).show();
     } finally {
       setState(() => _showSpinner = false);
     }
@@ -72,104 +76,74 @@ class _SignInScreenState extends State<SignInScreen> {
         title: Text('Sign In'),
         backgroundColor: kAppBarColor,
       ),
-      body: SafeArea(
-        child: ModalProgressHUD(
-          inAsyncCall: _showSpinner,
-          child: ScrollableLayout(
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: MediaQuery.of(context).size.width * 0.15,
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Hero(
-                    tag: 'logo',
-                    child: Stack(
-                      alignment: AlignmentDirectional.center,
+      body: Builder(
+        builder: (BuildContext context) {
+          scaffoldContext = context;
+          return SafeArea(
+            child: ModalProgressHUD(
+              inAsyncCall: _showSpinner,
+              child: ScrollableLayout(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: MediaQuery.of(context).size.width * 0.15,
+                  ),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        CircularText(
-                          children: [
-                            TextItem(
-                              text: Text(
-                                'Fruit Fairy',
-                                style: TextStyle(
-                                  fontFamily: 'Pacifico',
-                                  color: Colors.white,
-                                  fontSize: 30.0,
-                                ),
-                              ),
-                              space: 10,
-                              startAngle: -85,
-                              startAngleAlignment: StartAngleAlignment.center,
-                              direction: CircularTextDirection.clockwise,
-                            ),
-                          ],
-                          radius: 95.0,
-                          position: CircularTextPosition.outside,
-                          backgroundPaint: Paint()..color = Colors.transparent,
+                        Hero(
+                          tag: FruitFairyLogo.id,
+                          child: FruitFairyLogo(
+                            fontSize: 25.0,
+                            radius: 60.0,
+                          ),
                         ),
-                        CircleAvatar(
-                          radius: 85.0,
-                          backgroundImage: AssetImage('images/Fairy-Fruit.png'),
-                          backgroundColor: Colors.green.shade100,
+                        SizedBox(height: 24.0),
+                        InputField(
+                          label: 'Email',
+                          value: _email,
+                          keyboardType: TextInputType.emailAddress,
+                          errorMessage: _emailError,
+                          onChanged: (value) => setState(() {
+                            _email = value.trim();
+                            _emailError = Validate.checkEmail(
+                              email: _email,
+                            );
+                          }),
+                        ),
+                        SizedBox(height: 5.0),
+                        InputField(
+                          label: 'Password',
+                          value: _password,
+                          obscureText: true,
+                          errorMessage: _passwordError,
+                          onChanged: (value) => setState(() {
+                            _password = value;
+                            _passwordError = Validate.checkPassword(
+                              password: _password,
+                            );
+                          }),
+                        ),
+                        SizedBox(height: 15.0),
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: MediaQuery.of(context).size.width * 0.2,
+                          ),
+                          child: RoundedButton(
+                            label: 'Sign In',
+                            labelColor: kBackroundColor,
+                            backgroundColor: kLabelColor,
+                            onPressed: _signIn,
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  SizedBox(
-                    height: 24.0,
-                  ),
-                  InputField(
-                    label: 'Email',
-                    value: _email,
-                    keyboardType: TextInputType.emailAddress,
-                    errorMessage: _emailError,
-                    onChanged: (value) => setState(() {
-                      _email = value;
-                      _emailError = Validate.checkEmail(
-                        email: _email,
-                      );
-                    }),
-                  ),
-                  SizedBox(height: 5.0),
-                  InputField(
-                    label: 'Password',
-                    value: _password,
-                    obscureText: true,
-                    errorMessage: _passwordError,
-                    onChanged: (value) => setState(() {
-                      _password = value;
-                      _passwordError = Validate.checkPassword(
-                        password: _password,
-                      );
-                    }),
-                  ),
-                  SizedBox(height: 15.0),
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: MediaQuery.of(context).size.width * 0.2,
-                    ),
-                    child: RoundedButton(
-                      label: 'Sign In',
-                      color: Colors.white,
-                      onPressed: _signIn,
-                    ),
-                  ),
-                  SizedBox(height: 15.0),
-                  Text(
-                    _signInError,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: kErrorColor,
-                    ),
-                  )
-                ],
+                ),
               ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

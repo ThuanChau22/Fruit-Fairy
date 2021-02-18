@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
+import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
-import 'package:fruitfairy/utils/Validation.dart';
+import 'package:fruitfairy/utils/validation.dart';
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
@@ -33,10 +34,11 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
   String _emailError = '';
   String _passwordError = '';
   String _confirmPasswordError = '';
-  String _signUpError = '';
 
   int _firstNameCount = 0;
   int _lastNameCount = 0;
+
+  BuildContext scaffoldContext;
 
   bool _isValid() {
     String errors = '';
@@ -86,9 +88,10 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
         Navigator.of(context).pushNamed(HomeScreen.id);
       }
     } catch (e) {
-      setState(() {
-        _signUpError = e.message;
-      });
+      MessageBar(
+        scaffoldContext: scaffoldContext,
+        message: e.message,
+      ).show();
     } finally {
       setState(() => _showSpinner = false);
     }
@@ -97,111 +100,108 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: ModalProgressHUD(
-          opacity: 0.5,
-          inAsyncCall: _showSpinner,
-          child: ScrollableLayout(
-            child: Container(
-              padding: EdgeInsets.all(50.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  InputField(
-                    label: 'First Name',
-                    value: _firstName,
-                    errorMessage: _firstNameError,
-                    characterCount: _firstNameCount,
-                    keyboardType: TextInputType.name,
-                    onChanged: (value) => setState(() {
-                      _firstName = value.trim();
-                      _firstNameCount = _firstName.length;
-                      _firstNameError = Validate.name(
+      body: Builder(
+        builder: (BuildContext context) {
+          scaffoldContext = context;
+          return SafeArea(
+            child: ModalProgressHUD(
+              opacity: 0.5,
+              inAsyncCall: _showSpinner,
+              child: ScrollableLayout(
+                child: Container(
+                  padding: EdgeInsets.all(50.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      InputField(
                         label: 'First Name',
-                        name: _firstName,
-                      );
-                    }),
-                  ),
-                  SizedBox(height: 15.0),
-                  InputField(
-                    label: 'Last Name',
-                    value: _lastName,
-                    errorMessage: _lastNameError,
-                    characterCount: _lastNameCount,
-                    keyboardType: TextInputType.name,
-                    onChanged: (value) => setState(() {
-                      _lastName = value.trim();
-                      _lastNameCount = _lastName.length;
-                      _lastNameError = Validate.name(
+                        value: _firstName,
+                        errorMessage: _firstNameError,
+                        characterCount: _firstNameCount,
+                        keyboardType: TextInputType.name,
+                        onChanged: (value) => setState(() {
+                          _firstName = value.trim();
+                          _firstNameCount = _firstName.length;
+                          _firstNameError = Validate.name(
+                            label: 'First Name',
+                            name: _firstName,
+                          );
+                        }),
+                      ),
+                      SizedBox(height: 15.0),
+                      InputField(
                         label: 'Last Name',
-                        name: _lastName,
-                      );
-                    }),
+                        value: _lastName,
+                        errorMessage: _lastNameError,
+                        characterCount: _lastNameCount,
+                        keyboardType: TextInputType.name,
+                        onChanged: (value) => setState(() {
+                          _lastName = value.trim();
+                          _lastNameCount = _lastName.length;
+                          _lastNameError = Validate.name(
+                            label: 'Last Name',
+                            name: _lastName,
+                          );
+                        }),
+                      ),
+                      SizedBox(height: 15.0),
+                      InputField(
+                        label: 'Email',
+                        value: _email,
+                        errorMessage: _emailError,
+                        keyboardType: TextInputType.emailAddress,
+                        onChanged: (value) => setState(() {
+                          _email = value.trim();
+                          _emailError = Validate.email(
+                            email: _email,
+                          );
+                        }),
+                      ),
+                      SizedBox(height: 15.0),
+                      InputField(
+                        label: 'Password',
+                        value: _password,
+                        errorMessage: _passwordError,
+                        obscureText: true,
+                        onChanged: (value) => setState(() {
+                          _password = value;
+                          _passwordError = Validate.password(
+                            password: _password,
+                          );
+                          if (_confirmPassword.isNotEmpty) {
+                            _confirmPasswordError = Validate.confirmPassword(
+                              password: _password,
+                              confirmPassword: _confirmPassword,
+                            );
+                          }
+                        }),
+                      ),
+                      SizedBox(height: 15.0),
+                      InputField(
+                        label: 'Confirm Password',
+                        value: _confirmPassword,
+                        errorMessage: _confirmPasswordError,
+                        obscureText: true,
+                        onChanged: (value) => setState(() {
+                          _confirmPassword = value;
+                          _confirmPasswordError = Validate.confirmPassword(
+                            password: _password,
+                            confirmPassword: _confirmPassword,
+                          );
+                        }),
+                      ),
+                      SizedBox(height: 15.0),
+                      FlatButton(
+                        child: Text('Sign Up'),
+                        onPressed: _signUp,
+                      ),
+                    ],
                   ),
-                  SizedBox(height: 15.0),
-                  InputField(
-                    label: 'Email',
-                    value: _email,
-                    errorMessage: _emailError,
-                    keyboardType: TextInputType.emailAddress,
-                    onChanged: (value) => setState(() {
-                      _email = value.trim();
-                      _emailError = Validate.email(
-                        email: _email,
-                      );
-                    }),
-                  ),
-                  SizedBox(height: 15.0),
-                  InputField(
-                    label: 'Password',
-                    value: _password,
-                    errorMessage: _passwordError,
-                    obscureText: true,
-                    onChanged: (value) => setState(() {
-                      _password = value;
-                      _passwordError = Validate.password(
-                        password: _password,
-                      );
-                      if (_confirmPassword.isNotEmpty) {
-                        _confirmPasswordError = Validate.confirmPassword(
-                          password: _password,
-                          confirmPassword: _confirmPassword,
-                        );
-                      }
-                    }),
-                  ),
-                  SizedBox(height: 15.0),
-                  InputField(
-                    label: 'Confirm Password',
-                    value: _confirmPassword,
-                    errorMessage: _confirmPasswordError,
-                    obscureText: true,
-                    onChanged: (value) => setState(() {
-                      _confirmPassword = value;
-                      _confirmPasswordError = Validate.confirmPassword(
-                        password: _password,
-                        confirmPassword: _confirmPassword,
-                      );
-                    }),
-                  ),
-                  SizedBox(height: 15.0),
-                  FlatButton(
-                    child: Text('Sign Up'),
-                    onPressed: _signUp,
-                  ),
-                  SizedBox(height: 15.0),
-                  Text(
-                    _signUpError,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.red,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

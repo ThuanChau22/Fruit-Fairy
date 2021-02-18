@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:fruitfairy/constant.dart';
+import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/screens/sign_option_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fruitfairy/screens/signin_screen.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -17,6 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   bool _showSpinner = false;
   String _name = '';
+  BuildContext scaffoldContext;
 
   void getCurrentUser() async {
     setState(() => _showSpinner = true);
@@ -28,6 +31,10 @@ class _HomeScreenState extends State<HomeScreen> {
         setState(() {
           _name = data[kFirstNameField] + data[kLastNameField];
         });
+        MessageBar(
+          scaffoldContext: scaffoldContext,
+          message: 'Sign in successfully',
+        ).show();
       }
     } catch (e) {
       print(e.message);
@@ -36,12 +43,17 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void signOut() async {
+  void _signOut() async {
     setState(() => _showSpinner = true);
+    MessageBar(
+      scaffoldContext: scaffoldContext,
+      message: 'Signing out',
+    ).show();
     try {
       await _auth.signOut();
       Navigator.of(context).pop();
       Navigator.of(context).pushNamed(SignOptionScreen.id);
+      Navigator.of(context).pushNamed(SignInScreen.id);
     } catch (e) {
       print(e);
     } finally {
@@ -58,28 +70,41 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: ModalProgressHUD(
-          opacity: 0.5,
-          inAsyncCall: _showSpinner,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Hi, $_name',
-                  style: TextStyle(
-                    fontSize: 20.0,
-                  ),
-                ),
-                FlatButton(
-                  child: Text('Sign Out'),
-                  onPressed: signOut,
-                ),
-              ],
-            ),
+      backgroundColor: kBackroundColor,
+      appBar: AppBar(
+        centerTitle: true,
+        backgroundColor: kAppBarColor,
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.account_circle_outlined),
+            onPressed: _signOut,
           ),
-        ),
+        ],
+      ),
+      body: Builder(
+        builder: (BuildContext context) {
+          scaffoldContext = context;
+          return SafeArea(
+            child: ModalProgressHUD(
+              opacity: 0.5,
+              inAsyncCall: _showSpinner,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Hi, $_name',
+                      style: TextStyle(
+                        fontSize: 20.0,
+                        color: kLabelColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
