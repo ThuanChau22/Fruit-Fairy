@@ -20,15 +20,24 @@ class SignInScreen extends StatefulWidget {
 class _SignInScreenState extends State<SignInScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   bool _showSpinner = false;
+
   String _email = '';
   String _password = '';
 
   String _emailError = '';
   String _passwordError = '';
 
-  BuildContext scaffoldContext;
+  BuildContext _scaffoldContext;
 
-  bool _isValid() {
+  void showConfirmEmailMessage() {
+    MessageBar(
+      scaffoldContext: _scaffoldContext,
+      //TODO: add check email message
+      message: 'check email',
+    ).show();
+  }
+
+  bool _validate() {
     String errors = '';
     setState(() {
       errors += _emailError = Validate.checkEmail(
@@ -42,29 +51,49 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   void _signIn() async {
-    if (!_isValid()) {
-      return;
-    }
-
-    setState(() => _showSpinner = true);
-    try {
-      UserCredential registeredUser = await _auth.signInWithEmailAndPassword(
-        email: _email,
-        password: _password,
-      );
-      if (registeredUser != null) {
-        Navigator.of(context).pop();
-        Navigator.of(context).pop();
-        Navigator.of(context).pushNamed(HomeScreen.id);
+    if (_validate()) {
+      setState(() => _showSpinner = true);
+      try {
+        UserCredential registeredUser = await _auth.signInWithEmailAndPassword(
+          email: _email,
+          password: _password,
+        );
+        if (registeredUser != null) {
+          if (!registeredUser.user.emailVerified) {
+            await registeredUser.user.sendEmailVerification();
+            showConfirmEmailMessage();
+          } else {
+            Navigator.of(context).pushNamedAndRemoveUntil(
+              HomeScreen.id,
+              (route) => false,
+            );
+          }
+        }
+      } catch (e) {
+        if (e.code == 'too-many-requests') {
+          showConfirmEmailMessage();
+        } else {
+          MessageBar(
+            scaffoldContext: _scaffoldContext,
+            message: 'Incorrect Email or Password. Please try again!',
+          ).show();
+        }
+      } finally {
+        setState(() => _showSpinner = false);
       }
-    } catch (e) {
-      MessageBar(
-        scaffoldContext: scaffoldContext,
-        message: 'Incorrect Email/Password. Please try again!',
-      ).show();
-    } finally {
-      setState(() => _showSpinner = false);
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      UserCredential userCredential = ModalRoute.of(context).settings.arguments;
+      if (userCredential != null &&
+          userCredential.additionalUserInfo.isNewUser) {
+        showConfirmEmailMessage();
+      }
+    });
   }
 
   @override
@@ -78,7 +107,7 @@ class _SignInScreenState extends State<SignInScreen> {
       ),
       body: Builder(
         builder: (BuildContext context) {
-          scaffoldContext = context;
+          _scaffoldContext = context;
           return SafeArea(
             child: ModalProgressHUD(
               inAsyncCall: _showSpinner,
@@ -99,43 +128,11 @@ class _SignInScreenState extends State<SignInScreen> {
                           ),
                         ),
                         SizedBox(height: 24.0),
-                        InputField(
-                          label: 'Email',
-                          value: _email,
-                          keyboardType: TextInputType.emailAddress,
-                          errorMessage: _emailError,
-                          onChanged: (value) => setState(() {
-                            _email = value.trim();
-                            _emailError = Validate.checkEmail(
-                              email: _email,
-                            );
-                          }),
-                        ),
+                        emailInputField(),
                         SizedBox(height: 5.0),
-                        InputField(
-                          label: 'Password',
-                          value: _password,
-                          obscureText: true,
-                          errorMessage: _passwordError,
-                          onChanged: (value) => setState(() {
-                            _password = value;
-                            _passwordError = Validate.checkPassword(
-                              password: _password,
-                            );
-                          }),
-                        ),
+                        passwordInputField(),
                         SizedBox(height: 15.0),
-                        Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: MediaQuery.of(context).size.width * 0.2,
-                          ),
-                          child: RoundedButton(
-                            label: 'Sign In',
-                            labelColor: kBackroundColor,
-                            backgroundColor: kLabelColor,
-                            onPressed: _signIn,
-                          ),
-                        ),
+                        signInButton(context),
                       ],
                     ),
                   ),
@@ -143,6 +140,58 @@ class _SignInScreenState extends State<SignInScreen> {
               ),
             ),
           );
+        },
+      ),
+    );
+  }
+
+  InputField emailInputField() {
+    return InputField(
+      label: 'Email',
+      value: _email,
+      keyboardType: TextInputType.emailAddress,
+      errorMessage: _emailError,
+      onChanged: (value) {
+        setState(() {
+          _email = value.trim();
+          _emailError = Validate.checkEmail(
+            email: _email,
+          );
+        });
+      },
+      onTap: () => MessageBar(scaffoldContext: _scaffoldContext).hide(),
+    );
+  }
+
+  InputField passwordInputField() {
+    return InputField(
+      label: 'Password',
+      value: _password,
+      obscureText: true,
+      errorMessage: _passwordError,
+      onChanged: (value) {
+        setState(() {
+          _password = value;
+          _passwordError = Validate.checkPassword(
+            password: _password,
+          );
+        });
+      },
+      onTap: () => MessageBar(scaffoldContext: _scaffoldContext).hide(),
+    );
+  }
+
+  Padding signInButton(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: MediaQuery.of(context).size.width * 0.2,
+      ),
+      child: RoundedButton(
+        label: 'Sign In',
+        labelColor: kBackroundColor,
+        backgroundColor: kLabelColor,
+        onPressed: () {
+          _signIn();
         },
       ),
     );

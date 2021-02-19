@@ -14,19 +14,19 @@ void main() async {
 }
 
 class FruitFairy extends StatelessWidget {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final User user = FirebaseAuth.instance.currentUser;
   @override
   Widget build(BuildContext context) {
+    bool signedIn = user != null && user.emailVerified;
     return MaterialApp(
       theme: ThemeData.light().copyWith(),
-      initialRoute:
-          _auth.currentUser == null ? SignOptionScreen.id : HomeScreen.id,
+      initialRoute: signedIn ? HomeScreen.id : SignOptionScreen.id,
       routes: {
+        HomeScreen.id: (context) => HomeScreen(),
         SignOptionScreen.id: (context) => SignOptionScreen(),
         SignInScreen.id: (context) => SignInScreen(),
         SignUpRoleScreen.id: (context) => SignUpRoleScreen(),
         SignUpDonorScreen.id: (context) => SignUpDonorScreen(),
-        HomeScreen.id: (context) => HomeScreen(),
       },
     );
   }
