@@ -106,7 +106,7 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kBackroundColor,
+      backgroundColor: kBackgroundColor,
       appBar: AppBar(
         centerTitle: true,
         title: Text('Sign Up'),
@@ -136,7 +136,6 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
                       SizedBox(height: 15.0),
                       signUpButton(context),
                     ],
-                   ),
                   ),
                 ),
               ),
@@ -257,7 +256,7 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
       ),
       child: RoundedButton(
         label: 'Sign Up',
-        labelColor: kBackroundColor,
+        labelColor: kBackgroundColor,
         backgroundColor: kLabelColor,
         onPressed: () {
           _signUp();
