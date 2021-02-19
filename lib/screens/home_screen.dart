@@ -3,6 +3,9 @@ import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/screens/sign_option_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fruitfairy/screens/signin_screen.dart';
+import 'package:fruitfairy/widgets/rounded_button.dart';
+import 'package:fruitfairy/widgets/scrollable_layout.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -16,6 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   bool _showSpinner = false;
+  String _initialName = '';
   String _name = '';
 
   void getCurrentUser() async {
@@ -26,7 +30,8 @@ class _HomeScreenState extends State<HomeScreen> {
         Map<String, dynamic> data =
             (await _firestore.collection(kUserDB).doc(user.uid).get()).data();
         setState(() {
-          _name = data[kFirstNameField] + data[kLastNameField];
+          _name = data[kFirstNameField] + ' ' + data[kLastNameField];
+          _initialName = data[kFirstNameField][0] + data[kLastNameField][0];
         });
       }
     } catch (e) {
@@ -40,8 +45,8 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => _showSpinner = true);
     try {
       await _auth.signOut();
-      Navigator.of(context).pop();
-      Navigator.of(context).pushNamed(SignOptionScreen.id);
+      Navigator.of(context).popAndPushNamed(SignOptionScreen.id);
+      Navigator.of(context).pushNamed(SignInScreen.id);
     } catch (e) {
       print(e);
     } finally {
@@ -58,25 +63,79 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: kBackgroundColor,
+      appBar: AppBar(
+        actions: [
+          Container(
+            height: 40.0,
+            width: 40.0,
+            child: FloatingActionButton(
+              backgroundColor: Colors.white,
+              //TODO: add drop down menu with sign out and edit profile option
+              onPressed: signOut,
+              child: Text(
+                '$_initialName',
+                style: TextStyle(
+                  color: kBackgroundColor,
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ],
+        centerTitle: true,
+        backgroundColor: kAppBarColor,
+        title: Text('Profile Page'),
+      ),
       body: SafeArea(
         child: ModalProgressHUD(
           opacity: 0.5,
           inAsyncCall: _showSpinner,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Hi, $_name',
-                  style: TextStyle(
-                    fontSize: 20.0,
+          child: ScrollableLayout(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Text(
+                    'Welcome $_name',
+                    style: TextStyle(
+                      fontSize: 30.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-                FlatButton(
-                  child: Text('Sign Out'),
-                  onPressed: signOut,
-                ),
-              ],
+                  RoundedButton(
+                      onPressed: null, label: 'Donate', color: Colors.white),
+                  Text(
+                    'Donation History',
+                    style: TextStyle(
+                      fontSize: 30.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+
+                  Container(
+                    height: MediaQuery.of(context).size.height * 0.5,
+                    width: MediaQuery.of(context).size.width * 0.8,
+                    color: Colors.white,
+                    child: ListView(
+                      children: [
+                        ListTile(
+                          title: Text('1'),
+                        ),
+                        ListTile(
+                          title: Text('2'),
+                        ),
+                        ListTile(
+                          title: Text('3'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

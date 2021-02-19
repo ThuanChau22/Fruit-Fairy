@@ -7,7 +7,6 @@ import 'package:fruitfairy/screens/home_screen.dart';
 import 'package:fruitfairy/screens/signup_role_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fruitfairy/screens/reset_password_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

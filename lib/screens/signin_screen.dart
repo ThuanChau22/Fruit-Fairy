@@ -147,20 +147,20 @@ class _SignInScreenState extends State<SignInScreen> {
                       );
                     }),
                   ),
-                  //TODO: make a button or link for forgot password and lead it to the remake password screen
-                  FlatButton(
-                    onPressed: () {
-                      Navigator.pushNamed(
-                        context,
-                        ResetPasswordScreen.id,
-                      );
-                    },
-                    child: Text(
-                      'Forgot Password?',
-                      style: TextStyle(color: Colors.white, fontSize: 12),
+                  Center(
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          ResetPasswordScreen.id,
+                        );
+                      },
+                      child: Text(
+                        'Forgot Password?',
+                        style: TextStyle(color: Colors.white, fontSize: 12,  decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ),
-
                   SizedBox(height: 15.0),
                   Padding(
                     padding: EdgeInsets.symmetric(

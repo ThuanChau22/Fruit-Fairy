@@ -98,6 +98,11 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: kAppBarColor,
+        centerTitle: true,
+        title: Text('Sign Up'),
+      ),
       backgroundColor: kBackgroundColor,
       body: SafeArea(
         child: ModalProgressHUD(

@@ -13,7 +13,7 @@ class SignUpRoleScreen extends StatelessWidget {
       appBar: AppBar(
         centerTitle: true,
         title: Text('Create Account'),
-        backgroundColor: kBackgroundColor,
+        backgroundColor: kAppBarColor,
       ),
       body: SafeArea(
         child: Center(
