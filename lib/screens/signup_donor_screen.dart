@@ -109,7 +109,7 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
       backgroundColor: kBackroundColor,
       appBar: AppBar(
         centerTitle: true,
-        title: Text('Create Account'),
+        title: Text('Sign Up'),
         backgroundColor: kAppBarColor,
       ),
       body: Builder(
@@ -136,6 +136,7 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
                       SizedBox(height: 15.0),
                       signUpButton(context),
                     ],
+                   ),
                   ),
                 ),
               ),

@@ -7,6 +7,7 @@ import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
+import 'package:fruitfairy/screens/reset_password_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
@@ -99,7 +100,7 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kBackroundColor,
+      backgroundColor: kBackgroundColor,
       appBar: AppBar(
         centerTitle: true,
         title: Text('Sign In'),
@@ -131,6 +132,20 @@ class _SignInScreenState extends State<SignInScreen> {
                         emailInputField(),
                         SizedBox(height: 5.0),
                         passwordInputField(),
+                        Center(
+                          child: GestureDetector(
+                          onTap: () {
+                            Navigator.pushNamed(
+                              context,
+                              ResetPasswordScreen.id,
+                            );
+                          },
+                          child: Text(
+                              'Forgot Password?',
+                              style: TextStyle(color: Colors.white, fontSize: 12,  decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
                         SizedBox(height: 15.0),
                         signInButton(context),
                       ],
