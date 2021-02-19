@@ -34,7 +34,7 @@ class _SignOptionScreenState extends State<SignOptionScreen> {
       //   ),
       //   backgroundColor: kAppBarColor,
       // ),
-      backgroundColor: kBackroundColor,
+      backgroundColor: kBackgroundColor,
       body: SafeArea(
         child: ScrollableLayout(
           child: Center(
@@ -66,7 +66,7 @@ class _SignOptionScreenState extends State<SignOptionScreen> {
   RoundedButton signInButton(BuildContext context) {
     return RoundedButton(
       label: 'Sign In',
-      labelColor: kBackroundColor,
+      labelColor: kBackgroundColor,
       backgroundColor: kLabelColor,
       onPressed: () {
         Navigator.of(context).pushNamed(SignInScreen.id);
@@ -77,7 +77,7 @@ class _SignOptionScreenState extends State<SignOptionScreen> {
   RoundedButton signUpButton(BuildContext context) {
     return RoundedButton(
       label: 'Sign Up',
-      labelColor: kBackroundColor,
+      labelColor: kBackgroundColor,
       backgroundColor: kLabelColor,
       onPressed: () {
         Navigator.of(context).pushNamed(SignUpRoleScreen.id);

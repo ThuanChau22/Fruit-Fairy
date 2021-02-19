@@ -134,15 +134,19 @@ class _SignInScreenState extends State<SignInScreen> {
                         passwordInputField(),
                         Center(
                           child: GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              ResetPasswordScreen.id,
-                            );
-                          },
-                          child: Text(
+                            onTap: () {
+                              Navigator.pushNamed(
+                                context,
+                                ResetPasswordScreen.id,
+                              );
+                            },
+                            child: Text(
                               'Forgot Password?',
-                              style: TextStyle(color: Colors.white, fontSize: 12,  decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  decoration: TextDecoration.underline,
+                                  fontWeight: FontWeight.bold),
                             ),
                           ),
                         ),
@@ -203,7 +207,7 @@ class _SignInScreenState extends State<SignInScreen> {
       ),
       child: RoundedButton(
         label: 'Sign In',
-        labelColor: kBackroundColor,
+        labelColor: kBackgroundColor,
         backgroundColor: kLabelColor,
         onPressed: () {
           _signIn();

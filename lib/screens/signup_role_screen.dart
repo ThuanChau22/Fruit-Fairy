@@ -47,7 +47,7 @@ class SignUpRoleScreen extends StatelessWidget {
   RoundedButton donorButton(BuildContext context) {
     return RoundedButton(
       label: 'Donor',
-      labelColor: kBackroundColor,
+      labelColor: kBackgroundColor,
       backgroundColor: kLabelColor,
       onPressed: () {
         Navigator.of(context).pushNamed(SignUpDonorScreen.id);
@@ -58,7 +58,7 @@ class SignUpRoleScreen extends StatelessWidget {
   RoundedButton charityButton(BuildContext context) {
     return RoundedButton(
       label: 'Charity',
-      labelColor: kBackroundColor,
+      labelColor: kBackgroundColor,
       backgroundColor: kLabelColor,
       //ToDo: redirect to sign up charity screen
       onPressed: null,

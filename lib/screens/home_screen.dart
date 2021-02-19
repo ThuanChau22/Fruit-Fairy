@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:fruitfairy/constant.dart';
-import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
 import 'package:fruitfairy/screens/sign_option_screen.dart';
@@ -21,7 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   bool _showSpinner = false;
   String _initialName = '';
-  BuildContext _scaffoldContext;
+  String _name = '';
 
   void getCurrentUser() async {
     setState(() => _showSpinner = true);
@@ -31,6 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Map<String, dynamic> data =
             (await _firestore.collection(kUserDB).doc(user.uid).get()).data();
         setState(() {
+          _name = data[kFirstNameField] + ' ' + data[kLastNameField];
           _initialName = data[kFirstNameField][0] + data[kLastNameField][0];
         });
       }
@@ -43,10 +43,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _signOut() async {
     setState(() => _showSpinner = true);
-    MessageBar(
-      scaffoldContext: _scaffoldContext,
-      message: 'Signing out',
-    ).show();
     try {
       await _auth.signOut();
       Navigator.of(context).pushNamedAndRemoveUntil(
@@ -82,7 +78,9 @@ class _HomeScreenState extends State<HomeScreen> {
             child: FloatingActionButton(
               backgroundColor: Colors.white,
               //TODO: add drop down menu with sign out and edit profile option
-              onPressed: signOut,
+              onPressed: () {
+                _signOut();
+              },
               child: Text(
                 '$_initialName',
                 style: TextStyle(
@@ -113,7 +111,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   RoundedButton(
-                      onPressed: null, label: 'Donate', color: Colors.white),
+                      onPressed: null,
+                      label: 'Donate',
+                      labelColor: Colors.white),
                   Text(
                     'Donation History',
                     style: TextStyle(
@@ -122,7 +122,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: Colors.white,
                     ),
                   ),
-
                   Container(
                     height: MediaQuery.of(context).size.height * 0.5,
                     width: MediaQuery.of(context).size.width * 0.8,
@@ -144,8 +143,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }

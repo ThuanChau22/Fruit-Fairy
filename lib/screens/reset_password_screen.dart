@@ -11,7 +11,6 @@ class ResetPasswordScreen extends StatefulWidget {
 }
 
 class _ResetPasswordScreen extends State<ResetPasswordScreen> {
-
   String _email = '';
   String _emailError = '';
 
@@ -29,40 +28,40 @@ class _ResetPasswordScreen extends State<ResetPasswordScreen> {
       body: SafeArea(
         child: ScrollableLayout(
           child: Padding(
-            padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.2),
-            child: Column(
-                children: [
-                  Text(
-                    'Enter email for password reset:',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 25.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 15.0),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.15),
-                    child: InputField(
-                      label: 'Email',
-                      value: _email,
-                      keyboardType: TextInputType.emailAddress,
-                      errorMessage: _emailError,
-                      onChanged: (value) => setState(() {
-                        //TODO: Validate email
+            padding:
+                EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.2),
+            child: Column(children: [
+              Text(
+                'Enter email for password reset:',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 25.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 15.0),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: MediaQuery.of(context).size.width * 0.15),
+                child: InputField(
+                  label: 'Email',
+                  value: _email,
+                  keyboardType: TextInputType.emailAddress,
+                  errorMessage: _emailError,
+                  onChanged: (value) => setState(() {
+                    //TODO: Validate email
+                  }),
+                ),
+              ),
+              //SizedBox(height: 100.0),
 
-                      }),
-                    ),
-                  ),
-                  //SizedBox(height: 100.0),
+              RoundedButton(
+                label: 'Send',
 
-                  RoundedButton(
-                    label: 'Send',
-
-                    //TODO: Send a reset password email to the email
-                    onPressed: null,
-                  ),
-                ]),
+                //TODO: Send a reset password email to the email
+                onPressed: null,
+              ),
+            ]),
           ),
         ),
       ),

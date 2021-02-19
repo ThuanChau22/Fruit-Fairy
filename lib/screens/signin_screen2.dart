@@ -65,7 +65,7 @@ class _SignInScreen2State extends State<SignInScreen2> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kBackroundColor,
+      backgroundColor: kBackgroundColor,
       body: ModalProgressHUD(
         inAsyncCall: _showSpinner,
         child: NestedScrollView(
@@ -135,7 +135,7 @@ class _SignInScreen2State extends State<SignInScreen2> {
                     ),
                     child: RoundedButton(
                       label: 'Sign In',
-                      labelColor: kBackroundColor,
+                      labelColor: kBackgroundColor,
                       backgroundColor: kLabelColor,
                       onPressed: _signIn,
                     ),
