@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:fruitfairy/constant.dart';
-import 'package:fruitfairy/screens/sign_option_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fruitfairy/screens/signin_screen.dart';
+import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
+import 'package:fruitfairy/screens/sign_option_screen.dart';
+import 'package:fruitfairy/screens/signin_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -20,7 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   bool _showSpinner = false;
   String _initialName = '';
-  String _name = '';
+  BuildContext _scaffoldContext;
 
   void getCurrentUser() async {
     setState(() => _showSpinner = true);
@@ -30,7 +31,6 @@ class _HomeScreenState extends State<HomeScreen> {
         Map<String, dynamic> data =
             (await _firestore.collection(kUserDB).doc(user.uid).get()).data();
         setState(() {
-          _name = data[kFirstNameField] + ' ' + data[kLastNameField];
           _initialName = data[kFirstNameField][0] + data[kLastNameField][0];
         });
       }
@@ -41,11 +41,18 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void signOut() async {
+  void _signOut() async {
     setState(() => _showSpinner = true);
+    MessageBar(
+      scaffoldContext: _scaffoldContext,
+      message: 'Signing out',
+    ).show();
     try {
       await _auth.signOut();
-      Navigator.of(context).popAndPushNamed(SignOptionScreen.id);
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        SignOptionScreen.id,
+        (route) => false,
+      );
       Navigator.of(context).pushNamed(SignInScreen.id);
     } catch (e) {
       print(e);
@@ -65,6 +72,9 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: kBackgroundColor,
       appBar: AppBar(
+        centerTitle: true,
+        backgroundColor: kAppBarColor,
+        title: Text('Profile Page'),
         actions: [
           Container(
             height: 40.0,
@@ -84,9 +94,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ],
-        centerTitle: true,
-        backgroundColor: kAppBarColor,
-        title: Text('Profile Page'),
       ),
       body: SafeArea(
         child: ModalProgressHUD(
@@ -137,8 +144,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

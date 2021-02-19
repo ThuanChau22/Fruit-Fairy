@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 /// Color Theme
-const kBackgroundColor = Color(0xFFF05e5c);
-const kAppBarColor = Color(0xFF800000);
+const kAppBarColor = Color.fromRGBO(128, 0, 0, 1.0);
+const kBackroundColor = Color.fromRGBO(240, 94, 92, 1.0);
 const kLabelColor = Colors.white;
 const kErrorColor = Colors.white;
 
