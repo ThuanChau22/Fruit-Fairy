@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
+import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
 import 'package:fruitfairy/utils/Validation.dart';
 import 'package:fruitfairy/constant.dart';
@@ -97,6 +98,12 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: kAppBarColor,
+        centerTitle: true,
+        title: Text('Sign Up'),
+      ),
+      backgroundColor: kBackgroundColor,
       body: SafeArea(
         child: ModalProgressHUD(
           opacity: 0.5,
@@ -185,8 +192,8 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
                     }),
                   ),
                   SizedBox(height: 15.0),
-                  FlatButton(
-                    child: Text('Sign Up'),
+                  RoundedButton(
+                    label: 'Sign Up',
                     onPressed: _signUp,
                   ),
                   SizedBox(height: 15.0),

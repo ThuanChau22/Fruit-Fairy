@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fruitfairy/constant.dart';
+import 'package:fruitfairy/screens/reset_password_screen.dart';
 import 'package:fruitfairy/utils/Validation.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
@@ -66,7 +67,7 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kBackroundColor,
+      backgroundColor: kBackgroundColor,
       appBar: AppBar(
         centerTitle: true,
         title: Text('Sign In'),
@@ -145,6 +146,20 @@ class _SignInScreenState extends State<SignInScreen> {
                         password: _password,
                       );
                     }),
+                  ),
+                  Center(
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          ResetPasswordScreen.id,
+                        );
+                      },
+                      child: Text(
+                        'Forgot Password?',
+                        style: TextStyle(color: Colors.white, fontSize: 12,  decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
+                      ),
+                    ),
                   ),
                   SizedBox(height: 15.0),
                   Padding(
