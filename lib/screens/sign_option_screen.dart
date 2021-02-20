@@ -16,24 +16,6 @@ class _SignOptionScreenState extends State<SignOptionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   centerTitle: true,
-      //   title: Column(
-      //     children: [
-      //       Text(
-      //         'Solve Food Waste ',
-      //         textAlign: TextAlign.center,
-      //         style: TextStyle(),
-      //       ),
-      //       Text(
-      //         'One Donation At A Time',
-      //         textAlign: TextAlign.center,
-      //         style: TextStyle(),
-      //       ),
-      //     ],
-      //   ),
-      //   backgroundColor: kAppBarColor,
-      // ),
       backgroundColor: kBackgroundColor,
       body: SafeArea(
         child: ScrollableLayout(
@@ -41,7 +23,7 @@ class _SignOptionScreenState extends State<SignOptionScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                animatedLogo(),
+                fairyLogo(),
                 SizedBox(height: 24.0),
                 signInButton(context),
                 signUpButton(context),
@@ -53,12 +35,12 @@ class _SignOptionScreenState extends State<SignOptionScreen> {
     );
   }
 
-  Hero animatedLogo() {
+  Hero fairyLogo() {
     return Hero(
       tag: FruitFairyLogo.id,
       child: FruitFairyLogo(
-        fontSize: 40.0,
-        radius: 95.0,
+        fontSize: MediaQuery.of(context).size.width * 0.15,
+        radius: MediaQuery.of(context).size.width * 0.25,
       ),
     );
   }
