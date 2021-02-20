@@ -9,6 +9,7 @@ import 'package:fruitfairy/widgets/scrollable_layout.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
 import 'package:fruitfairy/screens/reset_password_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 class SignInScreen extends StatelessWidget {
@@ -43,15 +44,48 @@ class SignIn extends StatefulWidget {
 
 class _SignInState extends State<SignIn> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FlutterSecureStorage _storage = FlutterSecureStorage();
   bool _showSpinner = false;
 
-  String _email = '';
-  String _password = '';
+  TextEditingController _email = TextEditingController();
+  TextEditingController _password = TextEditingController();
   bool _obscureText = true;
   bool _rememberMe = false;
 
   String _emailError = '';
   String _passwordError = '';
+
+  Future<void> getCredentials() async {
+    setState(() => _showSpinner = true);
+    try {
+      Map<String, String> credentials = await _storage.readAll();
+      if (credentials.isNotEmpty) {
+        setState(() {
+          _email.text = credentials.entries.first.key;
+          _password.text = credentials.entries.first.value;
+          _rememberMe = true;
+        });
+      }
+    } catch (e) {
+      print(e);
+    } finally {
+      setState(() => _showSpinner = false);
+    }
+  }
+
+  Future<void> saveCredentials() async {
+    await _storage.deleteAll();
+    if (_rememberMe) {
+      setState(() => _showSpinner = true);
+      try {
+        await _storage.write(key: _email.text, value: _password.text);
+      } catch (e) {
+        print(e);
+      } finally {
+        setState(() => _showSpinner = false);
+      }
+    }
+  }
 
   void showConfirmEmailMessage() {
     MessageBar(
@@ -64,10 +98,10 @@ class _SignInState extends State<SignIn> {
     String errors = '';
     setState(() {
       errors += _emailError = Validate.checkEmail(
-        email: _email,
+        email: _email.text,
       );
       errors += _passwordError = Validate.checkPassword(
-        password: _password,
+        password: _password.text,
       );
     });
     return errors.isEmpty;
@@ -78,14 +112,15 @@ class _SignInState extends State<SignIn> {
       setState(() => _showSpinner = true);
       try {
         UserCredential registeredUser = await _auth.signInWithEmailAndPassword(
-          email: _email,
-          password: _password,
+          email: _email.text,
+          password: _password.text,
         );
         if (registeredUser != null) {
           if (!registeredUser.user.emailVerified) {
             await registeredUser.user.sendEmailVerification();
             showConfirmEmailMessage();
           } else {
+            await saveCredentials();
             Navigator.of(context).pushNamedAndRemoveUntil(
               HomeScreen.id,
               (route) => false,
@@ -113,6 +148,7 @@ class _SignInState extends State<SignIn> {
   @override
   void initState() {
     super.initState();
+    getCredentials();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       UserCredential userCredential = ModalRoute.of(context).settings.arguments;
       if (userCredential != null &&
@@ -169,14 +205,14 @@ class _SignInState extends State<SignIn> {
   Widget emailInputField() {
     return InputField(
       label: 'Email',
-      value: _email,
+      controller: _email,
       keyboardType: TextInputType.emailAddress,
       errorMessage: _emailError,
       onChanged: (value) {
         setState(() {
           _email = value.trim();
           _emailError = Validate.checkEmail(
-            email: _email,
+            email: _email.text,
           );
         });
       },
@@ -189,14 +225,14 @@ class _SignInState extends State<SignIn> {
   Widget passwordInputField() {
     return InputField(
       label: 'Password',
-      value: _password,
+      controller: _password,
       obscureText: _obscureText,
       errorMessage: _passwordError,
       onChanged: (value) {
         setState(() {
           _password = value;
           _passwordError = Validate.checkPassword(
-            password: _password,
+            password: _password.text,
           );
         });
       },
