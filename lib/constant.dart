@@ -5,6 +5,7 @@ const Color kAppBarColor = Color.fromRGBO(128, 0, 0, 1.0);
 const Color kPrimaryColor = Color.fromRGBO(240, 94, 92, 1.0);
 const Color kLabelColor = Colors.white;
 const Color kErrorColor = Colors.white;
+const Color kObjectBackgroundColor = Colors.white;
 
 /// Database fields
 const String kUserDB = 'users';
