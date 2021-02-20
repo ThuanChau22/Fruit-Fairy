@@ -7,6 +7,7 @@ import 'package:fruitfairy/screens/signin_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:strings/strings.dart';
 
 class HomeScreen extends StatefulWidget {
   static const String id = 'home_screen';
@@ -30,8 +31,10 @@ class _HomeScreenState extends State<HomeScreen> {
         Map<String, dynamic> data =
             (await _firestore.collection(kUserDB).doc(user.uid).get()).data();
         setState(() {
-          _name = data[kFirstNameField] + ' ' + data[kLastNameField];
-          _initialName = data[kFirstNameField][0] + data[kLastNameField][0];
+          String firstName = data[kFirstNameField];
+          String lastName = data[kLastNameField];
+          _name = camelize(firstName);
+          _initialName = '${firstName[0] + lastName[0]}'.toUpperCase();
         });
       }
     } catch (e) {
@@ -66,14 +69,13 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kBackgroundColor,
+      backgroundColor: kPrimaryColor,
       appBar: AppBar(
-        centerTitle: true,
         backgroundColor: kAppBarColor,
         title: Text('Profile Page'),
+        centerTitle: true,
         actions: [
           Container(
-            height: 40.0,
             width: 40.0,
             child: FloatingActionButton(
               backgroundColor: Colors.white,
@@ -84,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Text(
                 '$_initialName',
                 style: TextStyle(
-                  color: kBackgroundColor,
+                  color: kPrimaryColor,
                   fontSize: 20.0,
                   fontWeight: FontWeight.bold,
                 ),
@@ -95,8 +97,10 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: SafeArea(
         child: ModalProgressHUD(
-          opacity: 0.5,
           inAsyncCall: _showSpinner,
+          progressIndicator: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation(kAppBarColor),
+          ),
           child: ScrollableLayout(
             child: Center(
               child: Column(
@@ -111,9 +115,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   RoundedButton(
-                      onPressed: null,
-                      label: 'Donate',
-                      labelColor: Colors.white),
+                    onPressed: null,
+                    label: 'Donate',
+                    labelColor: kPrimaryColor,
+                  ),
+                  //TODO: Donation tracking status
                   Text(
                     'Donation History',
                     style: TextStyle(

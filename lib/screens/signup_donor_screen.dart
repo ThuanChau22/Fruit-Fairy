@@ -22,7 +22,6 @@ class SignUpDonorScreen extends StatefulWidget {
 class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
   bool _showSpinner = false;
 
   String _firstName = '';
@@ -36,9 +35,6 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
   String _emailError = '';
   String _passwordError = '';
   String _confirmPasswordError = '';
-
-  int _firstNameCount = 0;
-  int _lastNameCount = 0;
 
   BuildContext _scaffoldContext;
 
@@ -94,7 +90,7 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
         }
       } catch (e) {
         MessageBar(
-          scaffoldContext: _scaffoldContext,
+          _scaffoldContext,
           message: e.message,
         ).show();
       } finally {
@@ -106,32 +102,37 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kBackgroundColor,
+      backgroundColor: kPrimaryColor,
       appBar: AppBar(
-        centerTitle: true,
-        title: Text('Sign Up'),
         backgroundColor: kAppBarColor,
+        title: Text('Sign Up'),
+        centerTitle: true,
       ),
       body: Builder(
         builder: (BuildContext context) {
           _scaffoldContext = context;
           return SafeArea(
             child: ModalProgressHUD(
-              opacity: 0.5,
               inAsyncCall: _showSpinner,
+              progressIndicator: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation(kAppBarColor),
+              ),
               child: ScrollableLayout(
-                child: Container(
-                  padding: EdgeInsets.all(50.0),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: MediaQuery.of(context).size.width * 0.15,
+                    vertical: 50,
+                  ),
                   child: Column(
                     children: [
                       firstNameInputField(),
-                      SizedBox(height: 5.0),
+                      SizedBox(height: 10.0),
                       lastNameInputField(),
-                      SizedBox(height: 5.0),
+                      SizedBox(height: 10.0),
                       emailInputField(),
-                      SizedBox(height: 5.0),
+                      SizedBox(height: 10.0),
                       passwordInputField(),
-                      SizedBox(height: 5.0),
+                      SizedBox(height: 10.0),
                       confirmPasswordInputField(),
                       SizedBox(height: 15.0),
                       signUpButton(context),
@@ -146,52 +147,51 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
     );
   }
 
-  InputField firstNameInputField() {
+  Widget firstNameInputField() {
     return InputField(
       label: 'First Name',
-      value: _firstName,
       errorMessage: _firstNameError,
-      characterCount: _firstNameCount,
+      maxLength: Validate.maxNameLength,
       keyboardType: TextInputType.name,
       onChanged: (value) {
         setState(() {
           _firstName = value.trim();
-          _firstNameCount = _firstName.length;
           _firstNameError = Validate.name(
             label: 'First Name',
             name: _firstName,
           );
         });
       },
-      onTap: () => MessageBar(scaffoldContext: _scaffoldContext).hide(),
+      onTap: () {
+        MessageBar(_scaffoldContext).hide();
+      },
     );
   }
 
-  InputField lastNameInputField() {
+  Widget lastNameInputField() {
     return InputField(
       label: 'Last Name',
-      value: _lastName,
       errorMessage: _lastNameError,
-      characterCount: _lastNameCount,
+      maxLength: Validate.maxNameLength,
       keyboardType: TextInputType.name,
       onChanged: (value) {
         setState(() {
           _lastName = value.trim();
-          _lastNameCount = _lastName.length;
           _lastNameError = Validate.name(
             label: 'Last Name',
             name: _lastName,
           );
         });
       },
-      onTap: () => MessageBar(scaffoldContext: _scaffoldContext).hide(),
+      onTap: () {
+        MessageBar(_scaffoldContext).hide();
+      },
     );
   }
 
-  InputField emailInputField() {
+  Widget emailInputField() {
     return InputField(
       label: 'Email',
-      value: _email,
       errorMessage: _emailError,
       keyboardType: TextInputType.emailAddress,
       onChanged: (value) {
@@ -202,14 +202,15 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
           );
         });
       },
-      onTap: () => MessageBar(scaffoldContext: _scaffoldContext).hide(),
+      onTap: () {
+        MessageBar(_scaffoldContext).hide();
+      },
     );
   }
 
-  InputField passwordInputField() {
+  Widget passwordInputField() {
     return InputField(
       label: 'Password',
-      value: _password,
       errorMessage: _passwordError,
       obscureText: true,
       onChanged: (value) {
@@ -226,14 +227,15 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
           }
         });
       },
-      onTap: () => MessageBar(scaffoldContext: _scaffoldContext).hide(),
+      onTap: () {
+        MessageBar(_scaffoldContext).hide();
+      },
     );
   }
 
-  InputField confirmPasswordInputField() {
+  Widget confirmPasswordInputField() {
     return InputField(
       label: 'Confirm Password',
-      value: _confirmPassword,
       errorMessage: _confirmPasswordError,
       obscureText: true,
       onChanged: (value) {
@@ -245,18 +247,20 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
           );
         });
       },
-      onTap: () => MessageBar(scaffoldContext: _scaffoldContext).hide(),
+      onTap: () {
+        MessageBar(_scaffoldContext).hide();
+      },
     );
   }
 
-  Padding signUpButton(BuildContext context) {
+  Widget signUpButton(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(
-        horizontal: MediaQuery.of(context).size.width * 0.2,
+        horizontal: MediaQuery.of(context).size.width * 0.15,
       ),
       child: RoundedButton(
         label: 'Sign Up',
-        labelColor: kBackgroundColor,
+        labelColor: kPrimaryColor,
         backgroundColor: kLabelColor,
         onPressed: () {
           _signUp();

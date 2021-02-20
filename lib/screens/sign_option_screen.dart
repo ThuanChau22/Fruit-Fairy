@@ -16,35 +16,26 @@ class _SignOptionScreenState extends State<SignOptionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   centerTitle: true,
-      //   title: Column(
-      //     children: [
-      //       Text(
-      //         'Solve Food Waste ',
-      //         textAlign: TextAlign.center,
-      //         style: TextStyle(),
-      //       ),
-      //       Text(
-      //         'One Donation At A Time',
-      //         textAlign: TextAlign.center,
-      //         style: TextStyle(),
-      //       ),
-      //     ],
-      //   ),
-      //   backgroundColor: kAppBarColor,
-      // ),
-      backgroundColor: kBackgroundColor,
+      backgroundColor: kPrimaryColor,
       body: SafeArea(
         child: ScrollableLayout(
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                animatedLogo(),
+                fairyLogo(),
                 SizedBox(height: 24.0),
-                signInButton(context),
-                signUpButton(context),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: MediaQuery.of(context).size.width * 0.25,
+                  ),
+                  child: Column(
+                    children: [
+                      signInButton(context),
+                      signUpButton(context),
+                    ],
+                  ),
+                )
               ],
             ),
           ),
@@ -53,12 +44,12 @@ class _SignOptionScreenState extends State<SignOptionScreen> {
     );
   }
 
-  Hero animatedLogo() {
+  Hero fairyLogo() {
     return Hero(
       tag: FruitFairyLogo.id,
       child: FruitFairyLogo(
-        fontSize: 40.0,
-        radius: 95.0,
+        fontSize: MediaQuery.of(context).size.width * 0.15,
+        radius: MediaQuery.of(context).size.width * 0.25,
       ),
     );
   }
@@ -66,7 +57,7 @@ class _SignOptionScreenState extends State<SignOptionScreen> {
   RoundedButton signInButton(BuildContext context) {
     return RoundedButton(
       label: 'Sign In',
-      labelColor: kBackgroundColor,
+      labelColor: kPrimaryColor,
       backgroundColor: kLabelColor,
       onPressed: () {
         Navigator.of(context).pushNamed(SignInScreen.id);
@@ -77,7 +68,7 @@ class _SignOptionScreenState extends State<SignOptionScreen> {
   RoundedButton signUpButton(BuildContext context) {
     return RoundedButton(
       label: 'Sign Up',
-      labelColor: kBackgroundColor,
+      labelColor: kPrimaryColor,
       backgroundColor: kLabelColor,
       onPressed: () {
         Navigator.of(context).pushNamed(SignUpRoleScreen.id);

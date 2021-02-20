@@ -11,22 +11,36 @@ class SignUpRoleScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kBackgroundColor,
+      backgroundColor: kPrimaryColor,
       appBar: AppBar(
-        centerTitle: true,
-        title: Text('Create Account'),
         backgroundColor: kAppBarColor,
+        title: Text('Create Account'),
+        centerTitle: true,
       ),
       body: SafeArea(
         child: ScrollableLayout(
-          child: Center(
-            child: Column(
-              children: [
-                animatedLogo(),
-                SizedBox(height: 24.0),
-                donorButton(context),
-                charityButton(context),
-              ],
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: MediaQuery.of(context).size.width * 0.15,
+            ),
+            child: Center(
+              child: Column(
+                children: [
+                  fairyLogo(context),
+                  SizedBox(height: 24.0),
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: MediaQuery.of(context).size.width * 0.12,
+                    ),
+                    child: Column(
+                      children: [
+                        donorButton(context),
+                        charityButton(context),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -34,32 +48,44 @@ class SignUpRoleScreen extends StatelessWidget {
     );
   }
 
-  Hero animatedLogo() {
+  Widget fairyLogo(context) {
     return Hero(
       tag: FruitFairyLogo.id,
       child: FruitFairyLogo(
-        fontSize: 25.0,
-        radius: 60.0,
+        fontSize: MediaQuery.of(context).size.width * 0.07,
+        radius: MediaQuery.of(context).size.width * 0.15,
       ),
     );
   }
 
-  RoundedButton donorButton(BuildContext context) {
+  Widget donorButton(BuildContext context) {
     return RoundedButton(
       label: 'Donor',
-      labelColor: kBackgroundColor,
+      labelColor: kPrimaryColor,
       backgroundColor: kLabelColor,
+      labelCenter: false,
+      leading: Icon(
+        Icons.person,
+        size: MediaQuery.of(context).size.width * 0.1,
+        color: kPrimaryColor,
+      ),
       onPressed: () {
         Navigator.of(context).pushNamed(SignUpDonorScreen.id);
       },
     );
   }
 
-  RoundedButton charityButton(BuildContext context) {
+  Widget charityButton(BuildContext context) {
     return RoundedButton(
       label: 'Charity',
-      labelColor: kBackgroundColor,
+      labelColor: kPrimaryColor,
       backgroundColor: kLabelColor,
+      labelCenter: false,
+      leading: Icon(
+        Icons.group,
+        size: MediaQuery.of(context).size.width * 0.1,
+        color: kPrimaryColor,
+      ),
       //ToDo: redirect to sign up charity screen
       onPressed: null,
     );

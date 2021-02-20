@@ -2,15 +2,19 @@ import 'package:flutter/material.dart';
 
 class RoundedButton extends StatelessWidget {
   final String label;
+  final bool labelCenter;
   final Color labelColor;
   final Color backgroundColor;
   final Function onPressed;
+  final Widget leading;
 
   RoundedButton({
-    this.label,
+    @required this.label,
+    @required this.onPressed,
+    this.labelCenter = true,
     this.labelColor,
     this.backgroundColor,
-    @required this.onPressed,
+    this.leading,
   });
 
   @override
@@ -23,14 +27,16 @@ class RoundedButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(30.0),
         child: MaterialButton(
           onPressed: onPressed,
-          minWidth: 200.0,
-          height: 50.0,
-          child: Text(
-            label,
-            style: TextStyle(
-              color: labelColor,
-              fontSize: 20.0,
-              fontWeight: FontWeight.bold,
+          child: ListTile(
+            leading: leading,
+            title: Text(
+              label,
+              textAlign: labelCenter ? TextAlign.center : null,
+              style: TextStyle(
+                color: labelColor,
+                fontSize: 20.0,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ),

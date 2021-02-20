@@ -17,13 +17,11 @@ class _ResetPasswordScreen extends State<ResetPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kBackgroundColor,
+      backgroundColor: kPrimaryColor,
       appBar: AppBar(
-        centerTitle: true,
         backgroundColor: kAppBarColor,
-        title: Text(
-          'Reset Password',
-        ),
+        title: Text('Reset Password'),
+        centerTitle: true,
       ),
       body: SafeArea(
         child: ScrollableLayout(
@@ -45,19 +43,20 @@ class _ResetPasswordScreen extends State<ResetPasswordScreen> {
                     horizontal: MediaQuery.of(context).size.width * 0.15),
                 child: InputField(
                   label: 'Email',
-                  value: _email,
                   keyboardType: TextInputType.emailAddress,
                   errorMessage: _emailError,
-                  onChanged: (value) => setState(() {
-                    //TODO: Validate email
-                  }),
+                  onChanged: (value) {
+                    setState(() {
+                      //TODO: Validate email
+                    });
+                  },
                 ),
               ),
               //SizedBox(height: 100.0),
-
               RoundedButton(
                 label: 'Send',
-
+                labelColor: kPrimaryColor,
+                backgroundColor: kLabelColor,
                 //TODO: Send a reset password email to the email
                 onPressed: null,
               ),

@@ -3,31 +3,35 @@ import 'package:fruitfairy/constant.dart';
 
 class InputField extends StatelessWidget {
   final String label;
-  final String value;
   final String errorMessage;
-  final int characterCount;
   final TextInputType keyboardType;
   final bool obscureText;
+  final int maxLength;
   final Function onChanged;
   final Function onTap;
+  final TextEditingController controller;
 
   InputField({
     @required this.label,
-    @required this.value,
     @required this.onChanged,
-    this.characterCount = 0,
     this.errorMessage = '',
+    this.maxLength,
     this.keyboardType,
     this.obscureText = false,
+    this.controller,
     this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextField(
+      maxLength: maxLength,
       cursorColor: kLabelColor,
       keyboardType: keyboardType,
       obscureText: obscureText,
+      controller: controller,
+      onChanged: onChanged,
+      onTap: onTap,
       style: TextStyle(
         color: kLabelColor,
       ),
@@ -35,19 +39,18 @@ class InputField extends StatelessWidget {
         labelText: label,
         labelStyle: TextStyle(
           color: kLabelColor,
-          fontSize: 16,
+          fontSize: 18.0,
         ),
         errorText: errorMessage.isNotEmpty ? errorMessage : null,
         errorStyle: TextStyle(
           color: kErrorColor,
-          fontSize: 16,
+          fontSize: 16.0,
         ),
-        counterText: characterCount > 0 ? '$characterCount' : null,
+        errorMaxLines: 1,
         helperText: '',
         helperStyle: TextStyle(
           color: kLabelColor,
         ),
-        errorMaxLines: 2,
         contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
         filled: true,
         fillColor: Color.fromRGBO(255, 255, 255, 0.15),
@@ -71,8 +74,6 @@ class InputField extends StatelessWidget {
           borderRadius: BorderRadius.all(Radius.circular(32.0)),
         ),
       ),
-      onChanged: onChanged,
-      onTap: onTap,
     );
   }
 }

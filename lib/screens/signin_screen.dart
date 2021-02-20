@@ -7,34 +7,75 @@ import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
-import 'package:fruitfairy/screens/reset_password_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
+
+enum AuthMode { SignIn, Reset }
 
 class SignInScreen extends StatefulWidget {
   static const String id = 'signin_screen';
-
   @override
   _SignInScreenState createState() => _SignInScreenState();
 }
 
 class _SignInScreenState extends State<SignInScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FlutterSecureStorage _storage = FlutterSecureStorage();
+
+  AuthMode _mode = AuthMode.SignIn;
+  String appBarLabel = 'Sign In';
+  String buttonLabel = 'Sign In';
+  String navigationLinkLabel = 'Forgot Password?';
+
   bool _showSpinner = false;
 
-  String _email = '';
-  String _password = '';
+  TextEditingController _email = TextEditingController();
+  TextEditingController _password = TextEditingController();
+  bool _obscureText = true;
+  bool _rememberMe = false;
 
   String _emailError = '';
   String _passwordError = '';
 
   BuildContext _scaffoldContext;
 
+  Future<void> getCredentials() async {
+    setState(() => _showSpinner = true);
+    try {
+      Map<String, String> credentials = await _storage.readAll();
+      if (credentials.isNotEmpty) {
+        setState(() {
+          _email.text = credentials.entries.first.key;
+          _password.text = credentials.entries.first.value;
+          _rememberMe = true;
+        });
+      }
+    } catch (e) {
+      print(e);
+    } finally {
+      setState(() => _showSpinner = false);
+    }
+  }
+
+  Future<void> saveCredentials() async {
+    await _storage.deleteAll();
+    if (_rememberMe) {
+      setState(() => _showSpinner = true);
+      try {
+        await _storage.write(key: _email.text.trim(), value: _password.text);
+      } catch (e) {
+        print(e);
+      } finally {
+        setState(() => _showSpinner = false);
+      }
+    }
+  }
+
   void showConfirmEmailMessage() {
     MessageBar(
-      scaffoldContext: _scaffoldContext,
-      //TODO: add check email message
-      message: 'check email',
+      _scaffoldContext,
+      message: 'Please check your email for a verification link',
     ).show();
   }
 
@@ -42,28 +83,29 @@ class _SignInScreenState extends State<SignInScreen> {
     String errors = '';
     setState(() {
       errors += _emailError = Validate.checkEmail(
-        email: _email,
+        email: _email.text,
       );
       errors += _passwordError = Validate.checkPassword(
-        password: _password,
+        password: _password.text,
       );
     });
     return errors.isEmpty;
   }
 
-  void _signIn() async {
+  Future<void> _signIn() async {
     if (_validate()) {
       setState(() => _showSpinner = true);
       try {
         UserCredential registeredUser = await _auth.signInWithEmailAndPassword(
-          email: _email,
-          password: _password,
+          email: _email.text.trim(),
+          password: _password.text,
         );
         if (registeredUser != null) {
           if (!registeredUser.user.emailVerified) {
             await registeredUser.user.sendEmailVerification();
             showConfirmEmailMessage();
           } else {
+            await saveCredentials();
             Navigator.of(context).pushNamedAndRemoveUntil(
               HomeScreen.id,
               (route) => false,
@@ -72,10 +114,13 @@ class _SignInScreenState extends State<SignInScreen> {
         }
       } catch (e) {
         if (e.code == 'too-many-requests') {
-          showConfirmEmailMessage();
+          MessageBar(
+            _scaffoldContext,
+            message: 'Please check your email or sign in again shortly',
+          ).show();
         } else {
           MessageBar(
-            scaffoldContext: _scaffoldContext,
+            _scaffoldContext,
             message: 'Incorrect Email or Password. Please try again!',
           ).show();
         }
@@ -85,9 +130,35 @@ class _SignInScreenState extends State<SignInScreen> {
     }
   }
 
+  void _resetPassword() async {
+    setState(() {
+      _emailError = Validate.checkEmail(
+        email: _email.text,
+      );
+    });
+    if (_emailError.isEmpty) {
+      setState(() => _showSpinner = true);
+      try {
+        await _auth.sendPasswordResetEmail(email: _email.text.trim());
+        buttonLabel = 'Re-send';
+      } catch (e) {
+        print(e);
+      } finally {
+        setState(() => _showSpinner = false);
+      }
+      // TODO: Send email reset password message
+      MessageBar(
+        _scaffoldContext,
+        message: 'Email sent',
+      ).show();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+
+    getCredentials();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       UserCredential userCredential = ModalRoute.of(context).settings.arguments;
       if (userCredential != null &&
@@ -100,11 +171,11 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kBackgroundColor,
+      backgroundColor: kPrimaryColor,
       appBar: AppBar(
-        centerTitle: true,
-        title: Text('Sign In'),
         backgroundColor: kAppBarColor,
+        title: Text(appBarLabel),
+        centerTitle: true,
       ),
       body: Builder(
         builder: (BuildContext context) {
@@ -112,6 +183,9 @@ class _SignInScreenState extends State<SignInScreen> {
           return SafeArea(
             child: ModalProgressHUD(
               inAsyncCall: _showSpinner,
+              progressIndicator: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation(kAppBarColor),
+              ),
               child: ScrollableLayout(
                 child: Padding(
                   padding: EdgeInsets.symmetric(
@@ -121,37 +195,23 @@ class _SignInScreenState extends State<SignInScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Hero(
-                          tag: FruitFairyLogo.id,
-                          child: FruitFairyLogo(
-                            fontSize: 25.0,
-                            radius: 60.0,
-                          ),
-                        ),
+                        fairyLogo(),
                         SizedBox(height: 24.0),
                         emailInputField(),
-                        SizedBox(height: 5.0),
-                        passwordInputField(),
-                        Center(
-                          child: GestureDetector(
-                            onTap: () {
-                              Navigator.pushNamed(
-                                context,
-                                ResetPasswordScreen.id,
-                              );
-                            },
-                            child: Text(
-                              'Forgot Password?',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                  decoration: TextDecoration.underline,
-                                  fontWeight: FontWeight.bold),
-                            ),
+                        Visibility(
+                          visible: _mode == AuthMode.SignIn,
+                          child: Column(
+                            children: [
+                              SizedBox(height: 10.0),
+                              passwordInputField(),
+                              optionTile(),
+                              SizedBox(height: 15.0),
+                            ],
                           ),
                         ),
-                        SizedBox(height: 15.0),
                         signInButton(context),
+                        SizedBox(height: 30.0),
+                        navigationLink(context),
                       ],
                     ),
                   ),
@@ -164,54 +224,148 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
-  InputField emailInputField() {
+  Hero fairyLogo() {
+    return Hero(
+      tag: FruitFairyLogo.id,
+      child: FruitFairyLogo(
+        fontSize: MediaQuery.of(context).size.width * 0.07,
+        radius: MediaQuery.of(context).size.width * 0.15,
+      ),
+    );
+  }
+
+  Widget emailInputField() {
     return InputField(
       label: 'Email',
-      value: _email,
+      controller: _email,
       keyboardType: TextInputType.emailAddress,
       errorMessage: _emailError,
       onChanged: (value) {
         setState(() {
-          _email = value.trim();
           _emailError = Validate.checkEmail(
-            email: _email,
+            email: _email.text,
           );
         });
       },
-      onTap: () => MessageBar(scaffoldContext: _scaffoldContext).hide(),
+      onTap: () {
+        MessageBar(_scaffoldContext).hide();
+      },
     );
   }
 
-  InputField passwordInputField() {
+  Widget passwordInputField() {
     return InputField(
       label: 'Password',
-      value: _password,
-      obscureText: true,
+      controller: _password,
+      obscureText: _obscureText,
       errorMessage: _passwordError,
       onChanged: (value) {
         setState(() {
-          _password = value;
           _passwordError = Validate.checkPassword(
-            password: _password,
+            password: _password.text,
           );
         });
       },
-      onTap: () => MessageBar(scaffoldContext: _scaffoldContext).hide(),
+      onTap: () {
+        MessageBar(_scaffoldContext).hide();
+      },
     );
   }
 
-  Padding signInButton(BuildContext context) {
+  Widget optionTile() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            SizedBox(
+              width: 30,
+              height: 30,
+              child: Theme(
+                data: ThemeData(
+                  unselectedWidgetColor: kLabelColor,
+                ),
+                child: Checkbox(
+                  value: _rememberMe,
+                  activeColor: kLabelColor,
+                  checkColor: kPrimaryColor,
+                  onChanged: (bool value) {
+                    setState(() {
+                      _rememberMe = value;
+                    });
+                  },
+                ),
+              ),
+            ),
+            Text(
+              'Remember me',
+              style: TextStyle(
+                color: kLabelColor,
+                fontSize: 16,
+              ),
+            )
+          ],
+        ),
+        Padding(
+          padding: EdgeInsets.only(right: 15.0),
+          child: GestureDetector(
+            onTap: () {
+              setState(() {
+                _obscureText = !_obscureText;
+              });
+            },
+            child: Icon(
+              _obscureText ? Icons.visibility_off : Icons.visibility,
+              color: kLabelColor,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget signInButton(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(
-        horizontal: MediaQuery.of(context).size.width * 0.2,
+        horizontal: MediaQuery.of(context).size.width * 0.15,
       ),
       child: RoundedButton(
-        label: 'Sign In',
-        labelColor: kBackgroundColor,
+        label: buttonLabel,
+        labelColor: kPrimaryColor,
         backgroundColor: kLabelColor,
         onPressed: () {
-          _signIn();
+          _mode == AuthMode.SignIn ? _signIn() : _resetPassword();
         },
+      ),
+    );
+  }
+
+  Widget navigationLink(BuildContext context) {
+    return Center(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            if (_mode == AuthMode.SignIn) {
+              _mode = AuthMode.Reset;
+              appBarLabel = 'Reset Password';
+              buttonLabel = 'Send';
+              navigationLinkLabel = 'Back to Sign In';
+            } else {
+              _mode = AuthMode.SignIn;
+              appBarLabel = 'Sign In';
+              buttonLabel = 'Sign In';
+              navigationLinkLabel = 'Forgot Password?';
+            }
+          });
+        },
+        child: Text(
+          navigationLinkLabel,
+          style: TextStyle(
+            color: kLabelColor,
+            fontSize: 16,
+            decoration: TextDecoration.underline,
+          ),
+        ),
       ),
     );
   }
