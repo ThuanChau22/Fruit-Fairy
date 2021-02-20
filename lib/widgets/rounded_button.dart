@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fruitfairy/constant.dart';
 
 class RoundedButton extends StatelessWidget {
   final String label;
@@ -25,6 +26,10 @@ class RoundedButton extends StatelessWidget {
         color: backgroundColor,
         borderRadius: BorderRadius.circular(30.0),
         child: MaterialButton(
+          splashColor: kPrimaryColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30.0),
+          ),
           onPressed: onPressed,
           child: ListTile(
             leading: leading,

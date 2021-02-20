@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fruitfairy/screens/reset_password_screen.dart';
 import 'package:fruitfairy/screens/sign_option_screen.dart';
 import 'package:fruitfairy/screens/signin_screen.dart';
 import 'package:fruitfairy/screens/signup_donor_screen.dart';
@@ -39,27 +38,26 @@ class FruitFairy extends StatelessWidget {
         // },
         onGenerateRoute: (settings) {
           Map<String, Widget> routes = {
-            HomeScreen.id: HomeScreen(),
             SignOptionScreen.id: SignOptionScreen(),
             SignInScreen.id: SignInScreen(),
-            ResetPasswordScreen.id: ResetPasswordScreen(),
             SignUpRoleScreen.id: SignUpRoleScreen(),
             SignUpDonorScreen.id: SignUpDonorScreen(),
+            HomeScreen.id: HomeScreen(),
           };
-          Offset begin = Offset(1.0, 0.0);
-          if (settings.name == SignOptionScreen.id ||
-              settings.name == SignInScreen.id ||
-              settings.name == SignUpRoleScreen.id) {
-            begin = Offset(0.0, 0.0);
+          String screenName = settings.name;
+          if (screenName == SignOptionScreen.id ||
+              screenName == SignInScreen.id ||
+              screenName == SignUpRoleScreen.id) {
+            return MaterialPageRoute(builder: (context) => routes[screenName]);
           }
           return PageRouteBuilder(
             pageBuilder: (context, animation, secondaryAnimation) {
-              return routes[settings.name];
+              return routes[screenName];
             },
             transitionsBuilder:
                 (context, animation, secondaryAnimation, child) {
               Animatable<Offset> tween = Tween(
-                begin: begin,
+                begin: Offset(1.0, 0.0),
                 end: Offset.zero,
               ).chain(CurveTween(curve: Curves.ease));
               return SlideTransition(

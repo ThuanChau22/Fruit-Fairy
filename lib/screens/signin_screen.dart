@@ -194,29 +194,27 @@ class _SignInScreenState extends State<SignInScreen> {
                   padding: EdgeInsets.symmetric(
                     horizontal: MediaQuery.of(context).size.width * 0.15,
                   ),
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        fairyLogo(),
-                        SizedBox(height: 24.0),
-                        emailInputField(),
-                        Visibility(
-                          visible: _mode == AuthMode.SignIn,
-                          child: Column(
-                            children: [
-                              SizedBox(height: 10.0),
-                              passwordInputField(),
-                              optionTile(),
-                              SizedBox(height: 30.0),
-                            ],
-                          ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      fairyLogo(),
+                      SizedBox(height: 24.0),
+                      emailInputField(),
+                      Visibility(
+                        visible: _mode == AuthMode.SignIn,
+                        child: Column(
+                          children: [
+                            SizedBox(height: 10.0),
+                            passwordInputField(),
+                            optionTile(),
+                            SizedBox(height: 30.0),
+                          ],
                         ),
-                        signInButton(context),
-                        SizedBox(height: 30.0),
-                        navigationLink(context),
-                      ],
-                    ),
+                      ),
+                      signInButton(context),
+                      SizedBox(height: 30.0),
+                      navigationLink(context),
+                    ],
                   ),
                 ),
               ),

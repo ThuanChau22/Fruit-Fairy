@@ -23,24 +23,23 @@ class SignUpRoleScreen extends StatelessWidget {
             padding: EdgeInsets.symmetric(
               horizontal: MediaQuery.of(context).size.width * 0.15,
             ),
-            child: Center(
-              child: Column(
-                children: [
-                  fairyLogo(context),
-                  SizedBox(height: 24.0),
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: MediaQuery.of(context).size.width * 0.12,
-                    ),
-                    child: Column(
-                      children: [
-                        donorButton(context),
-                        charityButton(context),
-                      ],
-                    ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                fairyLogo(context),
+                SizedBox(height: 24.0),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: MediaQuery.of(context).size.width * 0.12,
                   ),
-                ],
-              ),
+                  child: Column(
+                    children: [
+                      donorButton(context),
+                      charityButton(context),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ),
