@@ -18,12 +18,18 @@ class MessageBar {
         duration: Duration(seconds: 5),
         content: Text(
           message,
-          textAlign: TextAlign.center,
           style: TextStyle(
             color: kLabelColor,
             fontSize: 16.0,
             fontWeight: FontWeight.bold,
           ),
+        ),
+        action: SnackBarAction(
+          label: 'Dismiss',
+          textColor: kLabelColor,
+          onPressed: () {
+            hide();
+          },
         ),
       ),
     );
