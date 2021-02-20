@@ -22,13 +22,44 @@ class FruitFairy extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData.light().copyWith(),
       initialRoute: signedIn ? HomeScreen.id : SignOptionScreen.id,
-      routes: {
-        HomeScreen.id: (context) => HomeScreen(),
-        SignOptionScreen.id: (context) => SignOptionScreen(),
-        SignInScreen.id: (context) => SignInScreen(),
-        ResetPasswordScreen.id: (context) => ResetPasswordScreen(),
-        SignUpRoleScreen.id: (context) => SignUpRoleScreen(),
-        SignUpDonorScreen.id: (context) => SignUpDonorScreen(),
+      // routes: {
+      //   HomeScreen.id: (context) => HomeScreen(),
+      //   SignOptionScreen.id: (context) => SignOptionScreen(),
+      //   SignInScreen.id: (context) => SignInScreen(),
+      //   ResetPasswordScreen.id: (context) => ResetPasswordScreen(),
+      //   SignUpRoleScreen.id: (context) => SignUpRoleScreen(),
+      //   SignUpDonorScreen.id: (context) => SignUpDonorScreen(),
+      // },
+      onGenerateRoute: (settings) {
+        Map<String, Widget> routes = {
+          HomeScreen.id: HomeScreen(),
+          SignOptionScreen.id: SignOptionScreen(),
+          SignInScreen.id: SignInScreen(),
+          ResetPasswordScreen.id: ResetPasswordScreen(),
+          SignUpRoleScreen.id: SignUpRoleScreen(),
+          SignUpDonorScreen.id: SignUpDonorScreen(),
+        };
+        Offset begin = Offset(1.0, 0.0);
+        if (settings.name == SignOptionScreen.id ||
+            settings.name == SignInScreen.id ||
+            settings.name == SignUpRoleScreen.id) {
+          begin = Offset(0.0, 0.0);
+        }
+        return PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) {
+            return routes[settings.name];
+          },
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            Animatable<Offset> tween = Tween(
+              begin: begin,
+              end: Offset.zero,
+            ).chain(CurveTween(curve: Curves.ease));
+            return SlideTransition(
+              position: animation.drive(tween),
+              child: child,
+            );
+          },
+        );
       },
     );
   }

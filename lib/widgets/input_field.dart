@@ -3,22 +3,22 @@ import 'package:fruitfairy/constant.dart';
 
 class InputField extends StatelessWidget {
   final String label;
-  final String value;
   final String errorMessage;
   final TextInputType keyboardType;
   final bool obscureText;
   final int maxLength;
   final Function onChanged;
   final Function onTap;
+  final TextEditingController controller;
 
   InputField({
     @required this.label,
-    @required this.value,
     @required this.onChanged,
     this.errorMessage = '',
     this.maxLength,
     this.keyboardType,
     this.obscureText = false,
+    this.controller,
     this.onTap,
   });
 
@@ -29,6 +29,9 @@ class InputField extends StatelessWidget {
       cursorColor: kLabelColor,
       keyboardType: keyboardType,
       obscureText: obscureText,
+      controller: controller,
+      onChanged: onChanged,
+      onTap: onTap,
       style: TextStyle(
         color: kLabelColor,
       ),
@@ -71,8 +74,6 @@ class InputField extends StatelessWidget {
           borderRadius: BorderRadius.all(Radius.circular(32.0)),
         ),
       ),
-      onChanged: onChanged,
-      onTap: onTap,
     );
   }
 }

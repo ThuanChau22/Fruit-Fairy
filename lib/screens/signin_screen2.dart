@@ -105,7 +105,6 @@ class _SignInScreen2State extends State<SignInScreen2> {
                   SizedBox(height: 24.0),
                   InputField(
                     label: 'Email',
-                    value: _email,
                     keyboardType: TextInputType.emailAddress,
                     errorMessage: _emailError,
                     onChanged: (value) => setState(() {
@@ -118,7 +117,6 @@ class _SignInScreen2State extends State<SignInScreen2> {
                   SizedBox(height: 5.0),
                   InputField(
                     label: 'Password',
-                    value: _password,
                     obscureText: true,
                     errorMessage: _passwordError,
                     onChanged: (value) => setState(() {

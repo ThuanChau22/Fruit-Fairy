@@ -43,7 +43,6 @@ class _ResetPasswordScreen extends State<ResetPasswordScreen> {
                     horizontal: MediaQuery.of(context).size.width * 0.15),
                 child: InputField(
                   label: 'Email',
-                  value: _email,
                   keyboardType: TextInputType.emailAddress,
                   errorMessage: _emailError,
                   onChanged: (value) {

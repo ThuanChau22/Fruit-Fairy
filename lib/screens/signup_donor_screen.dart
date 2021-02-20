@@ -12,9 +12,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
-final FirebaseAuth _auth = FirebaseAuth.instance;
-final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
 class SignUpDonorScreen extends StatelessWidget {
   static const String id = 'signup_donor_screen';
   @override
@@ -47,6 +44,8 @@ class SignUpDonor extends StatefulWidget {
 }
 
 class _SignUpDonorState extends State<SignUpDonor> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool _showSpinner = false;
 
   String _firstName = '';
@@ -158,7 +157,6 @@ class _SignUpDonorState extends State<SignUpDonor> {
   Widget firstNameInputField() {
     return InputField(
       label: 'First Name',
-      value: _firstName,
       errorMessage: _firstNameError,
       maxLength: Validate.maxNameLength,
       keyboardType: TextInputType.name,
@@ -180,7 +178,6 @@ class _SignUpDonorState extends State<SignUpDonor> {
   Widget lastNameInputField() {
     return InputField(
       label: 'Last Name',
-      value: _lastName,
       errorMessage: _lastNameError,
       maxLength: Validate.maxNameLength,
       keyboardType: TextInputType.name,
@@ -202,7 +199,6 @@ class _SignUpDonorState extends State<SignUpDonor> {
   Widget emailInputField() {
     return InputField(
       label: 'Email',
-      value: _email,
       errorMessage: _emailError,
       keyboardType: TextInputType.emailAddress,
       onChanged: (value) {
@@ -222,7 +218,6 @@ class _SignUpDonorState extends State<SignUpDonor> {
   Widget passwordInputField() {
     return InputField(
       label: 'Password',
-      value: _password,
       errorMessage: _passwordError,
       obscureText: true,
       onChanged: (value) {
@@ -248,7 +243,6 @@ class _SignUpDonorState extends State<SignUpDonor> {
   Widget confirmPasswordInputField() {
     return InputField(
       label: 'Confirm Password',
-      value: _confirmPassword,
       errorMessage: _confirmPasswordError,
       obscureText: true,
       onChanged: (value) {
