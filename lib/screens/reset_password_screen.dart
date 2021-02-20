@@ -17,7 +17,7 @@ class _ResetPasswordScreen extends State<ResetPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kBackgroundColor,
+      backgroundColor: kPrimaryColor,
       appBar: AppBar(
         backgroundColor: kAppBarColor,
         title: Text('Reset Password'),
@@ -55,7 +55,7 @@ class _ResetPasswordScreen extends State<ResetPasswordScreen> {
               //SizedBox(height: 100.0),
               RoundedButton(
                 label: 'Send',
-                labelColor: kBackgroundColor,
+                labelColor: kPrimaryColor,
                 backgroundColor: kLabelColor,
                 //TODO: Send a reset password email to the email
                 onPressed: null,

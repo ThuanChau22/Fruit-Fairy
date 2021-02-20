@@ -69,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kBackgroundColor,
+      backgroundColor: kPrimaryColor,
       appBar: AppBar(
         backgroundColor: kAppBarColor,
         title: Text('Profile Page'),
@@ -86,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Text(
                 '$_initialName',
                 style: TextStyle(
-                  color: kBackgroundColor,
+                  color: kPrimaryColor,
                   fontSize: 20.0,
                   fontWeight: FontWeight.bold,
                 ),
@@ -117,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   RoundedButton(
                     onPressed: null,
                     label: 'Donate',
-                    labelColor: kBackgroundColor,
+                    labelColor: kPrimaryColor,
                   ),
                   //TODO: Donation tracking status
                   Text(

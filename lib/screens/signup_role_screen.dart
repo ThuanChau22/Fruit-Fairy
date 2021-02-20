@@ -11,7 +11,7 @@ class SignUpRoleScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kBackgroundColor,
+      backgroundColor: kPrimaryColor,
       appBar: AppBar(
         backgroundColor: kAppBarColor,
         title: Text('Create Account'),
@@ -61,13 +61,13 @@ class SignUpRoleScreen extends StatelessWidget {
   Widget donorButton(BuildContext context) {
     return RoundedButton(
       label: 'Donor',
-      labelColor: kBackgroundColor,
+      labelColor: kPrimaryColor,
       backgroundColor: kLabelColor,
       labelCenter: false,
       leading: Icon(
         Icons.person,
         size: MediaQuery.of(context).size.width * 0.1,
-        color: kBackgroundColor,
+        color: kPrimaryColor,
       ),
       onPressed: () {
         Navigator.of(context).pushNamed(SignUpDonorScreen.id);
@@ -78,13 +78,13 @@ class SignUpRoleScreen extends StatelessWidget {
   Widget charityButton(BuildContext context) {
     return RoundedButton(
       label: 'Charity',
-      labelColor: kBackgroundColor,
+      labelColor: kPrimaryColor,
       backgroundColor: kLabelColor,
       labelCenter: false,
       leading: Icon(
         Icons.group,
         size: MediaQuery.of(context).size.width * 0.1,
-        color: kBackgroundColor,
+        color: kPrimaryColor,
       ),
       //ToDo: redirect to sign up charity screen
       onPressed: null,

@@ -16,7 +16,7 @@ class _SignOptionScreenState extends State<SignOptionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kBackgroundColor,
+      backgroundColor: kPrimaryColor,
       body: SafeArea(
         child: ScrollableLayout(
           child: Center(
@@ -57,7 +57,7 @@ class _SignOptionScreenState extends State<SignOptionScreen> {
   RoundedButton signInButton(BuildContext context) {
     return RoundedButton(
       label: 'Sign In',
-      labelColor: kBackgroundColor,
+      labelColor: kPrimaryColor,
       backgroundColor: kLabelColor,
       onPressed: () {
         Navigator.of(context).pushNamed(SignInScreen.id);
@@ -68,7 +68,7 @@ class _SignOptionScreenState extends State<SignOptionScreen> {
   RoundedButton signUpButton(BuildContext context) {
     return RoundedButton(
       label: 'Sign Up',
-      labelColor: kBackgroundColor,
+      labelColor: kPrimaryColor,
       backgroundColor: kLabelColor,
       onPressed: () {
         Navigator.of(context).pushNamed(SignUpRoleScreen.id);

@@ -12,37 +12,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
-class SignInScreen extends StatelessWidget {
+enum AuthForm { SignIn, Reset }
+
+class SignInScreen extends StatefulWidget {
   static const String id = 'signin_screen';
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: kBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: kAppBarColor,
-        title: Text('Sign In'),
-        centerTitle: true,
-      ),
-      body: Builder(
-        builder: (BuildContext context) {
-          return SafeArea(
-            child: SignIn(context),
-          );
-        },
-      ),
-    );
-  }
+  _SignInScreenState createState() => _SignInScreenState();
 }
 
-class SignIn extends StatefulWidget {
-  final BuildContext scaffoldContext;
-
-  const SignIn(this.scaffoldContext);
-  @override
-  _SignInState createState() => _SignInState();
-}
-
-class _SignInState extends State<SignIn> {
+class _SignInScreenState extends State<SignInScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FlutterSecureStorage _storage = FlutterSecureStorage();
   bool _showSpinner = false;
@@ -54,6 +32,8 @@ class _SignInState extends State<SignIn> {
 
   String _emailError = '';
   String _passwordError = '';
+
+  BuildContext _scaffoldContext;
 
   Future<void> getCredentials() async {
     setState(() => _showSpinner = true);
@@ -89,7 +69,7 @@ class _SignInState extends State<SignIn> {
 
   void showConfirmEmailMessage() {
     MessageBar(
-      widget.scaffoldContext,
+      _scaffoldContext,
       message: 'Please check your email for a verification link',
     ).show();
   }
@@ -130,12 +110,12 @@ class _SignInState extends State<SignIn> {
       } catch (e) {
         if (e.code == 'too-many-requests') {
           MessageBar(
-            widget.scaffoldContext,
+            _scaffoldContext,
             message: 'Please check your email or sign in again shortly',
           ).show();
         } else {
           MessageBar(
-            widget.scaffoldContext,
+            _scaffoldContext,
             message: 'Incorrect Email or Password. Please try again!',
           ).show();
         }
@@ -160,34 +140,48 @@ class _SignInState extends State<SignIn> {
 
   @override
   Widget build(BuildContext context) {
-    return ModalProgressHUD(
-      inAsyncCall: _showSpinner,
-      progressIndicator: CircularProgressIndicator(
-        valueColor: AlwaysStoppedAnimation(kAppBarColor),
+    return Scaffold(
+      backgroundColor: kPrimaryColor,
+      appBar: AppBar(
+        backgroundColor: kAppBarColor,
+        title: Text('Sign In'),
+        centerTitle: true,
       ),
-      child: ScrollableLayout(
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: MediaQuery.of(context).size.width * 0.15,
-          ),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                fairyLogo(),
-                SizedBox(height: 24.0),
-                emailInputField(),
-                SizedBox(height: 10.0),
-                passwordInputField(),
-                optionTile(),
-                SizedBox(height: 15.0),
-                signInButton(context),
-                SizedBox(height: 30.0),
-                forgotPasswordLink(context),
-              ],
+      body: Builder(
+        builder: (BuildContext context) {
+          return SafeArea(
+            child: ModalProgressHUD(
+              inAsyncCall: _showSpinner,
+              progressIndicator: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation(kAppBarColor),
+              ),
+              child: ScrollableLayout(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: MediaQuery.of(context).size.width * 0.15,
+                  ),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        fairyLogo(),
+                        SizedBox(height: 24.0),
+                        emailInputField(),
+                        SizedBox(height: 10.0),
+                        passwordInputField(),
+                        optionTile(),
+                        SizedBox(height: 15.0),
+                        signInButton(context),
+                        SizedBox(height: 30.0),
+                        forgotPasswordLink(context),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
@@ -217,7 +211,7 @@ class _SignInState extends State<SignIn> {
         });
       },
       onTap: () {
-        MessageBar(widget.scaffoldContext).hide();
+        MessageBar(_scaffoldContext).hide();
       },
     );
   }
@@ -237,7 +231,7 @@ class _SignInState extends State<SignIn> {
         });
       },
       onTap: () {
-        MessageBar(widget.scaffoldContext).hide();
+        MessageBar(_scaffoldContext).hide();
       },
     );
   }
@@ -258,7 +252,7 @@ class _SignInState extends State<SignIn> {
                 child: Checkbox(
                   value: _rememberMe,
                   activeColor: kLabelColor,
-                  checkColor: kBackgroundColor,
+                  checkColor: kPrimaryColor,
                   onChanged: (bool value) {
                     setState(() {
                       _rememberMe = value;
@@ -301,7 +295,7 @@ class _SignInState extends State<SignIn> {
       ),
       child: RoundedButton(
         label: 'Sign In',
-        labelColor: kBackgroundColor,
+        labelColor: kPrimaryColor,
         backgroundColor: kLabelColor,
         onPressed: () {
           _signIn();

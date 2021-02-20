@@ -20,7 +20,6 @@ class FruitFairy extends StatelessWidget {
   Widget build(BuildContext context) {
     bool signedIn = user != null && user.emailVerified;
     return MaterialApp(
-      theme: ThemeData.light().copyWith(),
       initialRoute: signedIn ? HomeScreen.id : SignOptionScreen.id,
       // routes: {
       //   HomeScreen.id: (context) => HomeScreen(),

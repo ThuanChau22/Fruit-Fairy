@@ -12,38 +12,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
-class SignUpDonorScreen extends StatelessWidget {
+class SignUpDonorScreen extends StatefulWidget {
   static const String id = 'signup_donor_screen';
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: kBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: kAppBarColor,
-        title: Text('Sign Up'),
-        centerTitle: true,
-      ),
-      body: Builder(
-        builder: (BuildContext context) {
-          return SafeArea(
-            child: SignUpDonor(context),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class SignUpDonor extends StatefulWidget {
-  final BuildContext scaffoldContext;
-
-  const SignUpDonor(this.scaffoldContext);
 
   @override
-  _SignUpDonorState createState() => _SignUpDonorState();
+  _SignUpDonorScreenState createState() => _SignUpDonorScreenState();
 }
 
-class _SignUpDonorState extends State<SignUpDonor> {
+class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool _showSpinner = false;
@@ -59,6 +35,8 @@ class _SignUpDonorState extends State<SignUpDonor> {
   String _emailError = '';
   String _passwordError = '';
   String _confirmPasswordError = '';
+
+  BuildContext _scaffoldContext;
 
   bool _validate() {
     String errors = '';
@@ -112,7 +90,7 @@ class _SignUpDonorState extends State<SignUpDonor> {
         }
       } catch (e) {
         MessageBar(
-          widget.scaffoldContext,
+          _scaffoldContext,
           message: e.message,
         ).show();
       } finally {
@@ -123,33 +101,48 @@ class _SignUpDonorState extends State<SignUpDonor> {
 
   @override
   Widget build(BuildContext context) {
-    return ModalProgressHUD(
-      inAsyncCall: _showSpinner,
-      progressIndicator: CircularProgressIndicator(
-        valueColor: AlwaysStoppedAnimation(kAppBarColor),
+    return Scaffold(
+      backgroundColor: kPrimaryColor,
+      appBar: AppBar(
+        backgroundColor: kAppBarColor,
+        title: Text('Sign Up'),
+        centerTitle: true,
       ),
-      child: ScrollableLayout(
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: MediaQuery.of(context).size.width * 0.15,
-            vertical: 50,
-          ),
-          child: Column(
-            children: [
-              firstNameInputField(),
-              SizedBox(height: 10.0),
-              lastNameInputField(),
-              SizedBox(height: 10.0),
-              emailInputField(),
-              SizedBox(height: 10.0),
-              passwordInputField(),
-              SizedBox(height: 10.0),
-              confirmPasswordInputField(),
-              SizedBox(height: 15.0),
-              signUpButton(context),
-            ],
-          ),
-        ),
+      body: Builder(
+        builder: (BuildContext context) {
+          _scaffoldContext = context;
+          return SafeArea(
+            child: ModalProgressHUD(
+              inAsyncCall: _showSpinner,
+              progressIndicator: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation(kAppBarColor),
+              ),
+              child: ScrollableLayout(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: MediaQuery.of(context).size.width * 0.15,
+                    vertical: 50,
+                  ),
+                  child: Column(
+                    children: [
+                      firstNameInputField(),
+                      SizedBox(height: 10.0),
+                      lastNameInputField(),
+                      SizedBox(height: 10.0),
+                      emailInputField(),
+                      SizedBox(height: 10.0),
+                      passwordInputField(),
+                      SizedBox(height: 10.0),
+                      confirmPasswordInputField(),
+                      SizedBox(height: 15.0),
+                      signUpButton(context),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -170,7 +163,7 @@ class _SignUpDonorState extends State<SignUpDonor> {
         });
       },
       onTap: () {
-        MessageBar(widget.scaffoldContext).hide();
+        MessageBar(_scaffoldContext).hide();
       },
     );
   }
@@ -191,7 +184,7 @@ class _SignUpDonorState extends State<SignUpDonor> {
         });
       },
       onTap: () {
-        MessageBar(widget.scaffoldContext).hide();
+        MessageBar(_scaffoldContext).hide();
       },
     );
   }
@@ -210,7 +203,7 @@ class _SignUpDonorState extends State<SignUpDonor> {
         });
       },
       onTap: () {
-        MessageBar(widget.scaffoldContext).hide();
+        MessageBar(_scaffoldContext).hide();
       },
     );
   }
@@ -235,7 +228,7 @@ class _SignUpDonorState extends State<SignUpDonor> {
         });
       },
       onTap: () {
-        MessageBar(widget.scaffoldContext).hide();
+        MessageBar(_scaffoldContext).hide();
       },
     );
   }
@@ -255,7 +248,7 @@ class _SignUpDonorState extends State<SignUpDonor> {
         });
       },
       onTap: () {
-        MessageBar(widget.scaffoldContext).hide();
+        MessageBar(_scaffoldContext).hide();
       },
     );
   }
@@ -267,7 +260,7 @@ class _SignUpDonorState extends State<SignUpDonor> {
       ),
       child: RoundedButton(
         label: 'Sign Up',
-        labelColor: kBackgroundColor,
+        labelColor: kPrimaryColor,
         backgroundColor: kLabelColor,
         onPressed: () {
           _signUp();
