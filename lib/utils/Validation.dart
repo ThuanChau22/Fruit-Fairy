@@ -1,7 +1,7 @@
 /// A class that provides methods for client validations
 class Validate {
-  static final _passwordLength = 8;
-  static final _maxNameLength = 20;
+  static final passwordLength = 8;
+  static final maxNameLength = 20;
 
   /// Private constructor to prevent instantiation
   Validate._();
@@ -12,8 +12,8 @@ class Validate {
     if (name.isEmpty) {
       return 'Please enter $label\n';
     }
-    if (name.length > _maxNameLength) {
-      return 'Maximum characters for $label is $_maxNameLength\n';
+    if (name.length > maxNameLength) {
+      return 'Only $maxNameLength characters allowed\n';
     }
     return '';
   }
@@ -39,16 +39,16 @@ class Validate {
       return 'Please enter Password\n';
     }
     if (!RegExp(r'[A-Z]').hasMatch(password)) {
-      return 'Password must contain at least one uppercase letter\n';
+      return 'Require at least one uppercase\n';
     }
     if (!RegExp(r'[a-z]').hasMatch(password)) {
-      return 'Password must contain at least one lowercase letter\n';
+      return 'Require at least one lowercase\n';
     }
     if (!RegExp(r'[0-9]').hasMatch(password)) {
-      return 'Password must contain at least one number\n';
+      return 'Require at least one number\n';
     }
-    if (password.length < _passwordLength) {
-      return 'Password must be at least $_passwordLength characters\n';
+    if (password.length < passwordLength) {
+      return 'Require at least $passwordLength characters\n';
     }
     return '';
   }
