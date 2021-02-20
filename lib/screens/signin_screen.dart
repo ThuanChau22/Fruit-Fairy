@@ -40,7 +40,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
   BuildContext _scaffoldContext;
 
-  Future<void> getCredentials() async {
+  void getCredentials() async {
     setState(() => _showSpinner = true);
     try {
       Map<String, String> credentials = await _storage.readAll();
@@ -58,12 +58,15 @@ class _SignInScreenState extends State<SignInScreen> {
     }
   }
 
-  Future<void> saveCredentials() async {
+  void saveCredentials() async {
     await _storage.deleteAll();
     if (_rememberMe) {
       setState(() => _showSpinner = true);
       try {
-        await _storage.write(key: _email.text.trim(), value: _password.text);
+        await _storage.write(
+          key: _email.text.trim(),
+          value: _password.text,
+        );
       } catch (e) {
         print(e);
       } finally {
@@ -92,7 +95,7 @@ class _SignInScreenState extends State<SignInScreen> {
     return errors.isEmpty;
   }
 
-  Future<void> _signIn() async {
+  void _signIn() async {
     if (_validate()) {
       setState(() => _showSpinner = true);
       try {
@@ -105,7 +108,7 @@ class _SignInScreenState extends State<SignInScreen> {
             await registeredUser.user.sendEmailVerification();
             showConfirmEmailMessage();
           } else {
-            await saveCredentials();
+            saveCredentials();
             Navigator.of(context).pushNamedAndRemoveUntil(
               HomeScreen.id,
               (route) => false,
@@ -205,7 +208,7 @@ class _SignInScreenState extends State<SignInScreen> {
                               SizedBox(height: 10.0),
                               passwordInputField(),
                               optionTile(),
-                              SizedBox(height: 15.0),
+                              SizedBox(height: 30.0),
                             ],
                           ),
                         ),
@@ -224,7 +227,7 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
-  Hero fairyLogo() {
+  Widget fairyLogo() {
     return Hero(
       tag: FruitFairyLogo.id,
       child: FruitFairyLogo(
@@ -327,12 +330,13 @@ class _SignInScreenState extends State<SignInScreen> {
   Widget signInButton(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(
+        vertical: 16.0,
         horizontal: MediaQuery.of(context).size.width * 0.15,
       ),
       child: RoundedButton(
         label: buttonLabel,
         labelColor: kPrimaryColor,
-        backgroundColor: kLabelColor,
+        backgroundColor: kObjectBackgroundColor,
         onPressed: () {
           _mode == AuthMode.SignIn ? _signIn() : _resetPassword();
         },

@@ -44,7 +44,7 @@ class _SignOptionScreenState extends State<SignOptionScreen> {
     );
   }
 
-  Hero fairyLogo() {
+  Widget fairyLogo() {
     return Hero(
       tag: FruitFairyLogo.id,
       child: FruitFairyLogo(
@@ -54,25 +54,31 @@ class _SignOptionScreenState extends State<SignOptionScreen> {
     );
   }
 
-  RoundedButton signInButton(BuildContext context) {
-    return RoundedButton(
-      label: 'Sign In',
-      labelColor: kPrimaryColor,
-      backgroundColor: kLabelColor,
-      onPressed: () {
-        Navigator.of(context).pushNamed(SignInScreen.id);
-      },
+  Widget signInButton(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 16.0),
+      child: RoundedButton(
+        label: 'Sign In',
+        labelColor: kPrimaryColor,
+        backgroundColor: kObjectBackgroundColor,
+        onPressed: () {
+          Navigator.of(context).pushNamed(SignInScreen.id);
+        },
+      ),
     );
   }
 
-  RoundedButton signUpButton(BuildContext context) {
-    return RoundedButton(
-      label: 'Sign Up',
-      labelColor: kPrimaryColor,
-      backgroundColor: kLabelColor,
-      onPressed: () {
-        Navigator.of(context).pushNamed(SignUpRoleScreen.id);
-      },
+  Widget signUpButton(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 16.0),
+      child: RoundedButton(
+        label: 'Sign Up',
+        labelColor: kPrimaryColor,
+        backgroundColor: kObjectBackgroundColor,
+        onPressed: () {
+          Navigator.of(context).pushNamed(SignUpRoleScreen.id);
+        },
+      ),
     );
   }
 }

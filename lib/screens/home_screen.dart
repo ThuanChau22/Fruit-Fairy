@@ -114,10 +114,17 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: Colors.white,
                     ),
                   ),
-                  RoundedButton(
-                    onPressed: null,
-                    label: 'Donate',
-                    labelColor: kPrimaryColor,
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      vertical: 16.0,
+                      horizontal: MediaQuery.of(context).size.width * 0.25,
+                    ),
+                    child: RoundedButton(
+                      onPressed: null,
+                      label: 'Donate',
+                      labelColor: kPrimaryColor,
+                      backgroundColor: kObjectBackgroundColor,
+                    ),
                   ),
                   //TODO: Donation tracking status
                   Text(

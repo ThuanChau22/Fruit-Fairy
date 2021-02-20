@@ -256,12 +256,13 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
   Widget signUpButton(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(
+        vertical: 16.0,
         horizontal: MediaQuery.of(context).size.width * 0.15,
       ),
       child: RoundedButton(
         label: 'Sign Up',
         labelColor: kPrimaryColor,
-        backgroundColor: kLabelColor,
+        backgroundColor: kObjectBackgroundColor,
         onPressed: () {
           _signUp();
         },

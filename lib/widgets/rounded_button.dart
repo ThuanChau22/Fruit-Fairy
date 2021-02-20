@@ -5,8 +5,8 @@ class RoundedButton extends StatelessWidget {
   final bool labelCenter;
   final Color labelColor;
   final Color backgroundColor;
-  final Function onPressed;
   final Widget leading;
+  final Function onPressed;
 
   RoundedButton({
     @required this.label,
@@ -19,8 +19,7 @@ class RoundedButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 16.0),
+    return Container(
       child: Material(
         elevation: 5.0,
         color: backgroundColor,

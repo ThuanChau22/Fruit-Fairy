@@ -59,35 +59,41 @@ class SignUpRoleScreen extends StatelessWidget {
   }
 
   Widget donorButton(BuildContext context) {
-    return RoundedButton(
-      label: 'Donor',
-      labelColor: kPrimaryColor,
-      backgroundColor: kLabelColor,
-      labelCenter: false,
-      leading: Icon(
-        Icons.person,
-        size: MediaQuery.of(context).size.width * 0.1,
-        color: kPrimaryColor,
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 16.0),
+      child: RoundedButton(
+        label: 'Donor',
+        labelColor: kPrimaryColor,
+        backgroundColor: kObjectBackgroundColor,
+        labelCenter: false,
+        leading: Icon(
+          Icons.person,
+          size: MediaQuery.of(context).size.width * 0.1,
+          color: kPrimaryColor,
+        ),
+        onPressed: () {
+          Navigator.of(context).pushNamed(SignUpDonorScreen.id);
+        },
       ),
-      onPressed: () {
-        Navigator.of(context).pushNamed(SignUpDonorScreen.id);
-      },
     );
   }
 
   Widget charityButton(BuildContext context) {
-    return RoundedButton(
-      label: 'Charity',
-      labelColor: kPrimaryColor,
-      backgroundColor: kLabelColor,
-      labelCenter: false,
-      leading: Icon(
-        Icons.group,
-        size: MediaQuery.of(context).size.width * 0.1,
-        color: kPrimaryColor,
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 16.0),
+      child: RoundedButton(
+        label: 'Charity',
+        labelColor: kPrimaryColor,
+        backgroundColor: kObjectBackgroundColor,
+        labelCenter: false,
+        leading: Icon(
+          Icons.group,
+          size: MediaQuery.of(context).size.width * 0.1,
+          color: kPrimaryColor,
+        ),
+        //ToDo: redirect to sign up charity screen
+        onPressed: null,
       ),
-      //ToDo: redirect to sign up charity screen
-      onPressed: null,
     );
   }
 }

@@ -134,7 +134,7 @@ class _SignInScreen2State extends State<SignInScreen2> {
                     child: RoundedButton(
                       label: 'Sign In',
                       labelColor: kPrimaryColor,
-                      backgroundColor: kLabelColor,
+                      backgroundColor: kObjectBackgroundColor,
                       onPressed: _signIn,
                     ),
                   ),

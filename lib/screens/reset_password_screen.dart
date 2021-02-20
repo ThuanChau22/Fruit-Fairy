@@ -56,7 +56,7 @@ class _ResetPasswordScreen extends State<ResetPasswordScreen> {
               RoundedButton(
                 label: 'Send',
                 labelColor: kPrimaryColor,
-                backgroundColor: kLabelColor,
+                backgroundColor: kObjectBackgroundColor,
                 //TODO: Send a reset password email to the email
                 onPressed: null,
               ),
