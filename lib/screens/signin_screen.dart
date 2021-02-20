@@ -7,7 +7,6 @@ import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
-import 'package:fruitfairy/screens/reset_password_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
@@ -64,7 +63,7 @@ class _SignInScreenState extends State<SignInScreen> {
     if (_rememberMe) {
       setState(() => _showSpinner = true);
       try {
-        await _storage.write(key: _email.text, value: _password.text);
+        await _storage.write(key: _email.text.trim(), value: _password.text);
       } catch (e) {
         print(e);
       } finally {
@@ -84,7 +83,7 @@ class _SignInScreenState extends State<SignInScreen> {
     String errors = '';
     setState(() {
       errors += _emailError = Validate.checkEmail(
-        email: _email.text.trim(),
+        email: _email.text,
       );
       errors += _passwordError = Validate.checkPassword(
         password: _password.text,
@@ -98,7 +97,7 @@ class _SignInScreenState extends State<SignInScreen> {
       setState(() => _showSpinner = true);
       try {
         UserCredential registeredUser = await _auth.signInWithEmailAndPassword(
-          email: _email.text,
+          email: _email.text.trim(),
           password: _password.text,
         );
         if (registeredUser != null) {
@@ -134,13 +133,13 @@ class _SignInScreenState extends State<SignInScreen> {
   void _resetPassword() async {
     setState(() {
       _emailError = Validate.checkEmail(
-        email: _email.text.trim(),
+        email: _email.text,
       );
     });
     if (_emailError.isEmpty) {
       setState(() => _showSpinner = true);
       try {
-        await _auth.sendPasswordResetEmail(email: _email.text);
+        await _auth.sendPasswordResetEmail(email: _email.text.trim());
         buttonLabel = 'Re-send';
       } catch (e) {
         print(e);
@@ -244,7 +243,7 @@ class _SignInScreenState extends State<SignInScreen> {
       onChanged: (value) {
         setState(() {
           _emailError = Validate.checkEmail(
-            email: _email.text.trim(),
+            email: _email.text,
           );
         });
       },
