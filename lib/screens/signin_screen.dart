@@ -11,30 +11,52 @@ import 'package:fruitfairy/screens/reset_password_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
-class SignInScreen extends StatefulWidget {
+class SignInScreen extends StatelessWidget {
   static const String id = 'signin_screen';
-
   @override
-  _SignInScreenState createState() => _SignInScreenState();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: kBackgroundColor,
+      appBar: AppBar(
+        backgroundColor: kAppBarColor,
+        title: Text('Sign In'),
+        centerTitle: true,
+      ),
+      body: Builder(
+        builder: (BuildContext context) {
+          return SafeArea(
+            child: SignIn(context),
+          );
+        },
+      ),
+    );
+  }
 }
 
-class _SignInScreenState extends State<SignInScreen> {
+class SignIn extends StatefulWidget {
+  final BuildContext scaffoldContext;
+
+  const SignIn(this.scaffoldContext);
+  @override
+  _SignInState createState() => _SignInState();
+}
+
+class _SignInState extends State<SignIn> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   bool _showSpinner = false;
 
   String _email = '';
   String _password = '';
+  bool _obscureText = true;
+  bool _rememberMe = false;
 
   String _emailError = '';
   String _passwordError = '';
 
-  BuildContext _scaffoldContext;
-
   void showConfirmEmailMessage() {
     MessageBar(
-      scaffoldContext: _scaffoldContext,
-      //TODO: add check email message
-      message: 'check email',
+      widget.scaffoldContext,
+      message: 'Please check your email for a verification link',
     ).show();
   }
 
@@ -72,10 +94,13 @@ class _SignInScreenState extends State<SignInScreen> {
         }
       } catch (e) {
         if (e.code == 'too-many-requests') {
-          showConfirmEmailMessage();
+          MessageBar(
+            widget.scaffoldContext,
+            message: 'Please check your email or sign in again shortly',
+          ).show();
         } else {
           MessageBar(
-            scaffoldContext: _scaffoldContext,
+            widget.scaffoldContext,
             message: 'Incorrect Email or Password. Please try again!',
           ).show();
         }
@@ -99,72 +124,49 @@ class _SignInScreenState extends State<SignInScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: kBackgroundColor,
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text('Sign In'),
-        backgroundColor: kAppBarColor,
+    return ModalProgressHUD(
+      inAsyncCall: _showSpinner,
+      progressIndicator: CircularProgressIndicator(
+        valueColor: AlwaysStoppedAnimation(kAppBarColor),
       ),
-      body: Builder(
-        builder: (BuildContext context) {
-          _scaffoldContext = context;
-          return SafeArea(
-            child: ModalProgressHUD(
-              inAsyncCall: _showSpinner,
-              child: ScrollableLayout(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: MediaQuery.of(context).size.width * 0.15,
-                  ),
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Hero(
-                          tag: FruitFairyLogo.id,
-                          child: FruitFairyLogo(
-                            fontSize: 25.0,
-                            radius: 60.0,
-                          ),
-                        ),
-                        SizedBox(height: 24.0),
-                        emailInputField(),
-                        SizedBox(height: 5.0),
-                        passwordInputField(),
-                        Center(
-                          child: GestureDetector(
-                            onTap: () {
-                              Navigator.pushNamed(
-                                context,
-                                ResetPasswordScreen.id,
-                              );
-                            },
-                            child: Text(
-                              'Forgot Password?',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                  decoration: TextDecoration.underline,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 15.0),
-                        signInButton(context),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+      child: ScrollableLayout(
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: MediaQuery.of(context).size.width * 0.15,
+          ),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                fairyLogo(),
+                SizedBox(height: 24.0),
+                emailInputField(),
+                SizedBox(height: 10.0),
+                passwordInputField(),
+                optionTile(),
+                SizedBox(height: 15.0),
+                signInButton(context),
+                SizedBox(height: 30.0),
+                forgotPasswordLink(context),
+              ],
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
 
-  InputField emailInputField() {
+  Hero fairyLogo() {
+    return Hero(
+      tag: FruitFairyLogo.id,
+      child: FruitFairyLogo(
+        fontSize: MediaQuery.of(context).size.width * 0.07,
+        radius: MediaQuery.of(context).size.width * 0.15,
+      ),
+    );
+  }
+
+  Widget emailInputField() {
     return InputField(
       label: 'Email',
       value: _email,
@@ -178,15 +180,17 @@ class _SignInScreenState extends State<SignInScreen> {
           );
         });
       },
-      onTap: () => MessageBar(scaffoldContext: _scaffoldContext).hide(),
+      onTap: () {
+        MessageBar(widget.scaffoldContext).hide();
+      },
     );
   }
 
-  InputField passwordInputField() {
+  Widget passwordInputField() {
     return InputField(
       label: 'Password',
       value: _password,
-      obscureText: true,
+      obscureText: _obscureText,
       errorMessage: _passwordError,
       onChanged: (value) {
         setState(() {
@@ -196,14 +200,68 @@ class _SignInScreenState extends State<SignInScreen> {
           );
         });
       },
-      onTap: () => MessageBar(scaffoldContext: _scaffoldContext).hide(),
+      onTap: () {
+        MessageBar(widget.scaffoldContext).hide();
+      },
     );
   }
 
-  Padding signInButton(BuildContext context) {
+  Widget optionTile() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            SizedBox(
+              width: 30,
+              height: 30,
+              child: Theme(
+                data: ThemeData(
+                  unselectedWidgetColor: kLabelColor,
+                ),
+                child: Checkbox(
+                  value: _rememberMe,
+                  activeColor: kLabelColor,
+                  checkColor: kBackgroundColor,
+                  onChanged: (bool value) {
+                    setState(() {
+                      _rememberMe = value;
+                    });
+                  },
+                ),
+              ),
+            ),
+            Text(
+              'Remember me',
+              style: TextStyle(
+                color: kLabelColor,
+                fontSize: 16,
+              ),
+            )
+          ],
+        ),
+        Padding(
+          padding: EdgeInsets.only(right: 15.0),
+          child: GestureDetector(
+            onTap: () {
+              setState(() {
+                _obscureText = !_obscureText;
+              });
+            },
+            child: Icon(
+              _obscureText ? Icons.visibility_off : Icons.visibility,
+              color: kLabelColor,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget signInButton(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(
-        horizontal: MediaQuery.of(context).size.width * 0.2,
+        horizontal: MediaQuery.of(context).size.width * 0.15,
       ),
       child: RoundedButton(
         label: 'Sign In',
@@ -212,6 +270,24 @@ class _SignInScreenState extends State<SignInScreen> {
         onPressed: () {
           _signIn();
         },
+      ),
+    );
+  }
+
+  Widget forgotPasswordLink(BuildContext context) {
+    return Center(
+      child: GestureDetector(
+        onTap: () {
+          Navigator.of(context).pushNamed(ResetPasswordScreen.id);
+        },
+        child: Text(
+          'Forgot Password?',
+          style: TextStyle(
+            color: kLabelColor,
+            fontSize: 16,
+            decoration: TextDecoration.underline,
+          ),
+        ),
       ),
     );
   }

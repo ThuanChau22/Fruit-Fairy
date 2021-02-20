@@ -12,17 +12,41 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
-class SignUpDonorScreen extends StatefulWidget {
-  static const String id = 'signup_donor_screen';
+final FirebaseAuth _auth = FirebaseAuth.instance;
+final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+class SignUpDonorScreen extends StatelessWidget {
+  static const String id = 'signup_donor_screen';
   @override
-  _SignUpDonorScreenState createState() => _SignUpDonorScreenState();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: kBackgroundColor,
+      appBar: AppBar(
+        backgroundColor: kAppBarColor,
+        title: Text('Sign Up'),
+        centerTitle: true,
+      ),
+      body: Builder(
+        builder: (BuildContext context) {
+          return SafeArea(
+            child: SignUpDonor(context),
+          );
+        },
+      ),
+    );
+  }
 }
 
-class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+class SignUpDonor extends StatefulWidget {
+  final BuildContext scaffoldContext;
 
+  const SignUpDonor(this.scaffoldContext);
+
+  @override
+  _SignUpDonorState createState() => _SignUpDonorState();
+}
+
+class _SignUpDonorState extends State<SignUpDonor> {
   bool _showSpinner = false;
 
   String _firstName = '';
@@ -36,11 +60,6 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
   String _emailError = '';
   String _passwordError = '';
   String _confirmPasswordError = '';
-
-  int _firstNameCount = 0;
-  int _lastNameCount = 0;
-
-  BuildContext _scaffoldContext;
 
   bool _validate() {
     String errors = '';
@@ -94,7 +113,7 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
         }
       } catch (e) {
         MessageBar(
-          scaffoldContext: _scaffoldContext,
+          widget.scaffoldContext,
           message: e.message,
         ).show();
       } finally {
@@ -105,90 +124,82 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: kBackgroundColor,
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text('Sign Up'),
-        backgroundColor: kAppBarColor,
+    return ModalProgressHUD(
+      inAsyncCall: _showSpinner,
+      progressIndicator: CircularProgressIndicator(
+        valueColor: AlwaysStoppedAnimation(kAppBarColor),
       ),
-      body: Builder(
-        builder: (BuildContext context) {
-          _scaffoldContext = context;
-          return SafeArea(
-            child: ModalProgressHUD(
-              opacity: 0.5,
-              inAsyncCall: _showSpinner,
-              child: ScrollableLayout(
-                child: Container(
-                  padding: EdgeInsets.all(50.0),
-                  child: Column(
-                    children: [
-                      firstNameInputField(),
-                      SizedBox(height: 5.0),
-                      lastNameInputField(),
-                      SizedBox(height: 5.0),
-                      emailInputField(),
-                      SizedBox(height: 5.0),
-                      passwordInputField(),
-                      SizedBox(height: 5.0),
-                      confirmPasswordInputField(),
-                      SizedBox(height: 15.0),
-                      signUpButton(context),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
+      child: ScrollableLayout(
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: MediaQuery.of(context).size.width * 0.15,
+            vertical: 50,
+          ),
+          child: Column(
+            children: [
+              firstNameInputField(),
+              SizedBox(height: 10.0),
+              lastNameInputField(),
+              SizedBox(height: 10.0),
+              emailInputField(),
+              SizedBox(height: 10.0),
+              passwordInputField(),
+              SizedBox(height: 10.0),
+              confirmPasswordInputField(),
+              SizedBox(height: 15.0),
+              signUpButton(context),
+            ],
+          ),
+        ),
       ),
     );
   }
 
-  InputField firstNameInputField() {
+  Widget firstNameInputField() {
     return InputField(
       label: 'First Name',
       value: _firstName,
       errorMessage: _firstNameError,
-      characterCount: _firstNameCount,
+      maxLength: Validate.maxNameLength,
       keyboardType: TextInputType.name,
       onChanged: (value) {
         setState(() {
           _firstName = value.trim();
-          _firstNameCount = _firstName.length;
           _firstNameError = Validate.name(
             label: 'First Name',
             name: _firstName,
           );
         });
       },
-      onTap: () => MessageBar(scaffoldContext: _scaffoldContext).hide(),
+      onTap: () {
+        MessageBar(widget.scaffoldContext).hide();
+      },
     );
   }
 
-  InputField lastNameInputField() {
+  Widget lastNameInputField() {
     return InputField(
       label: 'Last Name',
       value: _lastName,
       errorMessage: _lastNameError,
-      characterCount: _lastNameCount,
+      maxLength: Validate.maxNameLength,
       keyboardType: TextInputType.name,
       onChanged: (value) {
         setState(() {
           _lastName = value.trim();
-          _lastNameCount = _lastName.length;
           _lastNameError = Validate.name(
             label: 'Last Name',
             name: _lastName,
           );
         });
       },
-      onTap: () => MessageBar(scaffoldContext: _scaffoldContext).hide(),
+      onTap: () {
+        MessageBar(widget.scaffoldContext).hide();
+      },
     );
   }
 
-  InputField emailInputField() {
+  Widget emailInputField() {
     return InputField(
       label: 'Email',
       value: _email,
@@ -202,11 +213,13 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
           );
         });
       },
-      onTap: () => MessageBar(scaffoldContext: _scaffoldContext).hide(),
+      onTap: () {
+        MessageBar(widget.scaffoldContext).hide();
+      },
     );
   }
 
-  InputField passwordInputField() {
+  Widget passwordInputField() {
     return InputField(
       label: 'Password',
       value: _password,
@@ -226,11 +239,13 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
           }
         });
       },
-      onTap: () => MessageBar(scaffoldContext: _scaffoldContext).hide(),
+      onTap: () {
+        MessageBar(widget.scaffoldContext).hide();
+      },
     );
   }
 
-  InputField confirmPasswordInputField() {
+  Widget confirmPasswordInputField() {
     return InputField(
       label: 'Confirm Password',
       value: _confirmPassword,
@@ -245,14 +260,16 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
           );
         });
       },
-      onTap: () => MessageBar(scaffoldContext: _scaffoldContext).hide(),
+      onTap: () {
+        MessageBar(widget.scaffoldContext).hide();
+      },
     );
   }
 
-  Padding signUpButton(BuildContext context) {
+  Widget signUpButton(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(
-        horizontal: MediaQuery.of(context).size.width * 0.2,
+        horizontal: MediaQuery.of(context).size.width * 0.15,
       ),
       child: RoundedButton(
         label: 'Sign Up',

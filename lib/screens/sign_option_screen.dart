@@ -25,8 +25,17 @@ class _SignOptionScreenState extends State<SignOptionScreen> {
               children: [
                 fairyLogo(),
                 SizedBox(height: 24.0),
-                signInButton(context),
-                signUpButton(context),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: MediaQuery.of(context).size.width * 0.25,
+                  ),
+                  child: Column(
+                    children: [
+                      signInButton(context),
+                      signUpButton(context),
+                    ],
+                  ),
+                )
               ],
             ),
           ),

@@ -21,7 +21,7 @@ class MessageBar {
           textAlign: TextAlign.center,
           style: TextStyle(
             color: kLabelColor,
-            fontSize: 15.0,
+            fontSize: 16.0,
             fontWeight: FontWeight.bold,
           ),
         ),
