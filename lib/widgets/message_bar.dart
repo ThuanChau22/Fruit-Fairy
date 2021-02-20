@@ -15,6 +15,10 @@ class MessageBar {
     Scaffold.of(scaffoldContext).showSnackBar(
       SnackBar(
         backgroundColor: kAppBarColor,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15.0),
+        ),
         duration: Duration(seconds: 5),
         content: Text(
           message,
