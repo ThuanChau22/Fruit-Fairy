@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:fruitfairy/utils/route_generator.dart';
 import 'package:fruitfairy/screens/sign_option_screen.dart';
-import 'package:fruitfairy/screens/signin_screen.dart';
-import 'package:fruitfairy/screens/signup_donor_screen.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
-import 'package:fruitfairy/screens/signup_role_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 void main() async {
+  // Initialize app with Firebase
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   runApp(FruitFairy());
@@ -17,9 +16,11 @@ class FruitFairy extends StatelessWidget {
   final User user = FirebaseAuth.instance.currentUser;
   @override
   Widget build(BuildContext context) {
+    // Check user authentication status
     bool signedIn = user != null && user.emailVerified;
     return GestureDetector(
       onTap: () {
+        // Dismiss on screen keyboard
         FocusScopeNode currentFocus = FocusScope.of(context);
         if (!currentFocus.hasPrimaryFocus &&
             currentFocus.focusedChild != null) {
@@ -28,42 +29,7 @@ class FruitFairy extends StatelessWidget {
       },
       child: MaterialApp(
         initialRoute: signedIn ? HomeScreen.id : SignOptionScreen.id,
-        onGenerateRoute: (settings) {
-          Map<String, Widget> routes = {
-            SignOptionScreen.id: SignOptionScreen(),
-            SignInScreen.id: SignInScreen(),
-            SignUpRoleScreen.id: SignUpRoleScreen(),
-            SignUpDonorScreen.id: SignUpDonorScreen(),
-            HomeScreen.id: HomeScreen(),
-          };
-          String screenName = settings.name;
-          Object arguments = settings.arguments;
-          if (screenName == SignOptionScreen.id ||
-              screenName == SignInScreen.id ||
-              screenName == SignUpRoleScreen.id) {
-            return MaterialPageRoute(
-              settings: RouteSettings(name: screenName, arguments: arguments),
-              builder: (context) => routes[screenName],
-            );
-          }
-          return PageRouteBuilder(
-            settings: RouteSettings(name: screenName, arguments: arguments),
-            pageBuilder: (context, animation, secondaryAnimation) {
-              return routes[screenName];
-            },
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
-              Animatable<Offset> tween = Tween(
-                begin: Offset(1.0, 0.0),
-                end: Offset.zero,
-              ).chain(CurveTween(curve: Curves.ease));
-              return SlideTransition(
-                position: animation.drive(tween),
-                child: child,
-              );
-            },
-          );
-        },
+        onGenerateRoute: RouteGenerator.generate,
       ),
     );
   }
