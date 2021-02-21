@@ -15,7 +15,7 @@ class SignOptionScreen extends StatefulWidget {
 class _SignOptionScreenState extends State<SignOptionScreen> {
   @override
   Widget build(BuildContext context) {
-    Size screenSize = MediaQuery.of(context).size;
+    Size screen = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: kPrimaryColor,
       body: SafeArea(
@@ -25,10 +25,10 @@ class _SignOptionScreenState extends State<SignOptionScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 fairyLogo(),
-                SizedBox(height: screenSize.height * 0.03),
+                SizedBox(height: screen.height * 0.03),
                 Padding(
                   padding: EdgeInsets.symmetric(
-                    horizontal: screenSize.width * 0.25,
+                    horizontal: screen.width * 0.25,
                   ),
                   child: Column(
                     children: [
@@ -46,20 +46,20 @@ class _SignOptionScreenState extends State<SignOptionScreen> {
   }
 
   Widget fairyLogo() {
-    Size screenSize = MediaQuery.of(context).size;
+    Size screen = MediaQuery.of(context).size;
     return Hero(
       tag: FruitFairyLogo.id,
       child: FruitFairyLogo(
-        fontSize: screenSize.width * 0.15,
-        radius: screenSize.width * 0.25,
+        fontSize: screen.width * 0.15,
+        radius: screen.width * 0.25,
       ),
     );
   }
 
   Widget signInButton(BuildContext context) {
-    Size screenSize = MediaQuery.of(context).size;
+    Size screen = MediaQuery.of(context).size;
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: screenSize.height * 0.02),
+      padding: EdgeInsets.symmetric(vertical: screen.height * 0.02),
       child: RoundedButton(
         label: 'Sign In',
         labelColor: kPrimaryColor,
@@ -72,9 +72,9 @@ class _SignOptionScreenState extends State<SignOptionScreen> {
   }
 
   Widget signUpButton(BuildContext context) {
-    Size screenSize = MediaQuery.of(context).size;
+    Size screen = MediaQuery.of(context).size;
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: screenSize.height * 0.02),
+      padding: EdgeInsets.symmetric(vertical: screen.height * 0.02),
       child: RoundedButton(
         label: 'Sign Up',
         labelColor: kPrimaryColor,

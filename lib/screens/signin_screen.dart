@@ -73,13 +73,6 @@ class _SignInScreenState extends State<SignInScreen> {
     }
   }
 
-  void _showConfirmEmailMessage() {
-    MessageBar(
-      _scaffoldContext,
-      message: 'Please check your email for a verification link',
-    ).show();
-  }
-
   bool _validate() {
     String errors = '';
     setState(() {
@@ -124,14 +117,14 @@ class _SignInScreenState extends State<SignInScreen> {
         // Sign In Mode
         default:
           try {
-            UserCredential registeredUser =
-                await _auth.signInWithEmailAndPassword(
+            UserCredential user = await _auth.signInWithEmailAndPassword(
               email: _email.text.trim(),
               password: _password.text,
             );
-            if (registeredUser != null) {
-              if (!registeredUser.user.emailVerified) {
-                await registeredUser.user.sendEmailVerification();
+            if (user != null) {
+              if (!_auth.currentUser.emailVerified) {
+                await _auth.currentUser.sendEmailVerification();
+                await _auth.signOut();
                 _showConfirmEmailMessage();
               } else {
                 _storeCredential();
@@ -160,15 +153,21 @@ class _SignInScreenState extends State<SignInScreen> {
     }
   }
 
+  void _showConfirmEmailMessage() {
+    MessageBar(
+      _scaffoldContext,
+      message: 'Please check your email for verification link',
+    ).show();
+  }
+
   @override
   void initState() {
     super.initState();
 
     _getCredential();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      UserCredential userCredential = ModalRoute.of(context).settings.arguments;
-      if (userCredential != null &&
-          userCredential.additionalUserInfo.isNewUser) {
+      UserCredential user = ModalRoute.of(context).settings.arguments;
+      if (user != null && user.additionalUserInfo.isNewUser) {
         _showConfirmEmailMessage();
       }
     });
@@ -176,7 +175,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Size screenSize = MediaQuery.of(context).size;
+    Size screen = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: kPrimaryColor,
       appBar: AppBar(
@@ -196,13 +195,13 @@ class _SignInScreenState extends State<SignInScreen> {
               child: ScrollableLayout(
                 child: Padding(
                   padding: EdgeInsets.symmetric(
-                    vertical: screenSize.height * 0.03,
-                    horizontal: screenSize.width * 0.15,
+                    vertical: screen.height * 0.03,
+                    horizontal: screen.width * 0.15,
                   ),
                   child: Column(
                     children: [
                       fairyLogo(),
-                      SizedBox(height: screenSize.height * 0.03),
+                      SizedBox(height: screen.height * 0.03),
                       layoutMode(),
                     ],
                   ),
@@ -216,18 +215,18 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   Widget fairyLogo() {
-    Size screenSize = MediaQuery.of(context).size;
+    Size screen = MediaQuery.of(context).size;
     return Hero(
       tag: FruitFairyLogo.id,
       child: FruitFairyLogo(
-        fontSize: screenSize.width * 0.07,
-        radius: screenSize.width * 0.15,
+        fontSize: screen.width * 0.07,
+        radius: screen.width * 0.15,
       ),
     );
   }
 
   Widget layoutMode() {
-    Size screenSize = MediaQuery.of(context).size;
+    Size screen = MediaQuery.of(context).size;
     switch (_mode) {
       case AuthMode.Reset:
         return Column(
@@ -241,11 +240,11 @@ class _SignInScreenState extends State<SignInScreen> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: screenSize.height * 0.02),
+            SizedBox(height: screen.height * 0.02),
             emailInputField(),
-            SizedBox(height: screenSize.height * 0.02),
+            SizedBox(height: screen.height * 0.02),
             submitButton(context),
-            SizedBox(height: screenSize.height * 0.05),
+            SizedBox(height: screen.height * 0.05),
             signInLink(context),
           ],
         );
@@ -256,7 +255,7 @@ class _SignInScreenState extends State<SignInScreen> {
           children: [
             phoneNumberField(),
             submitButton(context),
-            SizedBox(height: screenSize.height * 0.05),
+            SizedBox(height: screen.height * 0.05),
             signInLink(context),
           ],
         );
@@ -266,22 +265,23 @@ class _SignInScreenState extends State<SignInScreen> {
       default:
         return Column(
           children: [
-            SizedBox(height: screenSize.height * 0.02),
+            SizedBox(height: screen.height * 0.02),
             emailInputField(),
-            SizedBox(height: screenSize.height * 0.01),
+            SizedBox(height: screen.height * 0.01),
             passwordInputField(),
             optionTile(),
-            SizedBox(height: screenSize.height * 0.02),
+            SizedBox(height: screen.height * 0.02),
             submitButton(context),
-            SizedBox(height: screenSize.height * 0.03),
+            SizedBox(height: screen.height * 0.03),
             forgotPasswordLink(context),
             Padding(
-              padding: EdgeInsets.symmetric(vertical: screenSize.height * 0.01),
+              padding: EdgeInsets.symmetric(vertical: screen.height * 0.01),
               child: Divider(color: kLabelColor, thickness: 2.0),
             ),
             phoneLink(context),
           ],
         );
+        break;
     }
   }
 

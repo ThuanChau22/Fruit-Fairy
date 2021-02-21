@@ -28,14 +28,6 @@ class FruitFairy extends StatelessWidget {
       },
       child: MaterialApp(
         initialRoute: signedIn ? HomeScreen.id : SignOptionScreen.id,
-        // routes: {
-        //   HomeScreen.id: (context) => HomeScreen(),
-        //   SignOptionScreen.id: (context) => SignOptionScreen(),
-        //   SignInScreen.id: (context) => SignInScreen(),
-        //   ResetPasswordScreen.id: (context) => ResetPasswordScreen(),
-        //   SignUpRoleScreen.id: (context) => SignUpRoleScreen(),
-        //   SignUpDonorScreen.id: (context) => SignUpDonorScreen(),
-        // },
         onGenerateRoute: (settings) {
           Map<String, Widget> routes = {
             SignOptionScreen.id: SignOptionScreen(),
@@ -45,12 +37,17 @@ class FruitFairy extends StatelessWidget {
             HomeScreen.id: HomeScreen(),
           };
           String screenName = settings.name;
+          Object arguments = settings.arguments;
           if (screenName == SignOptionScreen.id ||
               screenName == SignInScreen.id ||
               screenName == SignUpRoleScreen.id) {
-            return MaterialPageRoute(builder: (context) => routes[screenName]);
+            return MaterialPageRoute(
+              settings: RouteSettings(name: screenName, arguments: arguments),
+              builder: (context) => routes[screenName],
+            );
           }
           return PageRouteBuilder(
+            settings: RouteSettings(name: screenName, arguments: arguments),
             pageBuilder: (context, animation, secondaryAnimation) {
               return routes[screenName];
             },

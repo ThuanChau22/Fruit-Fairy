@@ -67,25 +67,27 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
     if (_validate()) {
       setState(() => _showSpinner = true);
       try {
-        UserCredential userCredential =
-            await _auth.createUserWithEmailAndPassword(
+        UserCredential newUser = await _auth.createUserWithEmailAndPassword(
           email: _email,
           password: _password,
         );
-        if (userCredential != null) {
-          await userCredential.user.sendEmailVerification();
+        if (newUser != null) {
+          await _auth.currentUser.sendEmailVerification();
           await _firestore
               .collection(kDBUserCollection)
-              .doc(userCredential.user.uid)
+              .doc(_auth.currentUser.uid)
               .set({
             kDBEmailField: _email,
             kDBFirstNameField: _firstName,
             kDBLastNameField: _lastName,
           });
+          await _auth.signOut();
           Navigator.of(context).pushNamedAndRemoveUntil(
             SignInScreen.id,
-            (route) => route.settings.name == SignOptionScreen.id,
-            arguments: userCredential,
+            (route) {
+              return route.settings.name == SignOptionScreen.id;
+            },
+            arguments: newUser,
           );
         }
       } catch (e) {
@@ -101,7 +103,7 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Size screenSize = MediaQuery.of(context).size;
+    Size screen = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: kPrimaryColor,
       appBar: AppBar(
@@ -121,22 +123,22 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
               child: ScrollableLayout(
                 child: Padding(
                   padding: EdgeInsets.symmetric(
-                    vertical: screenSize.height * 0.06,
-                    horizontal: screenSize.width * 0.15,
+                    vertical: screen.height * 0.06,
+                    horizontal: screen.width * 0.15,
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       firstNameInputField(),
-                      SizedBox(height: screenSize.height * 0.02),
+                      SizedBox(height: screen.height * 0.02),
                       lastNameInputField(),
-                      SizedBox(height: screenSize.height * 0.02),
+                      SizedBox(height: screen.height * 0.02),
                       emailInputField(),
-                      SizedBox(height: screenSize.height * 0.02),
+                      SizedBox(height: screen.height * 0.02),
                       passwordInputField(),
-                      SizedBox(height: screenSize.height * 0.02),
+                      SizedBox(height: screen.height * 0.02),
                       confirmPasswordInputField(),
-                      SizedBox(height: screenSize.height * 0.03),
+                      SizedBox(height: screen.height * 0.03),
                       signUpButton(context),
                     ],
                   ),
@@ -256,11 +258,11 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
   }
 
   Widget signUpButton(BuildContext context) {
-    Size screenSize = MediaQuery.of(context).size;
+    Size screen = MediaQuery.of(context).size;
     return Padding(
       padding: EdgeInsets.symmetric(
-        vertical: screenSize.height * 0.02,
-        horizontal: screenSize.width * 0.15,
+        vertical: screen.height * 0.02,
+        horizontal: screen.width * 0.15,
       ),
       child: RoundedButton(
         label: 'Sign Up',
