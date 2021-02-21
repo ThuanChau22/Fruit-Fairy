@@ -336,7 +336,11 @@ class _SignInScreenState extends State<SignInScreen> {
         labelColor: kPrimaryColor,
         backgroundColor: kObjectBackgroundColor,
         onPressed: () {
-          _mode == AuthMode.SignIn ? _signIn() : _resetPassword();
+          // _mode == AuthMode.SignIn ? _signIn() : _resetPassword();
+          MessageBar(
+            _scaffoldContext,
+            message: 'Message example',
+          ).show();
         },
       ),
     );
