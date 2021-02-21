@@ -8,8 +8,13 @@ const Color kErrorColor = Colors.white;
 const Color kObjectBackgroundColor = Colors.white;
 
 /// Database fields
-const String kUserDB = 'users';
-const String kEmailField = 'email';
-const String kFirstNameField = 'firstname';
-const String kLastNameField = 'lastname';
-const String kPhoneField = 'phone';
+const String kDBUserCollection = 'users';
+const String kDBEmailField = 'email';
+const String kDBFirstNameField = 'firstname';
+const String kDBLastNameField = 'lastname';
+const String kDBPhoneField = 'phone';
+
+/// Store credentials fields
+const String kStoreEmail = 'email';
+const String kStorePassword = 'password';
+const String kStorePhone = 'phone';

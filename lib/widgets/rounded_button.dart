@@ -7,7 +7,7 @@ class RoundedButton extends StatelessWidget {
   final Color labelColor;
   final Color backgroundColor;
   final Widget leading;
-  final Function onPressed;
+  final VoidCallback onPressed;
 
   RoundedButton({
     @required this.label,

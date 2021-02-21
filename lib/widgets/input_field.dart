@@ -7,8 +7,8 @@ class InputField extends StatelessWidget {
   final TextInputType keyboardType;
   final bool obscureText;
   final int maxLength;
-  final Function onChanged;
-  final Function onTap;
+  final ValueChanged<String> onChanged;
+  final GestureTapCallback onTap;
   final TextEditingController controller;
 
   InputField({

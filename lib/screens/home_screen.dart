@@ -23,16 +23,17 @@ class _HomeScreenState extends State<HomeScreen> {
   String _initialName = '';
   String _name = '';
 
-  void getCurrentUser() async {
+  void _getCurrentUser() async {
     setState(() => _showSpinner = true);
     try {
       User user = _auth.currentUser;
       if (user != null) {
         Map<String, dynamic> data =
-            (await _firestore.collection(kUserDB).doc(user.uid).get()).data();
+            (await _firestore.collection(kDBUserCollection).doc(user.uid).get())
+                .data();
         setState(() {
-          String firstName = data[kFirstNameField];
-          String lastName = data[kLastNameField];
+          String firstName = data[kDBFirstNameField];
+          String lastName = data[kDBLastNameField];
           _name = camelize(firstName);
           _initialName = '${firstName[0] + lastName[0]}'.toUpperCase();
         });
@@ -63,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    getCurrentUser();
+    _getCurrentUser();
   }
 
   @override

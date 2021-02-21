@@ -4,12 +4,14 @@ import 'package:fruitfairy/widgets/fruit_fairy_logo.dart';
 import 'package:fruitfairy/screens/signup_donor_screen.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class SignUpRoleScreen extends StatelessWidget {
   static const String id = 'signup_role_screen';
 
   @override
   Widget build(BuildContext context) {
+    Size screenSize = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: kPrimaryColor,
       appBar: AppBar(
@@ -21,16 +23,16 @@ class SignUpRoleScreen extends StatelessWidget {
         child: ScrollableLayout(
           child: Padding(
             padding: EdgeInsets.symmetric(
-              horizontal: MediaQuery.of(context).size.width * 0.15,
+              vertical: screenSize.height * 0.03,
+              horizontal: screenSize.width * 0.15,
             ),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 fairyLogo(context),
-                SizedBox(height: 24.0),
+                SizedBox(height: screenSize.height * 0.15),
                 Padding(
                   padding: EdgeInsets.symmetric(
-                    horizontal: MediaQuery.of(context).size.width * 0.12,
+                    horizontal: screenSize.width * 0.12,
                   ),
                   child: Column(
                     children: [
@@ -48,18 +50,20 @@ class SignUpRoleScreen extends StatelessWidget {
   }
 
   Widget fairyLogo(context) {
+    Size screenSize = MediaQuery.of(context).size;
     return Hero(
       tag: FruitFairyLogo.id,
       child: FruitFairyLogo(
-        fontSize: MediaQuery.of(context).size.width * 0.07,
-        radius: MediaQuery.of(context).size.width * 0.15,
+        fontSize: screenSize.width * 0.07,
+        radius: screenSize.width * 0.15,
       ),
     );
   }
 
   Widget donorButton(BuildContext context) {
+    Size screenSize = MediaQuery.of(context).size;
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 16.0),
+      padding: EdgeInsets.symmetric(vertical: screenSize.height * 0.025),
       child: RoundedButton(
         label: 'Donor',
         labelColor: kPrimaryColor,
@@ -67,7 +71,7 @@ class SignUpRoleScreen extends StatelessWidget {
         labelCenter: false,
         leading: Icon(
           Icons.person,
-          size: MediaQuery.of(context).size.width * 0.1,
+          size: screenSize.width * 0.1,
           color: kPrimaryColor,
         ),
         onPressed: () {
@@ -78,16 +82,18 @@ class SignUpRoleScreen extends StatelessWidget {
   }
 
   Widget charityButton(BuildContext context) {
+    Size screenSize = MediaQuery.of(context).size;
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 16.0),
+      padding: EdgeInsets.symmetric(vertical: screenSize.height * 0.025),
       child: RoundedButton(
         label: 'Charity',
         labelColor: kPrimaryColor,
         backgroundColor: kObjectBackgroundColor,
         labelCenter: false,
         leading: Icon(
-          Icons.group,
-          size: MediaQuery.of(context).size.width * 0.1,
+          FontAwesomeIcons.handHoldingHeart,
+          // Icons.group,
+          size: screenSize.width * 0.075,
           color: kPrimaryColor,
         ),
         //ToDo: redirect to sign up charity screen

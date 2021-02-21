@@ -75,12 +75,12 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
         if (userCredential != null) {
           await userCredential.user.sendEmailVerification();
           await _firestore
-              .collection(kUserDB)
+              .collection(kDBUserCollection)
               .doc(userCredential.user.uid)
               .set({
-            kEmailField: _email,
-            kFirstNameField: _firstName,
-            kLastNameField: _lastName,
+            kDBEmailField: _email,
+            kDBFirstNameField: _firstName,
+            kDBLastNameField: _lastName,
           });
           Navigator.of(context).pushNamedAndRemoveUntil(
             SignInScreen.id,
@@ -101,6 +101,7 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Size screenSize = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: kPrimaryColor,
       appBar: AppBar(
@@ -120,21 +121,22 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
               child: ScrollableLayout(
                 child: Padding(
                   padding: EdgeInsets.symmetric(
-                    horizontal: MediaQuery.of(context).size.width * 0.15,
-                    vertical: 50,
+                    vertical: screenSize.height * 0.06,
+                    horizontal: screenSize.width * 0.15,
                   ),
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       firstNameInputField(),
-                      SizedBox(height: 10.0),
+                      SizedBox(height: screenSize.height * 0.02),
                       lastNameInputField(),
-                      SizedBox(height: 10.0),
+                      SizedBox(height: screenSize.height * 0.02),
                       emailInputField(),
-                      SizedBox(height: 10.0),
+                      SizedBox(height: screenSize.height * 0.02),
                       passwordInputField(),
-                      SizedBox(height: 10.0),
+                      SizedBox(height: screenSize.height * 0.02),
                       confirmPasswordInputField(),
-                      SizedBox(height: 15.0),
+                      SizedBox(height: screenSize.height * 0.03),
                       signUpButton(context),
                     ],
                   ),
@@ -254,10 +256,11 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
   }
 
   Widget signUpButton(BuildContext context) {
+    Size screenSize = MediaQuery.of(context).size;
     return Padding(
       padding: EdgeInsets.symmetric(
-        vertical: 16.0,
-        horizontal: MediaQuery.of(context).size.width * 0.15,
+        vertical: screenSize.height * 0.02,
+        horizontal: screenSize.width * 0.15,
       ),
       child: RoundedButton(
         label: 'Sign Up',
