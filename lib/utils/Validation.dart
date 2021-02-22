@@ -41,16 +41,16 @@ class Validate {
       return 'Please enter Password\n';
     }
     if (!RegExp(r'[A-Z]').hasMatch(password)) {
-      return 'Require at least one uppercase\n';
+      return 'Requires at least one uppercase\n';
     }
     if (!RegExp(r'[a-z]').hasMatch(password)) {
-      return 'Require at least one lowercase\n';
+      return 'Requires at least one lowercase\n';
     }
     if (!RegExp(r'[0-9]').hasMatch(password)) {
-      return 'Require at least one number\n';
+      return 'Requires at least one number\n';
     }
     if (password.length < passwordLength) {
-      return 'Require at least $passwordLength characters\n';
+      return 'Requires at least $passwordLength characters\n';
     }
     return '';
   }

@@ -7,8 +7,8 @@ class InputField extends StatelessWidget {
   final TextInputType keyboardType;
   final bool obscureText;
   final int maxLength;
-  final Function onChanged;
-  final Function onTap;
+  final ValueChanged<String> onChanged;
+  final GestureTapCallback onTap;
   final TextEditingController controller;
 
   InputField({
@@ -53,7 +53,7 @@ class InputField extends StatelessWidget {
         ),
         contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
         filled: true,
-        fillColor: Color.fromRGBO(255, 255, 255, 0.15),
+        fillColor: kObjectBackgroundColor.withOpacity(0.2),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.all(Radius.circular(32.0)),
         ),

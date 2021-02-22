@@ -3,13 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/screens/sign_option_screen.dart';
 import 'package:fruitfairy/screens/signin_screen.dart';
+import 'package:fruitfairy/utils/auth_service.dart';
 import 'package:fruitfairy/utils/validation.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
 import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 class SignUpDonorScreen extends StatefulWidget {
@@ -20,8 +20,7 @@ class SignUpDonorScreen extends StatefulWidget {
 }
 
 class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final AuthService _auth = AuthService(FirebaseAuth.instance);
   bool _showSpinner = false;
 
   String _firstName = '';
@@ -67,31 +66,27 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
     if (_validate()) {
       setState(() => _showSpinner = true);
       try {
-        UserCredential userCredential =
-            await _auth.createUserWithEmailAndPassword(
+        UserCredential newUser = await _auth.signUp(
           email: _email,
           password: _password,
+          firstName: _firstName,
+          lastName: _lastName,
         );
-        if (userCredential != null) {
-          await userCredential.user.sendEmailVerification();
-          await _firestore
-              .collection(kUserDB)
-              .doc(userCredential.user.uid)
-              .set({
-            kEmailField: _email,
-            kFirstNameField: _firstName,
-            kLastNameField: _lastName,
-          });
-          Navigator.of(context).pushNamedAndRemoveUntil(
-            SignInScreen.id,
-            (route) => route.settings.name == SignOptionScreen.id,
-            arguments: userCredential,
-          );
-        }
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          SignInScreen.id,
+          (route) {
+            return route.settings.name == SignOptionScreen.id;
+          },
+          arguments: {
+            SignInScreen.credentialObject: newUser,
+            SignInScreen.email: _email,
+            SignInScreen.password: _password,
+          },
+        );
       } catch (e) {
         MessageBar(
           _scaffoldContext,
-          message: e.message,
+          message: e,
         ).show();
       } finally {
         setState(() => _showSpinner = false);
@@ -101,6 +96,7 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Size screen = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: kPrimaryColor,
       appBar: AppBar(
@@ -120,21 +116,22 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
               child: ScrollableLayout(
                 child: Padding(
                   padding: EdgeInsets.symmetric(
-                    horizontal: MediaQuery.of(context).size.width * 0.15,
-                    vertical: 50,
+                    vertical: screen.height * 0.06,
+                    horizontal: screen.width * 0.15,
                   ),
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       firstNameInputField(),
-                      SizedBox(height: 10.0),
+                      SizedBox(height: screen.height * 0.02),
                       lastNameInputField(),
-                      SizedBox(height: 10.0),
+                      SizedBox(height: screen.height * 0.02),
                       emailInputField(),
-                      SizedBox(height: 10.0),
+                      SizedBox(height: screen.height * 0.02),
                       passwordInputField(),
-                      SizedBox(height: 10.0),
+                      SizedBox(height: screen.height * 0.02),
                       confirmPasswordInputField(),
-                      SizedBox(height: 15.0),
+                      SizedBox(height: screen.height * 0.03),
                       signUpButton(context),
                     ],
                   ),
@@ -254,14 +251,16 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
   }
 
   Widget signUpButton(BuildContext context) {
+    Size screen = MediaQuery.of(context).size;
     return Padding(
       padding: EdgeInsets.symmetric(
-        horizontal: MediaQuery.of(context).size.width * 0.15,
+        vertical: screen.height * 0.02,
+        horizontal: screen.width * 0.15,
       ),
       child: RoundedButton(
         label: 'Sign Up',
         labelColor: kPrimaryColor,
-        backgroundColor: kLabelColor,
+        backgroundColor: kObjectBackgroundColor,
         onPressed: () {
           _signUp();
         },

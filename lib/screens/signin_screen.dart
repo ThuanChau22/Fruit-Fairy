@@ -1,175 +1,171 @@
 import 'package:flutter/material.dart';
 import 'package:fruitfairy/constant.dart';
+import 'package:fruitfairy/utils/auth_service.dart';
+import 'package:fruitfairy/utils/store_credential.dart';
 import 'package:fruitfairy/utils/validation.dart';
 import 'package:fruitfairy/widgets/fruit_fairy_logo.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
+import 'package:fruitfairy/widgets/label_link.dart';
 import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
-enum AuthMode { SignIn, Reset }
+enum AuthMode { SignIn, Phone, Reset }
 
 class SignInScreen extends StatefulWidget {
   static const String id = 'signin_screen';
+  static const String credentialObject = 'credential';
+  static const String email = 'email';
+  static const String password = 'password';
+  static const String phone = 'phone';
+
   @override
   _SignInScreenState createState() => _SignInScreenState();
 }
 
 class _SignInScreenState extends State<SignInScreen> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FlutterSecureStorage _storage = FlutterSecureStorage();
-
+  final AuthService _auth = AuthService(FirebaseAuth.instance);
   AuthMode _mode = AuthMode.SignIn;
   String appBarLabel = 'Sign In';
   String buttonLabel = 'Sign In';
-  String navigationLinkLabel = 'Forgot Password?';
 
   bool _showSpinner = false;
-
-  TextEditingController _email = TextEditingController();
-  TextEditingController _password = TextEditingController();
   bool _obscureText = true;
   bool _rememberMe = false;
+
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+  String _email = '';
+  String _password = '';
 
   String _emailError = '';
   String _passwordError = '';
 
   BuildContext _scaffoldContext;
 
-  Future<void> getCredentials() async {
+  void _getCredential() async {
     setState(() => _showSpinner = true);
-    try {
-      Map<String, String> credentials = await _storage.readAll();
-      if (credentials.isNotEmpty) {
-        setState(() {
-          _email.text = credentials.entries.first.key;
-          _password.text = credentials.entries.first.value;
-          _rememberMe = true;
-        });
+    Map<String, String> credentials = await StoreCredential.get();
+    if (credentials.isNotEmpty) {
+      setState(() {
+        _emailController.text = credentials[StoreCredential.email];
+        _email = _emailController.text;
+        _passwordController.text = credentials[StoreCredential.password];
+        _password = _passwordController.text;
+        _rememberMe = true;
+      });
+    }
+    setState(() => _showSpinner = false);
+  }
+
+  bool _validate() {
+    String errors = '';
+    setState(() {
+      switch (_mode) {
+        case AuthMode.Reset:
+          errors += _emailError = Validate.checkEmail(
+            email: _email,
+          );
+          break;
+
+        // Sign In Mode
+        default:
+          errors += _emailError = Validate.checkEmail(
+            email: _email,
+          );
+          errors += _passwordError = Validate.checkPassword(
+            password: _password,
+          );
+          break;
       }
-    } catch (e) {
-      print(e);
-    } finally {
+    });
+    return errors.isEmpty;
+  }
+
+  void submit() async {
+    if (_validate()) {
+      setState(() => _showSpinner = true);
+      switch (_mode) {
+        case AuthMode.Reset:
+          try {
+            _auth.resetPassword(email: _email);
+            buttonLabel = 'Re-send';
+            MessageBar(
+              _scaffoldContext,
+              message: 'Reset password email sent',
+            ).show();
+          } catch (e) {
+            print(e);
+          }
+          break;
+
+        // Sign In Mode
+        default:
+          try {
+            bool signIn = await _auth.signIn(
+              email: _email,
+              password: _password,
+            );
+            if (signIn) {
+              if (_rememberMe) {
+                StoreCredential.store(
+                  email: _email,
+                  password: _password,
+                );
+              }
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                HomeScreen.id,
+                (route) => false,
+              );
+            } else {
+              _showConfirmEmailMessage();
+            }
+          } catch (e) {
+            MessageBar(
+              _scaffoldContext,
+              message: e,
+            ).show();
+          }
+          break;
+      }
       setState(() => _showSpinner = false);
     }
   }
 
-  Future<void> saveCredentials() async {
-    await _storage.deleteAll();
-    if (_rememberMe) {
-      setState(() => _showSpinner = true);
-      try {
-        await _storage.write(key: _email.text.trim(), value: _password.text);
-      } catch (e) {
-        print(e);
-      } finally {
-        setState(() => _showSpinner = false);
-      }
-    }
-  }
-
-  void showConfirmEmailMessage() {
+  void _showConfirmEmailMessage() {
     MessageBar(
       _scaffoldContext,
       message: 'Please check your email for a verification link',
     ).show();
   }
 
-  bool _validate() {
-    String errors = '';
-    setState(() {
-      errors += _emailError = Validate.checkEmail(
-        email: _email.text,
-      );
-      errors += _passwordError = Validate.checkPassword(
-        password: _password.text,
-      );
-    });
-    return errors.isEmpty;
-  }
-
-  Future<void> _signIn() async {
-    if (_validate()) {
-      setState(() => _showSpinner = true);
-      try {
-        UserCredential registeredUser = await _auth.signInWithEmailAndPassword(
-          email: _email.text.trim(),
-          password: _password.text,
-        );
-        if (registeredUser != null) {
-          if (!registeredUser.user.emailVerified) {
-            await registeredUser.user.sendEmailVerification();
-            showConfirmEmailMessage();
-          } else {
-            await saveCredentials();
-            Navigator.of(context).pushNamedAndRemoveUntil(
-              HomeScreen.id,
-              (route) => false,
-            );
-          }
-        }
-      } catch (e) {
-        if (e.code == 'too-many-requests') {
-          MessageBar(
-            _scaffoldContext,
-            message: 'Please check your email or sign in again shortly',
-          ).show();
-        } else {
-          MessageBar(
-            _scaffoldContext,
-            message: 'Incorrect Email or Password. Please try again!',
-          ).show();
-        }
-      } finally {
-        setState(() => _showSpinner = false);
-      }
-    }
-  }
-
-  void _resetPassword() async {
-    setState(() {
-      _emailError = Validate.checkEmail(
-        email: _email.text,
-      );
-    });
-    if (_emailError.isEmpty) {
-      setState(() => _showSpinner = true);
-      try {
-        await _auth.sendPasswordResetEmail(email: _email.text.trim());
-        buttonLabel = 'Re-send';
-      } catch (e) {
-        print(e);
-      } finally {
-        setState(() => _showSpinner = false);
-      }
-      // TODO: Send email reset password message
-      MessageBar(
-        _scaffoldContext,
-        message: 'Email sent',
-      ).show();
-    }
-  }
-
   @override
   void initState() {
     super.initState();
-
-    getCredentials();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      UserCredential userCredential = ModalRoute.of(context).settings.arguments;
-      if (userCredential != null &&
-          userCredential.additionalUserInfo.isNewUser) {
-        showConfirmEmailMessage();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      Map<String, Object> args = ModalRoute.of(context).settings.arguments;
+      if (args != null) {
+        UserCredential user = args[SignInScreen.credentialObject];
+        if (user != null && user.additionalUserInfo.isNewUser) {
+          _emailController.text = args[SignInScreen.email];
+          _email = _emailController.text;
+          _passwordController.text = args[SignInScreen.password];
+          _password = _passwordController.text;
+          _rememberMe = false;
+          _showConfirmEmailMessage();
+        }
+      } else {
+        _getCredential();
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    Size screen = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: kPrimaryColor,
       appBar: AppBar(
@@ -189,31 +185,15 @@ class _SignInScreenState extends State<SignInScreen> {
               child: ScrollableLayout(
                 child: Padding(
                   padding: EdgeInsets.symmetric(
-                    horizontal: MediaQuery.of(context).size.width * 0.15,
+                    vertical: screen.height * 0.03,
+                    horizontal: screen.width * 0.15,
                   ),
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        fairyLogo(),
-                        SizedBox(height: 24.0),
-                        emailInputField(),
-                        Visibility(
-                          visible: _mode == AuthMode.SignIn,
-                          child: Column(
-                            children: [
-                              SizedBox(height: 10.0),
-                              passwordInputField(),
-                              optionTile(),
-                              SizedBox(height: 15.0),
-                            ],
-                          ),
-                        ),
-                        signInButton(context),
-                        SizedBox(height: 30.0),
-                        navigationLink(context),
-                      ],
-                    ),
+                  child: Column(
+                    children: [
+                      fairyLogo(),
+                      SizedBox(height: screen.height * 0.03),
+                      layoutMode(),
+                    ],
                   ),
                 ),
               ),
@@ -224,26 +204,87 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
-  Hero fairyLogo() {
+  Widget fairyLogo() {
+    Size screen = MediaQuery.of(context).size;
     return Hero(
       tag: FruitFairyLogo.id,
       child: FruitFairyLogo(
-        fontSize: MediaQuery.of(context).size.width * 0.07,
-        radius: MediaQuery.of(context).size.width * 0.15,
+        fontSize: screen.width * 0.07,
+        radius: screen.width * 0.15,
       ),
     );
+  }
+
+  Widget layoutMode() {
+    Size screen = MediaQuery.of(context).size;
+    switch (_mode) {
+      case AuthMode.Reset:
+        return Column(
+          children: [
+            Text(
+              'Enter email for password reset:',
+              style: TextStyle(
+                color: kLabelColor,
+                fontSize: 18.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: screen.height * 0.03),
+            emailInputField(),
+            SizedBox(height: screen.height * 0.02),
+            submitButton(context),
+            SizedBox(height: screen.height * 0.05),
+            signInLink(context),
+          ],
+        );
+        break;
+
+      case AuthMode.Phone:
+        return Column(
+          children: [
+            phoneNumberField(),
+            submitButton(context),
+            SizedBox(height: screen.height * 0.05),
+            signInLink(context),
+          ],
+        );
+        break;
+
+      // Sign In Mode
+      default:
+        return Column(
+          children: [
+            SizedBox(height: screen.height * 0.02),
+            emailInputField(),
+            SizedBox(height: screen.height * 0.01),
+            passwordInputField(),
+            optionTile(),
+            SizedBox(height: screen.height * 0.02),
+            submitButton(context),
+            SizedBox(height: screen.height * 0.03),
+            forgotPasswordLink(context),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: screen.height * 0.01),
+              child: Divider(color: kLabelColor, thickness: 2.0),
+            ),
+            phoneLink(context),
+          ],
+        );
+        break;
+    }
   }
 
   Widget emailInputField() {
     return InputField(
       label: 'Email',
-      controller: _email,
+      controller: _emailController,
       keyboardType: TextInputType.emailAddress,
       errorMessage: _emailError,
       onChanged: (value) {
         setState(() {
+          _email = value.trim();
           _emailError = Validate.checkEmail(
-            email: _email.text,
+            email: _email,
           );
         });
       },
@@ -256,19 +297,27 @@ class _SignInScreenState extends State<SignInScreen> {
   Widget passwordInputField() {
     return InputField(
       label: 'Password',
-      controller: _password,
+      controller: _passwordController,
       obscureText: _obscureText,
       errorMessage: _passwordError,
       onChanged: (value) {
         setState(() {
+          _password = value;
           _passwordError = Validate.checkPassword(
-            password: _password.text,
+            password: _password,
           );
         });
       },
       onTap: () {
         MessageBar(_scaffoldContext).hide();
       },
+    );
+  }
+
+  Widget phoneNumberField() {
+    return InputField(
+      label: 'Phone Number',
+      onChanged: (value) {},
     );
   }
 
@@ -324,7 +373,7 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
-  Widget signInButton(BuildContext context) {
+  Widget submitButton(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: MediaQuery.of(context).size.width * 0.15,
@@ -332,41 +381,50 @@ class _SignInScreenState extends State<SignInScreen> {
       child: RoundedButton(
         label: buttonLabel,
         labelColor: kPrimaryColor,
-        backgroundColor: kLabelColor,
-        onPressed: () {
-          _mode == AuthMode.SignIn ? _signIn() : _resetPassword();
+        backgroundColor: kObjectBackgroundColor,
+        onPressed: () async {
+          submit();
         },
       ),
     );
   }
 
-  Widget navigationLink(BuildContext context) {
-    return Center(
-      child: GestureDetector(
-        onTap: () {
-          setState(() {
-            if (_mode == AuthMode.SignIn) {
-              _mode = AuthMode.Reset;
-              appBarLabel = 'Reset Password';
-              buttonLabel = 'Send';
-              navigationLinkLabel = 'Back to Sign In';
-            } else {
-              _mode = AuthMode.SignIn;
-              appBarLabel = 'Sign In';
-              buttonLabel = 'Sign In';
-              navigationLinkLabel = 'Forgot Password?';
-            }
-          });
-        },
-        child: Text(
-          navigationLinkLabel,
-          style: TextStyle(
-            color: kLabelColor,
-            fontSize: 16,
-            decoration: TextDecoration.underline,
-          ),
-        ),
-      ),
+  Widget forgotPasswordLink(BuildContext context) {
+    return LabelLink(
+      label: 'Forgot Password?',
+      onTap: () {
+        setState(() {
+          _mode = AuthMode.Reset;
+          appBarLabel = 'Reset Password';
+          buttonLabel = 'Send';
+        });
+      },
+    );
+  }
+
+  Widget phoneLink(BuildContext context) {
+    return LabelLink(
+      label: 'Sign in with phone number',
+      onTap: () {
+        setState(() {
+          _mode = AuthMode.Phone;
+          appBarLabel = 'Sign In with Phone Number';
+          buttonLabel = 'Continue';
+        });
+      },
+    );
+  }
+
+  Widget signInLink(BuildContext context) {
+    return LabelLink(
+      label: 'Back to Sign In',
+      onTap: () {
+        setState(() {
+          _mode = AuthMode.SignIn;
+          appBarLabel = 'Sign In';
+          buttonLabel = 'Sign In';
+        });
+      },
     );
   }
 }

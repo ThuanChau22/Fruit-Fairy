@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:fruitfairy/constant.dart';
+import 'package:fruitfairy/utils/auth_service.dart';
+import 'package:fruitfairy/utils/firestore_service.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
 import 'package:fruitfairy/screens/sign_option_screen.dart';
 import 'package:fruitfairy/screens/signin_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:strings/strings.dart';
 
@@ -16,23 +17,21 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
+  final AuthService _auth = AuthService(FirebaseAuth.instance);
   bool _showSpinner = false;
   String _initialName = '';
   String _name = '';
 
-  void getCurrentUser() async {
+  void _getCurrentUser() async {
     setState(() => _showSpinner = true);
     try {
-      User user = _auth.currentUser;
+      User user = _auth.currentUser();
       if (user != null) {
-        Map<String, dynamic> data =
-            (await _firestore.collection(kUserDB).doc(user.uid).get()).data();
+        Map<String, dynamic> userData =
+            await FireStoreService.getUserData(user.uid);
         setState(() {
-          String firstName = data[kFirstNameField];
-          String lastName = data[kLastNameField];
+          String firstName = userData[kDBFirstNameField];
+          String lastName = userData[kDBLastNameField];
           _name = camelize(firstName);
           _initialName = '${firstName[0] + lastName[0]}'.toUpperCase();
         });
@@ -63,7 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    getCurrentUser();
+    _getCurrentUser();
   }
 
   @override
@@ -114,10 +113,17 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: Colors.white,
                     ),
                   ),
-                  RoundedButton(
-                    onPressed: null,
-                    label: 'Donate',
-                    labelColor: kPrimaryColor,
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      vertical: 16.0,
+                      horizontal: MediaQuery.of(context).size.width * 0.25,
+                    ),
+                    child: RoundedButton(
+                      onPressed: null,
+                      label: 'Donate',
+                      labelColor: kPrimaryColor,
+                      backgroundColor: kObjectBackgroundColor,
+                    ),
                   ),
                   //TODO: Donation tracking status
                   Text(
