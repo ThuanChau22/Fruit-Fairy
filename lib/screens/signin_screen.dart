@@ -7,11 +7,13 @@ import 'package:fruitfairy/widgets/fruit_fairy_logo.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
 import 'package:fruitfairy/widgets/label_link.dart';
 import 'package:fruitfairy/widgets/message_bar.dart';
+import 'package:fruitfairy/widgets/phone_input_field.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 enum AuthMode { SignIn, Phone, Reset }
 
@@ -40,6 +42,7 @@ class _SignInScreenState extends State<SignInScreen> {
   TextEditingController _passwordController = TextEditingController();
   String _email = '';
   String _password = '';
+  String _phone = '';
 
   String _emailError = '';
   String _passwordError = '';
@@ -66,14 +69,18 @@ class _SignInScreenState extends State<SignInScreen> {
     setState(() {
       switch (_mode) {
         case AuthMode.Reset:
-          errors += _emailError = Validate.checkEmail(
+          errors = _emailError = Validate.checkEmail(
             email: _email,
           );
           break;
 
+        case AuthMode.Phone:
+          errors = _phone.isEmpty ? 'error' : '';
+          break;
+
         // Sign In Mode
         default:
-          errors += _emailError = Validate.checkEmail(
+          errors = _emailError = Validate.checkEmail(
             email: _email,
           );
           errors += _passwordError = Validate.checkPassword(
@@ -102,6 +109,10 @@ class _SignInScreenState extends State<SignInScreen> {
           }
           break;
 
+        case AuthMode.Phone:
+          await _auth.signInWithPhone(_phone);
+          break;
+
         // Sign In Mode
         default:
           try {
@@ -110,8 +121,9 @@ class _SignInScreenState extends State<SignInScreen> {
               password: _password,
             );
             if (signIn) {
+              await StoreCredential.detele();
               if (_rememberMe) {
-                StoreCredential.store(
+                await StoreCredential.store(
                   email: _email,
                   password: _password,
                 );
@@ -189,6 +201,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     horizontal: screen.width * 0.15,
                   ),
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       fairyLogo(),
                       SizedBox(height: screen.height * 0.03),
@@ -243,6 +256,7 @@ class _SignInScreenState extends State<SignInScreen> {
         return Column(
           children: [
             phoneNumberField(),
+            SizedBox(height: screen.height * 0.02),
             submitButton(context),
             SizedBox(height: screen.height * 0.05),
             signInLink(context),
@@ -264,7 +278,7 @@ class _SignInScreenState extends State<SignInScreen> {
             SizedBox(height: screen.height * 0.03),
             forgotPasswordLink(context),
             Padding(
-              padding: EdgeInsets.symmetric(vertical: screen.height * 0.01),
+              padding: EdgeInsets.symmetric(vertical: screen.height * 0.015),
               child: Divider(color: kLabelColor, thickness: 2.0),
             ),
             phoneLink(context),
@@ -315,10 +329,36 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   Widget phoneNumberField() {
-    return InputField(
-      label: 'Phone Number',
-      onChanged: (value) {},
+    return InternationalPhoneInput(
+      onPhoneNumberChange: (number, internationalizedPhoneNumber, isoCode) {
+        setState(() {
+          _phone = internationalizedPhoneNumber;
+        });
+      },
+      initialPhoneNumber: _phone,
+      initialSelection: 'US',
+      showDropdownIcon: false,
     );
+  }
+
+  Future<bool> popUpDialog(BuildContext context) {
+    return Alert(
+      context: context,
+      title: 'Confirmation Code',
+      style: AlertStyle(
+        isCloseButton: false,
+        isOverlayTapDismiss: false,
+      ),
+      buttons: [
+        DialogButton(
+          child: Text(
+            'Try again',
+            style: TextStyle(color: Colors.white, fontSize: 20.0),
+          ),
+          onPressed: () => setState(() {}),
+        )
+      ],
+    ).show();
   }
 
   Widget optionTile() {
@@ -383,6 +423,7 @@ class _SignInScreenState extends State<SignInScreen> {
         labelColor: kPrimaryColor,
         backgroundColor: kObjectBackgroundColor,
         onPressed: () async {
+          FocusScope.of(context).unfocus();
           submit();
         },
       ),

@@ -120,7 +120,6 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
                     horizontal: screen.width * 0.15,
                   ),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       firstNameInputField(),
                       SizedBox(height: screen.height * 0.02),
@@ -262,6 +261,7 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
         labelColor: kPrimaryColor,
         backgroundColor: kObjectBackgroundColor,
         onPressed: () {
+          FocusScope.of(context).unfocus();
           _signUp();
         },
       ),
