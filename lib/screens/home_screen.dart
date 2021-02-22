@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:fruitfairy/constant.dart';
+import 'package:fruitfairy/utils/auth_service.dart';
+import 'package:fruitfairy/utils/firestore_service.dart';
+import 'package:fruitfairy/widgets/rounded_button.dart';
+import 'package:fruitfairy/widgets/scrollable_layout.dart';
 import 'package:fruitfairy/screens/sign_option_screen.dart';
+import 'package:fruitfairy/screens/signin_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:strings/strings.dart';
 
 class HomeScreen extends StatefulWidget {
   static const String id = 'home_screen';
@@ -12,21 +17,23 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
+  final AuthService _auth = AuthService(FirebaseAuth.instance);
   bool _showSpinner = false;
+  String _initialName = '';
   String _name = '';
 
-  void getCurrentUser() async {
+  void _getCurrentUser() async {
     setState(() => _showSpinner = true);
     try {
-      User user = _auth.currentUser;
+      User user = _auth.currentUser();
       if (user != null) {
-        Map<String, dynamic> data =
-            (await _firestore.collection(kUserDB).doc(user.uid).get()).data();
+        Map<String, dynamic> userData =
+            await FireStoreService.getUserData(user.uid);
         setState(() {
-          _name = data[kFirstNameField] + data[kLastNameField];
+          String firstName = userData[kDBFirstNameField];
+          String lastName = userData[kDBLastNameField];
+          _name = camelize(firstName);
+          _initialName = '${firstName[0] + lastName[0]}'.toUpperCase();
         });
       }
     } catch (e) {
@@ -36,12 +43,15 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void signOut() async {
+  void _signOut() async {
     setState(() => _showSpinner = true);
     try {
       await _auth.signOut();
-      Navigator.of(context).pop();
-      Navigator.of(context).pushNamed(SignOptionScreen.id);
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        SignOptionScreen.id,
+        (route) => false,
+      );
+      Navigator.of(context).pushNamed(SignInScreen.id);
     } catch (e) {
       print(e);
     } finally {
@@ -52,31 +62,98 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    getCurrentUser();
+    _getCurrentUser();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: kPrimaryColor,
+      appBar: AppBar(
+        backgroundColor: kAppBarColor,
+        title: Text('Profile Page'),
+        centerTitle: true,
+        actions: [
+          Container(
+            width: 40.0,
+            child: FloatingActionButton(
+              backgroundColor: Colors.white,
+              //TODO: add drop down menu with sign out and edit profile option
+              onPressed: () {
+                _signOut();
+              },
+              child: Text(
+                '$_initialName',
+                style: TextStyle(
+                  color: kPrimaryColor,
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: ModalProgressHUD(
-          opacity: 0.5,
           inAsyncCall: _showSpinner,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Hi, $_name',
-                  style: TextStyle(
-                    fontSize: 20.0,
+          progressIndicator: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation(kAppBarColor),
+          ),
+          child: ScrollableLayout(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Text(
+                    'Welcome $_name',
+                    style: TextStyle(
+                      fontSize: 30.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-                FlatButton(
-                  child: Text('Sign Out'),
-                  onPressed: signOut,
-                ),
-              ],
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      vertical: 16.0,
+                      horizontal: MediaQuery.of(context).size.width * 0.25,
+                    ),
+                    child: RoundedButton(
+                      onPressed: null,
+                      label: 'Donate',
+                      labelColor: kPrimaryColor,
+                      backgroundColor: kObjectBackgroundColor,
+                    ),
+                  ),
+                  //TODO: Donation tracking status
+                  Text(
+                    'Donation History',
+                    style: TextStyle(
+                      fontSize: 30.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Container(
+                    height: MediaQuery.of(context).size.height * 0.5,
+                    width: MediaQuery.of(context).size.width * 0.8,
+                    color: Colors.white,
+                    child: ListView(
+                      children: [
+                        ListTile(
+                          title: Text('1'),
+                        ),
+                        ListTile(
+                          title: Text('2'),
+                        ),
+                        ListTile(
+                          title: Text('3'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

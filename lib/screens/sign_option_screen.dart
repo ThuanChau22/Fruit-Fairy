@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:fruitfairy/constant.dart';
+import 'package:fruitfairy/widgets/fruit_fairy_logo.dart';
+import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
 import 'package:fruitfairy/screens/signin_screen.dart';
 import 'package:fruitfairy/screens/signup_role_screen.dart';
-import 'package:fruitfairy/widgets/rounded_button.dart';
-import 'package:flutter_circular_text/circular_text.dart';
 
 class SignOptionScreen extends StatefulWidget {
   static const String id = 'sign_option_screen';
@@ -15,69 +15,73 @@ class SignOptionScreen extends StatefulWidget {
 class _SignOptionScreenState extends State<SignOptionScreen> {
   @override
   Widget build(BuildContext context) {
+    Size screen = MediaQuery.of(context).size;
     return Scaffold(
-      backgroundColor: kBackroundColor,
+      backgroundColor: kPrimaryColor,
       body: SafeArea(
         child: ScrollableLayout(
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Hero(
-                  tag: 'logo',
-                  child: Stack(
-                    alignment: AlignmentDirectional.center,
+                fairyLogo(),
+                SizedBox(height: screen.height * 0.03),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: screen.width * 0.25,
+                  ),
+                  child: Column(
                     children: [
-                      CircularText(
-                        children: [
-                          TextItem(
-                            text: Text(
-                              'Fruit Fairy',
-                              style: TextStyle(
-                                fontFamily: 'Pacifico',
-                                color: Colors.white,
-                                fontSize: 40.0,
-                              ),
-                            ),
-                            space: 10,
-                            startAngle: -85,
-                            startAngleAlignment: StartAngleAlignment.center,
-                            direction: CircularTextDirection.clockwise,
-                          ),
-                        ],
-                        radius: 105.0,
-                        position: CircularTextPosition.outside,
-                        backgroundPaint: Paint()..color = Colors.transparent,
-                      ),
-                      CircleAvatar(
-                        radius: 95.0,
-                        backgroundImage: AssetImage('images/Fairy-Fruit.png'),
-                        backgroundColor: Colors.green.shade100,
-                      ),
+                      signInButton(context),
+                      signUpButton(context),
                     ],
                   ),
-                ),
-                SizedBox(
-                  height: 150.0,
-                ),
-                RoundedButton(
-                  label: 'Sign In',
-                  color: Colors.white,
-                  onPressed: () {
-                    Navigator.of(context).pushNamed(SignInScreen.id);
-                  },
-                ),
-                RoundedButton(
-                  label: 'Sign Up',
-                  color: Colors.white,
-                  onPressed: () {
-                    Navigator.of(context).pushNamed(SignUpRoleScreen.id);
-                  },
-                ),
+                )
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget fairyLogo() {
+    Size screen = MediaQuery.of(context).size;
+    return Hero(
+      tag: FruitFairyLogo.id,
+      child: FruitFairyLogo(
+        fontSize: screen.width * 0.15,
+        radius: screen.width * 0.25,
+      ),
+    );
+  }
+
+  Widget signInButton(BuildContext context) {
+    Size screen = MediaQuery.of(context).size;
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: screen.height * 0.02),
+      child: RoundedButton(
+        label: 'Sign In',
+        labelColor: kPrimaryColor,
+        backgroundColor: kObjectBackgroundColor,
+        onPressed: () {
+          Navigator.of(context).pushNamed(SignInScreen.id);
+        },
+      ),
+    );
+  }
+
+  Widget signUpButton(BuildContext context) {
+    Size screen = MediaQuery.of(context).size;
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: screen.height * 0.02),
+      child: RoundedButton(
+        label: 'Sign Up',
+        labelColor: kPrimaryColor,
+        backgroundColor: kObjectBackgroundColor,
+        onPressed: () {
+          Navigator.of(context).pushNamed(SignUpRoleScreen.id);
+        },
       ),
     );
   }

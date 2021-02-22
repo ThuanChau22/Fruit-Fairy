@@ -3,37 +3,57 @@ import 'package:fruitfairy/constant.dart';
 
 class InputField extends StatelessWidget {
   final String label;
-  final String value;
   final String errorMessage;
-  final int characterCount;
   final TextInputType keyboardType;
   final bool obscureText;
-  final Function onChanged;
+  final int maxLength;
+  final ValueChanged<String> onChanged;
+  final GestureTapCallback onTap;
+  final TextEditingController controller;
 
   InputField({
     @required this.label,
-    @required this.value,
     @required this.onChanged,
-    this.characterCount = 0,
     this.errorMessage = '',
-    this.obscureText = false,
+    this.maxLength,
     this.keyboardType,
+    this.obscureText = false,
+    this.controller,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextField(
+      maxLength: maxLength,
+      cursorColor: kLabelColor,
       keyboardType: keyboardType,
       obscureText: obscureText,
+      controller: controller,
+      onChanged: onChanged,
+      onTap: onTap,
+      style: TextStyle(
+        color: kLabelColor,
+      ),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: TextStyle(color: kLabelColor),
+        labelStyle: TextStyle(
+          color: kLabelColor,
+          fontSize: 18.0,
+        ),
         errorText: errorMessage.isNotEmpty ? errorMessage : null,
-        errorStyle: TextStyle(color: kErrorColor),
-        counterText: characterCount > 0 ? '$characterCount' : null,
+        errorStyle: TextStyle(
+          color: kErrorColor,
+          fontSize: 16.0,
+        ),
+        errorMaxLines: 1,
         helperText: '',
-        errorMaxLines: 2,
+        helperStyle: TextStyle(
+          color: kLabelColor,
+        ),
         contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+        filled: true,
+        fillColor: kObjectBackgroundColor.withOpacity(0.2),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.all(Radius.circular(32.0)),
         ),
@@ -54,7 +74,6 @@ class InputField extends StatelessWidget {
           borderRadius: BorderRadius.all(Radius.circular(32.0)),
         ),
       ),
-      onChanged: onChanged,
     );
   }
 }
