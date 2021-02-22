@@ -27,9 +27,21 @@ class SignUpRoleScreen extends StatelessWidget {
               horizontal: screen.width * 0.15,
             ),
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 fairyLogo(context),
-                SizedBox(height: screen.height * 0.15),
+                SizedBox(height: screen.height * 0.03),
+                Text(
+                  'Solve Food Waste\nOne Donation\nAt A Time',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: kLabelColor,
+                    fontSize: 25.0,
+                    fontFamily: 'Pacifico',
+                  ),
+                ),
+                SizedBox(height: screen.height * 0.04),
+                // SizedBox(height: screen.height * 0.15),
                 Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: screen.width * 0.12,
@@ -71,7 +83,7 @@ class SignUpRoleScreen extends StatelessWidget {
         labelCenter: false,
         leading: Icon(
           Icons.person,
-          size: screen.width * 0.1,
+          size: 40.0,
           color: kPrimaryColor,
         ),
         onPressed: () {
@@ -92,8 +104,7 @@ class SignUpRoleScreen extends StatelessWidget {
         labelCenter: false,
         leading: Icon(
           FontAwesomeIcons.handHoldingHeart,
-          // Icons.group,
-          size: screen.width * 0.075,
+          size: 35.0,
           color: kPrimaryColor,
         ),
         //ToDo: redirect to sign up charity screen
