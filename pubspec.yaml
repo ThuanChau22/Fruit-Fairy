@@ -22,6 +22,7 @@ dependencies:
   flutter_secure_storage: ^3.3.5
   font_awesome_flutter: ^8.11.0
   strings: ^0.1.4
+  provider: ^4.3.3
 
 dev_dependencies:
   flutter_test:

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fruitfairy/utils/auth_service.dart';
 import 'package:fruitfairy/utils/route_generator.dart';
 import 'package:fruitfairy/screens/sign_option_screen.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
@@ -13,10 +14,11 @@ void main() async {
 }
 
 class FruitFairy extends StatelessWidget {
-  final User user = FirebaseAuth.instance.currentUser;
+  final AuthService _auth = AuthService(FirebaseAuth.instance);
   @override
   Widget build(BuildContext context) {
     // Check user authentication status
+    User user = _auth.currentUser();
     bool signedIn = user != null && user.emailVerified;
     return GestureDetector(
       onTap: () {
@@ -28,8 +30,8 @@ class FruitFairy extends StatelessWidget {
         }
       },
       child: MaterialApp(
-        initialRoute: signedIn ? HomeScreen.id : SignOptionScreen.id,
         onGenerateRoute: RouteGenerator.generate,
+        initialRoute: signedIn ? HomeScreen.id : SignOptionScreen.id,
       ),
     );
   }

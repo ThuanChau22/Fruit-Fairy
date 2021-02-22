@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fruitfairy/constant.dart';
+import 'package:fruitfairy/utils/auth_service.dart';
+import 'package:fruitfairy/utils/store_credential.dart';
 import 'package:fruitfairy/utils/validation.dart';
 import 'package:fruitfairy/widgets/fruit_fairy_logo.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
@@ -9,31 +11,35 @@ import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 enum AuthMode { SignIn, Phone, Reset }
 
 class SignInScreen extends StatefulWidget {
   static const String id = 'signin_screen';
+  static const String credentialObject = 'credential';
+  static const String email = 'email';
+  static const String password = 'password';
+  static const String phone = 'phone';
+
   @override
   _SignInScreenState createState() => _SignInScreenState();
 }
 
 class _SignInScreenState extends State<SignInScreen> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FlutterSecureStorage _storage = FlutterSecureStorage();
-
+  final AuthService _auth = AuthService(FirebaseAuth.instance);
   AuthMode _mode = AuthMode.SignIn;
   String appBarLabel = 'Sign In';
   String buttonLabel = 'Sign In';
 
   bool _showSpinner = false;
-
-  TextEditingController _email = TextEditingController();
-  TextEditingController _password = TextEditingController();
   bool _obscureText = true;
   bool _rememberMe = false;
+
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+  String _email = '';
+  String _password = '';
 
   String _emailError = '';
   String _passwordError = '';
@@ -42,35 +48,17 @@ class _SignInScreenState extends State<SignInScreen> {
 
   void _getCredential() async {
     setState(() => _showSpinner = true);
-    try {
-      Map<String, String> credentials = await _storage.readAll();
-      if (credentials.isNotEmpty) {
-        setState(() {
-          _email.text = credentials[kStoreEmail];
-          _password.text = credentials[kStorePassword];
-          _rememberMe = true;
-        });
-      }
-    } catch (e) {
-      print(e);
-    } finally {
-      setState(() => _showSpinner = false);
+    Map<String, String> credentials = await StoreCredential.get();
+    if (credentials.isNotEmpty) {
+      setState(() {
+        _emailController.text = credentials[StoreCredential.email];
+        _email = _emailController.text;
+        _passwordController.text = credentials[StoreCredential.password];
+        _password = _passwordController.text;
+        _rememberMe = true;
+      });
     }
-  }
-
-  void _storeCredential() async {
-    await _storage.deleteAll();
-    if (_rememberMe) {
-      setState(() => _showSpinner = true);
-      try {
-        await _storage.write(key: kStoreEmail, value: _email.text.trim());
-        await _storage.write(key: kStorePassword, value: _password.text);
-      } catch (e) {
-        print(e);
-      } finally {
-        setState(() => _showSpinner = false);
-      }
-    }
+    setState(() => _showSpinner = false);
   }
 
   bool _validate() {
@@ -79,17 +67,17 @@ class _SignInScreenState extends State<SignInScreen> {
       switch (_mode) {
         case AuthMode.Reset:
           errors += _emailError = Validate.checkEmail(
-            email: _email.text,
+            email: _email,
           );
           break;
 
         // Sign In Mode
         default:
           errors += _emailError = Validate.checkEmail(
-            email: _email.text,
+            email: _email,
           );
           errors += _passwordError = Validate.checkPassword(
-            password: _password.text,
+            password: _password,
           );
           break;
       }
@@ -103,7 +91,7 @@ class _SignInScreenState extends State<SignInScreen> {
       switch (_mode) {
         case AuthMode.Reset:
           try {
-            await _auth.sendPasswordResetEmail(email: _email.text.trim());
+            _auth.resetPassword(email: _email);
             buttonLabel = 'Re-send';
             MessageBar(
               _scaffoldContext,
@@ -117,35 +105,29 @@ class _SignInScreenState extends State<SignInScreen> {
         // Sign In Mode
         default:
           try {
-            UserCredential user = await _auth.signInWithEmailAndPassword(
-              email: _email.text.trim(),
-              password: _password.text,
+            bool signIn = await _auth.signIn(
+              email: _email,
+              password: _password,
             );
-            if (user != null) {
-              if (!_auth.currentUser.emailVerified) {
-                await _auth.currentUser.sendEmailVerification();
-                await _auth.signOut();
-                _showConfirmEmailMessage();
-              } else {
-                _storeCredential();
-                Navigator.of(context).pushNamedAndRemoveUntil(
-                  HomeScreen.id,
-                  (route) => false,
+            if (signIn) {
+              if (_rememberMe) {
+                StoreCredential.store(
+                  email: _email,
+                  password: _password,
                 );
               }
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                HomeScreen.id,
+                (route) => false,
+              );
+            } else {
+              _showConfirmEmailMessage();
             }
           } catch (e) {
-            if (e.code == 'too-many-requests') {
-              MessageBar(
-                _scaffoldContext,
-                message: 'Please check your email or sign in again shortly',
-              ).show();
-            } else {
-              MessageBar(
-                _scaffoldContext,
-                message: 'Incorrect Email or Password. Please try again!',
-              ).show();
-            }
+            MessageBar(
+              _scaffoldContext,
+              message: e,
+            ).show();
           }
           break;
       }
@@ -156,19 +138,27 @@ class _SignInScreenState extends State<SignInScreen> {
   void _showConfirmEmailMessage() {
     MessageBar(
       _scaffoldContext,
-      message: 'Please check your email for verification link',
+      message: 'Please check your email for a verification link',
     ).show();
   }
 
   @override
   void initState() {
     super.initState();
-
-    _getCredential();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      UserCredential user = ModalRoute.of(context).settings.arguments;
-      if (user != null && user.additionalUserInfo.isNewUser) {
-        _showConfirmEmailMessage();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      Map<String, Object> args = ModalRoute.of(context).settings.arguments;
+      if (args != null) {
+        UserCredential user = args[SignInScreen.credentialObject];
+        if (user != null && user.additionalUserInfo.isNewUser) {
+          _emailController.text = args[SignInScreen.email];
+          _email = _emailController.text;
+          _passwordController.text = args[SignInScreen.password];
+          _password = _passwordController.text;
+          _rememberMe = false;
+          _showConfirmEmailMessage();
+        }
+      } else {
+        _getCredential();
       }
     });
   }
@@ -233,14 +223,13 @@ class _SignInScreenState extends State<SignInScreen> {
           children: [
             Text(
               'Enter email for password reset:',
-              textAlign: TextAlign.center,
               style: TextStyle(
                 color: kLabelColor,
-                fontSize: 20.0,
+                fontSize: 18.0,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: screen.height * 0.02),
+            SizedBox(height: screen.height * 0.03),
             emailInputField(),
             SizedBox(height: screen.height * 0.02),
             submitButton(context),
@@ -288,13 +277,14 @@ class _SignInScreenState extends State<SignInScreen> {
   Widget emailInputField() {
     return InputField(
       label: 'Email',
-      controller: _email,
+      controller: _emailController,
       keyboardType: TextInputType.emailAddress,
       errorMessage: _emailError,
       onChanged: (value) {
         setState(() {
+          _email = value.trim();
           _emailError = Validate.checkEmail(
-            email: _email.text,
+            email: _email,
           );
         });
       },
@@ -307,13 +297,14 @@ class _SignInScreenState extends State<SignInScreen> {
   Widget passwordInputField() {
     return InputField(
       label: 'Password',
-      controller: _password,
+      controller: _passwordController,
       obscureText: _obscureText,
       errorMessage: _passwordError,
       onChanged: (value) {
         setState(() {
+          _password = value;
           _passwordError = Validate.checkPassword(
-            password: _password.text,
+            password: _password,
           );
         });
       },
@@ -391,7 +382,7 @@ class _SignInScreenState extends State<SignInScreen> {
         label: buttonLabel,
         labelColor: kPrimaryColor,
         backgroundColor: kObjectBackgroundColor,
-        onPressed: () {
+        onPressed: () async {
           submit();
         },
       ),

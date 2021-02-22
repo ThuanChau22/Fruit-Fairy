@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:fruitfairy/constant.dart';
+import 'package:fruitfairy/utils/auth_service.dart';
+import 'package:fruitfairy/utils/firestore_service.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
 import 'package:fruitfairy/screens/sign_option_screen.dart';
 import 'package:fruitfairy/screens/signin_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:strings/strings.dart';
 
@@ -16,9 +17,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
+  final AuthService _auth = AuthService(FirebaseAuth.instance);
   bool _showSpinner = false;
   String _initialName = '';
   String _name = '';
@@ -26,14 +25,13 @@ class _HomeScreenState extends State<HomeScreen> {
   void _getCurrentUser() async {
     setState(() => _showSpinner = true);
     try {
-      User user = _auth.currentUser;
+      User user = _auth.currentUser();
       if (user != null) {
-        Map<String, dynamic> data =
-            (await _firestore.collection(kDBUserCollection).doc(user.uid).get())
-                .data();
+        Map<String, dynamic> userData =
+            await FireStoreService.getUserData(user.uid);
         setState(() {
-          String firstName = data[kDBFirstNameField];
-          String lastName = data[kDBLastNameField];
+          String firstName = userData[kDBFirstNameField];
+          String lastName = userData[kDBLastNameField];
           _name = camelize(firstName);
           _initialName = '${firstName[0] + lastName[0]}'.toUpperCase();
         });

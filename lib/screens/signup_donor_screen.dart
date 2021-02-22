@@ -3,13 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/screens/sign_option_screen.dart';
 import 'package:fruitfairy/screens/signin_screen.dart';
+import 'package:fruitfairy/utils/auth_service.dart';
 import 'package:fruitfairy/utils/validation.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
 import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 class SignUpDonorScreen extends StatefulWidget {
@@ -20,8 +20,7 @@ class SignUpDonorScreen extends StatefulWidget {
 }
 
 class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final AuthService _auth = AuthService(FirebaseAuth.instance);
   bool _showSpinner = false;
 
   String _firstName = '';
@@ -67,33 +66,27 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
     if (_validate()) {
       setState(() => _showSpinner = true);
       try {
-        UserCredential newUser = await _auth.createUserWithEmailAndPassword(
+        UserCredential newUser = await _auth.signUp(
           email: _email,
           password: _password,
+          firstName: _firstName,
+          lastName: _lastName,
         );
-        if (newUser != null) {
-          await _auth.currentUser.sendEmailVerification();
-          await _firestore
-              .collection(kDBUserCollection)
-              .doc(_auth.currentUser.uid)
-              .set({
-            kDBEmailField: _email,
-            kDBFirstNameField: _firstName,
-            kDBLastNameField: _lastName,
-          });
-          await _auth.signOut();
-          Navigator.of(context).pushNamedAndRemoveUntil(
-            SignInScreen.id,
-            (route) {
-              return route.settings.name == SignOptionScreen.id;
-            },
-            arguments: newUser,
-          );
-        }
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          SignInScreen.id,
+          (route) {
+            return route.settings.name == SignOptionScreen.id;
+          },
+          arguments: {
+            SignInScreen.credentialObject: newUser,
+            SignInScreen.email: _email,
+            SignInScreen.password: _password,
+          },
+        );
       } catch (e) {
         MessageBar(
           _scaffoldContext,
-          message: e.message,
+          message: e,
         ).show();
       } finally {
         setState(() => _showSpinner = false);
