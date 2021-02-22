@@ -80,11 +80,13 @@ class SignUpRoleScreen extends StatelessWidget {
         label: 'Donor',
         labelColor: kPrimaryColor,
         backgroundColor: kObjectBackgroundColor,
-        labelCenter: false,
         leading: Icon(
           Icons.person,
           size: 40.0,
           color: kPrimaryColor,
+        ),
+        trailing: SizedBox(
+          width: 40.0,
         ),
         onPressed: () {
           Navigator.of(context).pushNamed(SignUpDonorScreen.id);
@@ -101,12 +103,12 @@ class SignUpRoleScreen extends StatelessWidget {
         label: 'Charity',
         labelColor: kPrimaryColor,
         backgroundColor: kObjectBackgroundColor,
-        labelCenter: false,
         leading: Icon(
           FontAwesomeIcons.handHoldingHeart,
           size: 35.0,
           color: kPrimaryColor,
         ),
+        trailing: SizedBox(width: 35.0),
         //ToDo: redirect to sign up charity screen
         onPressed: null,
       ),
