@@ -261,6 +261,7 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
         labelColor: kPrimaryColor,
         backgroundColor: kObjectBackgroundColor,
         onPressed: () {
+          FocusScope.of(context).unfocus();
           _signUp();
         },
       ),

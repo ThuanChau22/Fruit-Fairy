@@ -70,7 +70,27 @@ class AuthService {
     return false;
   }
 
-  void resetPassword({String email}) async {
+  Future<void> signInWithPhone(String phoneNumber) async {
+    await _firebaseAuth.verifyPhoneNumber(
+      phoneNumber: phoneNumber,
+      verificationCompleted: (PhoneAuthCredential credential) async {
+        print('(1)$credential');
+        // await _firebaseAuth.signInWithCredential(credential);
+      },
+      verificationFailed: (FirebaseAuthException e) {
+        print('(2)$e');
+      },
+      codeSent: (String verificationId, int resendToken) async {
+        print('(3)$verificationId, $resendToken');
+      },
+      timeout: Duration(seconds: 10),
+      codeAutoRetrievalTimeout: (String verificationId) {
+        print('(4)$verificationId');
+      },
+    );
+  }
+
+  Future<void> resetPassword({String email}) async {
     await _firebaseAuth.sendPasswordResetEmail(email: email);
   }
 
