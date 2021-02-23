@@ -1,10 +1,10 @@
+import 'package:international_phone_input/international_phone_input.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:international_phone_input/international_phone_input.dart';
 import 'package:fruitfairy/constant.dart';
 
 // Modified widget from international_phone_input package
-class InternationalPhoneInput extends StatefulWidget {
+class PhoneInput extends StatefulWidget {
   final void Function(
     String phoneNumber,
     String internationalizedPhoneNumber,
@@ -17,7 +17,7 @@ class InternationalPhoneInput extends StatefulWidget {
   final bool showCountryFlags;
   final bool showDropdownIcon;
 
-  InternationalPhoneInput({
+  PhoneInput({
     this.onPhoneNumberChange,
     this.initialPhoneNumber,
     this.initialSelection,
@@ -32,11 +32,10 @@ class InternationalPhoneInput extends StatefulWidget {
   }
 
   @override
-  _InternationalPhoneInputState createState() =>
-      _InternationalPhoneInputState();
+  _PhoneInputState createState() => _PhoneInputState();
 }
 
-class _InternationalPhoneInputState extends State<InternationalPhoneInput> {
+class _PhoneInputState extends State<PhoneInput> {
   Country selectedItem;
   List<Country> itemList = [];
 
@@ -45,10 +44,8 @@ class _InternationalPhoneInputState extends State<InternationalPhoneInput> {
   bool showCountryCodes;
   bool showCountryFlags;
   bool showDropdownIcon;
-  Widget dropdownIcon;
-  InputBorder border;
 
-  _InternationalPhoneInputState();
+  _PhoneInputState();
 
   final phoneTextController = TextEditingController();
 
@@ -59,7 +56,6 @@ class _InternationalPhoneInputState extends State<InternationalPhoneInput> {
     showCountryFlags = widget.showCountryFlags;
     showDropdownIcon = widget.showDropdownIcon;
 
-    phoneTextController.addListener(_validatePhoneNumber);
     phoneTextController.text = widget.initialPhoneNumber;
 
     _fetchCountryData().then((list) {
@@ -140,68 +136,33 @@ class _InternationalPhoneInputState extends State<InternationalPhoneInput> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Flexible(
-          child: TextField(
-            cursorColor: kLabelColor,
-            style: TextStyle(color: kLabelColor),
-            keyboardType: TextInputType.phone,
-            controller: phoneTextController,
-            decoration: InputDecoration(
-              labelText: 'Phone Numbder',
-              labelStyle: TextStyle(
-                color: kLabelColor,
-                fontSize: 18.0,
-              ),
-              errorText: hasError ? errorText : null,
-              errorStyle: TextStyle(
-                color: kErrorColor,
-                fontSize: 16.0,
-              ),
-              helperText: '',
-              prefix: dropdownBox(),
-              filled: true,
-              fillColor: kObjectBackgroundColor.withOpacity(0.2),
-              contentPadding: EdgeInsets.symmetric(
-                vertical: 10.0,
-                horizontal: 20.0,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(32.0)),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: kLabelColor, width: 1.0),
-                borderRadius: BorderRadius.all(Radius.circular(32.0)),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: kLabelColor, width: 2.0),
-                borderRadius: BorderRadius.all(Radius.circular(32.0)),
-              ),
-              errorBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: kErrorColor, width: 1.0),
-                borderRadius: BorderRadius.all(Radius.circular(32.0)),
-              ),
-              focusedErrorBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: kErrorColor, width: 2.0),
-                borderRadius: BorderRadius.all(Radius.circular(32.0)),
-              ),
-            ),
+    return Container(
+      child: Column(
+        children: [
+          Row(
+            children: [
+              dropdownButton(),
+              textInputField(),
+            ],
           ),
-        )
-      ],
+          errorMessage(),
+        ],
+      ),
     );
   }
 
-  Container dropdownBox() {
-    return Container(
-      constraints: BoxConstraints(maxHeight: 25.0),
-      child: DropdownButtonHideUnderline(
+  Widget dropdownButton() {
+    return DropdownButtonHideUnderline(
+      child: Padding(
+        padding: EdgeInsets.only(top: 8),
         child: DropdownButton<Country>(
           value: selectedItem,
-          icon: Icon(Icons.arrow_drop_down, color: kLabelColor),
+          icon: Padding(
+            padding: EdgeInsets.only(bottom: 6.0),
+            child: Icon(Icons.arrow_drop_down, color: kLabelColor),
+          ),
           iconSize: showDropdownIcon ? 24.0 : 0.0,
-          dropdownColor: kLabelColor.withOpacity(0.2),
+          dropdownColor: kObjectBackgroundColor.withOpacity(0.3),
           onChanged: (Country newValue) {
             setState(() {
               selectedItem = newValue;
@@ -212,8 +173,9 @@ class _InternationalPhoneInputState extends State<InternationalPhoneInput> {
             return DropdownMenuItem<Country>(
               value: value,
               child: Container(
-                padding: EdgeInsets.only(bottom: 8.0),
+                padding: EdgeInsets.only(bottom: 5.0),
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     if (showCountryFlags) ...[
                       Image.asset(
@@ -226,8 +188,9 @@ class _InternationalPhoneInputState extends State<InternationalPhoneInput> {
                       SizedBox(width: 4),
                       Text(
                         value.dialCode,
-                        textAlign: TextAlign.end,
-                        style: TextStyle(color: kLabelColor),
+                        style: TextStyle(
+                          color: kLabelColor,
+                        ),
                       )
                     ]
                   ],
@@ -236,6 +199,62 @@ class _InternationalPhoneInputState extends State<InternationalPhoneInput> {
             );
           }).toList(),
         ),
+      ),
+    );
+  }
+
+  Widget textInputField() {
+    return Flexible(
+      child: TextField(
+        cursorColor: kLabelColor,
+        style: TextStyle(
+          color: kLabelColor,
+        ),
+        keyboardType: TextInputType.phone,
+        controller: phoneTextController,
+        decoration: InputDecoration(
+          labelText: 'Phone Number',
+          labelStyle: TextStyle(
+            color: kLabelColor,
+            fontSize: 18.0,
+          ),
+          contentPadding:
+              EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+          filled: true,
+          fillColor: kObjectBackgroundColor.withOpacity(0.2),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(32.0)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: kLabelColor, width: 1.0),
+            borderRadius: BorderRadius.all(Radius.circular(32.0)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: kLabelColor, width: 2.0),
+            borderRadius: BorderRadius.all(Radius.circular(32.0)),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: kErrorColor, width: 1.0),
+            borderRadius: BorderRadius.all(Radius.circular(32.0)),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: kErrorColor, width: 2.0),
+            borderRadius: BorderRadius.all(Radius.circular(32.0)),
+          ),
+        ),
+        onChanged: (value) {
+          _validatePhoneNumber();
+        },
+      ),
+    );
+  }
+
+  Widget errorMessage() {
+    return Text(
+      hasError ? errorText : '',
+      style: TextStyle(
+        color: kErrorColor,
+        fontSize: 16.0,
       ),
     );
   }
