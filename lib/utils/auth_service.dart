@@ -13,6 +13,10 @@ class AuthService {
     return _firebaseAuth.currentUser;
   }
 
+  String currentUserUID() {
+    return _firebaseAuth.currentUser.uid;
+  }
+
   Future<UserCredential> signUp({
     String email,
     String password,
@@ -70,6 +74,8 @@ class AuthService {
     return false;
   }
 
+  // Android: set SHA-1, SHA-256, enable SafetyNet from Google Cloud Console
+  // IOS: ???
   Future<void> signInWithPhone(String phoneNumber) async {
     await _firebaseAuth.verifyPhoneNumber(
       phoneNumber: phoneNumber,

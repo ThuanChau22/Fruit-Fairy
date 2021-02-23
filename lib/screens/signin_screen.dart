@@ -22,7 +22,6 @@ class SignInScreen extends StatefulWidget {
   static const String credentialObject = 'credential';
   static const String email = 'email';
   static const String password = 'password';
-  static const String phone = 'phone';
 
   @override
   _SignInScreenState createState() => _SignInScreenState();
@@ -218,12 +217,11 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   Widget fairyLogo() {
-    Size screen = MediaQuery.of(context).size;
     return Hero(
       tag: FruitFairyLogo.id,
       child: FruitFairyLogo(
-        fontSize: screen.width * 0.07,
-        radius: screen.width * 0.15,
+        fontSize: 30,
+        radius: 65,
       ),
     );
   }
