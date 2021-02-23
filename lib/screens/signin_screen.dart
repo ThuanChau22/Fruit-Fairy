@@ -423,6 +423,7 @@ class _SignInScreenState extends State<SignInScreen> {
         onPressed: () async {
           FocusScope.of(context).unfocus();
           submit();
+          // print(_auth.currentUser());
         },
       ),
     );
