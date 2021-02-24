@@ -24,7 +24,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   bool _showSpinner = false;
   final AuthService _auth = AuthService(FirebaseAuth.instance);
 
-  @override
+
   void _getCurrentUser() async {
     setState(() => _showSpinner = true);
     try {
@@ -44,7 +44,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       setState(() => _showSpinner = false);
     }
   }
-
+  @override
   void initState() {
     super.initState();
     _getCurrentUser();

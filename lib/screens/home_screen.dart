@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fruitfairy/constant.dart';
+import 'package:fruitfairy/screens/picking_fruit_screen.dart';
 import 'package:fruitfairy/utils/auth_service.dart';
 import 'package:fruitfairy/utils/firestore_service.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
@@ -157,7 +158,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       horizontal: MediaQuery.of(context).size.width * 0.25,
                     ),
                     child: RoundedButton(
-                      onPressed: null,
+                      onPressed: (){
+                        Navigator.of(context).pushNamed(PickingFruitScreen.id);
+                      },
                       label: 'Donate',
                       labelColor: kPrimaryColor,
                       backgroundColor: kObjectBackgroundColor,

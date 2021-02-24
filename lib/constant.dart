@@ -13,3 +13,42 @@ const String kDBEmailField = 'email';
 const String kDBFirstNameField = 'firstname';
 const String kDBLastNameField = 'lastname';
 const String kDBPhoneField = 'phone';
+
+const kTextFieldInputDecoration = InputDecoration(
+  filled: true,
+  fillColor: Colors.white,
+  prefixIcon: Icon(
+    Icons.search,
+    color: kPrimaryColor,
+    size: 30.0,
+  ),
+  hintText: 'Enter Fruit Name',
+  hintStyle: TextStyle(
+    color: kPrimaryColor,
+  ),
+  border: OutlineInputBorder(
+    borderRadius: BorderRadius.all(
+      Radius.circular(10.0),
+    ),
+    borderSide: BorderSide.none,
+  ),
+);
+
+
+List <Widget> kFruitImages = [
+  Image.asset('images/Orange.jpg'),
+  Image.asset('images/Apple.jpg'),
+  Image.asset('images/Avocado.jpg'),
+  Image.asset('images/Lemon.jpg'),
+  Image.asset('images/Peach.jpg'),
+  Image.asset('images/Orange.jpg'),
+  Image.asset('images/Apple.jpg'),
+  Image.asset('images/Avocado.jpg'),
+  Image.asset('images/Lemon.jpg'),
+  Image.asset('images/Peach.jpg'),
+  Image.asset('images/Orange.jpg'),
+  Image.asset('images/Apple.jpg'),
+  Image.asset('images/Avocado.jpg'),
+  Image.asset('images/Lemon.jpg'),
+  Image.asset('images/Peach.jpg'),
+];
