@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fruitfairy/constant.dart';
-import 'package:fruitfairy/screens/sign_option_screen.dart';
-import 'package:fruitfairy/screens/signin_screen.dart';
+import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
+import 'package:fruitfairy/screens/authentication/signin_screen.dart';
 import 'package:fruitfairy/utils/auth_service.dart';
 import 'package:fruitfairy/utils/validation.dart';
 import 'package:fruitfairy/widgets/input_field.dart';

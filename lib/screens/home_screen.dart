@@ -3,10 +3,10 @@ import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/screens/picking_fruit_screen.dart';
 import 'package:fruitfairy/utils/auth_service.dart';
 import 'package:fruitfairy/utils/firestore_service.dart';
+import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
+import 'package:fruitfairy/screens/authentication/signin_screen.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
-import 'package:fruitfairy/screens/sign_option_screen.dart';
-import 'package:fruitfairy/screens/signin_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:strings/strings.dart';
@@ -158,7 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       horizontal: MediaQuery.of(context).size.width * 0.25,
                     ),
                     child: RoundedButton(
-                      onPressed: (){
+                      onPressed: () {
                         Navigator.of(context).pushNamed(PickingFruitScreen.id);
                       },
                       label: 'Donate',
