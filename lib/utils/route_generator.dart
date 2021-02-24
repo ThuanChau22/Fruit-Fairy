@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:fruitfairy/screens/edit_profile_screen.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
+import 'package:fruitfairy/screens/picking_fruit_screen.dart';
 import 'package:fruitfairy/screens/sign_option_screen.dart';
 import 'package:fruitfairy/screens/signin_screen.dart';
 import 'package:fruitfairy/screens/signup_role_screen.dart';
@@ -15,6 +17,8 @@ class RouteGenerator {
     SignInScreen.id: SignInScreen(),
     SignUpRoleScreen.id: SignUpRoleScreen(),
     SignUpDonorScreen.id: SignUpDonorScreen(),
+    EditProfileScreen.id: EditProfileScreen(),
+    PickingFruitScreen.id: PickingFruitScreen(),
   };
 
   static Route<dynamic> generate(RouteSettings settings) {
