@@ -81,6 +81,7 @@ class Validate {
     return password.isEmpty ? 'Please enter Password\n' : '';
   }
 
+
   static Future<String> validatePhoneNumber(
       {String phoneNumber, String isoCode}) async {
     if (phoneNumber.isNotEmpty && isoCode.isNotEmpty) {
