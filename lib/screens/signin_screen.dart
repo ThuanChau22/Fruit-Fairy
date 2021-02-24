@@ -150,6 +150,11 @@ class _SignInScreenState extends State<SignInScreen> {
               ).show();
             },
           );
+          //TODO: After continue
+          MessageBar(
+            _scaffoldContext,
+            message: 'Doing something...',
+          ).show();
           break;
 
         // Sign In Mode
