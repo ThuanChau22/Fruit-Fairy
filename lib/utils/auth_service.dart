@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:fruitfairy/constant.dart';
-import 'package:fruitfairy/widgets/confirm_code_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -79,23 +78,22 @@ class AuthService {
   // IOS: ???
   Future<void> signInWithPhone({
     String phoneNumber,
-    BuildContext context,
     Function completed,
     Function failed,
     Function codeSent,
   }) async {
     await _firebaseAuth.verifyPhoneNumber(
+      timeout: Duration(seconds: 5),
       phoneNumber: phoneNumber,
       verificationCompleted: (PhoneAuthCredential credential) async {
         try {
-          UserCredential user =
-              await _firebaseAuth.signInWithCredential(credential);
-          if (user != null) {
-            if (_firebaseAuth.currentUser.email == null) {
-              _firebaseAuth.currentUser.delete();
-              completed('Not register');
-            } else {
+          if (await _firebaseAuth.signInWithCredential(credential) != null) {
+            if (_firebaseAuth.currentUser.email != null) {
               completed('');
+            } else {
+              await _firebaseAuth.currentUser.delete();
+              // TODO: Ask user to register first
+              completed('Register first');
             }
           }
         } catch (e) {
@@ -103,29 +101,32 @@ class AuthService {
         }
       },
       codeSent: (String verificationId, int resendToken) {
-        ConfirmCodeDialog(
-          scaffoldContext: context,
-          onSubmit: (confirmCode) async {
-            try {
-              PhoneAuthCredential credential = PhoneAuthProvider.credential(
-                verificationId: verificationId,
-                smsCode: confirmCode,
-              );
-              UserCredential user =
-                  await _firebaseAuth.signInWithCredential(credential);
-              if (user != null) {
-                codeSent('');
+        codeSent((smsCode) async {
+          try {
+            PhoneAuthCredential credential = PhoneAuthProvider.credential(
+              verificationId: verificationId,
+              smsCode: smsCode,
+            );
+            if (await _firebaseAuth.signInWithCredential(credential) != null) {
+              if (_firebaseAuth.currentUser.email != null) {
+                return '';
               } else {
-                codeSent('(2)');
+                await _firebaseAuth.currentUser.delete();
+                // TODO: Ask user to register first
+                return 'Register first';
               }
-            } catch (e) {
-              if (e.code == 'invalid-verification-code') {
-                codeSent('Invalid confirmation code. Please try again!');
-              }
-              print(e);
             }
-          },
-        ).show();
+          } catch (e) {
+            if (e.code == 'invalid-verification-code') {
+              return 'Invalid verification code. Please try again!';
+            }
+            if (e.code == 'session-expired') {
+              return 'Verification code has expired. Please re-send to try again!';
+            }
+            print(e);
+          }
+          return 'Error';
+        });
       },
       verificationFailed: (FirebaseAuthException e) {
         //TODO: too many request on phone auth
@@ -134,7 +135,6 @@ class AuthService {
         }
         print(e);
       },
-      timeout: Duration(seconds: 10),
       codeAutoRetrievalTimeout: (String verificationId) {
         print('Timeout');
       },

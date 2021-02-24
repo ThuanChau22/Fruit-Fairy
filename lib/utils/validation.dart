@@ -69,6 +69,17 @@ class Validate {
     return '';
   }
 
+  /// Validate phone number
+  /// Return empty String on correct [phoneNumber] and [isoCode]
+  static Future<String> validatePhoneNumber(
+      {String phoneNumber, String isoCode}) async {
+    if (phoneNumber.isNotEmpty && isoCode.isNotEmpty) {
+      bool isValid = await PhoneService.parsePhoneNumber(phoneNumber, isoCode);
+      return !isValid ? 'Please enter a valid phone number' : '';
+    }
+    return 'Please enter a valid phone number';
+  }
+
   /// Simple check email on signin
   /// Return empty String on correct [email]
   static String checkEmail({String email}) {
@@ -81,12 +92,9 @@ class Validate {
     return password.isEmpty ? 'Please enter Password\n' : '';
   }
 
-  static Future<String> validatePhoneNumber(
-      {String phoneNumber, String isoCode}) async {
-    if (phoneNumber.isNotEmpty && isoCode.isNotEmpty) {
-      bool isValid = await PhoneService.parsePhoneNumber(phoneNumber, isoCode);
-      return !isValid ? 'Please enter a valid phone number' : '';
-    }
-    return 'Please enter a valid phone number';
+  /// Simple check confirmation code on verifying
+  /// Return empty String on correct [confirmationCode]
+  static String checkConfirmationCode({String confirmationCode}) {
+    return confirmationCode.isEmpty ? 'Please enter Verification Code\n' : '';
   }
 }
