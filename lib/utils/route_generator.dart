@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
+import 'package:fruitfairy/screens/authentication/signin_screen.dart';
+import 'package:fruitfairy/screens/authentication/signup_role_screen.dart';
+import 'package:fruitfairy/screens/authentication/signup_donor_screen.dart';
 import 'package:fruitfairy/screens/edit_profile_screen.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
 import 'package:fruitfairy/screens/picking_fruit_screen.dart';
-import 'package:fruitfairy/screens/sign_option_screen.dart';
-import 'package:fruitfairy/screens/signin_screen.dart';
-import 'package:fruitfairy/screens/signup_role_screen.dart';
-import 'package:fruitfairy/screens/signup_donor_screen.dart';
 
 // A class that generate screen routes associate with screen names
 // including animation and passing arguments in transition
 class RouteGenerator {
   // Map screen names with screen widgets
   static Map<String, Widget> _routes = {
-    HomeScreen.id: HomeScreen(),
     SignOptionScreen.id: SignOptionScreen(),
     SignInScreen.id: SignInScreen(),
     SignUpRoleScreen.id: SignUpRoleScreen(),
     SignUpDonorScreen.id: SignUpDonorScreen(),
+    HomeScreen.id: HomeScreen(),
     EditProfileScreen.id: EditProfileScreen(),
     PickingFruitScreen.id: PickingFruitScreen(),
   };
