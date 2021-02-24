@@ -14,7 +14,7 @@ import 'package:fruitfairy/screens/home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
-enum AuthMode { SignIn, Phone, Reset }
+enum AuthMode { SignIn, Reset, Phone, VerifyCode }
 
 class SignInScreen extends StatefulWidget {
   static const String id = 'signin_screen';
@@ -43,10 +43,14 @@ class _SignInScreenState extends State<SignInScreen> {
   String _phone = '';
   String _dialCode = '';
   String _isoCode = 'US';
+  String _confirmCode = '';
 
   String _emailError = '';
   String _passwordError = '';
   String _phoneError = '';
+  String _confirmCodeError = '';
+
+  Future<String> Function(String smsCode) verifyCode;
 
   BuildContext _scaffoldContext;
 
@@ -81,6 +85,12 @@ class _SignInScreenState extends State<SignInScreen> {
         );
         break;
 
+      case AuthMode.VerifyCode:
+        errors = _confirmCodeError = Validate.checkConfirmationCode(
+          confirmationCode: _confirmCode,
+        );
+        break;
+
       // Sign In Mode
       default:
         errors = _emailError = Validate.checkEmail(
@@ -91,6 +101,7 @@ class _SignInScreenState extends State<SignInScreen> {
         );
         break;
     }
+    setState(() {});
     return errors.isEmpty;
   }
 
@@ -113,7 +124,6 @@ class _SignInScreenState extends State<SignInScreen> {
 
         case AuthMode.Phone:
           await _auth.signInWithPhone(
-            context: _scaffoldContext,
             phoneNumber: '$_dialCode$_phone',
             completed: (String errorMessage) {
               if (errorMessage.isEmpty) {
@@ -122,25 +132,19 @@ class _SignInScreenState extends State<SignInScreen> {
                   (route) => false,
                 );
               } else {
-                //TODO: Register with email first
                 MessageBar(
                   _scaffoldContext,
                   message: errorMessage,
                 ).show();
               }
             },
-            codeSent: (String errorMessage) {
-              if (errorMessage.isEmpty) {
-                Navigator.of(context).pushNamedAndRemoveUntil(
-                  HomeScreen.id,
-                  (route) => false,
-                );
-              } else {
-                //TODO: Error message from code sent
-                MessageBar(
-                  _scaffoldContext,
-                  message: errorMessage,
-                ).show();
+            codeSent: (Future<String> Function(String smsCode) verifyFunction) {
+              if (verifyFunction != null) {
+                verifyCode = verifyFunction;
+                setState(() {
+                  _mode = AuthMode.VerifyCode;
+                  buttonLabel = 'Verify';
+                });
               }
             },
             failed: (String errorMessage) {
@@ -150,11 +154,27 @@ class _SignInScreenState extends State<SignInScreen> {
               ).show();
             },
           );
-          //TODO: After continue
+          // TODO: After continue
           MessageBar(
             _scaffoldContext,
             message: 'Doing something...',
           ).show();
+          break;
+
+        case AuthMode.VerifyCode:
+          String errorMessage = await verifyCode(_confirmCode);
+          if (errorMessage.isEmpty) {
+            Navigator.of(context).pushNamedAndRemoveUntil(
+              HomeScreen.id,
+              (route) => false,
+            );
+          } else {
+            //TODO: Error message from code sent
+            MessageBar(
+              _scaffoldContext,
+              message: errorMessage,
+            ).show();
+          }
           break;
 
         // Sign In Mode
@@ -277,20 +297,13 @@ class _SignInScreenState extends State<SignInScreen> {
       case AuthMode.Reset:
         return Column(
           children: [
-            Text(
-              'Enter email for password reset:',
-              style: TextStyle(
-                color: kLabelColor,
-                fontSize: 18.0,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            instructionLabel('Enter email for password reset:'),
             SizedBox(height: screen.height * 0.03),
             emailInputField(),
             SizedBox(height: screen.height * 0.02),
             submitButton(context),
             SizedBox(height: screen.height * 0.05),
-            signInLink(context),
+            signInEmailLink(context),
           ],
         );
         break;
@@ -298,20 +311,27 @@ class _SignInScreenState extends State<SignInScreen> {
       case AuthMode.Phone:
         return Column(
           children: [
-            Text(
-              'Enter phone number to sign in:',
-              style: TextStyle(
-                color: kLabelColor,
-                fontSize: 18.0,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            instructionLabel('Enter phone number to sign in:'),
             SizedBox(height: screen.height * 0.03),
             phoneNumberField(),
             SizedBox(height: screen.height * 0.02),
             submitButton(context),
             SizedBox(height: screen.height * 0.05),
-            signInLink(context),
+            signInEmailLink(context),
+          ],
+        );
+        break;
+
+      case AuthMode.VerifyCode:
+        return Column(
+          children: [
+            instructionLabel('Enter verification code:'),
+            SizedBox(height: screen.height * 0.03),
+            verifyCodeField(),
+            SizedBox(height: screen.height * 0.02),
+            submitButton(context),
+            SizedBox(height: screen.height * 0.05),
+            resendCodeLink(context),
           ],
         );
         break;
@@ -333,11 +353,22 @@ class _SignInScreenState extends State<SignInScreen> {
               padding: EdgeInsets.symmetric(vertical: screen.height * 0.015),
               child: Divider(color: kLabelColor, thickness: 2.0),
             ),
-            phoneLink(context),
+            signInPhoneLink(context),
           ],
         );
         break;
     }
+  }
+
+  Widget instructionLabel(String label) {
+    return Text(
+      label,
+      style: TextStyle(
+        color: kLabelColor,
+        fontSize: 18.0,
+        fontWeight: FontWeight.bold,
+      ),
+    );
   }
 
   Widget emailInputField() {
@@ -395,6 +426,22 @@ class _SignInScreenState extends State<SignInScreen> {
           isoCode: _isoCode,
         );
         setState(() {});
+      },
+      onTap: () {
+        MessageBar(_scaffoldContext).hide();
+      },
+    );
+  }
+
+  Widget verifyCodeField() {
+    return InputField(
+      label: '6-Digit Code',
+      keyboardType: TextInputType.number,
+      errorMessage: _confirmCodeError,
+      onChanged: (value) {
+        setState(() {
+          _confirmCode = value;
+        });
       },
       onTap: () {
         MessageBar(_scaffoldContext).hide();
@@ -463,11 +510,24 @@ class _SignInScreenState extends State<SignInScreen> {
         label: buttonLabel,
         labelColor: kPrimaryColor,
         backgroundColor: kObjectBackgroundColor,
-        onPressed: () async {
+        onPressed: () {
           FocusScope.of(context).unfocus();
           submit();
         },
       ),
+    );
+  }
+
+  Widget signInEmailLink(BuildContext context) {
+    return LabelLink(
+      label: 'Back to Sign In',
+      onTap: () {
+        setState(() {
+          _mode = AuthMode.SignIn;
+          appBarLabel = 'Sign In';
+          buttonLabel = 'Sign In';
+        });
+      },
     );
   }
 
@@ -484,7 +544,7 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
-  Widget phoneLink(BuildContext context) {
+  Widget signInPhoneLink(BuildContext context) {
     return LabelLink(
       label: 'Sign in with phone number',
       onTap: () {
@@ -497,14 +557,13 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
-  Widget signInLink(BuildContext context) {
+  Widget resendCodeLink(BuildContext context) {
     return LabelLink(
-      label: 'Back to Sign In',
+      label: 'Re-send Verification Code',
       onTap: () {
         setState(() {
-          _mode = AuthMode.SignIn;
-          appBarLabel = 'Sign In';
-          buttonLabel = 'Sign In';
+          _mode = AuthMode.Phone;
+          buttonLabel = 'Continue';
         });
       },
     );
