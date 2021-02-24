@@ -27,9 +27,21 @@ class SignUpRoleScreen extends StatelessWidget {
               horizontal: screen.width * 0.15,
             ),
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 fairyLogo(context),
-                SizedBox(height: screen.height * 0.15),
+                SizedBox(height: screen.height * 0.03),
+                Text(
+                  'Solve Food Waste\nOne Donation\nAt A Time',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: kLabelColor,
+                    fontSize: 25.0,
+                    fontFamily: 'Pacifico',
+                  ),
+                ),
+                SizedBox(height: screen.height * 0.04),
+                // SizedBox(height: screen.height * 0.15),
                 Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: screen.width * 0.12,
@@ -50,12 +62,11 @@ class SignUpRoleScreen extends StatelessWidget {
   }
 
   Widget fairyLogo(context) {
-    Size screen = MediaQuery.of(context).size;
     return Hero(
       tag: FruitFairyLogo.id,
       child: FruitFairyLogo(
-        fontSize: screen.width * 0.07,
-        radius: screen.width * 0.15,
+        fontSize: 30,
+        radius: 65,
       ),
     );
   }
@@ -68,11 +79,13 @@ class SignUpRoleScreen extends StatelessWidget {
         label: 'Donor',
         labelColor: kPrimaryColor,
         backgroundColor: kObjectBackgroundColor,
-        labelCenter: false,
         leading: Icon(
           Icons.person,
-          size: screen.width * 0.1,
+          size: 40.0,
           color: kPrimaryColor,
+        ),
+        trailing: SizedBox(
+          width: 40.0,
         ),
         onPressed: () {
           Navigator.of(context).pushNamed(SignUpDonorScreen.id);
@@ -89,13 +102,12 @@ class SignUpRoleScreen extends StatelessWidget {
         label: 'Charity',
         labelColor: kPrimaryColor,
         backgroundColor: kObjectBackgroundColor,
-        labelCenter: false,
         leading: Icon(
           FontAwesomeIcons.handHoldingHeart,
-          // Icons.group,
-          size: screen.width * 0.075,
+          size: 35.0,
           color: kPrimaryColor,
         ),
+        trailing: SizedBox(width: 35.0),
         //ToDo: redirect to sign up charity screen
         onPressed: null,
       ),

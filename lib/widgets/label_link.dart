@@ -18,7 +18,7 @@ class LabelLink extends StatelessWidget {
         label,
         style: TextStyle(
           color: kLabelColor,
-          fontSize: 16,
+          fontSize: 18,
           decoration: TextDecoration.underline,
         ),
       ),

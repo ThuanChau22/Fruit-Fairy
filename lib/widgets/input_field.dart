@@ -10,15 +10,17 @@ class InputField extends StatelessWidget {
   final ValueChanged<String> onChanged;
   final GestureTapCallback onTap;
   final TextEditingController controller;
+  final bool readOnly;
 
   InputField({
     @required this.label,
-    @required this.onChanged,
     this.errorMessage = '',
     this.maxLength,
     this.keyboardType,
     this.obscureText = false,
+    this.readOnly = false,
     this.controller,
+    this.onChanged,
     this.onTap,
   });
 
@@ -30,6 +32,7 @@ class InputField extends StatelessWidget {
       keyboardType: keyboardType,
       obscureText: obscureText,
       controller: controller,
+      readOnly: readOnly,
       onChanged: onChanged,
       onTap: onTap,
       style: TextStyle(
@@ -57,6 +60,7 @@ class InputField extends StatelessWidget {
         border: OutlineInputBorder(
           borderRadius: BorderRadius.all(Radius.circular(32.0)),
         ),
+        enabled: !readOnly,
         enabledBorder: OutlineInputBorder(
           borderSide: BorderSide(color: kLabelColor, width: 1.0),
           borderRadius: BorderRadius.all(Radius.circular(32.0)),

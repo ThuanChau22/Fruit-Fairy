@@ -7,6 +7,7 @@ import 'package:fruitfairy/widgets/fruit_fairy_logo.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
 import 'package:fruitfairy/widgets/label_link.dart';
 import 'package:fruitfairy/widgets/message_bar.dart';
+import 'package:fruitfairy/widgets/phone_input_field.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
@@ -20,7 +21,6 @@ class SignInScreen extends StatefulWidget {
   static const String credentialObject = 'credential';
   static const String email = 'email';
   static const String password = 'password';
-  static const String phone = 'phone';
 
   @override
   _SignInScreenState createState() => _SignInScreenState();
@@ -40,9 +40,13 @@ class _SignInScreenState extends State<SignInScreen> {
   TextEditingController _passwordController = TextEditingController();
   String _email = '';
   String _password = '';
+  String _phone = '';
+  String _dialCode = '';
+  String _isoCode = 'US';
 
   String _emailError = '';
   String _passwordError = '';
+  String _phoneError = '';
 
   BuildContext _scaffoldContext;
 
@@ -61,32 +65,37 @@ class _SignInScreenState extends State<SignInScreen> {
     setState(() => _showSpinner = false);
   }
 
-  bool _validate() {
+  Future<bool> _validate() async {
     String errors = '';
-    setState(() {
-      switch (_mode) {
-        case AuthMode.Reset:
-          errors += _emailError = Validate.checkEmail(
-            email: _email,
-          );
-          break;
+    switch (_mode) {
+      case AuthMode.Reset:
+        errors = _emailError = Validate.checkEmail(
+          email: _email,
+        );
+        break;
 
-        // Sign In Mode
-        default:
-          errors += _emailError = Validate.checkEmail(
-            email: _email,
-          );
-          errors += _passwordError = Validate.checkPassword(
-            password: _password,
-          );
-          break;
-      }
-    });
+      case AuthMode.Phone:
+        errors = _phoneError = await Validate.validatePhoneNumber(
+          phoneNumber: _phone,
+          isoCode: _isoCode,
+        );
+        break;
+
+      // Sign In Mode
+      default:
+        errors = _emailError = Validate.checkEmail(
+          email: _email,
+        );
+        errors += _passwordError = Validate.checkPassword(
+          password: _password,
+        );
+        break;
+    }
     return errors.isEmpty;
   }
 
   void submit() async {
-    if (_validate()) {
+    if (await _validate()) {
       setState(() => _showSpinner = true);
       switch (_mode) {
         case AuthMode.Reset:
@@ -102,6 +111,52 @@ class _SignInScreenState extends State<SignInScreen> {
           }
           break;
 
+        case AuthMode.Phone:
+          await _auth.signInWithPhone(
+            context: _scaffoldContext,
+            phoneNumber: '$_dialCode$_phone',
+            completed: (String errorMessage) {
+              if (errorMessage.isEmpty) {
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  HomeScreen.id,
+                  (route) => false,
+                );
+              } else {
+                //TODO: Register with email first
+                MessageBar(
+                  _scaffoldContext,
+                  message: errorMessage,
+                ).show();
+              }
+            },
+            codeSent: (String errorMessage) {
+              if (errorMessage.isEmpty) {
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  HomeScreen.id,
+                  (route) => false,
+                );
+              } else {
+                //TODO: Error message from code sent
+                MessageBar(
+                  _scaffoldContext,
+                  message: errorMessage,
+                ).show();
+              }
+            },
+            failed: (String errorMessage) {
+              MessageBar(
+                _scaffoldContext,
+                message: errorMessage,
+              ).show();
+            },
+          );
+          //TODO: After continue
+          MessageBar(
+            _scaffoldContext,
+            message: 'Doing something...',
+          ).show();
+          break;
+
         // Sign In Mode
         default:
           try {
@@ -110,8 +165,9 @@ class _SignInScreenState extends State<SignInScreen> {
               password: _password,
             );
             if (signIn) {
+              await StoreCredential.detele();
               if (_rememberMe) {
-                StoreCredential.store(
+                await StoreCredential.store(
                   email: _email,
                   password: _password,
                 );
@@ -123,10 +179,10 @@ class _SignInScreenState extends State<SignInScreen> {
             } else {
               _showConfirmEmailMessage();
             }
-          } catch (e) {
+          } catch (errorMessage) {
             MessageBar(
               _scaffoldContext,
-              message: e,
+              message: errorMessage,
             ).show();
           }
           break;
@@ -189,6 +245,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     horizontal: screen.width * 0.15,
                   ),
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       fairyLogo(),
                       SizedBox(height: screen.height * 0.03),
@@ -205,12 +262,11 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   Widget fairyLogo() {
-    Size screen = MediaQuery.of(context).size;
     return Hero(
       tag: FruitFairyLogo.id,
       child: FruitFairyLogo(
-        fontSize: screen.width * 0.07,
-        radius: screen.width * 0.15,
+        fontSize: 30,
+        radius: 65,
       ),
     );
   }
@@ -242,7 +298,17 @@ class _SignInScreenState extends State<SignInScreen> {
       case AuthMode.Phone:
         return Column(
           children: [
+            Text(
+              'Enter phone number to sign in:',
+              style: TextStyle(
+                color: kLabelColor,
+                fontSize: 18.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: screen.height * 0.03),
             phoneNumberField(),
+            SizedBox(height: screen.height * 0.02),
             submitButton(context),
             SizedBox(height: screen.height * 0.05),
             signInLink(context),
@@ -264,7 +330,7 @@ class _SignInScreenState extends State<SignInScreen> {
             SizedBox(height: screen.height * 0.03),
             forgotPasswordLink(context),
             Padding(
-              padding: EdgeInsets.symmetric(vertical: screen.height * 0.01),
+              padding: EdgeInsets.symmetric(vertical: screen.height * 0.015),
               child: Divider(color: kLabelColor, thickness: 2.0),
             ),
             phoneLink(context),
@@ -315,9 +381,24 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   Widget phoneNumberField() {
-    return InputField(
-      label: 'Phone Number',
-      onChanged: (value) {},
+    return PhoneInputField(
+      initialPhoneNumber: _phone,
+      initialSelection: _isoCode,
+      errorMessage: _phoneError,
+      showDropdownIcon: false,
+      onPhoneNumberChanged: (phoneNumber, intlNumber, isoCode) async {
+        _phone = phoneNumber;
+        _isoCode = isoCode;
+        _dialCode = intlNumber.substring(0, intlNumber.indexOf(phoneNumber));
+        _phoneError = await Validate.validatePhoneNumber(
+          phoneNumber: _phone,
+          isoCode: _isoCode,
+        );
+        setState(() {});
+      },
+      onTap: () {
+        MessageBar(_scaffoldContext).hide();
+      },
     );
   }
 
@@ -383,6 +464,7 @@ class _SignInScreenState extends State<SignInScreen> {
         labelColor: kPrimaryColor,
         backgroundColor: kObjectBackgroundColor,
         onPressed: () async {
+          FocusScope.of(context).unfocus();
           submit();
         },
       ),
