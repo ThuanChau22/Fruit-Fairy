@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class FruitTile extends StatelessWidget {
-  final Widget fruitImage;
+  final AssetImage fruitImage;
   final bool selected;
   final int index;
   final void Function(int index) onTap;
@@ -15,20 +15,32 @@ class FruitTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: GestureDetector(
-          onTap: () {
-            onTap(index);
-          },
-        child: Stack(
-          children: [
-            fruitImage,
-            Container(
-              color: Colors.green.shade500.withOpacity(selected ? 0.5 : 0),
-            ),
-          ],
-        ),
+    return GestureDetector(
+      onTap: () {
+        onTap(index);
+      },
+      child: Stack(
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text('Fruit Name'),
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: fruitImage,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Container(
+            color: Colors.green.shade500.withOpacity(selected ? 0.5 : 0),
+          ),
+        ],
       ),
     );
   }

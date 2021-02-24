@@ -35,20 +35,21 @@ const kTextFieldInputDecoration = InputDecoration(
 );
 
 
-List <Widget> kFruitImages = [
-  Image.asset('images/Orange.jpg'),
-  Image.asset('images/Apple.jpg'),
-  Image.asset('images/Avocado.jpg'),
-  Image.asset('images/Lemon.jpg'),
-  Image.asset('images/Peach.jpg'),
-  Image.asset('images/Orange.jpg'),
-  Image.asset('images/Apple.jpg'),
-  Image.asset('images/Avocado.jpg'),
-  Image.asset('images/Lemon.jpg'),
-  Image.asset('images/Peach.jpg'),
-  Image.asset('images/Orange.jpg'),
-  Image.asset('images/Apple.jpg'),
-  Image.asset('images/Avocado.jpg'),
-  Image.asset('images/Lemon.jpg'),
-  Image.asset('images/Peach.jpg'),
+List <String> kFruitImages = [
+  'images/Peach.png',
+  'images/Avocado.png',
+  'images/Lemon.png',
+  'images/Orange.png',
+  'images/Peach.png',
+  'images/Avocado.png',
+  'images/Lemon.png',
+  'images/Orange.png',
+  'images/Peach.png',
+  'images/Avocado.png',
+  'images/Lemon.png',
+  'images/Orange.png',
+  'images/Peach.png',
+  'images/Avocado.png',
+  'images/Lemon.png',
+  'images/Orange.png',
 ];

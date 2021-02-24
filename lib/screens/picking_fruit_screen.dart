@@ -59,20 +59,23 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
                 child: GridView.count(
                   primary: false,
                   padding: EdgeInsets.all(10),
-                  crossAxisSpacing: 5,
-                  mainAxisSpacing: 5,
+                  crossAxisSpacing: 20,
+                  mainAxisSpacing: 20,
                   crossAxisCount: 3,
                   children: [
                     for (int i = 0; i < kFruitImages.length; i++)
-                      FruitTile(
-                        fruitImage: kFruitImages[i],
-                        index: i,
-                        selected: selectedFruits[i],
-                        onTap: (index) {
-                          setState(() {
-                            selectedFruits[index] = !selectedFruits[index];
-                          });
-                        },
+                      Container(
+                        color: Colors.white,
+                        child: FruitTile(
+                          fruitImage: AssetImage(kFruitImages[i]),
+                          index: i,
+                          selected: selectedFruits[i],
+                          onTap: (index) {
+                            setState(() {
+                              selectedFruits[index] = !selectedFruits[index];
+                            });
+                          },
+                        ),
                       ),
                   ],
                 ),
