@@ -62,12 +62,11 @@ class SignUpRoleScreen extends StatelessWidget {
   }
 
   Widget fairyLogo(context) {
-    Size screen = MediaQuery.of(context).size;
     return Hero(
       tag: FruitFairyLogo.id,
       child: FruitFairyLogo(
-        fontSize: screen.width * 0.07,
-        radius: screen.width * 0.15,
+        fontSize: 30,
+        radius: 65,
       ),
     );
   }

@@ -19,33 +19,31 @@ class RoundedButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Material(
-        elevation: 5.0,
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(30.0),
-        child: MaterialButton(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30.0),
-          ),
-          onPressed: onPressed,
-          child: Row(
-            children: [
-              leading ?? SizedBox(width: 20),
-              Expanded(
-                child: Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: labelColor,
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.bold,
-                  ),
+    return Material(
+      elevation: 5.0,
+      color: backgroundColor,
+      borderRadius: BorderRadius.circular(30.0),
+      child: MaterialButton(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30.0),
+        ),
+        onPressed: onPressed,
+        child: Row(
+          children: [
+            leading ?? SizedBox(width: 20),
+            Expanded(
+              child: Text(
+                label,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: labelColor,
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              trailing ?? SizedBox(width: 20),
-            ],
-          ),
+            ),
+            trailing ?? SizedBox(width: 20),
+          ],
         ),
       ),
     );

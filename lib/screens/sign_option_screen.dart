@@ -46,12 +46,11 @@ class _SignOptionScreenState extends State<SignOptionScreen> {
   }
 
   Widget fairyLogo() {
-    Size screen = MediaQuery.of(context).size;
     return Hero(
       tag: FruitFairyLogo.id,
       child: FruitFairyLogo(
-        fontSize: screen.width * 0.15,
-        radius: screen.width * 0.25,
+        fontSize: 60,
+        radius: 105,
       ),
     );
   }

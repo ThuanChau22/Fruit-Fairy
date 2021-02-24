@@ -1,4 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:fruitfairy/constant.dart';
+import 'package:fruitfairy/widgets/confirm_code_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -11,6 +13,10 @@ class AuthService {
 
   User currentUser() {
     return _firebaseAuth.currentUser;
+  }
+
+  String currentUserUID() {
+    return _firebaseAuth.currentUser.uid;
   }
 
   Future<UserCredential> signUp({
@@ -43,9 +49,8 @@ class AuthService {
     String email,
     String password,
   }) async {
-    UserCredential user;
     try {
-      user = await _firebaseAuth.signInWithEmailAndPassword(
+      UserCredential user = await _firebaseAuth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
@@ -70,22 +75,68 @@ class AuthService {
     return false;
   }
 
-  Future<void> signInWithPhone(String phoneNumber) async {
+  // Android: set SHA-1, SHA-256, enable SafetyNet from Google Cloud Console
+  // IOS: ???
+  Future<void> signInWithPhone({
+    String phoneNumber,
+    BuildContext context,
+    Function completed,
+    Function failed,
+    Function codeSent,
+  }) async {
     await _firebaseAuth.verifyPhoneNumber(
       phoneNumber: phoneNumber,
       verificationCompleted: (PhoneAuthCredential credential) async {
-        print('(1)$credential');
-        // await _firebaseAuth.signInWithCredential(credential);
+        try {
+          UserCredential user =
+              await _firebaseAuth.signInWithCredential(credential);
+          if (user != null) {
+            if (_firebaseAuth.currentUser.email == null) {
+              _firebaseAuth.currentUser.delete();
+              completed('Not register');
+            } else {
+              completed('');
+            }
+          }
+        } catch (e) {
+          print(e);
+        }
+      },
+      codeSent: (String verificationId, int resendToken) {
+        ConfirmCodeDialog(
+          scaffoldContext: context,
+          onSubmit: (confirmCode) async {
+            try {
+              PhoneAuthCredential credential = PhoneAuthProvider.credential(
+                verificationId: verificationId,
+                smsCode: confirmCode,
+              );
+              UserCredential user =
+                  await _firebaseAuth.signInWithCredential(credential);
+              if (user != null) {
+                codeSent('');
+              } else {
+                codeSent('(2)');
+              }
+            } catch (e) {
+              if (e.code == 'invalid-verification-code') {
+                codeSent('Invalid confirmation code. Please try again!');
+              }
+              print(e);
+            }
+          },
+        ).show();
       },
       verificationFailed: (FirebaseAuthException e) {
-        print('(2)$e');
-      },
-      codeSent: (String verificationId, int resendToken) async {
-        print('(3)$verificationId, $resendToken');
+        //TODO: too many request on phone auth
+        if (e.code == 'too-many-requests') {
+          failed(e.message);
+        }
+        print(e);
       },
       timeout: Duration(seconds: 10),
       codeAutoRetrievalTimeout: (String verificationId) {
-        print('(4)$verificationId');
+        print('Timeout');
       },
     );
   }

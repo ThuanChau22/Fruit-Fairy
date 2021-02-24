@@ -39,26 +39,24 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
 
   bool _validate() {
     String errors = '';
-    setState(() {
-      errors += _firstNameError = Validate.name(
-        label: 'First Name',
-        name: _firstName,
-      );
-      errors += _lastNameError = Validate.name(
-        label: 'Last Name',
-        name: _lastName,
-      );
-      errors += _emailError = Validate.email(
-        email: _email,
-      );
-      errors += _passwordError = Validate.password(
-        password: _password,
-      );
-      errors += _confirmPasswordError = Validate.confirmPassword(
-        password: _password,
-        confirmPassword: _confirmPassword,
-      );
-    });
+    errors += _firstNameError = Validate.name(
+      label: 'First Name',
+      name: _firstName,
+    );
+    errors += _lastNameError = Validate.name(
+      label: 'Last Name',
+      name: _lastName,
+    );
+    errors += _emailError = Validate.email(
+      email: _email,
+    );
+    errors += _passwordError = Validate.password(
+      password: _password,
+    );
+    errors += _confirmPasswordError = Validate.confirmPassword(
+      password: _password,
+      confirmPassword: _confirmPassword,
+    );
     return errors.isEmpty;
   }
 
