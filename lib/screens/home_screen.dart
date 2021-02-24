@@ -9,12 +9,16 @@ import 'package:fruitfairy/screens/signin_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:strings/strings.dart';
+import 'package:fruitfairy/screens/edit_profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   static const String id = 'home_screen';
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
+
+String firstName = '';
+String lastName = '';
 
 class _HomeScreenState extends State<HomeScreen> {
   final AuthService _auth = AuthService(FirebaseAuth.instance);
@@ -70,30 +74,64 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: kPrimaryColor,
       appBar: AppBar(
-        backgroundColor: kAppBarColor,
-        title: Text('Profile Page'),
-        centerTitle: true,
-        actions: [
-          Container(
-            width: 40.0,
-            child: FloatingActionButton(
-              backgroundColor: Colors.white,
-              //TODO: add drop down menu with sign out and edit profile option
-              onPressed: () {
-                _signOut();
-              },
-              child: Text(
-                '$_initialName',
-                style: TextStyle(
-                  color: kPrimaryColor,
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.bold,
+          backgroundColor: kAppBarColor,
+          title: Text('Profile Page'),
+          centerTitle: true,
+          actions: [
+            Container(
+              width: 100.0,
+              child: PopupMenuButton<int>(
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: 1,
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).pushNamed(EditProfileScreen.id);
+                      },
+                      child: Text(
+                        "Edit Profile",
+                        style: TextStyle(
+                            color: kPrimaryColor, fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 2,
+                    child: GestureDetector(
+                      onTap: () {
+                        _signOut();
+                      },
+                      child: Text(
+                        "Sign Out",
+                        style: TextStyle(
+                            color: kPrimaryColor, fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                  ),
+                ],
+                icon: Container(
+                  height: double.infinity,
+                  width: double.infinity,
+                  decoration: ShapeDecoration(
+                    color: Colors.white,
+                    shape: CircleBorder(
+                      side: BorderSide(color: Colors.white, width: 0),
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      _initialName,
+                      style: TextStyle(
+                        color: kPrimaryColor,
+                        fontSize: 20.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
-      ),
+          ]),
       body: SafeArea(
         child: ModalProgressHUD(
           inAsyncCall: _showSpinner,
@@ -106,7 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Text(
-                    'Welcome $_name',
+                    'Welcome $_name!',
                     style: TextStyle(
                       fontSize: 30.0,
                       fontWeight: FontWeight.bold,
