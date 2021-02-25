@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fruitfairy/screens/donation_cart_screen.dart';
 import 'package:fruitfairy/screens/edit_profile_screen.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
 import 'package:fruitfairy/screens/picking_fruit_screen.dart';
@@ -19,6 +20,7 @@ class RouteGenerator {
     SignUpDonorScreen.id: SignUpDonorScreen(),
     EditProfileScreen.id: EditProfileScreen(),
     PickingFruitScreen.id: PickingFruitScreen(),
+    DonationCartScreen.id: DonationCartScreen(),
   };
 
   static Route<dynamic> generate(RouteSettings settings) {

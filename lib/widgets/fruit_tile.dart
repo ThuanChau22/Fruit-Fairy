@@ -5,12 +5,14 @@ class FruitTile extends StatelessWidget {
   final bool selected;
   final int index;
   final void Function(int index) onTap;
+  final Text fruitName;
 
   FruitTile({
     this.fruitImage,
     this.selected = false,
     this.index,
     this.onTap,
+    this.fruitName,
   });
 
   @override
@@ -24,7 +26,7 @@ class FruitTile extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text('Fruit Name'),
+              fruitName,
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
@@ -38,7 +40,7 @@ class FruitTile extends StatelessWidget {
             ],
           ),
           Container(
-            color: Colors.green.shade500.withOpacity(selected ? 0.5 : 0),
+            color: Colors.grey.shade700.withOpacity(selected ? 0.5 : 0),
           ),
         ],
       ),

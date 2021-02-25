@@ -34,8 +34,18 @@ const kTextFieldInputDecoration = InputDecoration(
   ),
 );
 
+Widget kDivider() {
+  return Divider(
+    color: kLabelColor,
+    thickness: 3.0,
+    indent: 20.0,
+    endIndent: 20.0,
+  );
+}
 
-List <String> kFruitImages = [
+
+
+List<String> kFruitImages = [
   'images/Peach.png',
   'images/Avocado.png',
   'images/Lemon.png',
@@ -52,4 +62,22 @@ List <String> kFruitImages = [
   'images/Avocado.png',
   'images/Lemon.png',
   'images/Orange.png',
+];
+List<String> kFruitNames = [
+  'Peach',
+  'Avocado',
+  'Lemon',
+  'Orange',
+  'Peach',
+  'Avocado',
+  'Lemon',
+  'Orange',
+  'Peach',
+  'Avocado',
+  'Lemon',
+  'Orange',
+  'Peach',
+  'Avocado',
+  'Lemon',
+  'Orange',
 ];

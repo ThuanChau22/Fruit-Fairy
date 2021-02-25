@@ -110,6 +110,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   SizedBox(height: screen.height * 0.01),
                   streetInputField(),
                   SizedBox(height: screen.height * 0.01),
+                  cityInputField(),
+                  SizedBox(height: screen.height * 0.01),
                   zipcodeInputField(),
                   SizedBox(height: screen.height * 0.01),
                   stateInputField(),
@@ -201,9 +203,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       onChanged: (value) {},
     );
   }
+  cityInputField() {
+    return InputField(
+      label: 'City',
+      //controller: _streetController
+      onChanged: (value) {},
+    );
+  }
   zipcodeInputField() {
     return InputField(
-      label: 'Zipcode',
+      label: 'Zip Code',
       //controller: _zipcodeController
       onChanged: (value) {},
     );
