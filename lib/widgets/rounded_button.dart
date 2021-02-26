@@ -1,46 +1,54 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class RoundedButton extends StatelessWidget {
   final String label;
-  final bool labelCenter;
   final Color labelColor;
   final Color backgroundColor;
   final Widget leading;
+  final Widget trailing;
   final VoidCallback onPressed;
 
   RoundedButton({
     @required this.label,
     @required this.onPressed,
-    this.labelCenter = true,
     this.labelColor,
     this.backgroundColor,
     this.leading,
+    this.trailing,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Material(
-        elevation: 5.0,
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(30.0),
-        child: MaterialButton(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30.0),
-          ),
-          onPressed: onPressed,
-          child: ListTile(
-            leading: leading,
-            title: Text(
-              label,
-              textAlign: labelCenter ? TextAlign.center : null,
-              style: TextStyle(
-                color: labelColor,
-                fontSize: 20.0,
-                fontWeight: FontWeight.bold,
+    return Material(
+      elevation: 5.0,
+      color: backgroundColor,
+      borderRadius: BorderRadius.circular(30.0),
+      child: MaterialButton(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30.0),
+        ),
+        onPressed: () {
+          onPressed();
+          HapticFeedback.mediumImpact();
+          FocusScope.of(context).unfocus();
+        },
+        child: Row(
+          children: [
+            leading ?? SizedBox(width: 20),
+            Expanded(
+              child: Text(
+                label,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: labelColor,
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-          ),
+            trailing ?? SizedBox(width: 20),
+          ],
         ),
       ),
     );

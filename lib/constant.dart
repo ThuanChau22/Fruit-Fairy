@@ -8,12 +8,20 @@ const Color kErrorColor = Colors.white;
 const Color kObjectBackgroundColor = Colors.white;
 
 /// Database fields
-const String kDBUserCollection = 'users';
-const String kDBEmailField = 'email';
-const String kDBFirstNameField = 'firstname';
-const String kDBLastNameField = 'lastname';
-const String kDBPhoneField = 'phone';
+const String kDBUsers = 'users';
+const String kDBEmail = 'email';
+const String kDBFirstName = 'firstname';
+const String kDBLastName = 'lastname';
+const String kDBPhone = 'phone';
+const String kDBPhoneNumber = 'number';
+const String kDBPhoneCountry = 'country';
+const String kDBAddress = 'address';
+const String kDBAddressStreet = 'street';
+const String kDBAddressCity = 'city';
+const String kDBAddressState = 'state';
+const String kDBAddressZip = 'zip';
 
+// Widget Style
 const kTextFieldInputDecoration = InputDecoration(
   filled: true,
   fillColor: Colors.white,
@@ -33,6 +41,7 @@ const kTextFieldInputDecoration = InputDecoration(
     borderSide: BorderSide.none,
   ),
 );
+
 
 Widget kDivider() {
   return Divider(

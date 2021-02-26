@@ -14,13 +14,13 @@ class InputField extends StatelessWidget {
 
   InputField({
     @required this.label,
-    @required this.onChanged,
     this.errorMessage = '',
     this.maxLength,
     this.keyboardType,
     this.obscureText = false,
-    this.controller,
     this.readOnly = false,
+    this.controller,
+    this.onChanged,
     this.onTap,
   });
 

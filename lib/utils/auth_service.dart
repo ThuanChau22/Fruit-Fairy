@@ -3,13 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AuthService {
-  final FirebaseAuth _firebaseAuth;
-  final CollectionReference userDB =
-      FirebaseFirestore.instance.collection(kDBUserCollection);
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
-  AuthService(this._firebaseAuth);
+  AuthService();
 
-  User currentUser() {
+  User get user {
     return _firebaseAuth.currentUser;
   }
 
@@ -27,10 +25,13 @@ class AuthService {
       );
       if (newUser != null) {
         await _firebaseAuth.currentUser.sendEmailVerification();
-        await userDB.doc(_firebaseAuth.currentUser.uid).set({
-          kDBEmailField: email,
-          kDBFirstNameField: firstName,
-          kDBLastNameField: lastName,
+        await FirebaseFirestore.instance
+            .collection(kDBUsers)
+            .doc(_firebaseAuth.currentUser.uid)
+            .set({
+          kDBEmail: email,
+          kDBFirstName: firstName,
+          kDBLastName: lastName,
         });
       }
     } catch (e) {
@@ -43,9 +44,8 @@ class AuthService {
     String email,
     String password,
   }) async {
-    UserCredential user;
     try {
-      user = await _firebaseAuth.signInWithEmailAndPassword(
+      UserCredential user = await _firebaseAuth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
@@ -70,7 +70,74 @@ class AuthService {
     return false;
   }
 
-  void resetPassword({String email}) async {
+  // Android: set SHA-1, SHA-256, enable SafetyNet from Google Cloud Console
+  // IOS: ???
+  Future<void> signInWithPhone({
+    String phoneNumber,
+    Function completed,
+    Function failed,
+    Function codeSent,
+  }) async {
+    await _firebaseAuth.verifyPhoneNumber(
+      timeout: Duration(seconds: 5),
+      phoneNumber: phoneNumber,
+      verificationCompleted: (PhoneAuthCredential credential) async {
+        try {
+          if (await _firebaseAuth.signInWithCredential(credential) != null) {
+            if (_firebaseAuth.currentUser.email != null) {
+              completed('');
+            } else {
+              await _firebaseAuth.currentUser.delete();
+              // TODO: Ask user to register first
+              completed('Register first');
+            }
+          }
+        } catch (e) {
+          print(e);
+        }
+      },
+      codeSent: (String verificationId, int resendToken) {
+        codeSent((smsCode) async {
+          try {
+            PhoneAuthCredential credential = PhoneAuthProvider.credential(
+              verificationId: verificationId,
+              smsCode: smsCode,
+            );
+            if (await _firebaseAuth.signInWithCredential(credential) != null) {
+              if (_firebaseAuth.currentUser.email != null) {
+                return '';
+              } else {
+                await _firebaseAuth.currentUser.delete();
+                // TODO: Ask user to register first
+                return 'Register first';
+              }
+            }
+          } catch (e) {
+            if (e.code == 'invalid-verification-code') {
+              return 'Invalid verification code. Please try again!';
+            }
+            if (e.code == 'session-expired') {
+              return 'Verification code has expired. Please re-send to try again!';
+            }
+            print(e);
+          }
+          return 'Error';
+        });
+      },
+      verificationFailed: (FirebaseAuthException e) {
+        //TODO: too many request on phone auth
+        if (e.code == 'too-many-requests') {
+          failed(e.message);
+        }
+        print(e);
+      },
+      codeAutoRetrievalTimeout: (String verificationId) {
+        print('Timeout');
+      },
+    );
+  }
+
+  Future<void> resetPassword(String email) async {
     await _firebaseAuth.sendPasswordResetEmail(email: email);
   }
 
