@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class RoundedButton extends StatelessWidget {
   final String label;
@@ -27,7 +28,11 @@ class RoundedButton extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30.0),
         ),
-        onPressed: onPressed,
+        onPressed: () {
+          onPressed();
+          HapticFeedback.mediumImpact();
+          FocusScope.of(context).unfocus();
+        },
         child: Row(
           children: [
             leading ?? SizedBox(width: 20),

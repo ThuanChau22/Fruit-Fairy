@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'package:international_phone_input/international_phone_input.dart';
 import 'package:fruitfairy/constant.dart';
@@ -134,8 +135,14 @@ class _PhoneInputFieldState extends State<PhoneInputField> {
           iconSize: widget.showDropdownIcon ? 24.0 : 0.0,
           dropdownColor: kObjectBackgroundColor.withOpacity(0.3),
           onChanged: (Country newValue) {
-            selectedCountry = newValue;
+            setState(() {
+              selectedCountry = newValue;
+            });
             _validatePhoneNumber();
+            HapticFeedback.mediumImpact();
+          },
+          onTap: () {
+            HapticFeedback.mediumImpact();
           },
           items: countryList.map<DropdownMenuItem<Country>>((Country value) {
             return DropdownMenuItem<Country>(

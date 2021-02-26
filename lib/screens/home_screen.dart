@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
 import 'package:fruitfairy/utils/auth_service.dart';
@@ -120,18 +121,32 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       width: 50.0,
       child: PopupMenuButton<Profile>(
-        onSelected: (action) {
-          switch (action) {
-            case Profile.Edit:
-              Navigator.of(context).pushNamed(EditProfileScreen.id);
-              break;
-
-            case Profile.SignOut:
-              _signOut();
-              break;
-            default:
-          }
-        },
+        offset: Offset(0.0, 50),
+        tooltip: 'Show options',
+        icon: Container(
+          decoration: ShapeDecoration(
+            color: Colors.white,
+            shape: CircleBorder(
+              side: BorderSide(
+                color: Colors.white,
+                width: 0.0,
+              ),
+            ),
+          ),
+          child: Center(
+            child: Text(
+              _initialName,
+              style: TextStyle(
+                color: kPrimaryColor,
+                fontSize: 20.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
         itemBuilder: (context) => [
           PopupMenuItem(
             value: Profile.Edit,
@@ -154,27 +169,20 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ],
-        icon: Container(
-          decoration: ShapeDecoration(
-            color: Colors.white,
-            shape: CircleBorder(
-              side: BorderSide(
-                color: Colors.white,
-                width: 0.0,
-              ),
-            ),
-          ),
-          child: Center(
-            child: Text(
-              _initialName,
-              style: TextStyle(
-                color: kPrimaryColor,
-                fontSize: 20.0,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
+        onSelected: (action) {
+          switch (action) {
+            case Profile.Edit:
+              Navigator.of(context).pushNamed(EditProfileScreen.id);
+              HapticFeedback.mediumImpact();
+              break;
+
+            case Profile.SignOut:
+              _signOut();
+              HapticFeedback.mediumImpact();
+              break;
+            default:
+          }
+        },
       ),
     );
   }
