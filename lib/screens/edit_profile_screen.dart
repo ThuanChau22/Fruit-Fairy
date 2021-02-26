@@ -31,7 +31,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         _emailController.text = userData[kDBEmail];
       });
     } catch (e) {
-      print(e.message);
+      print(e);
     } finally {
       setState(() => _showSpinner = false);
     }

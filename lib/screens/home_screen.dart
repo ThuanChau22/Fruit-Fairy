@@ -38,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _initialName = '${firstName[0] + lastName[0]}'.toUpperCase();
       });
     } catch (e) {
-      print(e.message);
+      print(e);
     } finally {
       setState(() => _showSpinner = false);
     }
