@@ -109,7 +109,7 @@ class SignUpRoleScreen extends StatelessWidget {
         ),
         trailing: SizedBox(width: 35.0),
         //ToDo: redirect to sign up charity screen
-        onPressed: null,
+        onPressed: () {},
       ),
     );
   }

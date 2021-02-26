@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
 import 'package:fruitfairy/utils/auth_service.dart';
@@ -471,6 +472,7 @@ class _SignInScreenState extends State<SignInScreen> {
                 setState(() {
                   _rememberMe = value;
                 });
+                HapticFeedback.mediumImpact();
               },
             ),
           ),
@@ -494,6 +496,7 @@ class _SignInScreenState extends State<SignInScreen> {
           setState(() {
             _obscureText = !_obscureText;
           });
+          HapticFeedback.mediumImpact();
         },
         child: Icon(
           _obscureText ? Icons.visibility_off : Icons.visibility,
@@ -513,7 +516,6 @@ class _SignInScreenState extends State<SignInScreen> {
         labelColor: kPrimaryColor,
         backgroundColor: kObjectBackgroundColor,
         onPressed: () {
-          FocusScope.of(context).unfocus();
           submit();
         },
       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fruitfairy/constant.dart';
 
 class LabelLink extends StatelessWidget {
@@ -13,7 +14,11 @@ class LabelLink extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        onTap();
+        HapticFeedback.mediumImpact();
+        FocusScope.of(context).unfocus();
+      },
       child: Text(
         label,
         style: TextStyle(
