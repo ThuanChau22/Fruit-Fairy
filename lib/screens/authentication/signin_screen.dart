@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fruitfairy/constant.dart';
+import 'package:fruitfairy/models/account.dart';
 import 'package:fruitfairy/utils/auth_service.dart';
+import 'package:fruitfairy/utils/firestore_service.dart';
 import 'package:fruitfairy/utils/store_credential.dart';
 import 'package:fruitfairy/utils/validation.dart';
 import 'package:fruitfairy/widgets/fruit_fairy_logo.dart';
@@ -12,6 +14,7 @@ import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 enum AuthMode { SignIn, Reset, Phone, VerifyCode }
@@ -27,7 +30,6 @@ class SignInScreen extends StatefulWidget {
 }
 
 class _SignInScreenState extends State<SignInScreen> {
-  final AuthService _auth = AuthService(FirebaseAuth.instance);
   AuthMode _mode = AuthMode.SignIn;
   String appBarLabel = 'Sign In';
   String buttonLabel = 'Sign In';
@@ -73,9 +75,7 @@ class _SignInScreenState extends State<SignInScreen> {
     String errors = '';
     switch (_mode) {
       case AuthMode.Reset:
-        errors = _emailError = Validate.checkEmail(
-          email: _email,
-        );
+        errors = _emailError = Validate.checkEmail(_email);
         break;
 
       case AuthMode.Phone:
@@ -86,19 +86,13 @@ class _SignInScreenState extends State<SignInScreen> {
         break;
 
       case AuthMode.VerifyCode:
-        errors = _confirmCodeError = Validate.checkConfirmationCode(
-          confirmationCode: _confirmCode,
-        );
+        errors = _confirmCodeError = Validate.checkConfirmCode(_confirmCode);
         break;
 
       // Sign In Mode
       default:
-        errors = _emailError = Validate.checkEmail(
-          email: _email,
-        );
-        errors += _passwordError = Validate.checkPassword(
-          password: _password,
-        );
+        errors = _emailError = Validate.checkEmail(_email);
+        errors += _passwordError = Validate.checkPassword(_password);
         break;
     }
     setState(() {});
@@ -111,7 +105,8 @@ class _SignInScreenState extends State<SignInScreen> {
       switch (_mode) {
         case AuthMode.Reset:
           try {
-            _auth.resetPassword(email: _email);
+            final AuthService auth = context.read<AuthService>();
+            auth.resetPassword(_email);
             buttonLabel = 'Re-send';
             MessageBar(
               _scaffoldContext,
@@ -123,14 +118,12 @@ class _SignInScreenState extends State<SignInScreen> {
           break;
 
         case AuthMode.Phone:
-          await _auth.signInWithPhone(
+          final AuthService auth = context.read<AuthService>();
+          await auth.signInWithPhone(
             phoneNumber: '$_dialCode$_phone',
             completed: (String errorMessage) {
               if (errorMessage.isEmpty) {
-                Navigator.of(context).pushNamedAndRemoveUntil(
-                  HomeScreen.id,
-                  (route) => false,
-                );
+                _signInSuccess();
               } else {
                 MessageBar(
                   _scaffoldContext,
@@ -164,10 +157,7 @@ class _SignInScreenState extends State<SignInScreen> {
         case AuthMode.VerifyCode:
           String errorMessage = await verifyCode(_confirmCode);
           if (errorMessage.isEmpty) {
-            Navigator.of(context).pushNamedAndRemoveUntil(
-              HomeScreen.id,
-              (route) => false,
-            );
+            _signInSuccess();
           } else {
             //TODO: Error message from code sent
             MessageBar(
@@ -180,11 +170,12 @@ class _SignInScreenState extends State<SignInScreen> {
         // Sign In Mode
         default:
           try {
-            bool signIn = await _auth.signIn(
+            final AuthService auth = context.read<AuthService>();
+            bool signedIn = await auth.signIn(
               email: _email,
               password: _password,
             );
-            if (signIn) {
+            if (signedIn) {
               await StoreCredential.detele();
               if (_rememberMe) {
                 await StoreCredential.store(
@@ -192,10 +183,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   password: _password,
                 );
               }
-              Navigator.of(context).pushNamedAndRemoveUntil(
-                HomeScreen.id,
-                (route) => false,
-              );
+              _signInSuccess();
             } else {
               _showConfirmEmailMessage();
             }
@@ -209,6 +197,16 @@ class _SignInScreenState extends State<SignInScreen> {
       }
       setState(() => _showSpinner = false);
     }
+  }
+
+  void _signInSuccess() async {
+    FireStoreService fireStoreService = context.read<FireStoreService>();
+    fireStoreService.uid = context.read<AuthService>().user.uid;
+    context.read<Account>().fromMap(await fireStoreService.getUserData());
+    Navigator.of(context).pushNamedAndRemoveUntil(
+      HomeScreen.id,
+      (route) => false,
+    );
   }
 
   void _showConfirmEmailMessage() {
@@ -380,9 +378,7 @@ class _SignInScreenState extends State<SignInScreen> {
       onChanged: (value) {
         setState(() {
           _email = value.trim();
-          _emailError = Validate.checkEmail(
-            email: _email,
-          );
+          _emailError = Validate.checkEmail(_email);
         });
       },
       onTap: () {
@@ -400,9 +396,7 @@ class _SignInScreenState extends State<SignInScreen> {
       onChanged: (value) {
         setState(() {
           _password = value;
-          _passwordError = Validate.checkPassword(
-            password: _password,
-          );
+          _passwordError = Validate.checkPassword(_password);
         });
       },
       onTap: () {
@@ -453,51 +447,59 @@ class _SignInScreenState extends State<SignInScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          children: [
-            SizedBox(
-              width: 30,
-              height: 30,
-              child: Theme(
-                data: ThemeData(
-                  unselectedWidgetColor: kLabelColor,
-                ),
-                child: Checkbox(
-                  value: _rememberMe,
-                  activeColor: kLabelColor,
-                  checkColor: kPrimaryColor,
-                  onChanged: (bool value) {
-                    setState(() {
-                      _rememberMe = value;
-                    });
-                  },
-                ),
-              ),
+        rememberMe(),
+        passwordVisibility(),
+      ],
+    );
+  }
+
+  Widget rememberMe() {
+    return Row(
+      children: [
+        SizedBox(
+          width: 30,
+          height: 30,
+          child: Theme(
+            data: ThemeData(
+              unselectedWidgetColor: kLabelColor,
             ),
-            Text(
-              'Remember me',
-              style: TextStyle(
-                color: kLabelColor,
-                fontSize: 16,
-              ),
-            )
-          ],
-        ),
-        Padding(
-          padding: EdgeInsets.only(right: 15.0),
-          child: GestureDetector(
-            onTap: () {
-              setState(() {
-                _obscureText = !_obscureText;
-              });
-            },
-            child: Icon(
-              _obscureText ? Icons.visibility_off : Icons.visibility,
-              color: kLabelColor,
+            child: Checkbox(
+              value: _rememberMe,
+              activeColor: kLabelColor,
+              checkColor: kPrimaryColor,
+              onChanged: (bool value) {
+                setState(() {
+                  _rememberMe = value;
+                });
+              },
             ),
           ),
         ),
+        Text(
+          'Remember me',
+          style: TextStyle(
+            color: kLabelColor,
+            fontSize: 16,
+          ),
+        )
       ],
+    );
+  }
+
+  Widget passwordVisibility() {
+    return Padding(
+      padding: EdgeInsets.only(right: 15.0),
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _obscureText = !_obscureText;
+          });
+        },
+        child: Icon(
+          _obscureText ? Icons.visibility_off : Icons.visibility,
+          color: kLabelColor,
+        ),
+      ),
     );
   }
 

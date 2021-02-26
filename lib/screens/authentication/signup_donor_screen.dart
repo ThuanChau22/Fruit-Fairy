@@ -10,6 +10,7 @@ import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 class SignUpDonorScreen extends StatefulWidget {
@@ -20,7 +21,6 @@ class SignUpDonorScreen extends StatefulWidget {
 }
 
 class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
-  final AuthService _auth = AuthService(FirebaseAuth.instance);
   bool _showSpinner = false;
 
   String _firstName = '';
@@ -47,12 +47,8 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
       label: 'Last Name',
       name: _lastName,
     );
-    errors += _emailError = Validate.email(
-      email: _email,
-    );
-    errors += _passwordError = Validate.password(
-      password: _password,
-    );
+    errors += _emailError = Validate.email(_email);
+    errors += _passwordError = Validate.password(_password);
     errors += _confirmPasswordError = Validate.confirmPassword(
       password: _password,
       confirmPassword: _confirmPassword,
@@ -64,7 +60,8 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
     if (_validate()) {
       setState(() => _showSpinner = true);
       try {
-        UserCredential newUser = await _auth.signUp(
+        final AuthService auth = context.read<AuthService>();
+        UserCredential newUser = await auth.signUp(
           email: _email,
           password: _password,
           firstName: _firstName,
@@ -191,9 +188,7 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
       onChanged: (value) {
         setState(() {
           _email = value.trim();
-          _emailError = Validate.email(
-            email: _email,
-          );
+          _emailError = Validate.email(_email);
         });
       },
       onTap: () {
@@ -210,9 +205,7 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
       onChanged: (value) {
         setState(() {
           _password = value;
-          _passwordError = Validate.password(
-            password: _password,
-          );
+          _passwordError = Validate.password(_password);
           if (_confirmPassword.isNotEmpty) {
             _confirmPasswordError = Validate.confirmPassword(
               password: _password,

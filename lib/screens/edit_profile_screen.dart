@@ -1,14 +1,11 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:fruitfairy/utils/auth_service.dart';
-import 'package:fruitfairy/utils/firestore_service.dart';
+import 'package:fruitfairy/constant.dart';
+import 'package:fruitfairy/models/account.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
+import 'package:provider/provider.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
-import 'package:fruitfairy/constant.dart';
-
-import '../constant.dart';
 
 class EditProfileScreen extends StatefulWidget {
   static const String id = 'edit_profile_screen';
@@ -18,108 +15,94 @@ class EditProfileScreen extends StatefulWidget {
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
+  bool _showSpinner = false;
+
   TextEditingController _emailController = TextEditingController();
   TextEditingController _firstNameController = TextEditingController();
   TextEditingController _lastNameController = TextEditingController();
-  bool _showSpinner = false;
-  final AuthService _auth = AuthService(FirebaseAuth.instance);
 
-
-  void _getCurrentUser() async {
-    setState(() => _showSpinner = true);
-    try {
-      User user = _auth.currentUser();
-      if (user != null) {
-        Map<String, dynamic> userData =
-            await FireStoreService.getUserData(user.uid);
-        setState(() {
-          _firstNameController.text = userData[kDBFirstNameField];
-          _lastNameController.text = userData[kDBLastNameField];
-          _emailController.text = userData[kDBEmailField];
-        });
-      }
-    } catch (e) {
-      print(e.message);
-    } finally {
-      setState(() => _showSpinner = false);
-    }
-  }
   @override
   void initState() {
     super.initState();
-    _getCurrentUser();
   }
 
   @override
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
-    return Scaffold(
-      backgroundColor: kPrimaryColor,
-      appBar: AppBar(
-        backgroundColor: kAppBarColor,
-        title: Text('Edit Profile Page'),
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: ModalProgressHUD(
-          inAsyncCall: _showSpinner,
-          progressIndicator: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation(kAppBarColor),
+    return Consumer<Account>(
+      builder: (context, account, child) {
+        _firstNameController.text = account.firstName;
+        _lastNameController.text = account.lastName;
+        _emailController.text = account.email;
+        return Scaffold(
+          backgroundColor: kPrimaryColor,
+          appBar: AppBar(
+            backgroundColor: kAppBarColor,
+            title: Text('Edit Profile Page'),
+            centerTitle: true,
           ),
-          child: ScrollableLayout(
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                vertical: screen.height * 0.06,
-                horizontal: screen.width * 0.15,
+          body: SafeArea(
+            child: ModalProgressHUD(
+              inAsyncCall: _showSpinner,
+              progressIndicator: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation(kAppBarColor),
               ),
-              child: Column(
-                //mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Account Information',
-                    style: TextStyle(
-                      color: kLabelColor,
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.bold,
-                    ),
+              child: ScrollableLayout(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    vertical: screen.height * 0.06,
+                    horizontal: screen.width * 0.15,
                   ),
-                  divider(),
-                  SizedBox(height: screen.height * 0.01),
-                  firstNameInputField(),
-                  SizedBox(height: screen.height * 0.01),
-                  lastNameInputField(),
-                  SizedBox(height: screen.height * 0.01),
-                  emailInputField(),
-                  SizedBox(height: screen.height * 0.01),
-                  phoneInputField(),
-                  SizedBox(height: screen.height * 0.01),
-                  passwordInputField(),
-                  SizedBox(height: screen.height * 0.01),
-                  confirmPasswordInputField(),
-                  button(),
-                  SizedBox(height: screen.height * 0.01),
-                  Text(
-                    'Address Information',
-                    style: TextStyle(
-                      color: kLabelColor,
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  child: Column(
+                    //mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Account Information',
+                        style: TextStyle(
+                          color: kLabelColor,
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      divider(),
+                      SizedBox(height: screen.height * 0.01),
+                      firstNameInputField(),
+                      SizedBox(height: screen.height * 0.01),
+                      lastNameInputField(),
+                      SizedBox(height: screen.height * 0.01),
+                      emailInputField(),
+                      SizedBox(height: screen.height * 0.01),
+                      phoneInputField(),
+                      SizedBox(height: screen.height * 0.01),
+                      passwordInputField(),
+                      SizedBox(height: screen.height * 0.01),
+                      confirmPasswordInputField(),
+                      button(),
+                      SizedBox(height: screen.height * 0.01),
+                      Text(
+                        'Address Information',
+                        style: TextStyle(
+                          color: kLabelColor,
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      divider(),
+                      SizedBox(height: screen.height * 0.01),
+                      streetInputField(),
+                      SizedBox(height: screen.height * 0.01),
+                      zipcodeInputField(),
+                      SizedBox(height: screen.height * 0.01),
+                      stateInputField(),
+                      button(),
+                    ],
                   ),
-                  divider(),
-                  SizedBox(height: screen.height * 0.01),
-                  streetInputField(),
-                  SizedBox(height: screen.height * 0.01),
-                  zipcodeInputField(),
-                  SizedBox(height: screen.height * 0.01),
-                  stateInputField(),
-                  button(),
-                ],
+                ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -132,20 +115,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  Widget button(){
+  Widget button() {
     Size screen = MediaQuery.of(context).size;
-    return
-      Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: screen.width * 0.15,
-        ),
-        child: RoundedButton(
-          label: 'Update',
-          labelColor: kPrimaryColor,
-          backgroundColor: kObjectBackgroundColor,
-          onPressed: () {},
-        ),
-      );
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: screen.width * 0.15,
+      ),
+      child: RoundedButton(
+        label: 'Update',
+        labelColor: kPrimaryColor,
+        backgroundColor: kObjectBackgroundColor,
+        onPressed: () {},
+      ),
+    );
   }
 
   Widget emailInputField() {
@@ -194,6 +176,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       onChanged: (value) {},
     );
   }
+
   streetInputField() {
     return InputField(
       label: 'Street',
@@ -201,6 +184,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       onChanged: (value) {},
     );
   }
+
   zipcodeInputField() {
     return InputField(
       label: 'Zipcode',
@@ -208,6 +192,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       onChanged: (value) {},
     );
   }
+
   stateInputField() {
     return InputField(
       label: 'State',

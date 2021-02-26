@@ -23,7 +23,7 @@ class Validate {
 
   /// Validate email on signup
   /// Return empty String on correct [email]
-  static String email({String email}) {
+  static String email(String email) {
     email = email.trim();
     if (email.isEmpty) {
       return 'Please enter Email\n';
@@ -38,7 +38,7 @@ class Validate {
 
   /// Validate password on signup
   /// Return empty String on correct [password]
-  static String password({String password}) {
+  static String password(String password) {
     if (password.isEmpty) {
       return 'Please enter Password\n';
     }
@@ -82,19 +82,19 @@ class Validate {
 
   /// Simple check email on signin
   /// Return empty String on correct [email]
-  static String checkEmail({String email}) {
+  static String checkEmail(String email) {
     return email.trim().isEmpty ? 'Please enter Email\n' : '';
   }
 
   /// Simple check password on signin
   /// Return empty String on correct [password]
-  static String checkPassword({String password}) {
+  static String checkPassword(String password) {
     return password.isEmpty ? 'Please enter Password\n' : '';
   }
 
   /// Simple check confirmation code on verifying
   /// Return empty String on correct [confirmationCode]
-  static String checkConfirmationCode({String confirmationCode}) {
+  static String checkConfirmCode(String confirmationCode) {
     return confirmationCode.isEmpty ? 'Please enter Verification Code\n' : '';
   }
 }
