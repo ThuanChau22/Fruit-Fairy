@@ -23,6 +23,7 @@ dependencies:
   font_awesome_flutter: ^8.11.0
   strings: ^0.1.4
   provider: ^4.3.3
+  getwidget: ^1.2.4
 
 dev_dependencies:
   flutter_test:
