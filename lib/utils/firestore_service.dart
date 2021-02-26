@@ -2,10 +2,17 @@ import 'package:fruitfairy/constant.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FireStoreService {
-  static final CollectionReference userDB =
-      FirebaseFirestore.instance.collection(kDBUserCollection);
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  String userId;
 
-  static Future<Map<String, dynamic>> getUserData(String uid) async {
-    return (await userDB.doc(uid).get()).data();
+  FireStoreService();
+
+  set uid(String uid) {
+    this.userId = uid;
+  }
+
+  Future<Map<String, dynamic>> getUserData() async {
+    CollectionReference userDB = _firestore.collection(kDBUsers);
+    return (await userDB.doc(userId).get()).data();
   }
 }

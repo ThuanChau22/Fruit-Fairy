@@ -7,8 +7,7 @@ class StoreCredential {
 
   StoreCredential._();
 
-  static void store({String email, String password}) async {
-    await _storage.deleteAll();
+  static Future<void> store({String email, String password}) async {
     try {
       await _storage.write(
         key: StoreCredential.email,
@@ -21,6 +20,10 @@ class StoreCredential {
     } catch (e) {
       print(e);
     }
+  }
+
+  static Future<void> detele() async {
+    await _storage.deleteAll();
   }
 
   static Future<Map<String, String>> get() async {

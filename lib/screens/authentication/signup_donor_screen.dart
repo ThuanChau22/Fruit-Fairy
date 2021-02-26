@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fruitfairy/constant.dart';
-import 'package:fruitfairy/screens/sign_option_screen.dart';
-import 'package:fruitfairy/screens/signin_screen.dart';
+import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
+import 'package:fruitfairy/screens/authentication/signin_screen.dart';
 import 'package:fruitfairy/utils/auth_service.dart';
 import 'package:fruitfairy/utils/validation.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
@@ -10,6 +10,7 @@ import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 class SignUpDonorScreen extends StatefulWidget {
@@ -20,7 +21,6 @@ class SignUpDonorScreen extends StatefulWidget {
 }
 
 class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
-  final AuthService _auth = AuthService(FirebaseAuth.instance);
   bool _showSpinner = false;
 
   String _firstName = '';
@@ -39,26 +39,20 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
 
   bool _validate() {
     String errors = '';
-    setState(() {
-      errors += _firstNameError = Validate.name(
-        label: 'First Name',
-        name: _firstName,
-      );
-      errors += _lastNameError = Validate.name(
-        label: 'Last Name',
-        name: _lastName,
-      );
-      errors += _emailError = Validate.email(
-        email: _email,
-      );
-      errors += _passwordError = Validate.password(
-        password: _password,
-      );
-      errors += _confirmPasswordError = Validate.confirmPassword(
-        password: _password,
-        confirmPassword: _confirmPassword,
-      );
-    });
+    errors += _firstNameError = Validate.name(
+      label: 'First Name',
+      name: _firstName,
+    );
+    errors += _lastNameError = Validate.name(
+      label: 'Last Name',
+      name: _lastName,
+    );
+    errors += _emailError = Validate.email(_email);
+    errors += _passwordError = Validate.password(_password);
+    errors += _confirmPasswordError = Validate.confirmPassword(
+      password: _password,
+      confirmPassword: _confirmPassword,
+    );
     return errors.isEmpty;
   }
 
@@ -66,7 +60,8 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
     if (_validate()) {
       setState(() => _showSpinner = true);
       try {
-        UserCredential newUser = await _auth.signUp(
+        final AuthService auth = context.read<AuthService>();
+        UserCredential newUser = await auth.signUp(
           email: _email,
           password: _password,
           firstName: _firstName,
@@ -120,7 +115,6 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
                     horizontal: screen.width * 0.15,
                   ),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       firstNameInputField(),
                       SizedBox(height: screen.height * 0.02),
@@ -194,9 +188,7 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
       onChanged: (value) {
         setState(() {
           _email = value.trim();
-          _emailError = Validate.email(
-            email: _email,
-          );
+          _emailError = Validate.email(_email);
         });
       },
       onTap: () {
@@ -213,9 +205,7 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
       onChanged: (value) {
         setState(() {
           _password = value;
-          _passwordError = Validate.password(
-            password: _password,
-          );
+          _passwordError = Validate.password(_password);
           if (_confirmPassword.isNotEmpty) {
             _confirmPasswordError = Validate.confirmPassword(
               password: _password,
@@ -262,7 +252,9 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
         labelColor: kPrimaryColor,
         backgroundColor: kObjectBackgroundColor,
         onPressed: () {
-          _signUp();
+          setState(() {
+            _signUp();
+          });
         },
       ),
     );

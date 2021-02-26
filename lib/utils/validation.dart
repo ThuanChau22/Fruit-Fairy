@@ -1,3 +1,5 @@
+import 'package:international_phone_input/international_phone_input.dart';
+
 /// A class that provides methods for client validations
 class Validate {
   static final passwordLength = 8;
@@ -21,7 +23,7 @@ class Validate {
 
   /// Validate email on signup
   /// Return empty String on correct [email]
-  static String email({String email}) {
+  static String email(String email) {
     email = email.trim();
     if (email.isEmpty) {
       return 'Please enter Email\n';
@@ -36,7 +38,7 @@ class Validate {
 
   /// Validate password on signup
   /// Return empty String on correct [password]
-  static String password({String password}) {
+  static String password(String password) {
     if (password.isEmpty) {
       return 'Please enter Password\n';
     }
@@ -67,15 +69,32 @@ class Validate {
     return '';
   }
 
+  /// Validate phone number
+  /// Return empty String on correct [phoneNumber] and [isoCode]
+  static Future<String> validatePhoneNumber(
+      {String phoneNumber, String isoCode}) async {
+    if (phoneNumber.isNotEmpty && isoCode.isNotEmpty) {
+      bool isValid = await PhoneService.parsePhoneNumber(phoneNumber, isoCode);
+      return !isValid ? 'Please enter a valid phone number' : '';
+    }
+    return 'Please enter a valid phone number';
+  }
+
   /// Simple check email on signin
   /// Return empty String on correct [email]
-  static String checkEmail({String email}) {
+  static String checkEmail(String email) {
     return email.trim().isEmpty ? 'Please enter Email\n' : '';
   }
 
   /// Simple check password on signin
   /// Return empty String on correct [password]
-  static String checkPassword({String password}) {
+  static String checkPassword(String password) {
     return password.isEmpty ? 'Please enter Password\n' : '';
+  }
+
+  /// Simple check confirmation code on verifying
+  /// Return empty String on correct [confirmationCode]
+  static String checkConfirmCode(String confirmationCode) {
+    return confirmationCode.isEmpty ? 'Please enter Verification Code\n' : '';
   }
 }
