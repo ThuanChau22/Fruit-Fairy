@@ -42,20 +42,51 @@ const kTextFieldInputDecoration = InputDecoration(
   ),
 );
 
-List<Widget> kFruitImages = [
-  Image.asset('images/Orange.jpg'),
-  Image.asset('images/Apple.jpg'),
-  Image.asset('images/Avocado.jpg'),
-  Image.asset('images/Lemon.jpg'),
-  Image.asset('images/Peach.jpg'),
-  Image.asset('images/Orange.jpg'),
-  Image.asset('images/Apple.jpg'),
-  Image.asset('images/Avocado.jpg'),
-  Image.asset('images/Lemon.jpg'),
-  Image.asset('images/Peach.jpg'),
-  Image.asset('images/Orange.jpg'),
-  Image.asset('images/Apple.jpg'),
-  Image.asset('images/Avocado.jpg'),
-  Image.asset('images/Lemon.jpg'),
-  Image.asset('images/Peach.jpg'),
+
+Widget kDivider() {
+  return Divider(
+    color: kLabelColor,
+    thickness: 3.0,
+    indent: 20.0,
+    endIndent: 20.0,
+  );
+}
+
+
+
+List<String> kFruitImages = [
+  'images/Peach.png',
+  'images/Avocado.png',
+  'images/Lemon.png',
+  'images/Orange.png',
+  'images/Peach.png',
+  'images/Avocado.png',
+  'images/Lemon.png',
+  'images/Orange.png',
+  'images/Peach.png',
+  'images/Avocado.png',
+  'images/Lemon.png',
+  'images/Orange.png',
+  'images/Peach.png',
+  'images/Avocado.png',
+  'images/Lemon.png',
+  'images/Orange.png',
+];
+List<String> kFruitNames = [
+  'Peach',
+  'Avocado',
+  'Lemon',
+  'Orange',
+  'Peach',
+  'Avocado',
+  'Lemon',
+  'Orange',
+  'Peach',
+  'Avocado',
+  'Lemon',
+  'Orange',
+  'Peach',
+  'Avocado',
+  'Lemon',
+  'Orange',
 ];

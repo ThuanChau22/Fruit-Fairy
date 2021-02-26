@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fruitfairy/constant.dart';
+import 'package:fruitfairy/screens/donation_cart_screen.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
 
@@ -59,26 +60,37 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
                 child: GridView.count(
                   primary: false,
                   padding: EdgeInsets.all(10),
-                  crossAxisSpacing: 5,
-                  mainAxisSpacing: 5,
+                  crossAxisSpacing: 20,
+                  mainAxisSpacing: 20,
                   crossAxisCount: 3,
                   children: [
                     for (int i = 0; i < kFruitImages.length; i++)
-                      FruitTile(
-                        fruitImage: kFruitImages[i],
-                        index: i,
-                        selected: selectedFruits[i],
-                        onTap: (index) {
-                          setState(() {
-                            selectedFruits[index] = !selectedFruits[index];
-                          });
-                        },
+                      Container(
+                        color: kObjectBackgroundColor,
+                        child: FruitTile(
+                          fruitImage: AssetImage(kFruitImages[i]),
+                          fruitName: Text(
+                            kFruitNames[i],
+                            style: TextStyle(
+                              color: kPrimaryColor,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20.0,
+                            ),
+                          ),
+                          index: i,
+                          selected: selectedFruits[i],
+                          onTap: (index) {
+                            setState(() {
+                              selectedFruits[index] = !selectedFruits[index];
+                            });
+                          },
+                        ),
                       ),
                   ],
                 ),
               ),
               SizedBox(height: screen.height * 0.02),
-              divider(),
+              kDivider(),
               SizedBox(height: screen.height * 0.02),
               Padding(
                 padding: EdgeInsets.symmetric(
@@ -88,7 +100,9 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
                   label: 'Go To Cart',
                   labelColor: kPrimaryColor,
                   backgroundColor: kObjectBackgroundColor,
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.of(context).pushNamed(DonationCartScreen.id);
+                  },
                 ),
               ),
               SizedBox(height: screen.height * 0.02),
@@ -100,11 +114,4 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
   }
 }
 
-Widget divider() {
-  return Divider(
-    color: kLabelColor,
-    thickness: 3.0,
-    indent: 20.0,
-    endIndent: 20.0,
-  );
-}
+
