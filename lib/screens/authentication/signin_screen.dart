@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fruitfairy/constant.dart';
+import 'package:fruitfairy/models/account.dart';
 import 'package:fruitfairy/utils/auth_service.dart';
 import 'package:fruitfairy/utils/firestore_service.dart';
 import 'package:fruitfairy/utils/store_credential.dart';
@@ -198,8 +199,10 @@ class _SignInScreenState extends State<SignInScreen> {
     }
   }
 
-  void _signInSuccess() {
-    context.read<FireStoreService>().uid = context.read<AuthService>().user.uid;
+  void _signInSuccess() async {
+    FireStoreService fireStoreService = context.read<FireStoreService>();
+    fireStoreService.uid = context.read<AuthService>().user.uid;
+    context.read<Account>().fromMap(await fireStoreService.getUserData());
     Navigator.of(context).pushNamedAndRemoveUntil(
       HomeScreen.id,
       (route) => false,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fruitfairy/models/account.dart';
 import 'package:fruitfairy/utils/auth_service.dart';
 import 'package:fruitfairy/utils/firestore_service.dart';
 import 'package:fruitfairy/utils/route_generator.dart';
@@ -23,6 +24,7 @@ class FruitFairy extends StatelessWidget {
       providers: [
         Provider<AuthService>(create: (_) => AuthService()),
         Provider<FireStoreService>(create: (_) => FireStoreService()),
+        ChangeNotifierProvider<Account>(create: (_) => Account()),
       ],
       child: Authentication(),
     );
@@ -30,12 +32,20 @@ class FruitFairy extends StatelessWidget {
 }
 
 class Authentication extends StatelessWidget {
+  void _fetchAccount(BuildContext context, String uid) async {
+    final FireStoreService fireStoreService = context.read<FireStoreService>();
+    context.read<FireStoreService>().uid = uid;
+    context.read<Account>().fromMap(await fireStoreService.getUserData());
+  }
+
   @override
   Widget build(BuildContext context) {
     // Check user authentication status
     User user = context.read<AuthService>().user;
     bool signedIn = user != null && user.emailVerified;
-    context.read<FireStoreService>().uid = signedIn ? user.uid : null;
+    if (signedIn) {
+      _fetchAccount(context, user.uid);
+    }
     return GestureWapper(
       child: MaterialApp(
         onGenerateRoute: RouteGenerator.generate,
