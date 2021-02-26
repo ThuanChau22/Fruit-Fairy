@@ -5,12 +5,12 @@ import 'package:fruitfairy/utils/auth_service.dart';
 import 'package:fruitfairy/utils/firestore_service.dart';
 import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
 import 'package:fruitfairy/screens/authentication/signin_screen.dart';
+import 'package:fruitfairy/screens/edit_profile_screen.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:strings/strings.dart';
-import 'package:fruitfairy/screens/edit_profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   static const String id = 'home_screen';
@@ -22,7 +22,6 @@ String firstName = '';
 String lastName = '';
 
 class _HomeScreenState extends State<HomeScreen> {
-  final AuthService _auth = AuthService(FirebaseAuth.instance);
   bool _showSpinner = false;
   String _initialName = '';
   String _name = '';
@@ -30,17 +29,14 @@ class _HomeScreenState extends State<HomeScreen> {
   void _getCurrentUser() async {
     setState(() => _showSpinner = true);
     try {
-      User user = _auth.currentUser();
-      if (user != null) {
-        Map<String, dynamic> userData =
-            await FireStoreService.getUserData(user.uid);
-        setState(() {
-          String firstName = userData[kDBFirstNameField];
-          String lastName = userData[kDBLastNameField];
-          _name = camelize(firstName);
-          _initialName = '${firstName[0] + lastName[0]}'.toUpperCase();
-        });
-      }
+      final FireStoreService fireStore = context.read<FireStoreService>();
+      Map<String, dynamic> userData = await fireStore.getUserData();
+      setState(() {
+        String firstName = userData[kDBFirstName];
+        String lastName = userData[kDBLastName];
+        _name = camelize(firstName);
+        _initialName = '${firstName[0] + lastName[0]}'.toUpperCase();
+      });
     } catch (e) {
       print(e.message);
     } finally {
@@ -51,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _signOut() async {
     setState(() => _showSpinner = true);
     try {
-      await _auth.signOut();
+      await context.read<AuthService>().signOut();
       Navigator.of(context).pushNamedAndRemoveUntil(
         SignOptionScreen.id,
         (route) => false,

@@ -1,14 +1,11 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:fruitfairy/utils/auth_service.dart';
+import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/utils/firestore_service.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
+import 'package:provider/provider.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
-import 'package:fruitfairy/constant.dart';
-
-import '../constant.dart';
 
 class EditProfileScreen extends StatefulWidget {
   static const String id = 'edit_profile_screen';
@@ -22,28 +19,24 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   TextEditingController _firstNameController = TextEditingController();
   TextEditingController _lastNameController = TextEditingController();
   bool _showSpinner = false;
-  final AuthService _auth = AuthService(FirebaseAuth.instance);
-
 
   void _getCurrentUser() async {
     setState(() => _showSpinner = true);
     try {
-      User user = _auth.currentUser();
-      if (user != null) {
-        Map<String, dynamic> userData =
-            await FireStoreService.getUserData(user.uid);
-        setState(() {
-          _firstNameController.text = userData[kDBFirstNameField];
-          _lastNameController.text = userData[kDBLastNameField];
-          _emailController.text = userData[kDBEmailField];
-        });
-      }
+      final FireStoreService fireStore = context.read<FireStoreService>();
+      Map<String, dynamic> userData = await fireStore.getUserData();
+      setState(() {
+        _firstNameController.text = userData[kDBFirstName];
+        _lastNameController.text = userData[kDBLastName];
+        _emailController.text = userData[kDBEmail];
+      });
     } catch (e) {
       print(e.message);
     } finally {
       setState(() => _showSpinner = false);
     }
   }
+
   @override
   void initState() {
     super.initState();
@@ -132,20 +125,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  Widget button(){
+  Widget button() {
     Size screen = MediaQuery.of(context).size;
-    return
-      Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: screen.width * 0.15,
-        ),
-        child: RoundedButton(
-          label: 'Update',
-          labelColor: kPrimaryColor,
-          backgroundColor: kObjectBackgroundColor,
-          onPressed: () {},
-        ),
-      );
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: screen.width * 0.15,
+      ),
+      child: RoundedButton(
+        label: 'Update',
+        labelColor: kPrimaryColor,
+        backgroundColor: kObjectBackgroundColor,
+        onPressed: () {},
+      ),
+    );
   }
 
   Widget emailInputField() {
@@ -194,6 +186,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       onChanged: (value) {},
     );
   }
+
   streetInputField() {
     return InputField(
       label: 'Street',
@@ -201,6 +194,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       onChanged: (value) {},
     );
   }
+
   zipcodeInputField() {
     return InputField(
       label: 'Zipcode',
@@ -208,6 +202,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       onChanged: (value) {},
     );
   }
+
   stateInputField() {
     return InputField(
       label: 'State',

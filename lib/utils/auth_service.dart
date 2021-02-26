@@ -1,21 +1,14 @@
-import 'package:flutter/material.dart';
 import 'package:fruitfairy/constant.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AuthService {
-  final FirebaseAuth _firebaseAuth;
-  final CollectionReference userDB =
-      FirebaseFirestore.instance.collection(kDBUserCollection);
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
-  AuthService(this._firebaseAuth);
+  AuthService();
 
-  User currentUser() {
+  User get user {
     return _firebaseAuth.currentUser;
-  }
-
-  String currentUserUID() {
-    return _firebaseAuth.currentUser.uid;
   }
 
   Future<UserCredential> signUp({
@@ -32,10 +25,13 @@ class AuthService {
       );
       if (newUser != null) {
         await _firebaseAuth.currentUser.sendEmailVerification();
-        await userDB.doc(_firebaseAuth.currentUser.uid).set({
-          kDBEmailField: email,
-          kDBFirstNameField: firstName,
-          kDBLastNameField: lastName,
+        await FirebaseFirestore.instance
+            .collection(kDBUsers)
+            .doc(_firebaseAuth.currentUser.uid)
+            .set({
+          kDBEmail: email,
+          kDBFirstName: firstName,
+          kDBLastName: lastName,
         });
       }
     } catch (e) {
@@ -141,7 +137,7 @@ class AuthService {
     );
   }
 
-  Future<void> resetPassword({String email}) async {
+  Future<void> resetPassword(String email) async {
     await _firebaseAuth.sendPasswordResetEmail(email: email);
   }
 
