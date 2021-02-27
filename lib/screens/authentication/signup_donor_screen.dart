@@ -117,13 +117,13 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
                   child: Column(
                     children: [
                       firstNameInputField(),
-                      SizedBox(height: screen.height * 0.02),
+                      inputFieldSizeBox(),
                       lastNameInputField(),
-                      SizedBox(height: screen.height * 0.02),
+                      inputFieldSizeBox(),
                       emailInputField(),
-                      SizedBox(height: screen.height * 0.02),
+                      inputFieldSizeBox(),
                       passwordInputField(),
-                      SizedBox(height: screen.height * 0.02),
+                      inputFieldSizeBox(),
                       confirmPasswordInputField(),
                       SizedBox(height: screen.height * 0.03),
                       signUpButton(context),
@@ -136,6 +136,11 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
         },
       ),
     );
+  }
+
+  Widget inputFieldSizeBox() {
+    Size screen = MediaQuery.of(context).size;
+    return SizedBox(height: screen.height * 0.02);
   }
 
   Widget firstNameInputField() {
