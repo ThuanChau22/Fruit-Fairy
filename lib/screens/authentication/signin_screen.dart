@@ -10,6 +10,7 @@ import 'package:fruitfairy/widgets/fruit_fairy_logo.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
 import 'package:fruitfairy/widgets/label_link.dart';
 import 'package:fruitfairy/widgets/message_bar.dart';
+import 'package:fruitfairy/widgets/obscure_icon.dart';
 import 'package:fruitfairy/widgets/phone_input_field.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
@@ -36,17 +37,15 @@ class _SignInScreenState extends State<SignInScreen> {
   String buttonLabel = 'Sign In';
 
   bool _showSpinner = false;
-  bool _obscureText = true;
   bool _rememberMe = false;
+  bool _obscurePassword = true;
 
-  TextEditingController _emailController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
-  String _email = '';
-  String _password = '';
+  TextEditingController _email = TextEditingController();
+  TextEditingController _password = TextEditingController();
   String _phone = '';
   String _dialCode = '';
   String _isoCode = 'US';
-  String _confirmCode = '';
+  TextEditingController _confirmCode = TextEditingController();
 
   String _emailError = '';
   String _passwordError = '';
@@ -62,10 +61,8 @@ class _SignInScreenState extends State<SignInScreen> {
     Map<String, String> credentials = await StoreCredential.get();
     if (credentials.isNotEmpty) {
       setState(() {
-        _emailController.text = credentials[StoreCredential.email];
-        _email = _emailController.text;
-        _passwordController.text = credentials[StoreCredential.password];
-        _password = _passwordController.text;
+        _email.text = credentials[StoreCredential.email];
+        _password.text = credentials[StoreCredential.password];
         _rememberMe = true;
       });
     }
@@ -74,9 +71,11 @@ class _SignInScreenState extends State<SignInScreen> {
 
   Future<bool> _validate() async {
     String errors = '';
+    String email = _email.text.trim();
+    String password = _password.text.trim();
     switch (_mode) {
       case AuthMode.Reset:
-        errors = _emailError = Validate.checkEmail(_email);
+        errors = _emailError = Validate.checkEmail(email);
         break;
 
       case AuthMode.Phone:
@@ -87,13 +86,15 @@ class _SignInScreenState extends State<SignInScreen> {
         break;
 
       case AuthMode.VerifyCode:
-        errors = _confirmCodeError = Validate.checkConfirmCode(_confirmCode);
+        errors = _confirmCodeError = Validate.checkConfirmCode(
+          _confirmCode.text.trim(),
+        );
         break;
 
       // Sign In Mode
       default:
-        errors = _emailError = Validate.checkEmail(_email);
-        errors += _passwordError = Validate.checkPassword(_password);
+        errors = _emailError = Validate.checkEmail(email);
+        errors += _passwordError = Validate.checkPassword(password);
         break;
     }
     setState(() {});
@@ -106,8 +107,8 @@ class _SignInScreenState extends State<SignInScreen> {
       switch (_mode) {
         case AuthMode.Reset:
           try {
-            final AuthService auth = context.read<AuthService>();
-            auth.resetPassword(_email);
+            AuthService auth = context.read<AuthService>();
+            auth.resetPassword(_email.text.trim());
             buttonLabel = 'Re-send';
             MessageBar(
               _scaffoldContext,
@@ -119,7 +120,7 @@ class _SignInScreenState extends State<SignInScreen> {
           break;
 
         case AuthMode.Phone:
-          final AuthService auth = context.read<AuthService>();
+          AuthService auth = context.read<AuthService>();
           await auth.signInWithPhone(
             phoneNumber: '$_dialCode$_phone',
             completed: (String errorMessage) {
@@ -156,7 +157,7 @@ class _SignInScreenState extends State<SignInScreen> {
           break;
 
         case AuthMode.VerifyCode:
-          String errorMessage = await verifyCode(_confirmCode);
+          String errorMessage = await verifyCode(_confirmCode.text.trim());
           if (errorMessage.isEmpty) {
             _signInSuccess();
           } else {
@@ -171,17 +172,19 @@ class _SignInScreenState extends State<SignInScreen> {
         // Sign In Mode
         default:
           try {
-            final AuthService auth = context.read<AuthService>();
+            String email = _email.text.trim();
+            String password = _password.text.trim();
+            AuthService auth = context.read<AuthService>();
             bool signedIn = await auth.signIn(
-              email: _email,
-              password: _password,
+              email: email,
+              password: password,
             );
             if (signedIn) {
               await StoreCredential.detele();
               if (_rememberMe) {
                 await StoreCredential.store(
-                  email: _email,
-                  password: _password,
+                  email: email,
+                  password: password,
                 );
               }
               _signInSuccess();
@@ -225,10 +228,8 @@ class _SignInScreenState extends State<SignInScreen> {
       if (args != null) {
         UserCredential user = args[SignInScreen.credentialObject];
         if (user != null && user.additionalUserInfo.isNewUser) {
-          _emailController.text = args[SignInScreen.email];
-          _email = _emailController.text;
-          _passwordController.text = args[SignInScreen.password];
-          _password = _passwordController.text;
+          _email.text = args[SignInScreen.email];
+          _password.text = args[SignInScreen.password];
           _rememberMe = false;
           _showConfirmEmailMessage();
         }
@@ -236,6 +237,13 @@ class _SignInScreenState extends State<SignInScreen> {
         _getCredential();
       }
     });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _email.dispose();
+    _password.dispose();
   }
 
   @override
@@ -297,7 +305,7 @@ class _SignInScreenState extends State<SignInScreen> {
         return Column(
           children: [
             instructionLabel('Enter email for password reset:'),
-            SizedBox(height: screen.height * 0.03),
+            SizedBox(height: screen.height * 0.02),
             emailInputField(),
             SizedBox(height: screen.height * 0.02),
             submitButton(context),
@@ -311,7 +319,7 @@ class _SignInScreenState extends State<SignInScreen> {
         return Column(
           children: [
             instructionLabel('Enter phone number to sign in:'),
-            SizedBox(height: screen.height * 0.03),
+            SizedBox(height: screen.height * 0.02),
             phoneNumberField(),
             SizedBox(height: screen.height * 0.02),
             submitButton(context),
@@ -325,7 +333,7 @@ class _SignInScreenState extends State<SignInScreen> {
         return Column(
           children: [
             instructionLabel('Enter verification code:'),
-            SizedBox(height: screen.height * 0.03),
+            SizedBox(height: screen.height * 0.02),
             verifyCodeField(),
             SizedBox(height: screen.height * 0.02),
             submitButton(context),
@@ -339,11 +347,10 @@ class _SignInScreenState extends State<SignInScreen> {
       default:
         return Column(
           children: [
-            SizedBox(height: screen.height * 0.02),
             emailInputField(),
             SizedBox(height: screen.height * 0.01),
             passwordInputField(),
-            optionTile(),
+            rememberMe(),
             SizedBox(height: screen.height * 0.02),
             submitButton(context),
             SizedBox(height: screen.height * 0.03),
@@ -373,13 +380,12 @@ class _SignInScreenState extends State<SignInScreen> {
   Widget emailInputField() {
     return InputField(
       label: 'Email',
-      controller: _emailController,
+      controller: _email,
       keyboardType: TextInputType.emailAddress,
       errorMessage: _emailError,
       onChanged: (value) {
         setState(() {
-          _email = value.trim();
-          _emailError = Validate.checkEmail(_email);
+          _emailError = Validate.checkEmail(_email.text.trim());
         });
       },
       onTap: () {
@@ -389,20 +395,35 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   Widget passwordInputField() {
-    return InputField(
-      label: 'Password',
-      controller: _passwordController,
-      obscureText: _obscureText,
-      errorMessage: _passwordError,
-      onChanged: (value) {
-        setState(() {
-          _password = value;
-          _passwordError = Validate.checkPassword(_password);
-        });
-      },
-      onTap: () {
-        MessageBar(_scaffoldContext).hide();
-      },
+    return Stack(
+      children: [
+        InputField(
+          label: 'Password',
+          controller: _password,
+          obscureText: _obscurePassword,
+          errorMessage: _passwordError,
+          onChanged: (value) {
+            setState(() {
+              _passwordError = Validate.checkPassword(_password.text);
+            });
+          },
+          onTap: () {
+            MessageBar(_scaffoldContext).hide();
+          },
+        ),
+        Positioned(
+          top: 12.0,
+          right: 12.0,
+          child: ObscureIcon(
+            obscure: _obscurePassword,
+            onTap: () {
+              setState(() {
+                _obscurePassword = !_obscurePassword;
+              });
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -431,26 +452,11 @@ class _SignInScreenState extends State<SignInScreen> {
   Widget verifyCodeField() {
     return InputField(
       label: '6-Digit Code',
-      keyboardType: TextInputType.number,
+      controller: _confirmCode,
       errorMessage: _confirmCodeError,
-      onChanged: (value) {
-        setState(() {
-          _confirmCode = value;
-        });
-      },
       onTap: () {
         MessageBar(_scaffoldContext).hide();
       },
-    );
-  }
-
-  Widget optionTile() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        rememberMe(),
-        passwordVisibility(),
-      ],
     );
   }
 
@@ -485,24 +491,6 @@ class _SignInScreenState extends State<SignInScreen> {
           ),
         )
       ],
-    );
-  }
-
-  Widget passwordVisibility() {
-    return Padding(
-      padding: EdgeInsets.only(right: 15.0),
-      child: GestureDetector(
-        onTap: () {
-          setState(() {
-            _obscureText = !_obscureText;
-          });
-          HapticFeedback.mediumImpact();
-        },
-        child: Icon(
-          _obscureText ? Icons.visibility_off : Icons.visibility,
-          color: kLabelColor,
-        ),
-      ),
     );
   }
 

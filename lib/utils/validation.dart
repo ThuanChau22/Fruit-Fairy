@@ -11,7 +11,6 @@ class Validate {
   /// Validate name
   /// Return empty String on correct [name]
   static String name({String name, String label}) {
-    name = name.trim();
     if (name.isEmpty) {
       return 'Please enter $label\n';
     }
@@ -24,7 +23,6 @@ class Validate {
   /// Validate email on signup
   /// Return empty String on correct [email]
   static String email(String email) {
-    email = email.trim();
     if (email.isEmpty) {
       return 'Please enter Email\n';
     }
@@ -83,7 +81,7 @@ class Validate {
   /// Simple check email on signin
   /// Return empty String on correct [email]
   static String checkEmail(String email) {
-    return email.trim().isEmpty ? 'Please enter Email\n' : '';
+    return email.isEmpty ? 'Please enter Email\n' : '';
   }
 
   /// Simple check password on signin

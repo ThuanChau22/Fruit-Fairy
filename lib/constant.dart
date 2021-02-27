@@ -42,7 +42,6 @@ const kTextFieldInputDecoration = InputDecoration(
   ),
 );
 
-
 Widget kDivider() {
   return Divider(
     color: kLabelColor,
@@ -51,8 +50,6 @@ Widget kDivider() {
     endIndent: 20.0,
   );
 }
-
-
 
 List<String> kFruitImages = [
   'images/Peach.png',

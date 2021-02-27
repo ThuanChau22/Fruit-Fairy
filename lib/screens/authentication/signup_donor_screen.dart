@@ -7,6 +7,7 @@ import 'package:fruitfairy/utils/auth_service.dart';
 import 'package:fruitfairy/utils/validation.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
 import 'package:fruitfairy/widgets/message_bar.dart';
+import 'package:fruitfairy/widgets/obscure_icon.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -22,12 +23,13 @@ class SignUpDonorScreen extends StatefulWidget {
 
 class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
   bool _showSpinner = false;
+  bool _obscurePassword = true;
 
-  String _firstName = '';
-  String _lastName = '';
-  String _email = '';
-  String _password = '';
-  String _confirmPassword = '';
+  TextEditingController _firstName = TextEditingController();
+  TextEditingController _lastName = TextEditingController();
+  TextEditingController _email = TextEditingController();
+  TextEditingController _password = TextEditingController();
+  TextEditingController _confirmPassword = TextEditingController();
 
   String _firstNameError = '';
   String _lastNameError = '';
@@ -41,17 +43,17 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
     String errors = '';
     errors += _firstNameError = Validate.name(
       label: 'First Name',
-      name: _firstName,
+      name: _firstName.text.trim(),
     );
     errors += _lastNameError = Validate.name(
       label: 'Last Name',
-      name: _lastName,
+      name: _lastName.text.trim(),
     );
-    errors += _emailError = Validate.email(_email);
-    errors += _passwordError = Validate.password(_password);
+    errors += _emailError = Validate.email(_email.text.trim());
+    errors += _passwordError = Validate.password(_password.text.trim());
     errors += _confirmPasswordError = Validate.confirmPassword(
-      password: _password,
-      confirmPassword: _confirmPassword,
+      password: _password.text.trim(),
+      confirmPassword: _confirmPassword.text.trim(),
     );
     return errors.isEmpty;
   }
@@ -60,12 +62,14 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
     if (_validate()) {
       setState(() => _showSpinner = true);
       try {
+        String email = _email.text.trim();
+        String password = _password.text.trim();
         final AuthService auth = context.read<AuthService>();
         UserCredential newUser = await auth.signUp(
-          email: _email,
-          password: _password,
-          firstName: _firstName,
-          lastName: _lastName,
+          email: email,
+          password: password,
+          firstName: _firstName.text.trim(),
+          lastName: _lastName.text.trim(),
         );
         Navigator.of(context).pushNamedAndRemoveUntil(
           SignInScreen.id,
@@ -74,8 +78,8 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
           },
           arguments: {
             SignInScreen.credentialObject: newUser,
-            SignInScreen.email: _email,
-            SignInScreen.password: _password,
+            SignInScreen.email: email,
+            SignInScreen.password: password,
           },
         );
       } catch (e) {
@@ -125,7 +129,7 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
                       passwordInputField(),
                       inputFieldSizeBox(),
                       confirmPasswordInputField(),
-                      SizedBox(height: screen.height * 0.03),
+                      SizedBox(height: screen.height * 0.05),
                       signUpButton(context),
                     ],
                   ),
@@ -140,21 +144,21 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
 
   Widget inputFieldSizeBox() {
     Size screen = MediaQuery.of(context).size;
-    return SizedBox(height: screen.height * 0.02);
+    return SizedBox(height: screen.height * 0.01);
   }
 
   Widget firstNameInputField() {
     return InputField(
       label: 'First Name',
+      controller: _firstName,
       errorMessage: _firstNameError,
       maxLength: Validate.maxNameLength,
       keyboardType: TextInputType.name,
       onChanged: (value) {
         setState(() {
-          _firstName = value.trim();
           _firstNameError = Validate.name(
             label: 'First Name',
-            name: _firstName,
+            name: _firstName.text.trim(),
           );
         });
       },
@@ -167,15 +171,15 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
   Widget lastNameInputField() {
     return InputField(
       label: 'Last Name',
+      controller: _lastName,
       errorMessage: _lastNameError,
       maxLength: Validate.maxNameLength,
       keyboardType: TextInputType.name,
       onChanged: (value) {
         setState(() {
-          _lastName = value.trim();
           _lastNameError = Validate.name(
             label: 'Last Name',
-            name: _lastName,
+            name: _lastName.text.trim(),
           );
         });
       },
@@ -188,12 +192,12 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
   Widget emailInputField() {
     return InputField(
       label: 'Email',
+      controller: _email,
       errorMessage: _emailError,
       keyboardType: TextInputType.emailAddress,
       onChanged: (value) {
         setState(() {
-          _email = value.trim();
-          _emailError = Validate.email(_email);
+          _emailError = Validate.email(_email.text.trim());
         });
       },
       onTap: () {
@@ -203,39 +207,57 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
   }
 
   Widget passwordInputField() {
-    return InputField(
-      label: 'Password',
-      errorMessage: _passwordError,
-      obscureText: true,
-      onChanged: (value) {
-        setState(() {
-          _password = value;
-          _passwordError = Validate.password(_password);
-          if (_confirmPassword.isNotEmpty) {
-            _confirmPasswordError = Validate.confirmPassword(
-              password: _password,
-              confirmPassword: _confirmPassword,
-            );
-          }
-        });
-      },
-      onTap: () {
-        MessageBar(_scaffoldContext).hide();
-      },
+    return Stack(
+      children: [
+        InputField(
+          label: 'Password',
+          controller: _password,
+          errorMessage: _passwordError,
+          obscureText: _obscurePassword,
+          onChanged: (value) {
+            setState(() {
+              String password = _password.text.trim();
+              String confirmPassword = _confirmPassword.text.trim();
+              _passwordError = Validate.password(password);
+              if (confirmPassword.isNotEmpty) {
+                _confirmPasswordError = Validate.confirmPassword(
+                  password: password,
+                  confirmPassword: confirmPassword,
+                );
+              }
+            });
+          },
+          onTap: () {
+            MessageBar(_scaffoldContext).hide();
+          },
+        ),
+        Positioned(
+          top: 12.0,
+          right: 12.0,
+          child: ObscureIcon(
+            obscure: _obscurePassword,
+            onTap: () {
+              setState(() {
+                _obscurePassword = !_obscurePassword;
+              });
+            },
+          ),
+        ),
+      ],
     );
   }
 
   Widget confirmPasswordInputField() {
     return InputField(
       label: 'Confirm Password',
+      controller: _confirmPassword,
       errorMessage: _confirmPasswordError,
       obscureText: true,
       onChanged: (value) {
         setState(() {
-          _confirmPassword = value;
           _confirmPasswordError = Validate.confirmPassword(
-            password: _password,
-            confirmPassword: _confirmPassword,
+            password: _password.text.trim(),
+            confirmPassword: _confirmPassword.text.trim(),
           );
         });
       },
@@ -249,7 +271,6 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
     Size screen = MediaQuery.of(context).size;
     return Padding(
       padding: EdgeInsets.symmetric(
-        vertical: screen.height * 0.02,
         horizontal: screen.width * 0.15,
       ),
       child: RoundedButton(
