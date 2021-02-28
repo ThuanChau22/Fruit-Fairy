@@ -3,9 +3,9 @@ import 'package:flutter/foundation.dart';
 import 'package:fruitfairy/constant.dart';
 
 class Account extends ChangeNotifier {
-  String _firstName;
-  String _lastName;
-  String _email;
+  String _firstName = '';
+  String _lastName = '';
+  String _email = '';
   Map<String, String> _phone = {};
   Map<String, String> _address = {};
 
@@ -76,6 +76,15 @@ class Account extends ChangeNotifier {
       this._address[kDBAddressState] = address[kDBAddressState];
       this._address[kDBAddressZip] = address[kDBAddressZip];
     }
+    notifyListeners();
+  }
+
+  void clear() {
+    _firstName = '';
+    _lastName = '';
+    _email = '';
+    _phone = {};
+    _address = {};
     notifyListeners();
   }
 }
