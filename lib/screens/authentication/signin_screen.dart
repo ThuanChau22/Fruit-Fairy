@@ -205,8 +205,8 @@ class _SignInScreenState extends State<SignInScreen> {
 
   void _signInSuccess() async {
     FireStoreService fireStoreService = context.read<FireStoreService>();
-    fireStoreService.uid = context.read<AuthService>().user.uid;
-    context.read<Account>().fromMap(await fireStoreService.getUserData());
+    fireStoreService.uid(context.read<AuthService>().user.uid);
+    context.read<Account>().fromMap(await fireStoreService.userData);
     Navigator.of(context).pushNamedAndRemoveUntil(
       HomeScreen.id,
       (route) => false,

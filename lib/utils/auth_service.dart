@@ -25,14 +25,6 @@ class AuthService {
       );
       if (newUser != null) {
         await _firebaseAuth.currentUser.sendEmailVerification();
-        await FirebaseFirestore.instance
-            .collection(kDBUsers)
-            .doc(_firebaseAuth.currentUser.uid)
-            .set({
-          kDBEmail: email,
-          kDBFirstName: firstName,
-          kDBLastName: lastName,
-        });
       }
     } catch (e) {
       throw e.message;

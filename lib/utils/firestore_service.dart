@@ -7,12 +7,28 @@ class FireStoreService {
 
   FireStoreService();
 
-  set uid(String uid) {
+  Future<Map<String, dynamic>> get userData async {
+    CollectionReference userDB = _firestore.collection(kDBUsers);
+    return (await userDB.doc(userId).get()).data();
+  }
+
+  void uid(String uid) {
     this.userId = uid;
   }
 
-  Future<Map<String, dynamic>> getUserData() async {
-    CollectionReference userDB = _firestore.collection(kDBUsers);
-    return (await userDB.doc(userId).get()).data();
+  Future<void> addUser({
+    String email,
+    String firstName,
+    String lastName,
+  }) async {
+    try {
+      await _firestore.collection(kDBUsers).doc(userId).set({
+        kDBEmail: email,
+        kDBFirstName: firstName,
+        kDBLastName: lastName,
+      });
+    } catch (e) {
+      throw e.message;
+    }
   }
 }

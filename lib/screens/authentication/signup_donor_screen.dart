@@ -4,6 +4,7 @@ import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
 import 'package:fruitfairy/screens/authentication/signin_screen.dart';
 import 'package:fruitfairy/utils/auth_service.dart';
+import 'package:fruitfairy/utils/firestore_service.dart';
 import 'package:fruitfairy/utils/validation.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
 import 'package:fruitfairy/widgets/message_bar.dart';
@@ -64,10 +65,15 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
       try {
         String email = _email.text.trim();
         String password = _password.text;
-        final AuthService auth = context.read<AuthService>();
+        AuthService auth = context.read<AuthService>();
         UserCredential newUser = await auth.signUp(
           email: email,
           password: password,
+        );
+        FireStoreService fireStore = context.read<FireStoreService>();
+        fireStore.uid(newUser.user.uid);
+        await fireStore.addUser(
+          email: email,
           firstName: _firstName.text.trim(),
           lastName: _lastName.text.trim(),
         );
