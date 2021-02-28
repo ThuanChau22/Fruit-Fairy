@@ -82,10 +82,6 @@ class InputField extends StatelessWidget {
         borderSide: BorderSide(color: kErrorColor, width: 2.0),
         borderRadius: BorderRadius.all(Radius.circular(32.0)),
       ),
-      disabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: kErrorColor, width: 1.0),
-        borderRadius: BorderRadius.all(Radius.circular(32.0)),
-      ),
     );
   }
 }

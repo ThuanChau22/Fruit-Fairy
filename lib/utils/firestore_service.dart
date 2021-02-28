@@ -31,4 +31,45 @@ class FireStoreService {
       throw e.message;
     }
   }
+
+  Future<void> updateUserName({
+    String firstName,
+    String lastName,
+  }) async {
+    try {
+      await _firestore.collection(kDBUsers).doc(userId).update({
+        kDBFirstName: firstName,
+        kDBLastName: lastName,
+      });
+    } catch (e) {
+      throw e.message;
+    }
+  }
+
+  Future<void> updateUserAddress({
+    String street,
+    String city,
+    String state,
+    String zip,
+  }) async {
+    try {
+      DocumentReference doc = _firestore.collection(kDBUsers).doc(userId);
+      if (street.isEmpty && city.isEmpty && state.isEmpty && zip.isEmpty) {
+        await doc.update({
+          kDBAddress: FieldValue.delete(),
+        });
+      } else {
+        await doc.update({
+          kDBAddress: {
+            kDBAddressStreet: street,
+            kDBAddressCity: city,
+            kDBAddressState: state,
+            kDBAddressZip: zip,
+          },
+        });
+      }
+    } catch (e) {
+      throw e.message;
+    }
+  }
 }

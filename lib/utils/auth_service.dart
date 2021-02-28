@@ -1,6 +1,4 @@
-import 'package:fruitfairy/constant.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AuthService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
@@ -127,6 +125,26 @@ class AuthService {
         print('Timeout');
       },
     );
+  }
+
+  Future<void> updatePassword({
+    String email,
+    String oldPassword,
+    String newPassword,
+  }) async {
+    try {
+      EmailAuthCredential credential = EmailAuthProvider.credential(
+        email: email,
+        password: oldPassword,
+      );
+      await _firebaseAuth.currentUser.reauthenticateWithCredential(credential);
+      await _firebaseAuth.currentUser.updatePassword(newPassword);
+    } catch (e) {
+      if (e.code == 'wrong-password') {
+        throw 'Incorrect Current Password. Please try again!';
+      }
+      print(e);
+    }
   }
 
   Future<void> resetPassword(String email) async {

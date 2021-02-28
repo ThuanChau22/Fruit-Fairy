@@ -46,17 +46,26 @@ class Account extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setPhoneNumber({String number, String country}) {
-    this._phone[kDBPhoneNumber] = number;
-    this._phone[kDBPhoneCountry] = country;
+  void setPhoneNumber({String country, String number}) {
+    if (number.isEmpty) {
+      this._phone = {};
+    } else {
+      this._phone[kDBPhoneCountry] = country;
+      this._phone[kDBPhoneNumber] = number;
+    }
     notifyListeners();
   }
 
   void setAddress({String street, String city, String state, String zip}) {
-    this._address[kDBAddressStreet] = street;
-    this._address[kDBAddressCity] = city;
-    this._address[kDBAddressState] = state;
-    this._address[kDBAddressZip] = zip;
+    if (street.isEmpty && city.isEmpty && state.isEmpty && zip.isEmpty) {
+      this._address = {};
+    } else {
+      this._address[kDBAddressStreet] = street;
+      this._address[kDBAddressCity] = city;
+      this._address[kDBAddressState] = state;
+      this._address[kDBAddressZip] = zip;
+    }
+
     notifyListeners();
   }
 
@@ -80,11 +89,11 @@ class Account extends ChangeNotifier {
   }
 
   void clear() {
-    _firstName = '';
-    _lastName = '';
-    _email = '';
-    _phone = {};
-    _address = {};
+    this._firstName = '';
+    this._lastName = '';
+    this._email = '';
+    this._phone = {};
+    this._address = {};
     notifyListeners();
   }
 }

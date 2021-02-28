@@ -22,6 +22,7 @@ class MessageBar {
         duration: Duration(seconds: 5),
         content: Text(
           message,
+          textAlign: TextAlign.center,
           style: TextStyle(
             color: kLabelColor,
             fontSize: 16.0,
