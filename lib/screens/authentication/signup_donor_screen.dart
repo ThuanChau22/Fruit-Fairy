@@ -50,10 +50,10 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
       name: _lastName.text.trim(),
     );
     errors += _emailError = Validate.email(_email.text.trim());
-    errors += _passwordError = Validate.password(_password.text.trim());
+    errors += _passwordError = Validate.password(_password.text);
     errors += _confirmPasswordError = Validate.confirmPassword(
-      password: _password.text.trim(),
-      confirmPassword: _confirmPassword.text.trim(),
+      password: _password.text,
+      confirmPassword: _confirmPassword.text,
     );
     return errors.isEmpty;
   }
@@ -63,7 +63,7 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
       setState(() => _showSpinner = true);
       try {
         String email = _email.text.trim();
-        String password = _password.text.trim();
+        String password = _password.text;
         final AuthService auth = context.read<AuthService>();
         UserCredential newUser = await auth.signUp(
           email: email,
@@ -216,8 +216,8 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
           obscureText: _obscurePassword,
           onChanged: (value) {
             setState(() {
-              String password = _password.text.trim();
-              String confirmPassword = _confirmPassword.text.trim();
+              String password = _password.text;
+              String confirmPassword = _confirmPassword.text;
               _passwordError = Validate.password(password);
               if (confirmPassword.isNotEmpty) {
                 _confirmPasswordError = Validate.confirmPassword(
@@ -256,8 +256,8 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
       onChanged: (value) {
         setState(() {
           _confirmPasswordError = Validate.confirmPassword(
-            password: _password.text.trim(),
-            confirmPassword: _confirmPassword.text.trim(),
+            password: _password.text,
+            confirmPassword: _confirmPassword.text,
           );
         });
       },

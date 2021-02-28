@@ -72,7 +72,7 @@ class _SignInScreenState extends State<SignInScreen> {
   Future<bool> _validate() async {
     String errors = '';
     String email = _email.text.trim();
-    String password = _password.text.trim();
+    String password = _password.text;
     switch (_mode) {
       case AuthMode.Reset:
         errors = _emailError = Validate.checkEmail(email);
@@ -173,7 +173,7 @@ class _SignInScreenState extends State<SignInScreen> {
         default:
           try {
             String email = _email.text.trim();
-            String password = _password.text.trim();
+            String password = _password.text;
             AuthService auth = context.read<AuthService>();
             bool signedIn = await auth.signIn(
               email: email,
