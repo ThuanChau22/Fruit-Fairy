@@ -34,8 +34,8 @@ class FruitFairy extends StatelessWidget {
 class Authentication extends StatelessWidget {
   void _fetchAccount(BuildContext context, String uid) async {
     final FireStoreService fireStoreService = context.read<FireStoreService>();
-    context.read<FireStoreService>().uid = uid;
-    context.read<Account>().fromMap(await fireStoreService.getUserData());
+    context.read<FireStoreService>().uid(uid);
+    context.read<Account>().fromMap(await fireStoreService.userData);
   }
 
   @override

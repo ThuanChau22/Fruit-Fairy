@@ -15,6 +15,7 @@ const String kDBLastName = 'lastname';
 const String kDBPhone = 'phone';
 const String kDBPhoneNumber = 'number';
 const String kDBPhoneCountry = 'country';
+const String kDBPhoneDialCode = 'dialCode';
 const String kDBAddress = 'address';
 const String kDBAddressStreet = 'street';
 const String kDBAddressCity = 'city';
@@ -42,7 +43,6 @@ const kTextFieldInputDecoration = InputDecoration(
   ),
 );
 
-
 Widget kDivider() {
   return Divider(
     color: kLabelColor,
@@ -51,8 +51,6 @@ Widget kDivider() {
     endIndent: 20.0,
   );
 }
-
-
 
 List<String> kFruitImages = [
   'images/Peach.png',

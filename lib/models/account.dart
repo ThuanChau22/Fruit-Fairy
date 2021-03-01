@@ -3,13 +3,17 @@ import 'package:flutter/foundation.dart';
 import 'package:fruitfairy/constant.dart';
 
 class Account extends ChangeNotifier {
-  String _firstName;
-  String _lastName;
-  String _email;
+  String _email = '';
+  String _firstName = '';
+  String _lastName = '';
   Map<String, String> _phone = {};
   Map<String, String> _address = {};
 
   Account();
+
+  String get email {
+    return _email;
+  }
 
   String get firstName {
     return _firstName;
@@ -19,16 +23,17 @@ class Account extends ChangeNotifier {
     return _lastName;
   }
 
-  String get email {
-    return _email;
-  }
-
   UnmodifiableMapView<String, String> get phone {
     return UnmodifiableMapView(_phone);
   }
 
   UnmodifiableMapView<String, String> get address {
     return UnmodifiableMapView(_address);
+  }
+
+  void setEmail(String email) {
+    this._email = email;
+    notifyListeners();
   }
 
   void setFirstName(String firstName) {
@@ -41,33 +46,39 @@ class Account extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setEmail(String email) {
-    this._email = email;
-    notifyListeners();
-  }
-
-  void setPhoneNumber({String number, String country}) {
-    this._phone[kDBPhoneNumber] = number;
-    this._phone[kDBPhoneCountry] = country;
+  void setPhoneNumber({String country, String dialCode, String phoneNumber}) {
+    if (phoneNumber.isEmpty) {
+      this._phone = {};
+    } else {
+      this._phone[kDBPhoneCountry] = country;
+      this._phone[kDBPhoneDialCode] = dialCode;
+      this._phone[kDBPhoneNumber] = phoneNumber;
+    }
     notifyListeners();
   }
 
   void setAddress({String street, String city, String state, String zip}) {
-    this._address[kDBAddressStreet] = street;
-    this._address[kDBAddressCity] = city;
-    this._address[kDBAddressState] = state;
-    this._address[kDBAddressZip] = zip;
+    if (street.isEmpty && city.isEmpty && state.isEmpty && zip.isEmpty) {
+      this._address = {};
+    } else {
+      this._address[kDBAddressStreet] = street;
+      this._address[kDBAddressCity] = city;
+      this._address[kDBAddressState] = state;
+      this._address[kDBAddressZip] = zip;
+    }
+
     notifyListeners();
   }
 
   void fromMap(Map<String, dynamic> accountData) {
+    this._email = accountData[kDBEmail];
     this._firstName = accountData[kDBFirstName];
     this._lastName = accountData[kDBLastName];
-    this._email = accountData[kDBEmail];
     Map<String, dynamic> phone = accountData[kDBPhone];
     if (phone != null) {
-      this._phone[kDBPhoneNumber] = phone[kDBPhoneNumber];
       this._phone[kDBPhoneCountry] = phone[kDBPhoneCountry];
+      this._phone[kDBPhoneDialCode] = phone[kDBPhoneDialCode];
+      this._phone[kDBPhoneNumber] = phone[kDBPhoneNumber];
     }
     Map<String, dynamic> address = accountData[kDBAddress];
     if (address != null) {
@@ -76,6 +87,15 @@ class Account extends ChangeNotifier {
       this._address[kDBAddressState] = address[kDBAddressState];
       this._address[kDBAddressZip] = address[kDBAddressZip];
     }
+    notifyListeners();
+  }
+
+  void clear() {
+    this._email = '';
+    this._firstName = '';
+    this._lastName = '';
+    this._phone = {};
+    this._address = {};
     notifyListeners();
   }
 }
