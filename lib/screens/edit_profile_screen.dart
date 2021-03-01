@@ -32,9 +32,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final AutoScroll<Field> _scroller = AutoScroll(
     elements: {
       Field.Name: 0,
-      Field.Address: 1,
-      Field.Password: 2,
-      Field.Phone: 3,
+      Field.Phone: 1,
+      Field.Address: 2,
+      Field.Password: 3,
     },
   );
 
@@ -332,7 +332,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         _confirmCode.clear();
         _hasPhoneNumber = true;
         _updatePhoneRequestLabel = 'Send';
-        errorMessage = 'Phone Number Registered';
+        errorMessage = 'Phone Number Updated';
       }
       MessageBar(
         _scaffoldContext,
@@ -416,9 +416,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ),
                   child: Column(
                     children: [
-                      _scroller.wrap(
+                      inputGroupLabel(
+                        'Account',
                         tag: Field.Name,
-                        child: inputGroupLabel('Account Information'),
                       ),
                       emailInputField(),
                       inputFieldSizeBox(),
@@ -426,9 +426,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       inputFieldSizeBox(),
                       lastNameInputField(),
                       inputFieldSizeBox(),
-                      _scroller.wrap(
+                      inputGroupLabel(
+                        'Mobile Contact',
+                        tag: Field.Phone,
+                      ),
+                      phoneNumberField(),
+                      verifyCodeField(),
+                      removePhoneLink(),
+                      inputGroupLabel(
+                        'Address',
                         tag: Field.Address,
-                        child: inputGroupLabel('Address'),
                       ),
                       streetInputField(),
                       inputFieldSizeBox(),
@@ -438,9 +445,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       inputFieldSizeBox(),
                       zipInputField(),
                       inputFieldSizeBox(),
-                      _scroller.wrap(
+                      inputGroupLabel(
+                        'Change Password',
                         tag: Field.Password,
-                        child: inputGroupLabel('Change Password'),
                       ),
                       currentPasswordInputField(),
                       inputFieldSizeBox(),
@@ -450,18 +457,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       inputFieldSizeBox(),
                       saveButton(),
                       SizedBox(height: screen.height * 0.05),
-                      _scroller.wrap(
-                        tag: Field.Phone,
-                        child: inputGroupLabel('Mobile Contact'),
-                      ),
-                      phoneNumberField(),
-                      verifyCodeField(),
-                      inputFieldSizeBox(),
-                      Visibility(
-                        visible: _hasPhoneNumber,
-                        child: removePhoneLink(),
-                      ),
-                      SizedBox(height: screen.height * 0.05),
+                      deleteAccountLink(),
                     ],
                   ),
                 ),
@@ -473,31 +469,34 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  Widget inputGroupLabel(String label) {
+  Widget inputGroupLabel(String label, {Field tag}) {
     Size screen = MediaQuery.of(context).size;
-    return Padding(
-      padding: EdgeInsets.only(
-        left: screen.width * 0.05,
-        right: screen.width * 0.05,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: kLabelColor,
-              fontSize: 20.0,
-              fontWeight: FontWeight.bold,
+    return _scroller.wrap(
+      tag: tag,
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: screen.width * 0.05,
+          right: screen.width * 0.05,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                color: kLabelColor,
+                fontSize: 20.0,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-          Divider(
-            color: kLabelColor,
-            height: 2.0,
-            thickness: 2.0,
-          ),
-          SizedBox(height: screen.height * 0.02),
-        ],
+            Divider(
+              color: kLabelColor,
+              height: 2.0,
+              thickness: 2.0,
+            ),
+            SizedBox(height: screen.height * 0.02),
+          ],
+        ),
       ),
     );
   }
@@ -553,6 +552,115 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       onTap: () {
         MessageBar(_scaffoldContext).hide();
       },
+    );
+  }
+
+  Widget phoneNumberField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 3,
+              child: InputField(
+                label: 'Phone Number',
+                controller: _phoneNumber,
+                prefixText: _dialCode,
+                helperText: null,
+                onChanged: (value) async {
+                  _phoneError = await Validate.phoneNumber(
+                    phoneNumber: _phoneNumber.text.trim(),
+                    isoCode: _isoCode,
+                  );
+                  setState(() {});
+                },
+                onTap: () {
+                  MessageBar(_scaffoldContext).hide();
+                },
+              ),
+            ),
+            SizedBox(width: 5.0),
+            Expanded(
+              flex: 2,
+              child: RoundedButton(
+                label: _updatePhoneRequestLabel,
+                labelColor: kPrimaryColor,
+                onPressed: () {
+                  _updatePhoneRequest();
+                },
+              ),
+            ),
+          ],
+        ),
+        Padding(
+          padding: EdgeInsets.symmetric(
+            vertical: 4.0,
+            horizontal: 20.0,
+          ),
+          child: Text(
+            _phoneError,
+            style: TextStyle(
+              color: kErrorColor,
+              fontSize: 16.0,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget verifyCodeField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 3,
+              child: InputField(
+                label: '6-Digit Code',
+                controller: _confirmCode,
+                errorMessage: _confirmCodeError,
+                onTap: () {
+                  MessageBar(_scaffoldContext).hide();
+                },
+              ),
+            ),
+            SizedBox(width: 5.0),
+            Expanded(
+              flex: 2,
+              child: RoundedButton(
+                label: 'Verify',
+                labelColor: kPrimaryColor,
+                onPressed: () {
+                  _updatePhoneVerify();
+                },
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget removePhoneLink() {
+    Size screen = MediaQuery.of(context).size;
+    return Visibility(
+      visible: _hasPhoneNumber,
+      child: Column(
+        children: [
+          LabelLink(
+            label: 'Remove phone number',
+            onTap: () {
+              _removePhone();
+            },
+          ),
+          SizedBox(height: screen.height * 0.03),
+        ],
+      ),
     );
   }
 
@@ -728,103 +836,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  Widget phoneNumberField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              flex: 3,
-              child: InputField(
-                label: 'Phone Number',
-                controller: _phoneNumber,
-                prefixText: _dialCode,
-                helperText: null,
-                onChanged: (value) async {
-                  _phoneError = await Validate.phoneNumber(
-                    phoneNumber: _phoneNumber.text.trim(),
-                    isoCode: _isoCode,
-                  );
-                  setState(() {});
-                },
-                onTap: () {
-                  MessageBar(_scaffoldContext).hide();
-                },
-              ),
-            ),
-            SizedBox(width: 5.0),
-            Expanded(
-              flex: 2,
-              child: RoundedButton(
-                label: _updatePhoneRequestLabel,
-                labelColor: kPrimaryColor,
-                onPressed: () {
-                  _updatePhoneRequest();
-                },
-              ),
-            ),
-          ],
-        ),
-        Padding(
-          padding: EdgeInsets.symmetric(
-            vertical: 4.0,
-            horizontal: 20.0,
-          ),
-          child: Text(
-            _phoneError,
-            style: TextStyle(
-              color: kErrorColor,
-              fontSize: 16.0,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget verifyCodeField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              flex: 3,
-              child: InputField(
-                label: '6-Digit Code',
-                controller: _confirmCode,
-                errorMessage: _confirmCodeError,
-                onTap: () {
-                  MessageBar(_scaffoldContext).hide();
-                },
-              ),
-            ),
-            SizedBox(width: 5.0),
-            Expanded(
-              flex: 2,
-              child: RoundedButton(
-                label: 'Verify',
-                labelColor: kPrimaryColor,
-                onPressed: () {
-                  _updatePhoneVerify();
-                },
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget removePhoneLink() {
+  Widget deleteAccountLink() {
     return LabelLink(
-      label: 'Remove Phone Number',
-      onTap: () {
-        _removePhone();
-      },
+      label: 'I want to delete this account',
+      onTap: () {},
     );
   }
 }
