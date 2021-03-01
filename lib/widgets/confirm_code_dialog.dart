@@ -35,7 +35,7 @@ class ConfirmCodeDialog {
         padding: EdgeInsets.only(top: 20.0),
         child: InputField(
           label: 'Code',
-          // controller: confirmCodeController,
+          controller: confirmCodeController,
           onTap: () {
             MessageBar(scaffoldContext).hide();
           },

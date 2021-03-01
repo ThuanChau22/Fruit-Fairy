@@ -72,4 +72,29 @@ class FireStoreService {
       throw e.message;
     }
   }
+
+  Future<void> updatePhoneNumber({
+    String country,
+    String dialCode,
+    String phoneNumber,
+  }) async {
+    try {
+      DocumentReference doc = _firestore.collection(kDBUsers).doc(userId);
+      if (phoneNumber.isEmpty) {
+        await doc.update({
+          kDBPhone: FieldValue.delete(),
+        });
+      } else {
+        await doc.update({
+          kDBPhone: {
+            kDBPhoneCountry: country,
+            kDBPhoneDialCode: dialCode,
+            kDBPhoneNumber: phoneNumber,
+          },
+        });
+      }
+    } catch (e) {
+      throw e.message;
+    }
+  }
 }

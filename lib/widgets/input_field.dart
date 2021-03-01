@@ -10,6 +10,8 @@ class InputField extends StatelessWidget {
   final bool obscureText;
   final bool readOnly;
   final int maxLength;
+  final String helperText;
+  final String prefixText;
   final ValueChanged<String> onChanged;
   final GestureTapCallback onTap;
 
@@ -22,6 +24,8 @@ class InputField extends StatelessWidget {
     this.obscureText = false,
     this.readOnly = false,
     this.maxLength,
+    this.helperText = '',
+    this.prefixText,
     this.onChanged,
     this.onTap,
   });
@@ -55,9 +59,14 @@ class InputField extends StatelessWidget {
         fontSize: 16.0,
       ),
       errorMaxLines: 1,
-      helperText: '',
+      helperText: helperText,
       helperStyle: TextStyle(
         color: kLabelColor,
+      ),
+      prefixText: prefixText,
+      prefixStyle: TextStyle(
+        color: kLabelColor,
+        fontSize: 16.0,
       ),
       contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
       filled: true,
@@ -80,6 +89,10 @@ class InputField extends StatelessWidget {
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderSide: BorderSide(color: kErrorColor, width: 2.0),
+        borderRadius: BorderRadius.all(Radius.circular(32.0)),
+      ),
+      disabledBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: kErrorColor, width: 1.0),
         borderRadius: BorderRadius.all(Radius.circular(32.0)),
       ),
     );

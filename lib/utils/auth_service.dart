@@ -22,7 +22,7 @@ class AuthService {
         password: password,
       );
       if (newUser != null) {
-        await _firebaseAuth.currentUser.sendEmailVerification();
+        await user.sendEmailVerification();
       }
     } catch (e) {
       throw e.message;
@@ -35,21 +35,22 @@ class AuthService {
     String password,
   }) async {
     try {
-      UserCredential user = await _firebaseAuth.signInWithEmailAndPassword(
+      UserCredential userCredential =
+          await _firebaseAuth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-      if (user != null) {
-        if (_firebaseAuth.currentUser.emailVerified) {
+      if (userCredential != null) {
+        if (user.emailVerified) {
           return true;
         } else {
-          await _firebaseAuth.currentUser.sendEmailVerification();
+          await user.sendEmailVerification();
           return false;
         }
       }
     } catch (e) {
       if (e.code == 'too-many-requests') {
-        throw 'Please check your email or sign in again shortly';
+        throw 'Please wait a moment and sign in again shortly';
       }
       if (e.code == 'user-disabled') {
         throw 'Your account has been disabled';
@@ -65,8 +66,8 @@ class AuthService {
   Future<void> signInWithPhone({
     String phoneNumber,
     Function completed,
-    Function failed,
     Function codeSent,
+    Function failed,
   }) async {
     await _firebaseAuth.verifyPhoneNumber(
       timeout: Duration(seconds: 5),
@@ -74,10 +75,10 @@ class AuthService {
       verificationCompleted: (PhoneAuthCredential credential) async {
         try {
           if (await _firebaseAuth.signInWithCredential(credential) != null) {
-            if (_firebaseAuth.currentUser.email != null) {
+            if (user.email != null) {
               completed('');
             } else {
-              await _firebaseAuth.currentUser.delete();
+              await user.delete();
               // TODO: Ask user to register first
               completed('Register first');
             }
@@ -94,10 +95,10 @@ class AuthService {
               smsCode: smsCode,
             );
             if (await _firebaseAuth.signInWithCredential(credential) != null) {
-              if (_firebaseAuth.currentUser.email != null) {
+              if (user.email != null) {
                 return '';
               } else {
-                await _firebaseAuth.currentUser.delete();
+                await user.delete();
                 // TODO: Ask user to register first
                 return 'Register first';
               }
@@ -127,6 +128,70 @@ class AuthService {
     );
   }
 
+  Future<void> registerPhone({
+    String phoneNumber,
+    bool update = false,
+    Function codeSent,
+    Function failed,
+  }) async {
+    await _firebaseAuth.verifyPhoneNumber(
+      timeout: Duration(seconds: 5),
+      phoneNumber: phoneNumber,
+      codeSent: (String verificationId, int resendToken) {
+        codeSent((smsCode) async {
+          try {
+            PhoneAuthCredential credential = PhoneAuthProvider.credential(
+              verificationId: verificationId,
+              smsCode: smsCode,
+            );
+            if (update) {
+              await user.updatePhoneNumber(credential);
+            } else {
+              await user.linkWithCredential(credential);
+            }
+          } catch (e) {
+            if (e.code == 'invalid-verification-code' ||
+                e.code == 'invalid-verification-id') {
+              return 'Invalid verification code. Please try again!';
+            }
+            if (e.code == 'session-expired') {
+              return 'Verification code has expired. Please re-send to try again!';
+            }
+            if (e.code == 'credential-already-in-use') {
+              //TODO: Tell user phone number is used by other
+              return 'Phone Number is being used by another account';
+            }
+            print(e);
+          }
+          return '';
+        });
+      },
+      verificationFailed: (FirebaseAuthException e) {
+        //TODO: too many request on phone auth
+        if (e.code == 'too-many-requests') {
+          failed(e.message);
+        }
+        print(e);
+      },
+      verificationCompleted: (PhoneAuthCredential credential) {
+        print('Complete');
+      },
+      codeAutoRetrievalTimeout: (String verificationId) {
+        print('Timeout');
+      },
+    );
+  }
+
+  Future<bool> removePhone() async {
+    for (UserInfo userInfo in user.providerData) {
+      if (userInfo.providerId == PhoneAuthProvider.PROVIDER_ID) {
+        await user.unlink(PhoneAuthProvider.PROVIDER_ID);
+        return true;
+      }
+    }
+    return false;
+  }
+
   Future<void> updatePassword({
     String email,
     String oldPassword,
@@ -137,8 +202,8 @@ class AuthService {
         email: email,
         password: oldPassword,
       );
-      await _firebaseAuth.currentUser.reauthenticateWithCredential(credential);
-      await _firebaseAuth.currentUser.updatePassword(newPassword);
+      await user.reauthenticateWithCredential(credential);
+      await user.updatePassword(newPassword);
     } catch (e) {
       if (e.code == 'wrong-password') {
         throw 'Incorrect Current Password. Please try again!';

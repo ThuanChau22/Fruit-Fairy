@@ -11,7 +11,6 @@ import 'package:fruitfairy/widgets/input_field.dart';
 import 'package:fruitfairy/widgets/label_link.dart';
 import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/obscure_icon.dart';
-import 'package:fruitfairy/widgets/phone_input_field.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
@@ -42,9 +41,9 @@ class _SignInScreenState extends State<SignInScreen> {
 
   TextEditingController _email = TextEditingController();
   TextEditingController _password = TextEditingController();
-  String _phone = '';
-  String _dialCode = '';
-  String _isoCode = 'US';
+
+  String _isoCode = 'US', _dialCode = '+1';
+  TextEditingController _phoneNumber = TextEditingController();
   TextEditingController _confirmCode = TextEditingController();
 
   String _emailError = '';
@@ -63,6 +62,9 @@ class _SignInScreenState extends State<SignInScreen> {
       setState(() {
         _email.text = credentials[StoreCredential.email];
         _password.text = credentials[StoreCredential.password];
+        _phoneNumber.text = credentials[StoreCredential.phone];
+        _isoCode = credentials[StoreCredential.isoCode];
+        _dialCode = credentials[StoreCredential.dialCode];
         _rememberMe = true;
       });
     }
@@ -79,8 +81,8 @@ class _SignInScreenState extends State<SignInScreen> {
         break;
 
       case AuthMode.Phone:
-        errors = _phoneError = await Validate.validatePhoneNumber(
-          phoneNumber: _phone,
+        errors = _phoneError = await Validate.phoneNumber(
+          phoneNumber: _phoneNumber.text.trim(),
           isoCode: _isoCode,
         );
         break;
@@ -122,7 +124,7 @@ class _SignInScreenState extends State<SignInScreen> {
         case AuthMode.Phone:
           AuthService auth = context.read<AuthService>();
           await auth.signInWithPhone(
-            phoneNumber: '$_dialCode$_phone',
+            phoneNumber: '$_dialCode${_phoneNumber.text.trim()}',
             completed: (String errorMessage) {
               if (errorMessage.isEmpty) {
                 _signInSuccess();
@@ -142,7 +144,7 @@ class _SignInScreenState extends State<SignInScreen> {
                 });
               }
             },
-            failed: (String errorMessage) {
+            failed: (errorMessage) {
               MessageBar(
                 _scaffoldContext,
                 message: errorMessage,
@@ -152,7 +154,7 @@ class _SignInScreenState extends State<SignInScreen> {
           // TODO: After continue
           MessageBar(
             _scaffoldContext,
-            message: 'Doing something...',
+            message: 'Sending...',
           ).show();
           break;
 
@@ -180,13 +182,6 @@ class _SignInScreenState extends State<SignInScreen> {
               password: password,
             );
             if (signedIn) {
-              await StoreCredential.detele();
-              if (_rememberMe) {
-                await StoreCredential.store(
-                  email: email,
-                  password: password,
-                );
-              }
               _signInSuccess();
             } else {
               _showConfirmEmailMessage();
@@ -204,6 +199,16 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   void _signInSuccess() async {
+    await StoreCredential.detele();
+    if (_rememberMe) {
+      await StoreCredential.store(
+        email: _email.text.trim(),
+        password: _password.text,
+        phoneNumber: _phoneNumber.text.trim(),
+        isoCode: _isoCode,
+        dialCode: _dialCode,
+      );
+    }
     FireStoreService fireStoreService = context.read<FireStoreService>();
     fireStoreService.uid(context.read<AuthService>().user.uid);
     context.read<Account>().fromMap(await fireStoreService.userData);
@@ -244,6 +249,7 @@ class _SignInScreenState extends State<SignInScreen> {
     super.dispose();
     _email.dispose();
     _password.dispose();
+    _phoneNumber.dispose();
   }
 
   @override
@@ -428,17 +434,14 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   Widget phoneNumberField() {
-    return PhoneInputField(
-      initialPhoneNumber: _phone,
-      initialSelection: _isoCode,
+    return InputField(
+      label: 'Phone Number',
+      controller: _phoneNumber,
+      prefixText: _dialCode,
       errorMessage: _phoneError,
-      showDropdownIcon: false,
-      onPhoneNumberChanged: (phoneNumber, intlNumber, isoCode) async {
-        _phone = phoneNumber;
-        _isoCode = isoCode;
-        _dialCode = intlNumber.substring(0, intlNumber.indexOf(phoneNumber));
-        _phoneError = await Validate.validatePhoneNumber(
-          phoneNumber: _phone,
+      onChanged: (value) async {
+        _phoneError = await Validate.phoneNumber(
+          phoneNumber: _phoneNumber.text.trim(),
           isoCode: _isoCode,
         );
         setState(() {});

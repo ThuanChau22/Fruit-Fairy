@@ -69,7 +69,7 @@ class Validate {
 
   /// Validate phone number
   /// Return empty String on correct [phoneNumber] and [isoCode]
-  static Future<String> validatePhoneNumber(
+  static Future<String> phoneNumber(
       {String phoneNumber, String isoCode}) async {
     if (phoneNumber.isNotEmpty && isoCode.isNotEmpty) {
       bool isValid = await PhoneService.parsePhoneNumber(phoneNumber, isoCode);

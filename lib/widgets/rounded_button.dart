@@ -25,7 +25,7 @@ class RoundedButton extends StatelessWidget {
       color: backgroundColor,
       borderRadius: BorderRadius.circular(30.0),
       child: MaterialButton(
-        height: 50.0,
+        height: 48.0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30.0),
         ),
@@ -36,7 +36,7 @@ class RoundedButton extends StatelessWidget {
         },
         child: Row(
           children: [
-            leading ?? SizedBox(width: 20),
+            leading ?? SizedBox.shrink(),
             Expanded(
               child: Text(
                 label,
@@ -48,7 +48,7 @@ class RoundedButton extends StatelessWidget {
                 ),
               ),
             ),
-            trailing ?? SizedBox(width: 20),
+            trailing ?? SizedBox.shrink(),
           ],
         ),
       ),
