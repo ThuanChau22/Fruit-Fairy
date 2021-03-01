@@ -261,6 +261,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       } else {
         updateMessage = 'Profile is Up-to-date';
       }
+      _getAccountInfo();
     } else {
       _scrollToError();
       updateMessage = errorMessage;
