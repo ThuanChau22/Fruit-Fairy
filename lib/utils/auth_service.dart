@@ -122,9 +122,7 @@ class AuthService {
         }
         print(e);
       },
-      codeAutoRetrievalTimeout: (String verificationId) {
-        print('Timeout');
-      },
+      codeAutoRetrievalTimeout: (String verificationId) {},
     );
   }
 
@@ -173,12 +171,8 @@ class AuthService {
         }
         print(e);
       },
-      verificationCompleted: (PhoneAuthCredential credential) {
-        print('Complete');
-      },
-      codeAutoRetrievalTimeout: (String verificationId) {
-        print('Timeout');
-      },
+      verificationCompleted: (PhoneAuthCredential credential) {},
+      codeAutoRetrievalTimeout: (String verificationId) {},
     );
   }
 
