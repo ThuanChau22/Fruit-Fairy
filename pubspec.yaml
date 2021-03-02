@@ -25,6 +25,7 @@ dependencies:
   strings: ^0.1.4
   international_phone_input: ^1.0.4
   rflutter_alert: ^1.1.0
+  scroll_to_index: ^1.0.6
 
 dev_dependencies:
   flutter_test:

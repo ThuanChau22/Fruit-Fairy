@@ -30,6 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => _showSpinner = true);
     try {
       await context.read<AuthService>().signOut();
+      context.read<Account>().clear();
       Navigator.of(context).pushNamedAndRemoveUntil(
         SignOptionScreen.id,
         (route) => false,
@@ -50,7 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
         String firstName = account.firstName;
         String lastName = account.lastName;
         _showSpinner = true;
-        if (firstName != null && lastName != null) {
+        if (firstName.isNotEmpty && lastName.isNotEmpty) {
           _initialName = '${firstName[0] + lastName[0]}'.toUpperCase();
           _name = camelize(firstName);
           _showSpinner = false;

@@ -106,6 +106,12 @@ class _PhoneInputFieldState extends State<PhoneInputField> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    phoneTextController.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
       child: Column(
@@ -133,7 +139,7 @@ class _PhoneInputFieldState extends State<PhoneInputField> {
             child: Icon(Icons.arrow_drop_down, color: kLabelColor),
           ),
           iconSize: widget.showDropdownIcon ? 24.0 : 0.0,
-          dropdownColor: kObjectBackgroundColor.withOpacity(0.3),
+          dropdownColor: kLabelColor.withOpacity(0.5),
           onChanged: (Country newValue) {
             setState(() {
               selectedCountry = newValue;
@@ -165,6 +171,7 @@ class _PhoneInputFieldState extends State<PhoneInputField> {
                         value.dialCode,
                         style: TextStyle(
                           color: kLabelColor,
+                          fontWeight: FontWeight.bold,
                         ),
                       )
                     ]

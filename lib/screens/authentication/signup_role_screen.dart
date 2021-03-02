@@ -41,7 +41,6 @@ class SignUpRoleScreen extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: screen.height * 0.04),
-                // SizedBox(height: screen.height * 0.15),
                 Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: screen.width * 0.12,
