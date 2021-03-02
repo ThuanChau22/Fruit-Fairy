@@ -125,9 +125,9 @@ class _SignInScreenState extends State<SignInScreen> {
           AuthService auth = context.read<AuthService>();
           await auth.signInWithPhone(
             phoneNumber: '$_dialCode${_phoneNumber.text.trim()}',
-            completed: (String errorMessage) {
+            completed: (String errorMessage) async {
               if (errorMessage.isEmpty) {
-                _signInSuccess();
+                await _signInSuccess();
               } else {
                 MessageBar(
                   _scaffoldContext,
@@ -161,7 +161,7 @@ class _SignInScreenState extends State<SignInScreen> {
         case AuthMode.VerifyCode:
           String errorMessage = await verifyCode(_confirmCode.text.trim());
           if (errorMessage.isEmpty) {
-            _signInSuccess();
+            await _signInSuccess();
           } else {
             //TODO: Error message from code sent
             MessageBar(
@@ -182,7 +182,7 @@ class _SignInScreenState extends State<SignInScreen> {
               password: password,
             );
             if (signedIn) {
-              _signInSuccess();
+              await _signInSuccess();
             } else {
               _showConfirmEmailMessage();
             }
@@ -198,7 +198,7 @@ class _SignInScreenState extends State<SignInScreen> {
     }
   }
 
-  void _signInSuccess() async {
+  Future<void> _signInSuccess() async {
     await StoreCredential.detele();
     if (_rememberMe) {
       await StoreCredential.store(
