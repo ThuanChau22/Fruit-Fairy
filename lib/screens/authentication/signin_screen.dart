@@ -154,7 +154,7 @@ class _SignInScreenState extends State<SignInScreen> {
           // TODO: After continue
           MessageBar(
             _scaffoldContext,
-            message: 'Sending...',
+            message: 'Message Sent',
           ).show();
           break;
 

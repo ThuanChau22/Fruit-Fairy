@@ -180,7 +180,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           return errorMessage;
         }
       } else {
-        return 'Please check your input';
+        return 'Please check your inputs';
       }
     }
     return '';
@@ -238,7 +238,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           return errorMessage;
         }
       } else {
-        return 'Please check your input';
+        return 'Please check your inputs';
       }
     }
     return '';
@@ -274,6 +274,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   void _updatePhoneRequest() async {
+    setState(() => _showSpinner = true);
     if (_hasChanges(Field.Phone)) {
       String phoneNumber = _phoneNumber.text.trim();
       _phoneError = await Validate.phoneNumber(
@@ -301,7 +302,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         //TODO: Notify message
         MessageBar(
           _scaffoldContext,
-          message: 'Sending...',
+          message: 'Message Sent',
         ).show();
         _confirmCode.clear();
         _updatePhoneRequestLabel = 'Re-send';
@@ -312,10 +313,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         message: 'Phone Number Already Registered',
       ).show();
     }
-    setState(() {});
+    setState(() => _showSpinner = false);
   }
 
   void _updatePhoneVerify() async {
+    setState(() => _showSpinner = true);
     if (_hasChanges(Field.Phone) && verifyCode != null) {
       String errorMessage = await verifyCode(_confirmCode.text.trim());
       if (errorMessage.isEmpty) {
@@ -330,6 +332,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               dialCode: _dialCode,
               phoneNumber: phoneNumber,
             );
+        _phoneNumber.text = phoneNumber;
         _confirmCode.clear();
         _hasPhoneNumber = true;
         _updatePhoneRequestLabel = 'Send';
@@ -340,32 +343,28 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         message: errorMessage,
       ).show();
     }
-    setState(() {});
+    setState(() => _showSpinner = false);
   }
 
   void _removePhone() async {
+    setState(() => _showSpinner = true);
     AuthService auth = context.read<AuthService>();
     if (auth.user.phoneNumber.isNotEmpty) {
-      auth.removePhone().then((removed) async {
-        if (removed) {
-          await context.read<FireStoreService>().updatePhoneNumber(
-                phoneNumber: '',
-              );
-          context.read<Account>().setPhoneNumber(phoneNumber: '');
-          _phoneNumber.clear();
-          _hasPhoneNumber = false;
-          MessageBar(
-            _scaffoldContext,
-            message: 'Phone Number Removed',
-          ).show();
-        }
-        setState(() {});
-      });
-      MessageBar(
-        _scaffoldContext,
-        message: 'Removing Phone Number',
-      ).show();
+      bool removed = await auth.removePhone();
+      if (removed) {
+        await context.read<FireStoreService>().updatePhoneNumber(
+              phoneNumber: '',
+            );
+        context.read<Account>().setPhoneNumber(phoneNumber: '');
+        _phoneNumber.clear();
+        _hasPhoneNumber = false;
+        MessageBar(
+          _scaffoldContext,
+          message: 'Phone Number Removed',
+        ).show();
+      }
     }
+    setState(() => _showSpinner = false);
   }
 
   @override
@@ -839,7 +838,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   Widget deleteAccountLink() {
     return LabelLink(
-      label: 'I want to delete this account',
+      label: 'Delete this account',
       onTap: () {},
     );
   }
