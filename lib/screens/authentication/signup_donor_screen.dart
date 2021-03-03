@@ -11,7 +11,6 @@ import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/obscure_icon.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
@@ -66,12 +65,12 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
         String email = _email.text.trim();
         String password = _password.text;
         AuthService auth = context.read<AuthService>();
-        UserCredential newUser = await auth.signUp(
+        String notifyMessage = await auth.signUp(
           email: email,
           password: password,
         );
         FireStoreService fireStore = context.read<FireStoreService>();
-        fireStore.uid(newUser.user.uid);
+        fireStore.uid(auth.user.uid);
         await fireStore.addUser(
           email: email,
           firstName: _firstName.text.trim(),
@@ -83,9 +82,9 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
             return route.settings.name == SignOptionScreen.id;
           },
           arguments: {
-            SignInScreen.credentialObject: newUser,
             SignInScreen.email: email,
             SignInScreen.password: password,
+            SignInScreen.message: notifyMessage,
           },
         );
       } catch (e) {

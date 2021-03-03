@@ -13,6 +13,7 @@ import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
 import 'package:provider/provider.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 enum Field {
   Name,
@@ -72,7 +73,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   String _phoneError = '';
   String _confirmCodeError = '';
 
-  Future<String> Function(String smsCode) verifyCode;
+  Future<String> Function(String smsCode) _verifyCode;
 
   BuildContext _scaffoldContext;
 
@@ -180,7 +181,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           return errorMessage;
         }
       } else {
-        return 'Please check your inputs';
+        return 'Please check your inputs!';
       }
     }
     return '';
@@ -238,7 +239,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           return errorMessage;
         }
       } else {
-        return 'Please check your inputs';
+        return 'Please check your inputs!';
       }
     }
     return '';
@@ -257,9 +258,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (errorMessage.isEmpty) {
       if (_updatedName || _updatedAddress || _updatedPassword) {
         _updatedName = _updatedAddress = _updatedPassword = false;
-        updateMessage = 'Profile Updated';
+        updateMessage = 'Profile updated';
       } else {
-        updateMessage = 'Profile is Up-to-date';
+        updateMessage = 'Profile is up-to-date';
       }
       _getAccountInfo();
     } else {
@@ -283,13 +284,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       );
       if (_phoneError.isEmpty) {
         AuthService auth = context.read<AuthService>();
-        auth.registerPhone(
+        String notifyMessage = await auth.registerPhone(
           phoneNumber: '$_dialCode$phoneNumber',
           update: context.read<Account>().phone.isNotEmpty,
-          codeSent:
-              (Future<String> Function(String smsCode) verifyFunction) async {
-            if (verifyFunction != null) {
-              verifyCode = verifyFunction;
+          codeSent: (verifyCode) async {
+            if (verifyCode != null) {
+              _verifyCode = verifyCode;
             }
           },
           failed: (errorMessage) {
@@ -299,18 +299,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             ).show();
           },
         );
-        //TODO: Notify message
-        MessageBar(
-          _scaffoldContext,
-          message: 'Message Sent',
-        ).show();
         _confirmCode.clear();
         _updatePhoneRequestLabel = 'Re-send';
+        MessageBar(
+          _scaffoldContext,
+          message: notifyMessage,
+        ).show();
       }
     } else {
       MessageBar(
         _scaffoldContext,
-        message: 'Phone Number Already Registered',
+        message: 'Phone number already registered',
       ).show();
     }
     setState(() => _showSpinner = false);
@@ -318,8 +317,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   void _updatePhoneVerify() async {
     setState(() => _showSpinner = true);
-    if (_hasChanges(Field.Phone) && verifyCode != null) {
-      String errorMessage = await verifyCode(_confirmCode.text.trim());
+    if (_hasChanges(Field.Phone) && _verifyCode != null) {
+      String errorMessage = await _verifyCode(_confirmCode.text.trim());
       if (errorMessage.isEmpty) {
         String phoneNumber = _phoneNumber.text.trim();
         await context.read<FireStoreService>().updatePhoneNumber(
@@ -336,7 +335,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         _confirmCode.clear();
         _hasPhoneNumber = true;
         _updatePhoneRequestLabel = 'Send';
-        errorMessage = 'Phone Number Updated';
+        errorMessage = 'Phone number updated';
       }
       MessageBar(
         _scaffoldContext,
@@ -360,7 +359,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         _hasPhoneNumber = false;
         MessageBar(
           _scaffoldContext,
-          message: 'Phone Number Removed',
+          message: 'Phone number removed',
         ).show();
       }
     }
@@ -839,7 +838,72 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget deleteAccountLink() {
     return LabelLink(
       label: 'Delete this account',
-      onTap: () {},
+      onTap: () {
+        showDeleteDialog();
+        MessageBar(_scaffoldContext).hide();
+      },
     );
+  }
+
+  TextEditingController controller = TextEditingController();
+  void showDeleteDialog() {
+    Alert(
+      context: context,
+      title: 'Delete account dialog',
+      style: AlertStyle(
+        titleStyle: TextStyle(
+          color: kLabelColor,
+          fontWeight: FontWeight.bold,
+        ),
+        backgroundColor: kPrimaryColor,
+        overlayColor: Colors.black.withOpacity(0.5),
+        isCloseButton: false,
+        isOverlayTapDismiss: false,
+      ),
+      content: Padding(
+        padding: EdgeInsets.only(top: 20.0),
+        child: InputField(
+          label: 'Password',
+          controller: controller,
+          onTap: () {},
+        ),
+      ),
+      buttons: [
+        DialogButton(
+          color: kObjectBackgroundColor,
+          radius: BorderRadius.circular(30.0),
+          width: 150.0,
+          height: 50.0,
+          child: Text(
+            'Delete',
+            style: TextStyle(
+              color: kPrimaryColor,
+              fontSize: 20.0,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          onPressed: () {
+            controller.text.trim();
+          },
+        ),
+        DialogButton(
+          color: kObjectBackgroundColor,
+          radius: BorderRadius.circular(30.0),
+          width: 150.0,
+          height: 50.0,
+          child: Text(
+            'Cancel',
+            style: TextStyle(
+              color: kPrimaryColor,
+              fontSize: 20.0,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          onPressed: () {
+            controller.text.trim();
+          },
+        ),
+      ],
+    ).show();
   }
 }

@@ -24,7 +24,7 @@ class Validate {
   /// Return empty String on correct [email]
   static String email(String email) {
     if (email.isEmpty) {
-      return 'Please enter Email\n';
+      return 'Please enter email\n';
     }
     if (!RegExp(
             r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
@@ -38,7 +38,7 @@ class Validate {
   /// Return empty String on correct [password]
   static String password(String password) {
     if (password.isEmpty) {
-      return 'Please enter Password\n';
+      return 'Please enter password\n';
     }
     if (!RegExp(r'[A-Z]').hasMatch(password)) {
       return 'Requires at least one uppercase\n';
@@ -59,7 +59,7 @@ class Validate {
   /// Return empty String on correct [confirmPassword]
   static String confirmPassword({String password, String confirmPassword}) {
     if (confirmPassword.isEmpty) {
-      return 'Please confirm your Password\n';
+      return 'Please confirm your password\n';
     }
     if (password != confirmPassword) {
       return 'Passwords do not match\n';
@@ -81,18 +81,18 @@ class Validate {
   /// Simple check email on signin
   /// Return empty String on correct [email]
   static String checkEmail(String email) {
-    return email.isEmpty ? 'Please enter Email\n' : '';
+    return email.isEmpty ? 'Please enter email\n' : '';
   }
 
   /// Simple check password on signin
   /// Return empty String on correct [password]
   static String checkPassword(String password) {
-    return password.isEmpty ? 'Please enter Password\n' : '';
+    return password.isEmpty ? 'Please enter password\n' : '';
   }
 
   /// Simple check confirmation code on verifying
   /// Return empty String on correct [confirmationCode]
   static String checkConfirmCode(String confirmationCode) {
-    return confirmationCode.isEmpty ? 'Please enter Verification Code\n' : '';
+    return confirmationCode.isEmpty ? 'Please enter verification code\n' : '';
   }
 }
