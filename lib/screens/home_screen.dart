@@ -60,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
           backgroundColor: kPrimaryColor,
           appBar: AppBar(
               backgroundColor: kAppBarColor,
-              title: Text('Profile'),
+              title: Text('Home Page'),
               centerTitle: true,
               actions: [
                 initialIcon(),

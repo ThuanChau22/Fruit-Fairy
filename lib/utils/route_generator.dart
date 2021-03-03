@@ -7,6 +7,8 @@ import 'package:fruitfairy/screens/donation_cart_screen.dart';
 import 'package:fruitfairy/screens/edit_profile_screen.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
 import 'package:fruitfairy/screens/picking_fruit_screen.dart';
+import 'package:fruitfairy/screens/confirmation_donation_screen.dart';
+import 'package:fruitfairy/screens/temp_fruit_with_quantity.dart';
 
 // A class that generate screen routes associate with screen names
 // including animation and passing arguments in transition
@@ -21,6 +23,9 @@ class RouteGenerator {
     EditProfileScreen.id: EditProfileScreen(),
     PickingFruitScreen.id: PickingFruitScreen(),
     DonationCartScreen.id: DonationCartScreen(),
+    ConfirmationDonationScreen.id: ConfirmationDonationScreen(),
+    FruitQuantity.id: FruitQuantity(),
+
   };
 
   static Route<dynamic> generate(RouteSettings settings) {

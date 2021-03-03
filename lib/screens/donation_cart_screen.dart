@@ -3,6 +3,7 @@ import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/widgets/fruit_image_with_remove_button.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
+import 'package:fruitfairy/screens/temp_fruit_with_quantity.dart';
 
 class DonationCartScreen extends StatefulWidget {
   static const String id = 'donation_cart_screen';
@@ -130,19 +131,21 @@ class _DonationCartScreenState extends State<DonationCartScreen> {
         selectedFruits(),
         SizedBox(height: screen.height * 0.02),
         kDivider(),
-        Container(
-          height: screen.height * 0.325,
-          child: ListView(
-            shrinkWrap: true,
-            physics: AlwaysScrollableScrollPhysics(),
-            children: [
-              SizedBox(height: screen.height * 0.02),
-              fillInFields(),
-              button(),
-              SizedBox(height: screen.height * 0.02),
-            ],
-          ),
-        ),
+        button(),
+        SizedBox(height: screen.height * 0.02),
+        // Container(
+        //   height: screen.height * 0.325,
+        //   child: ListView(
+        //     shrinkWrap: true,
+        //     physics: AlwaysScrollableScrollPhysics(),
+        //     children: [
+        //       SizedBox(height: screen.height * 0.02),
+        //       //fillInFields(),
+        //       //button(),
+        //       SizedBox(height: screen.height * 0.02),
+        //     ],
+        //   ),
+        // ),
       ],
     );
   }
@@ -161,10 +164,16 @@ class _DonationCartScreenState extends State<DonationCartScreen> {
         mainAxisSpacing: 20,
         crossAxisCount: 2,
         children: [
-          for (int i = 0; i < 1; i++)
+          for (int i = 0; i < 6; i++)
             FruitImageWithRemove(
               fruitImage: AssetImage(kFruitImages[i]),
-              fruitName: Text(kFruitNames[i]),
+              fruitName: Text(
+                kFruitNames[i],
+                style: TextStyle(
+                    color: kPrimaryColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20.0),
+              ),
             ),
         ],
       ),
@@ -224,13 +233,15 @@ class _DonationCartScreenState extends State<DonationCartScreen> {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: screen.width * 0.3),
       child: RoundedButton(
-        label: 'Confirm',
+        label: 'Next',
         labelColor: kPrimaryColor,
         backgroundColor: kObjectBackgroundColor,
         onPressed: () {
-          //Navigator.of(context).pushNamed(DonationCartScreen.id);
+          Navigator.of(context).pushNamed(FruitQuantity.id);
         },
       ),
     );
   }
+
+
 }

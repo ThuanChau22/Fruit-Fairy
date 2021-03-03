@@ -396,7 +396,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       backgroundColor: kPrimaryColor,
       appBar: AppBar(
         backgroundColor: kAppBarColor,
-        title: Text('Edit Profile'),
+        title: Text('Profile'),
         centerTitle: true,
       ),
       body: Builder(
