@@ -5,7 +5,6 @@ import 'package:fruitfairy/utils/firestore_service.dart';
 import 'package:fruitfairy/utils/route_generator.dart';
 import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
-import 'package:fruitfairy/widgets/gesture_wrapper.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
@@ -46,7 +45,15 @@ class Authentication extends StatelessWidget {
     if (signedIn) {
       _fetchAccount(context, user.uid);
     }
-    return GestureWapper(
+    return GestureDetector(
+      onTap: () {
+        // Dismiss on screen keyboard
+        FocusScopeNode currentFocus = FocusScope.of(context);
+        if (!currentFocus.hasPrimaryFocus &&
+            currentFocus.focusedChild != null) {
+          currentFocus.focusedChild.unfocus();
+        }
+      },
       child: MaterialApp(
         onGenerateRoute: RouteGenerator.generate,
         initialRoute: signedIn ? HomeScreen.id : SignOptionScreen.id,
