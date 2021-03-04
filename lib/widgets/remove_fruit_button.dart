@@ -21,7 +21,8 @@ Widget kRemoveButton() {
               color: kLabelColor,
               size: 16.0,
             ),
-            onPressed: () {},
+            onPressed: () {
+            },
           ),
         ),
       ),

@@ -7,7 +7,9 @@ import 'package:fruitfairy/screens/temp_fruit_with_quantity.dart';
 class DonationCartScreen extends StatefulWidget {
   static const String id = 'donation_cart_screen';
   List<int> fruitList;
-  DonationCartScreen(this.fruitList);
+  List<String> fruitNames;
+  DonationCartScreen(this.fruitList, this.fruitNames);
+
 
   @override
   _DonationCartScreenState createState() => _DonationCartScreenState();
@@ -170,7 +172,7 @@ class _DonationCartScreenState extends State<DonationCartScreen> {
             FruitImageWithRemove(
               fruitImage: AssetImage(kFruitImages[widget.fruitList[i]]),
               fruitName: Text(
-                kFruitNames[i],
+                widget.fruitNames[i],
                 style: TextStyle(
                     color: kPrimaryColor,
                     fontWeight: FontWeight.bold,

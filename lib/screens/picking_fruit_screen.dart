@@ -16,6 +16,7 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
 
   //make a new list to store the selected fruits index
   List<int> selectedFruitList = [];
+  List<String> selectedFruitNames = [];
 
   @override
   void initState() {
@@ -88,8 +89,10 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
                               //add the selected fruit into the list
                               if (selectedFruits[index]) {
                                 selectedFruitList.add(index);
+                                selectedFruitNames.add(kFruitNames[index]);
                               } else {
                                 selectedFruitList.remove(index);
+                                selectedFruitNames.remove(kFruitNames[index]);
                               }
                             });
                           },
@@ -114,7 +117,7 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => DonationCartScreen(selectedFruitList),
+                          builder: (context) => DonationCartScreen(selectedFruitList, selectedFruitNames)
                         ),
                       );
                     }),
