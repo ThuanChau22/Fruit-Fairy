@@ -45,8 +45,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   bool _updatedName = false;
   bool _updatedAddress = false;
   bool _updatedPassword = false;
-  String _updatePhoneRequestLabel = 'Send';
-  bool _hasPhoneNumber = false;
+  String _updatePhoneLabel = 'Add';
+  bool _newPhoneNumber = false;
   DeleteMode _deleteMode = DeleteMode.Input;
   bool _obscureDeletePassword = true;
 
@@ -94,7 +94,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       _isoCode = phone[kDBPhoneCountry];
       _dialCode = phone[kDBPhoneDialCode];
       _phoneNumber.text = phone[kDBPhoneNumber];
-      _hasPhoneNumber = true;
+      _updatePhoneLabel = 'Remove';
     }
     Map<String, String> address = account.address;
     if (address.isNotEmpty) {
@@ -283,14 +283,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   void _updatePhoneRequest() async {
     setState(() => _showSpinner = true);
-    if (_hasChanges(Field.Phone)) {
-      String phoneNumber = _phoneNumber.text.trim();
-      _phoneError = await Validate.phoneNumber(
-        phoneNumber: phoneNumber,
-        isoCode: _isoCode,
-      );
-      if (_phoneError.isEmpty) {
-        AuthService auth = context.read<AuthService>();
+    String phoneNumber = _phoneNumber.text.trim();
+    _phoneError = await Validate.phoneNumber(
+      phoneNumber: phoneNumber,
+      isoCode: _isoCode,
+    );
+    if (_phoneError.isEmpty) {
+      AuthService auth = context.read<AuthService>();
+      if (_hasChanges(Field.Phone)) {
         String notifyMessage = await auth.registerPhone(
           phoneNumber: '$_dialCode$phoneNumber',
           update: context.read<Account>().phone.isNotEmpty,
@@ -307,17 +307,26 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           },
         );
         _confirmCode.clear();
-        _updatePhoneRequestLabel = 'Re-send';
+        _newPhoneNumber = true;
+        _updatePhoneLabel = 'Re-send';
         MessageBar(
           _scaffoldContext,
           message: notifyMessage,
         ).show();
+      } else {
+        if (await auth.removePhone()) {
+          await context.read<FireStoreService>().updatePhoneNumber(
+                phoneNumber: '',
+              );
+          context.read<Account>().setPhoneNumber(phoneNumber: '');
+          _phoneNumber.clear();
+          _updatePhoneLabel = 'Add';
+          MessageBar(
+            _scaffoldContext,
+            message: 'Phone number removed',
+          ).show();
+        }
       }
-    } else {
-      MessageBar(
-        _scaffoldContext,
-        message: 'Phone number already registered',
-      ).show();
     }
     setState(() => _showSpinner = false);
   }
@@ -340,35 +349,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             );
         _phoneNumber.text = phoneNumber;
         _confirmCode.clear();
-        _hasPhoneNumber = true;
-        _updatePhoneRequestLabel = 'Send';
+        _newPhoneNumber = false;
+        _updatePhoneLabel = 'Remove';
         errorMessage = 'Phone number updated';
       }
       MessageBar(
         _scaffoldContext,
         message: errorMessage,
       ).show();
-    }
-    setState(() => _showSpinner = false);
-  }
-
-  void _removePhone() async {
-    setState(() => _showSpinner = true);
-    AuthService auth = context.read<AuthService>();
-    if (auth.user.phoneNumber.isNotEmpty) {
-      bool removed = await auth.removePhone();
-      if (removed) {
-        await context.read<FireStoreService>().updatePhoneNumber(
-              phoneNumber: '',
-            );
-        context.read<Account>().setPhoneNumber(phoneNumber: '');
-        _phoneNumber.clear();
-        _hasPhoneNumber = false;
-        MessageBar(
-          _scaffoldContext,
-          message: 'Phone number removed',
-        ).show();
-      }
     }
     setState(() => _showSpinner = false);
   }
@@ -468,7 +456,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ),
                       phoneNumberField(),
                       verifyCodeField(),
-                      removePhoneLink(),
+                      inputFieldSizeBox(),
                       inputGroupLabel(
                         'Address',
                         tag: Field.Address,
@@ -606,10 +594,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 prefixText: _dialCode,
                 helperText: null,
                 onChanged: (value) async {
+                  String phoneNumber = _phoneNumber.text.trim();
                   _phoneError = await Validate.phoneNumber(
-                    phoneNumber: _phoneNumber.text.trim(),
+                    phoneNumber: phoneNumber,
                     isoCode: _isoCode,
                   );
+                  _updatePhoneLabel =
+                      _hasChanges(Field.Phone) || phoneNumber.isEmpty
+                          ? 'Add'
+                          : 'Remove';
+                  _newPhoneNumber = false;
                   setState(() {});
                 },
                 onTap: () {
@@ -621,7 +615,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             Expanded(
               flex: 2,
               child: RoundedButton(
-                label: _updatePhoneRequestLabel,
+                label: _updatePhoneLabel,
                 labelColor: kPrimaryColor,
                 onPressed: () {
                   _updatePhoneRequest();
@@ -648,53 +642,38 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Widget verifyCodeField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              flex: 3,
-              child: InputField(
-                label: '6-Digit Code',
-                controller: _confirmCode,
-                errorMessage: _confirmCodeError,
-                onTap: () {
-                  MessageBar(_scaffoldContext).hide();
-                },
-              ),
-            ),
-            SizedBox(width: 5.0),
-            Expanded(
-              flex: 2,
-              child: RoundedButton(
-                label: 'Verify',
-                labelColor: kPrimaryColor,
-                onPressed: () {
-                  _updatePhoneVerify();
-                },
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget removePhoneLink() {
-    Size screen = MediaQuery.of(context).size;
     return Visibility(
-      visible: _hasPhoneNumber,
+      visible: _newPhoneNumber,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          LabelLink(
-            label: 'Remove phone number',
-            onTap: () {
-              _removePhone();
-            },
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 3,
+                child: InputField(
+                  label: '6-Digit Code',
+                  controller: _confirmCode,
+                  errorMessage: _confirmCodeError,
+                  onTap: () {
+                    MessageBar(_scaffoldContext).hide();
+                  },
+                ),
+              ),
+              SizedBox(width: 5.0),
+              Expanded(
+                flex: 2,
+                child: RoundedButton(
+                  label: 'Verify',
+                  labelColor: kPrimaryColor,
+                  onPressed: () {
+                    _updatePhoneVerify();
+                  },
+                ),
+              ),
+            ],
           ),
-          SizedBox(height: screen.height * 0.03),
         ],
       ),
     );
@@ -904,6 +883,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       ),
       closeFunction: () {
         _deleteMode = DeleteMode.Input;
+        _obscureDeletePassword = true;
         _deleteConfirm.clear();
         _deleteError = '';
         Navigator.of(context).pop();
