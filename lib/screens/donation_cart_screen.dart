@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/widgets/fruit_image_with_remove_button.dart';
-import 'package:fruitfairy/widgets/input_field.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/screens/temp_fruit_with_quantity.dart';
-import 'package:fruitfairy/screens/donation_cart_screen.dart';
-import 'package:fruitfairy/screens/picking_fruit_screen.dart';
+
+
 
 class DonationCartScreen extends StatefulWidget {
   static const String id = 'donation_cart_screen';
@@ -41,6 +40,8 @@ class _DonationCartScreenState extends State<DonationCartScreen> {
     }
     return selectedFruitsList;
   }
+
+  //List<>
 
 
   Widget fruitItem(int index) {
@@ -155,6 +156,7 @@ class _DonationCartScreenState extends State<DonationCartScreen> {
     );
   }
 
+
   Widget selectedFruits() {
     // return Expanded(
     //   child: Column(
@@ -174,12 +176,17 @@ class _DonationCartScreenState extends State<DonationCartScreen> {
             FruitImageWithRemove(
               fruitImage: AssetImage(kFruitImages[widget.fruitList[i]]),
               fruitName: Text(
-                kFruitNames[i],
+                kFruitNames[widget.fruitList[i]],
                 style: TextStyle(
                     color: kPrimaryColor,
                     fontWeight: FontWeight.bold,
                     fontSize: 20.0),
               ),
+              removeFunction:(){ setState(() {
+                widget.fruitList.removeAt(i);
+              });},
+
+
             ),
         ],
       ),
