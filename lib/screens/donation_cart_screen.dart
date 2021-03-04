@@ -4,12 +4,12 @@ import 'package:fruitfairy/widgets/fruit_image_with_remove_button.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/screens/temp_fruit_with_quantity.dart';
 
+
+
 class DonationCartScreen extends StatefulWidget {
   static const String id = 'donation_cart_screen';
   List<int> fruitList;
-  List<String> fruitNames;
-  DonationCartScreen(this.fruitList, this.fruitNames);
-
+  DonationCartScreen(this.fruitList);
 
   @override
   _DonationCartScreenState createState() => _DonationCartScreenState();
@@ -40,6 +40,8 @@ class _DonationCartScreenState extends State<DonationCartScreen> {
     }
     return selectedFruitsList;
   }
+
+  //List<>
 
 
   Widget fruitItem(int index) {
@@ -154,6 +156,7 @@ class _DonationCartScreenState extends State<DonationCartScreen> {
     );
   }
 
+
   Widget selectedFruits() {
     // return Expanded(
     //   child: Column(
@@ -168,16 +171,22 @@ class _DonationCartScreenState extends State<DonationCartScreen> {
         mainAxisSpacing: 20,
         crossAxisCount: 2,
         children: [
+          //Todo: the images shown here are from fruit picking screen
           for (int i = 0; i < widget.fruitList.length; i++)
             FruitImageWithRemove(
               fruitImage: AssetImage(kFruitImages[widget.fruitList[i]]),
               fruitName: Text(
-                widget.fruitNames[i],
+                kFruitNames[widget.fruitList[i]],
                 style: TextStyle(
                     color: kPrimaryColor,
                     fontWeight: FontWeight.bold,
                     fontSize: 20.0),
               ),
+              removeFunction:(){ setState(() {
+                widget.fruitList.removeAt(i);
+              });},
+
+
             ),
         ],
       ),
