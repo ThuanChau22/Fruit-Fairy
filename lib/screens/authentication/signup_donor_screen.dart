@@ -68,11 +68,6 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
         String notifyMessage = await auth.signUp(
           email: email,
           password: password,
-        );
-        FireStoreService fireStore = context.read<FireStoreService>();
-        fireStore.uid(auth.user.uid);
-        await fireStore.addUser(
-          email: email,
           firstName: _firstName.text.trim(),
           lastName: _lastName.text.trim(),
         );

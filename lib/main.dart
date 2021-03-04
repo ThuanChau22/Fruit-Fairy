@@ -31,9 +31,9 @@ class FruitFairy extends StatelessWidget {
 }
 
 class Authentication extends StatelessWidget {
-  void _fetchAccount(BuildContext context, String uid) async {
-    final FireStoreService fireStoreService = context.read<FireStoreService>();
-    context.read<FireStoreService>().uid(uid);
+  void _fetchAccount(BuildContext context) async {
+    FireStoreService fireStoreService = context.read<FireStoreService>();
+    fireStoreService.uid(context.read<AuthService>().user.uid);
     context.read<Account>().fromMap(await fireStoreService.userData);
   }
 
@@ -43,7 +43,7 @@ class Authentication extends StatelessWidget {
     User user = context.read<AuthService>().user;
     bool signedIn = user != null && user.emailVerified;
     if (signedIn) {
-      _fetchAccount(context, user.uid);
+      _fetchAccount(context);
     }
     return GestureDetector(
       onTap: () {

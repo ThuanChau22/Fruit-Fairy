@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fruitfairy/utils/firestore_service.dart';
 
 class AuthService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
@@ -19,6 +20,13 @@ class AuthService {
       await _firebaseAuth.createUserWithEmailAndPassword(
         email: email,
         password: password,
+      );
+      FireStoreService fireStoreService = FireStoreService();
+      fireStoreService.uid(user.uid);
+      await fireStoreService.addAccount(
+        email: email,
+        firstName: firstName,
+        lastName: lastName,
       );
       await user.sendEmailVerification();
     } catch (e) {
@@ -211,20 +219,23 @@ class AuthService {
     await _firebaseAuth.signOut();
   }
 
-  Future<void> deleteAccount(
+  Future<void> deleteAccount({
     String email,
     String password,
-  ) async {
+  }) async {
     try {
       EmailAuthCredential credential = EmailAuthProvider.credential(
         email: email,
         password: password,
       );
       await user.reauthenticateWithCredential(credential);
+      FireStoreService fireStoreService = FireStoreService();
+      fireStoreService.uid(user.uid);
+      await fireStoreService.deleteAccount();
       await user.delete();
     } catch (e) {
       if (e.code == 'wrong-password') {
-        throw 'Incorrect Password. Please try again!';
+        throw 'Incorrect password!';
       }
     }
   }

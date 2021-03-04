@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
 import 'package:fruitfairy/utils/auth_service.dart';
@@ -11,16 +12,15 @@ import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/obscure_icon.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
+import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
+import 'package:fruitfairy/screens/authentication/signin_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
-enum Field {
-  Name,
-  Address,
-  Password,
-  Phone,
-}
+enum Field { Name, Phone, Address, Password }
+
+enum DeleteMode { Input, Loading, Success }
 
 class EditProfileScreen extends StatefulWidget {
   static const String id = 'edit_profile_screen';
@@ -47,10 +47,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   bool _updatedPassword = false;
   String _updatePhoneRequestLabel = 'Send';
   bool _hasPhoneNumber = false;
+  DeleteMode _deleteMode = DeleteMode.Input;
+  bool _obscureDeletePassword = true;
 
   TextEditingController _email = TextEditingController();
   TextEditingController _firstName = TextEditingController();
   TextEditingController _lastName = TextEditingController();
+
+  String _isoCode = 'US', _dialCode = '+1';
+  TextEditingController _phoneNumber = TextEditingController();
+  TextEditingController _confirmCode = TextEditingController();
 
   TextEditingController _street = TextEditingController();
   TextEditingController _city = TextEditingController();
@@ -61,21 +67,22 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   TextEditingController _newPassword = TextEditingController();
   TextEditingController _confirmPassword = TextEditingController();
 
-  String _isoCode = 'US', _dialCode = '+1';
-  TextEditingController _phoneNumber = TextEditingController();
-  TextEditingController _confirmCode = TextEditingController();
+  TextEditingController _deleteConfirm = TextEditingController();
 
   String _firstNameError = '';
   String _lastNameError = '';
+  String _phoneError = '';
+  String _confirmCodeError = '';
   String _oldPasswordError = '';
   String _newPasswordError = '';
   String _confirmPasswordError = '';
-  String _phoneError = '';
-  String _confirmCodeError = '';
+  String _deleteError = '';
 
   Future<String> Function(String smsCode) _verifyCode;
 
   BuildContext _scaffoldContext;
+
+  StateSetter setDialogState;
 
   void _getAccountInfo() {
     Account account = context.read<Account>();
@@ -366,6 +373,33 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     setState(() => _showSpinner = false);
   }
 
+  void _deleteAccount() async {
+    String password = _deleteConfirm.text;
+    _deleteError = Validate.checkPassword(password);
+    if (_deleteError.isEmpty) {
+      setDialogState(() => _deleteMode = DeleteMode.Loading);
+      try {
+        await context.read<AuthService>().deleteAccount(
+              email: _email.text.trim(),
+              password: password,
+            );
+        context.read<Account>().clear();
+        setDialogState(() => _deleteMode = DeleteMode.Success);
+        await Future.delayed(Duration(milliseconds: 1500));
+        Navigator.of(context).pop();
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          SignOptionScreen.id,
+          (route) => false,
+        );
+        Navigator.of(context).pushNamed(SignInScreen.id);
+      } catch (errorMessage) {
+        _deleteError = errorMessage;
+        setDialogState(() => _deleteMode = DeleteMode.Input);
+      }
+    }
+    setDialogState(() {});
+  }
+
   @override
   void initState() {
     super.initState();
@@ -379,12 +413,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _email.dispose();
     _firstName.dispose();
     _lastName.dispose();
+    _phoneNumber.dispose();
+    _confirmCode.dispose();
     _newPassword.dispose();
     _confirmPassword.dispose();
     _street.dispose();
     _city.dispose();
     _state.dispose();
     _zip.dispose();
+    _deleteConfirm.dispose();
   }
 
   @override
@@ -845,65 +882,126 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  TextEditingController controller = TextEditingController();
-  void showDeleteDialog() {
+  Future<void> showDeleteDialog() async {
     Alert(
       context: context,
-      title: 'Delete account dialog',
+      title: 'Delete Account',
       style: AlertStyle(
+        alertBorder: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0),
+        ),
         titleStyle: TextStyle(
           color: kLabelColor,
           fontWeight: FontWeight.bold,
         ),
         backgroundColor: kPrimaryColor,
-        overlayColor: Colors.black.withOpacity(0.5),
-        isCloseButton: false,
+        overlayColor: Colors.black.withOpacity(0.50),
         isOverlayTapDismiss: false,
       ),
-      content: Padding(
-        padding: EdgeInsets.only(top: 20.0),
-        child: InputField(
-          label: 'Password',
-          controller: controller,
-          onTap: () {},
-        ),
+      closeIcon: Icon(
+        Icons.close_rounded,
+        color: kLabelColor,
       ),
-      buttons: [
-        DialogButton(
-          color: kObjectBackgroundColor,
-          radius: BorderRadius.circular(30.0),
-          width: 150.0,
-          height: 50.0,
-          child: Text(
-            'Delete',
-            style: TextStyle(
-              color: kPrimaryColor,
-              fontSize: 20.0,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          onPressed: () {
-            controller.text.trim();
-          },
-        ),
-        DialogButton(
-          color: kObjectBackgroundColor,
-          radius: BorderRadius.circular(30.0),
-          width: 150.0,
-          height: 50.0,
-          child: Text(
-            'Cancel',
-            style: TextStyle(
-              color: kPrimaryColor,
-              fontSize: 20.0,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          onPressed: () {
-            controller.text.trim();
-          },
-        ),
-      ],
+      closeFunction: () {
+        _deleteMode = DeleteMode.Input;
+        _deleteConfirm.clear();
+        _deleteError = '';
+        Navigator.of(context).pop();
+        HapticFeedback.mediumImpact();
+      },
+      content: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          setDialogState = setState;
+          return Padding(
+            padding: EdgeInsets.only(top: 10.0),
+            child: deleteLayout(),
+          );
+        },
+      ),
+      buttons: [],
     ).show();
+  }
+
+  Widget deleteLayout() {
+    switch (_deleteMode) {
+      case DeleteMode.Loading:
+        return Container(
+          height: 50.0,
+          child: Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation(kAppBarColor),
+            ),
+          ),
+        );
+        break;
+
+      case DeleteMode.Success:
+        return Container(
+          height: 50.0,
+          child: Center(
+            child: Text(
+              'Account deleted',
+              style: TextStyle(
+                color: kLabelColor,
+              ),
+            ),
+          ),
+        );
+        break;
+
+      default:
+        return Column(
+          children: [
+            Text(
+              'Please confirm your password',
+              style: TextStyle(
+                color: kLabelColor,
+                fontSize: 18.0,
+              ),
+            ),
+            SizedBox(height: 10.0),
+            Stack(
+              children: [
+                InputField(
+                  label: 'Password',
+                  controller: _deleteConfirm,
+                  errorMessage: _deleteError,
+                  obscureText: _obscureDeletePassword,
+                  onChanged: (value) {
+                    setDialogState(() {
+                      _deleteError =
+                          Validate.checkPassword(_deleteConfirm.text);
+                    });
+                  },
+                ),
+                Positioned(
+                  top: 12.0,
+                  right: 12.0,
+                  child: ObscureIcon(
+                    obscure: _obscureDeletePassword,
+                    onTap: () {
+                      setDialogState(() {
+                        _obscureDeletePassword = !_obscureDeletePassword;
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 10.0),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 50.0),
+              child: RoundedButton(
+                label: 'Delete',
+                labelColor: kPrimaryColor,
+                backgroundColor: kObjectBackgroundColor,
+                onPressed: () {
+                  _deleteAccount();
+                },
+              ),
+            ),
+          ],
+        );
+    }
   }
 }

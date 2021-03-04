@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
 import 'package:fruitfairy/utils/auth_service.dart';
+import 'package:fruitfairy/utils/firestore_service.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
 import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
@@ -30,6 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => _showSpinner = true);
     try {
       await context.read<AuthService>().signOut();
+      context.read<FireStoreService>().uid(null);
       context.read<Account>().clear();
       Navigator.of(context).pushNamedAndRemoveUntil(
         SignOptionScreen.id,
