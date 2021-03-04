@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/widgets/fruit_image_with_remove_button.dart';
-import 'package:fruitfairy/widgets/input_field.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/screens/temp_fruit_with_quantity.dart';
 
 class DonationCartScreen extends StatefulWidget {
   static const String id = 'donation_cart_screen';
+  List<int> fruitList;
+  DonationCartScreen(this.fruitList);
 
   @override
   _DonationCartScreenState createState() => _DonationCartScreenState();
@@ -37,6 +38,7 @@ class _DonationCartScreenState extends State<DonationCartScreen> {
     }
     return selectedFruitsList;
   }
+
 
   Widget fruitItem(int index) {
     return FruitImageWithRemove(
@@ -164,9 +166,10 @@ class _DonationCartScreenState extends State<DonationCartScreen> {
         mainAxisSpacing: 20,
         crossAxisCount: 2,
         children: [
-          for (int i = 0; i < 6; i++)
+          //Todo: the images shown here are from fruit picking screen
+          for (int i = 0; i < widget.fruitList.length; i++)
             FruitImageWithRemove(
-              fruitImage: AssetImage(kFruitImages[i]),
+              fruitImage: AssetImage(kFruitImages[widget.fruitList[i]]),
               fruitName: Text(
                 kFruitNames[i],
                 style: TextStyle(
@@ -175,54 +178,6 @@ class _DonationCartScreenState extends State<DonationCartScreen> {
                     fontSize: 20.0),
               ),
             ),
-        ],
-      ),
-    );
-  }
-
-  Widget fillInFields() {
-    Size screen = MediaQuery.of(context).size;
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: screen.width * 0.15),
-      child: Column(
-        children: [
-          Text(
-            'Your Information:',
-            textAlign: TextAlign.left,
-            style: TextStyle(
-              fontSize: 20.0,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          SizedBox(height: screen.height * 0.02),
-          Text(
-            'Address:',
-            textAlign: TextAlign.left,
-            style: TextStyle(
-              fontSize: 20.0,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          SizedBox(height: screen.height * 0.02),
-          InputField(
-            label: 'Street',
-            onChanged: null,
-          ),
-          InputField(label: 'City', onChanged: null),
-          InputField(label: 'Zip Code', onChanged: null),
-          InputField(label: 'State', onChanged: null),
-          Text(
-            'Phone Number:',
-            textAlign: TextAlign.left,
-            style: TextStyle(
-              fontSize: 20.0,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          InputField(label: 'Phone number', onChanged: null),
         ],
       ),
     );
