@@ -22,7 +22,8 @@ class RouteGenerator {
     HomeScreen.id: HomeScreen(),
     EditProfileScreen.id: EditProfileScreen(),
     PickingFruitScreen.id: PickingFruitScreen(),
-    DonationCartScreen.id: DonationCartScreen(),
+    //make a change here
+    DonationCartScreen.id: DonationCartScreen(null),
     ConfirmationDonationScreen.id: ConfirmationDonationScreen(),
     FruitQuantity.id: FruitQuantity(),
 

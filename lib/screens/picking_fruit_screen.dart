@@ -14,6 +14,9 @@ class PickingFruitScreen extends StatefulWidget {
 class _PickingFruitScreenState extends State<PickingFruitScreen> {
   List<bool> selectedFruits = [];
 
+  //make a new list to store the selected fruits index
+  List<int> selectedFruitList = [];
+
   @override
   void initState() {
     super.initState();
@@ -82,6 +85,12 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
                           onTap: (index) {
                             setState(() {
                               selectedFruits[index] = !selectedFruits[index];
+                              //add the selected fruit into the list
+                              if (selectedFruits[index]) {
+                                selectedFruitList.add(index);
+                              } else {
+                                selectedFruitList.remove(index);
+                              }
                             });
                           },
                         ),
@@ -97,13 +106,20 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
                   horizontal: MediaQuery.of(context).size.width * 0.15,
                 ),
                 child: RoundedButton(
-                  label: 'Go To Cart',
-                  labelColor: kPrimaryColor,
-                  backgroundColor: kObjectBackgroundColor,
-                  onPressed: () {
-                    Navigator.of(context).pushNamed(DonationCartScreen.id);
-                  },
-                ),
+                    label: 'Go To Cart',
+                    labelColor: kPrimaryColor,
+                    backgroundColor: kObjectBackgroundColor,
+                    onPressed: () {
+                      print(selectedFruitList.length);
+                      //Navigator.of(context).pushNamed(DonationCartScreen.id);
+                      //Todo: push the new data in
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DonationCartScreen(selectedFruitList),
+                        ),
+                      );
+                    }),
               ),
               SizedBox(height: screen.height * 0.02),
             ],
@@ -113,5 +129,3 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
     );
   }
 }
-
-
