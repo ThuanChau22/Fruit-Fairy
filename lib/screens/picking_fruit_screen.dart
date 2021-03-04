@@ -111,8 +111,6 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
                     backgroundColor: kObjectBackgroundColor,
                     onPressed: () {
                       print(selectedFruitList.length);
-                      //Navigator.of(context).pushNamed(DonationCartScreen.id);
-                      //Todo: push the new data in
                       Navigator.push(
                         context,
                         MaterialPageRoute(

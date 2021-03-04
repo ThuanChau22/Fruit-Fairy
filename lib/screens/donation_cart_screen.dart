@@ -166,7 +166,6 @@ class _DonationCartScreenState extends State<DonationCartScreen> {
         mainAxisSpacing: 20,
         crossAxisCount: 2,
         children: [
-          //Todo: the images shown here are from fruit picking screen
           for (int i = 0; i < widget.fruitList.length; i++)
             FruitImageWithRemove(
               fruitImage: AssetImage(kFruitImages[widget.fruitList[i]]),
