@@ -3,13 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
 
+import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
-import 'package:fruitfairy/utils/auth_service.dart';
-import 'package:fruitfairy/utils/constant.dart';
-import 'package:fruitfairy/utils/firestore_service.dart';
-import 'package:fruitfairy/utils/store_credential.dart';
-import 'package:fruitfairy/utils/validation.dart';
+import 'package:fruitfairy/services/fireauth_service.dart';
+import 'package:fruitfairy/services/firestore_service.dart';
+import 'package:fruitfairy/services/store_credential.dart';
+import 'package:fruitfairy/services/validation.dart';
 import 'package:fruitfairy/widgets/fruit_fairy_logo.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
 import 'package:fruitfairy/widgets/label_link.dart';
@@ -109,7 +109,7 @@ class _SignInScreenState extends State<SignInScreen> {
       switch (_mode) {
         case AuthMode.Reset:
           try {
-            AuthService auth = context.read<AuthService>();
+            FireAuthService auth = context.read<FireAuthService>();
             String notifyMessage = await auth.resetPassword(_email.text.trim());
             _buttonLabel = 'Re-send';
             MessageBar(
@@ -122,7 +122,7 @@ class _SignInScreenState extends State<SignInScreen> {
           break;
 
         case AuthMode.Phone:
-          AuthService auth = context.read<AuthService>();
+          FireAuthService auth = context.read<FireAuthService>();
           String nofifyMessage = await auth.signInWithPhone(
             phoneNumber: '$_dialCode${_phoneNumber.text.trim()}',
             completed: (String errorMessage) async {
@@ -174,7 +174,7 @@ class _SignInScreenState extends State<SignInScreen> {
           try {
             String email = _email.text.trim();
             String password = _password.text;
-            AuthService auth = context.read<AuthService>();
+            FireAuthService auth = context.read<FireAuthService>();
             String notifyMessage = await auth.signIn(
               email: email,
               password: password,
@@ -211,7 +211,7 @@ class _SignInScreenState extends State<SignInScreen> {
       );
     }
     FireStoreService fireStoreService = context.read<FireStoreService>();
-    fireStoreService.uid(context.read<AuthService>().user.uid);
+    fireStoreService.uid(context.read<FireAuthService>().user.uid);
     context.read<Account>().fromMap(await fireStoreService.userData);
     Navigator.of(context).pushNamedAndRemoveUntil(
       HomeScreen.id,

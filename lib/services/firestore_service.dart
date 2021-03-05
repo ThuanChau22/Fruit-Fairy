@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'package:fruitfairy/utils/constant.dart';
+import 'package:fruitfairy/constant.dart';
 
 class FireStoreService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

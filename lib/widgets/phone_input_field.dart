@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'package:international_phone_input/international_phone_input.dart';
 
-import 'package:fruitfairy/utils/constant.dart';
+import 'package:fruitfairy/constant.dart';
 
 class PhoneInputField extends StatefulWidget {
   final String initialPhoneNumber;

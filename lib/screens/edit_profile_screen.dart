@@ -4,13 +4,14 @@ import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
+import 'package:fruitfairy/api_keys.dart';
+import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
 import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
 import 'package:fruitfairy/screens/authentication/signin_screen.dart';
-import 'package:fruitfairy/utils/auth_service.dart';
-import 'package:fruitfairy/utils/constant.dart';
-import 'package:fruitfairy/utils/firestore_service.dart';
-import 'package:fruitfairy/utils/validation.dart';
+import 'package:fruitfairy/services/fireauth_service.dart';
+import 'package:fruitfairy/services/firestore_service.dart';
+import 'package:fruitfairy/services/validation.dart';
 import 'package:fruitfairy/widgets/auto_scroll.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
 import 'package:fruitfairy/widgets/label_link.dart';
@@ -231,7 +232,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       );
       if (error.isEmpty) {
         try {
-          await context.read<AuthService>().updatePassword(
+          await context.read<FireAuthService>().updatePassword(
                 email: _email.text.trim(),
                 oldPassword: oldPassword,
                 newPassword: newPassword,
@@ -287,7 +288,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       isoCode: _isoCode,
     );
     if (_phoneError.isEmpty) {
-      AuthService auth = context.read<AuthService>();
+      FireAuthService auth = context.read<FireAuthService>();
       if (_hasChanges(Field.Phone)) {
         String notifyMessage = await auth.registerPhone(
           phoneNumber: '$_dialCode$phoneNumber',
@@ -365,7 +366,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (_deleteError.isEmpty) {
       setDialogState(() => _deleteMode = DeleteMode.Loading);
       try {
-        await context.read<AuthService>().deleteAccount(
+        await context.read<FireAuthService>().deleteAccount(
               email: _email.text.trim(),
               password: password,
             );
@@ -390,6 +391,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   void initState() {
     super.initState();
     _getAccountInfo();
+    print(PLACES_API_KEY);
   }
 
   @override

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
-import 'package:fruitfairy/utils/constant.dart';
+import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
 
 class TestNestedScrollView extends StatefulWidget {

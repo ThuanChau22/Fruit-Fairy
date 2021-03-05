@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:fruitfairy/utils/constant.dart';
+import 'package:fruitfairy/constant.dart';
 
 class MessageBar {
   final BuildContext scaffoldContext;

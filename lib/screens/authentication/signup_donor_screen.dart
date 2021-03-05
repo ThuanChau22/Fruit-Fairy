@@ -3,11 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
 
+import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
 import 'package:fruitfairy/screens/authentication/signin_screen.dart';
-import 'package:fruitfairy/utils/auth_service.dart';
-import 'package:fruitfairy/utils/constant.dart';
-import 'package:fruitfairy/utils/validation.dart';
+import 'package:fruitfairy/services/fireauth_service.dart';
+import 'package:fruitfairy/services/validation.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
 import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/obscure_icon.dart';
@@ -64,7 +64,7 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
       try {
         String email = _email.text.trim();
         String password = _password.text;
-        AuthService auth = context.read<AuthService>();
+        FireAuthService auth = context.read<FireAuthService>();
         String notifyMessage = await auth.signUp(
           email: email,
           password: password,

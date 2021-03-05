@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/screens/donation_cart_screen.dart';
-import 'package:fruitfairy/utils/constant.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
 

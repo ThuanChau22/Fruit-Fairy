@@ -1,7 +1,7 @@
 import 'dart:collection';
 import 'package:flutter/foundation.dart';
 
-import 'package:fruitfairy/utils/constant.dart';
+import 'package:fruitfairy/constant.dart';
 
 class Account extends ChangeNotifier {
   String _email = '';
