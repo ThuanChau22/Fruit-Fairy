@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:fruitfairy/utils/firestore_service.dart';
 
 class AuthService {

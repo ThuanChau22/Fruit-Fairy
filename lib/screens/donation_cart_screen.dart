@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:fruitfairy/constant.dart';
+
+import 'package:fruitfairy/utils/constant.dart';
 import 'package:fruitfairy/widgets/fruit_image_with_remove_button.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 
@@ -108,7 +109,9 @@ class _DonationCartScreenState extends State<DonationCartScreen> {
                   crossAxisCount: 2,
                   children: [
                     for (int i = 0; i < kFruitImages.length; i++)
-                    FruitImageWithRemove(fruitImage: AssetImage(kFruitImages[i]),fruitName: Text(kFruitNames[i])),
+                      FruitImageWithRemove(
+                          fruitImage: AssetImage(kFruitImages[i]),
+                          fruitName: Text(kFruitNames[i])),
                   ],
                 ),
               ),
@@ -122,5 +125,3 @@ class _DonationCartScreenState extends State<DonationCartScreen> {
     );
   }
 }
-
-

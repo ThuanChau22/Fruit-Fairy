@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
+
 import 'package:fruitfairy/widgets/remove_fruit_button.dart';
 
 class FruitImageWithRemove extends StatelessWidget {
-
   final AssetImage fruitImage;
   final Text fruitName;
 
-  FruitImageWithRemove({this.fruitName,this.fruitImage});
+  FruitImageWithRemove({this.fruitName, this.fruitImage});
 
   @override
   Widget build(BuildContext context) {
