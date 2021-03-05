@@ -30,6 +30,18 @@ class SignInScreen extends StatefulWidget {
 }
 
 class _SignInScreenState extends State<SignInScreen> {
+  final TextEditingController _email = TextEditingController();
+  final TextEditingController _password = TextEditingController();
+  final TextEditingController _phoneNumber = TextEditingController();
+  final TextEditingController _confirmCode = TextEditingController();
+
+  String _isoCode = 'US', _dialCode = '+1';
+
+  String _emailError = '';
+  String _passwordError = '';
+  String _phoneError = '';
+  String _confirmCodeError = '';
+
   AuthMode _mode = AuthMode.SignIn;
   String _appBarLabel = 'Sign In';
   String _buttonLabel = 'Sign In';
@@ -37,18 +49,6 @@ class _SignInScreenState extends State<SignInScreen> {
   bool _showSpinner = false;
   bool _rememberMe = false;
   bool _obscurePassword = true;
-
-  TextEditingController _email = TextEditingController();
-  TextEditingController _password = TextEditingController();
-
-  String _isoCode = 'US', _dialCode = '+1';
-  TextEditingController _phoneNumber = TextEditingController();
-  TextEditingController _confirmCode = TextEditingController();
-
-  String _emailError = '';
-  String _passwordError = '';
-  String _phoneError = '';
-  String _confirmCodeError = '';
 
   Future<String> Function(String smsCode) _verifyCode;
 

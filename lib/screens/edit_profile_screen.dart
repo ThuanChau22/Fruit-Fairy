@@ -39,6 +39,31 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     },
   );
 
+  final TextEditingController _email = TextEditingController();
+  final TextEditingController _firstName = TextEditingController();
+  final TextEditingController _lastName = TextEditingController();
+  final TextEditingController _phoneNumber = TextEditingController();
+  final TextEditingController _confirmCode = TextEditingController();
+  final TextEditingController _street = TextEditingController();
+  final TextEditingController _city = TextEditingController();
+  final TextEditingController _state = TextEditingController();
+  final TextEditingController _zip = TextEditingController();
+  final TextEditingController _oldPassword = TextEditingController();
+  final TextEditingController _newPassword = TextEditingController();
+  final TextEditingController _confirmPassword = TextEditingController();
+  final TextEditingController _deleteConfirm = TextEditingController();
+
+  String _isoCode = 'US', _dialCode = '+1';
+
+  String _firstNameError = '';
+  String _lastNameError = '';
+  String _phoneError = '';
+  String _confirmCodeError = '';
+  String _oldPasswordError = '';
+  String _newPasswordError = '';
+  String _confirmPasswordError = '';
+  String _deleteError = '';
+
   bool _showSpinner = false;
   bool _obscureOldPassword = true;
   bool _obscureNewPassword = true;
@@ -49,34 +74,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   bool _newPhoneNumber = false;
   DeleteMode _deleteMode = DeleteMode.Input;
   bool _obscureDeletePassword = true;
-
-  TextEditingController _email = TextEditingController();
-  TextEditingController _firstName = TextEditingController();
-  TextEditingController _lastName = TextEditingController();
-
-  String _isoCode = 'US', _dialCode = '+1';
-  TextEditingController _phoneNumber = TextEditingController();
-  TextEditingController _confirmCode = TextEditingController();
-
-  TextEditingController _street = TextEditingController();
-  TextEditingController _city = TextEditingController();
-  TextEditingController _state = TextEditingController();
-  TextEditingController _zip = TextEditingController();
-
-  TextEditingController _oldPassword = TextEditingController();
-  TextEditingController _newPassword = TextEditingController();
-  TextEditingController _confirmPassword = TextEditingController();
-
-  TextEditingController _deleteConfirm = TextEditingController();
-
-  String _firstNameError = '';
-  String _lastNameError = '';
-  String _phoneError = '';
-  String _confirmCodeError = '';
-  String _oldPasswordError = '';
-  String _newPasswordError = '';
-  String _confirmPasswordError = '';
-  String _deleteError = '';
 
   Future<String> Function(String smsCode) _verifyCode;
 

@@ -21,20 +21,20 @@ class SignUpDonorScreen extends StatefulWidget {
 }
 
 class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
-  bool _showSpinner = false;
-  bool _obscurePassword = true;
-
-  TextEditingController _firstName = TextEditingController();
-  TextEditingController _lastName = TextEditingController();
-  TextEditingController _email = TextEditingController();
-  TextEditingController _password = TextEditingController();
-  TextEditingController _confirmPassword = TextEditingController();
+  final TextEditingController _firstName = TextEditingController();
+  final TextEditingController _lastName = TextEditingController();
+  final TextEditingController _email = TextEditingController();
+  final TextEditingController _password = TextEditingController();
+  final TextEditingController _confirmPassword = TextEditingController();
 
   String _firstNameError = '';
   String _lastNameError = '';
   String _emailError = '';
   String _passwordError = '';
   String _confirmPasswordError = '';
+
+  bool _showSpinner = false;
+  bool _obscurePassword = true;
 
   BuildContext _scaffoldContext;
 
