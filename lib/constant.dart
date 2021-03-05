@@ -53,41 +53,4 @@ Widget kDivider() {
   );
 }
 
-List<String> kFruitImages = [
-  'images/Peach.png',
-  'images/Avocado.png',
-  'images/Lemon.png',
-  'images/Orange.png',
-  'images/Peach.png',
-  'images/Avocado.png',
-  'images/Lemon.png',
-  'images/Orange.png',
-  'images/Peach.png',
-  'images/Avocado.png',
-  'images/Lemon.png',
-  'images/Orange.png',
-  'images/Peach.png',
-  'images/Avocado.png',
-  'images/Lemon.png',
-  'images/Orange.png',
-];
-List<String> kFruitNames = [
-  'Peach',
-  'Avocado',
-  'Lemon',
-  'Orange',
-  'Peach',
-  'Avocado',
-  'Lemon',
-  'Orange',
-  'Peach',
-  'Avocado',
-  'Lemon',
-  'Orange',
-  'Peach',
-  'Avocado',
-  'Lemon',
-  'Orange',
-];
-
 

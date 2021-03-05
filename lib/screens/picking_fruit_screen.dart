@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:fruitfairy/constant.dart';
+import 'package:fruitfairy/models/basket.dart';
 import 'package:fruitfairy/screens/donation_cart_screen.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
+import 'package:provider/provider.dart';
 
 class PickingFruitScreen extends StatefulWidget {
   static const String id = 'picking_fruit_screen';
@@ -12,22 +14,15 @@ class PickingFruitScreen extends StatefulWidget {
 }
 
 class _PickingFruitScreenState extends State<PickingFruitScreen> {
-  List<bool> selectedFruits = [];
-
-  //make a new list to store the selected fruits index
-  List<int> selectedFruitList = [];
-
   @override
   void initState() {
     super.initState();
-    for (int i = 0; i < kFruitImages.length; i++) {
-      selectedFruits.add(false);
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
+    Basket basket = context.watch<Basket>();
     return Scaffold(
       backgroundColor: kPrimaryColor,
       appBar: AppBar(
@@ -49,7 +44,8 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
               ),
               SizedBox(height: screen.height * 0.02),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: screen.height * 0.05),
+                padding:
+                EdgeInsets.symmetric(horizontal: screen.height * 0.05),
                 child: TextField(
                     onChanged: (value) {},
                     style: TextStyle(
@@ -66,36 +62,7 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
                   crossAxisSpacing: 20,
                   mainAxisSpacing: 20,
                   crossAxisCount: 3,
-                  children: [
-                    for (int i = 0; i < kFruitImages.length; i++)
-                      Container(
-                        color: kObjectBackgroundColor,
-                        child: FruitTile(
-                          fruitImage: AssetImage(kFruitImages[i]),
-                          fruitName: Text(
-                            kFruitNames[i],
-                            style: TextStyle(
-                              color: kPrimaryColor,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20.0,
-                            ),
-                          ),
-                          index: i,
-                          selected: selectedFruits[i],
-                          onTap: (index) {
-                            setState(() {
-                              selectedFruits[index] = !selectedFruits[index];
-                              //add the selected fruit into the list
-                              if (selectedFruits[index]) {
-                                selectedFruitList.add(index);
-                              } else {
-                                selectedFruitList.remove(index);
-                              }
-                            });
-                          },
-                        ),
-                      ),
-                  ],
+                  children: fruitList(basket),
                 ),
               ),
               SizedBox(height: screen.height * 0.02),
@@ -110,15 +77,7 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
                     labelColor: kPrimaryColor,
                     backgroundColor: kObjectBackgroundColor,
                     onPressed: () {
-
-                      //Navigator.of(context).pushNamed(DonationCartScreen.id);
-                      //Todo: push the new data in
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DonationCartScreen(selectedFruitList),
-                        ),
-                      );
+                      Navigator.pushNamed(context, DonationCartScreen.id);
                     }),
               ),
               SizedBox(height: screen.height * 0.02),
@@ -127,5 +86,40 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
         ),
       ),
     );
+  }
+
+  List<Widget> fruitList(Basket basket) {
+    List<Widget> list = [];
+    for (int i = 0; i < basket.fruitImages.length; i++) {
+      list.add(
+        Container(
+          color: kObjectBackgroundColor,
+          child: FruitTile(
+            fruitImage: AssetImage(basket.fruitImages[i]),
+            fruitName: Text(
+              basket.fruitNames[i],
+              style: TextStyle(
+                color: kPrimaryColor,
+                fontWeight: FontWeight.bold,
+                fontSize: 20.0,
+              ),
+            ),
+            index: i,
+            selected: basket.selectedFruits.contains(i),
+            onTap: (index) {
+              setState(() {
+                //add the selected fruit into the list
+                if (basket.selectedFruits.contains(i)) {
+                  basket.remove(i);
+                } else {
+                  basket.pickFruit(i);
+                }
+              });
+            },
+          ),
+        ),
+      );
+    }
+    return list;
   }
 }

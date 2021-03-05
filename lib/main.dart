@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fruitfairy/models/account.dart';
+import 'package:fruitfairy/models/basket.dart';
 import 'package:fruitfairy/utils/auth_service.dart';
 import 'package:fruitfairy/utils/firestore_service.dart';
 import 'package:fruitfairy/utils/route_generator.dart';
@@ -25,6 +26,7 @@ class FruitFairy extends StatelessWidget {
         Provider<AuthService>(create: (_) => AuthService()),
         Provider<FireStoreService>(create: (_) => FireStoreService()),
         ChangeNotifierProvider<Account>(create: (_) => Account()),
+        ChangeNotifierProvider<Basket>(create: (_) => Basket()),
       ],
       child: Authentication(),
     );

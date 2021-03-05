@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:fruitfairy/constant.dart';
+import 'package:fruitfairy/models/basket.dart';
 import 'package:fruitfairy/widgets/fruit_image_with_remove_button.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/screens/temp_fruit_with_quantity.dart';
-
-
+import 'package:provider/provider.dart';
 
 class DonationCartScreen extends StatefulWidget {
   static const String id = 'donation_cart_screen';
-  List<int> fruitList;
-  DonationCartScreen(this.fruitList);
 
   @override
   _DonationCartScreenState createState() => _DonationCartScreenState();
@@ -23,37 +21,8 @@ enum YesOrNoSelection {
 class _DonationCartScreenState extends State<DonationCartScreen> {
   YesOrNoSelection selectedOption;
 
-  List<Widget> getSelectedFruits() {
-    List<Widget> selectedFruitsList = [];
-    int i = 0;
-    while (i < kFruitImages.length) {
-      List<Widget> rowItems = [fruitItem(i++)];
-      while (i % 2 != 0) {
-        rowItems.add(fruitItem(i++));
-      }
-      selectedFruitsList.add(Expanded(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: rowItems,
-        ),
-      ));
-    }
-    return selectedFruitsList;
-  }
-
-  //List<>
-
-
-  Widget fruitItem(int index) {
-    return FruitImageWithRemove(
-      fruitImage: AssetImage(kFruitImages[index]),
-      fruitName: Text(kFruitNames[index]),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    Size screen = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: kPrimaryColor,
       appBar: AppBar(
@@ -62,12 +31,13 @@ class _DonationCartScreenState extends State<DonationCartScreen> {
         centerTitle: true,
       ),
       body: SafeArea(
-        child: myColumn(screen),
+        child: myColumn(),
       ),
     );
   }
 
-  Widget myColumn(Size screen) {
+  Widget myColumn() {
+    Size screen = MediaQuery.of(context).size;
     return Column(
       children: [
         SizedBox(height: screen.height * 0.02),
@@ -134,64 +104,48 @@ class _DonationCartScreenState extends State<DonationCartScreen> {
           ),
         ),
         SizedBox(height: screen.height * 0.01),
-        selectedFruits(),
+        Expanded(
+          child: GridView.count(
+            primary: false,
+            padding: EdgeInsets.all(8),
+            crossAxisSpacing: 20,
+            mainAxisSpacing: 20,
+            crossAxisCount: 2,
+            children: selectedFruits(),
+          ),
+        ),
         SizedBox(height: screen.height * 0.02),
         kDivider(),
         button(),
         SizedBox(height: screen.height * 0.02),
-        // Container(
-        //   height: screen.height * 0.325,
-        //   child: ListView(
-        //     shrinkWrap: true,
-        //     physics: AlwaysScrollableScrollPhysics(),
-        //     children: [
-        //       SizedBox(height: screen.height * 0.02),
-        //       //fillInFields(),
-        //       //button(),
-        //       SizedBox(height: screen.height * 0.02),
-        //     ],
-        //   ),
-        // ),
       ],
     );
   }
 
-
-  Widget selectedFruits() {
-    // return Expanded(
-    //   child: Column(
-    //     children: getSelectedFruits(),
-    //   ),
-    // );
-    return Expanded(
-      child: GridView.count(
-        primary: false,
-        padding: EdgeInsets.all(8),
-        crossAxisSpacing: 20,
-        mainAxisSpacing: 20,
-        crossAxisCount: 2,
-        children: [
-          //Todo: the images shown here are from fruit picking screen
-          for (int i = 0; i < widget.fruitList.length; i++)
-            FruitImageWithRemove(
-              fruitImage: AssetImage(kFruitImages[widget.fruitList[i]]),
-              fruitName: Text(
-                kFruitNames[widget.fruitList[i]],
-                style: TextStyle(
-                    color: kPrimaryColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20.0),
-              ),
-              removeFunction:(){ setState(() {
-                widget.fruitList.removeAt(i);
-              });},
-
-
-            ),
-        ],
-      ),
-    );
+  List<Widget> selectedFruits(){
+    List<Widget> selectedFruits = [];
+    Basket basket = context.read<Basket>();
+    List<int> list = basket.selectedFruits;
+    for (int i = 0; i < list.length; i++){
+      selectedFruits.add(FruitImageWithRemove(
+        fruitImage: AssetImage(basket.fruitImages[list[i]]),
+        fruitName: Text(
+          basket.fruitNames[list[i]],
+          style: TextStyle(
+              color: kPrimaryColor,
+              fontWeight: FontWeight.bold,
+              fontSize: 20.0),
+        ),
+        removeFunction: () {
+          setState(() {
+            basket.remove(list[i]);
+          });
+        },
+      ),);
+    }
+    return selectedFruits;
   }
+
 
   Widget button() {
     Size screen = MediaQuery.of(context).size;
@@ -207,6 +161,4 @@ class _DonationCartScreenState extends State<DonationCartScreen> {
       ),
     );
   }
-
-
 }
