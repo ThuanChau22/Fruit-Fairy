@@ -94,23 +94,6 @@ class _DonationCartScreenState extends State<DonationCartScreen> {
                       : Colors.white,
                 ),
               ),
-
-              SizedBox(height: screen.height * 0.02),
-              Expanded(
-                //Already scrollable
-                child: GridView.count(
-                  primary: false,
-                  padding: EdgeInsets.all(8),
-                  crossAxisSpacing: 20,
-                  mainAxisSpacing: 20,
-                  crossAxisCount: 2,
-                  children: [
-                    for (int i = 0; i < kFruitImages.length; i++)
-                      FruitImageWithRemove(
-                          fruitImage: AssetImage(kFruitImages[i]),
-                          fruitName: Text(kFruitNames[i])),
-                  ],
-
             ),
             Expanded(
               child: Padding(
@@ -128,7 +111,6 @@ class _DonationCartScreenState extends State<DonationCartScreen> {
                   backgroundColor: selectedOption == YesOrNoSelection.no
                       ? Colors.green.shade100
                       : Colors.white,
-
                 ),
               ),
             )
