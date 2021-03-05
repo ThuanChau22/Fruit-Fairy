@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fruitfairy/constant.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:provider/provider.dart';
+
 import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
 import 'package:fruitfairy/screens/authentication/signin_screen.dart';
 import 'package:fruitfairy/utils/auth_service.dart';
-import 'package:fruitfairy/utils/firestore_service.dart';
+import 'package:fruitfairy/utils/constant.dart';
 import 'package:fruitfairy/utils/validation.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
 import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/obscure_icon.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:provider/provider.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 class SignUpDonorScreen extends StatefulWidget {
   static const String id = 'signup_donor_screen';
@@ -23,20 +22,20 @@ class SignUpDonorScreen extends StatefulWidget {
 }
 
 class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
-  bool _showSpinner = false;
-  bool _obscurePassword = true;
-
-  TextEditingController _firstName = TextEditingController();
-  TextEditingController _lastName = TextEditingController();
-  TextEditingController _email = TextEditingController();
-  TextEditingController _password = TextEditingController();
-  TextEditingController _confirmPassword = TextEditingController();
+  final TextEditingController _firstName = TextEditingController();
+  final TextEditingController _lastName = TextEditingController();
+  final TextEditingController _email = TextEditingController();
+  final TextEditingController _password = TextEditingController();
+  final TextEditingController _confirmPassword = TextEditingController();
 
   String _firstNameError = '';
   String _lastNameError = '';
   String _emailError = '';
   String _passwordError = '';
   String _confirmPasswordError = '';
+
+  bool _showSpinner = false;
+  bool _obscurePassword = true;
 
   BuildContext _scaffoldContext;
 
@@ -66,14 +65,9 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
         String email = _email.text.trim();
         String password = _password.text;
         AuthService auth = context.read<AuthService>();
-        UserCredential newUser = await auth.signUp(
+        String notifyMessage = await auth.signUp(
           email: email,
           password: password,
-        );
-        FireStoreService fireStore = context.read<FireStoreService>();
-        fireStore.uid(newUser.user.uid);
-        await fireStore.addUser(
-          email: email,
           firstName: _firstName.text.trim(),
           lastName: _lastName.text.trim(),
         );
@@ -83,9 +77,9 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
             return route.settings.name == SignOptionScreen.id;
           },
           arguments: {
-            SignInScreen.credentialObject: newUser,
             SignInScreen.email: email,
             SignInScreen.password: password,
+            SignInScreen.message: notifyMessage,
           },
         );
       } catch (e) {

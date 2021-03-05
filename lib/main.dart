@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
+
 import 'package:fruitfairy/models/account.dart';
+import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
+import 'package:fruitfairy/screens/home_screen.dart';
 import 'package:fruitfairy/utils/auth_service.dart';
 import 'package:fruitfairy/utils/firestore_service.dart';
 import 'package:fruitfairy/utils/route_generator.dart';
-import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
-import 'package:fruitfairy/screens/home_screen.dart';
-import 'package:fruitfairy/widgets/gesture_wrapper.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:provider/provider.dart';
 
 void main() async {
   // Initialize app with Firebase
@@ -32,9 +32,9 @@ class FruitFairy extends StatelessWidget {
 }
 
 class Authentication extends StatelessWidget {
-  void _fetchAccount(BuildContext context, String uid) async {
-    final FireStoreService fireStoreService = context.read<FireStoreService>();
-    context.read<FireStoreService>().uid(uid);
+  void _fetchAccount(BuildContext context) async {
+    FireStoreService fireStoreService = context.read<FireStoreService>();
+    fireStoreService.uid(context.read<AuthService>().user.uid);
     context.read<Account>().fromMap(await fireStoreService.userData);
   }
 
@@ -44,9 +44,17 @@ class Authentication extends StatelessWidget {
     User user = context.read<AuthService>().user;
     bool signedIn = user != null && user.emailVerified;
     if (signedIn) {
-      _fetchAccount(context, user.uid);
+      _fetchAccount(context);
     }
-    return GestureWapper(
+    return GestureDetector(
+      onTap: () {
+        // Dismiss on screen keyboard
+        FocusScopeNode currentFocus = FocusScope.of(context);
+        if (!currentFocus.hasPrimaryFocus &&
+            currentFocus.focusedChild != null) {
+          currentFocus.focusedChild.unfocus();
+        }
+      },
       child: MaterialApp(
         onGenerateRoute: RouteGenerator.generate,
         initialRoute: signedIn ? HomeScreen.id : SignOptionScreen.id,

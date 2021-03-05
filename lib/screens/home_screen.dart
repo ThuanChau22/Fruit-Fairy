@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fruitfairy/constant.dart';
+import 'package:provider/provider.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:strings/strings.dart';
+
 import 'package:fruitfairy/models/account.dart';
-import 'package:fruitfairy/utils/auth_service.dart';
-import 'package:fruitfairy/widgets/rounded_button.dart';
-import 'package:fruitfairy/widgets/scrollable_layout.dart';
 import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
 import 'package:fruitfairy/screens/authentication/signin_screen.dart';
 import 'package:fruitfairy/screens/edit_profile_screen.dart';
 import 'package:fruitfairy/screens/picking_fruit_screen.dart';
-import 'package:provider/provider.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
-import 'package:strings/strings.dart';
+import 'package:fruitfairy/utils/auth_service.dart';
+import 'package:fruitfairy/utils/constant.dart';
+import 'package:fruitfairy/utils/firestore_service.dart';
+import 'package:fruitfairy/widgets/rounded_button.dart';
+import 'package:fruitfairy/widgets/scrollable_layout.dart';
 
 enum Profile { Edit, SignOut }
 
@@ -30,6 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => _showSpinner = true);
     try {
       await context.read<AuthService>().signOut();
+      context.read<FireStoreService>().uid(null);
       context.read<Account>().clear();
       Navigator.of(context).pushNamedAndRemoveUntil(
         SignOptionScreen.id,

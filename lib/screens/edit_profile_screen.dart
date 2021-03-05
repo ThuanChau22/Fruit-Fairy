@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:fruitfairy/constant.dart';
+import 'package:flutter/services.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:provider/provider.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
+
 import 'package:fruitfairy/models/account.dart';
+import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
+import 'package:fruitfairy/screens/authentication/signin_screen.dart';
 import 'package:fruitfairy/utils/auth_service.dart';
+import 'package:fruitfairy/utils/constant.dart';
 import 'package:fruitfairy/utils/firestore_service.dart';
 import 'package:fruitfairy/utils/validation.dart';
 import 'package:fruitfairy/widgets/auto_scroll.dart';
@@ -11,15 +18,10 @@ import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/obscure_icon.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
-import 'package:provider/provider.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
 
-enum Field {
-  Name,
-  Address,
-  Password,
-  Phone,
-}
+enum Field { Name, Phone, Address, Password }
+
+enum DeleteMode { Input, Loading, Success }
 
 class EditProfileScreen extends StatefulWidget {
   static const String id = 'edit_profile_screen';
@@ -38,43 +40,47 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     },
   );
 
+  final TextEditingController _email = TextEditingController();
+  final TextEditingController _firstName = TextEditingController();
+  final TextEditingController _lastName = TextEditingController();
+  final TextEditingController _phoneNumber = TextEditingController();
+  final TextEditingController _confirmCode = TextEditingController();
+  final TextEditingController _street = TextEditingController();
+  final TextEditingController _city = TextEditingController();
+  final TextEditingController _state = TextEditingController();
+  final TextEditingController _zip = TextEditingController();
+  final TextEditingController _oldPassword = TextEditingController();
+  final TextEditingController _newPassword = TextEditingController();
+  final TextEditingController _confirmPassword = TextEditingController();
+  final TextEditingController _deleteConfirm = TextEditingController();
+
+  String _isoCode = 'US', _dialCode = '+1';
+
+  String _firstNameError = '';
+  String _lastNameError = '';
+  String _phoneError = '';
+  String _confirmCodeError = '';
+  String _oldPasswordError = '';
+  String _newPasswordError = '';
+  String _confirmPasswordError = '';
+  String _deleteError = '';
+
   bool _showSpinner = false;
   bool _obscureOldPassword = true;
   bool _obscureNewPassword = true;
   bool _updatedName = false;
   bool _updatedAddress = false;
   bool _updatedPassword = false;
-  String _updatePhoneRequestLabel = 'Send';
-  bool _hasPhoneNumber = false;
+  String _updatePhoneLabel = 'Add';
+  bool _newPhoneNumber = false;
+  DeleteMode _deleteMode = DeleteMode.Input;
+  bool _obscureDeletePassword = true;
 
-  TextEditingController _email = TextEditingController();
-  TextEditingController _firstName = TextEditingController();
-  TextEditingController _lastName = TextEditingController();
-
-  TextEditingController _street = TextEditingController();
-  TextEditingController _city = TextEditingController();
-  TextEditingController _state = TextEditingController();
-  TextEditingController _zip = TextEditingController();
-
-  TextEditingController _oldPassword = TextEditingController();
-  TextEditingController _newPassword = TextEditingController();
-  TextEditingController _confirmPassword = TextEditingController();
-
-  String _isoCode = 'US', _dialCode = '+1';
-  TextEditingController _phoneNumber = TextEditingController();
-  TextEditingController _confirmCode = TextEditingController();
-
-  String _firstNameError = '';
-  String _lastNameError = '';
-  String _oldPasswordError = '';
-  String _newPasswordError = '';
-  String _confirmPasswordError = '';
-  String _phoneError = '';
-  String _confirmCodeError = '';
-
-  Future<String> Function(String smsCode) verifyCode;
+  Future<String> Function(String smsCode) _verifyCode;
 
   BuildContext _scaffoldContext;
+
+  StateSetter setDialogState;
 
   void _getAccountInfo() {
     Account account = context.read<Account>();
@@ -86,7 +92,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       _isoCode = phone[kDBPhoneCountry];
       _dialCode = phone[kDBPhoneDialCode];
       _phoneNumber.text = phone[kDBPhoneNumber];
-      _hasPhoneNumber = true;
+      _updatePhoneLabel = 'Remove';
     }
     Map<String, String> address = account.address;
     if (address.isNotEmpty) {
@@ -180,7 +186,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           return errorMessage;
         }
       } else {
-        return 'Please check your input';
+        return 'Please check your inputs!';
       }
     }
     return '';
@@ -238,7 +244,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           return errorMessage;
         }
       } else {
-        return 'Please check your input';
+        return 'Please check your inputs!';
       }
     }
     return '';
@@ -257,9 +263,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (errorMessage.isEmpty) {
       if (_updatedName || _updatedAddress || _updatedPassword) {
         _updatedName = _updatedAddress = _updatedPassword = false;
-        updateMessage = 'Profile Updated';
+        updateMessage = 'Profile updated';
       } else {
-        updateMessage = 'Profile is Up-to-date';
+        updateMessage = 'Profile is up-to-date';
       }
       _getAccountInfo();
     } else {
@@ -274,21 +280,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   void _updatePhoneRequest() async {
-    if (_hasChanges(Field.Phone)) {
-      String phoneNumber = _phoneNumber.text.trim();
-      _phoneError = await Validate.phoneNumber(
-        phoneNumber: phoneNumber,
-        isoCode: _isoCode,
-      );
-      if (_phoneError.isEmpty) {
-        AuthService auth = context.read<AuthService>();
-        auth.registerPhone(
+    setState(() => _showSpinner = true);
+    String phoneNumber = _phoneNumber.text.trim();
+    _phoneError = await Validate.phoneNumber(
+      phoneNumber: phoneNumber,
+      isoCode: _isoCode,
+    );
+    if (_phoneError.isEmpty) {
+      AuthService auth = context.read<AuthService>();
+      if (_hasChanges(Field.Phone)) {
+        String notifyMessage = await auth.registerPhone(
           phoneNumber: '$_dialCode$phoneNumber',
           update: context.read<Account>().phone.isNotEmpty,
-          codeSent:
-              (Future<String> Function(String smsCode) verifyFunction) async {
-            if (verifyFunction != null) {
-              verifyCode = verifyFunction;
+          codeSent: (verifyCode) async {
+            if (verifyCode != null) {
+              _verifyCode = verifyCode;
             }
           },
           failed: (errorMessage) {
@@ -298,26 +304,35 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             ).show();
           },
         );
-        //TODO: Notify message
+        _confirmCode.clear();
+        _newPhoneNumber = true;
+        _updatePhoneLabel = 'Re-send';
         MessageBar(
           _scaffoldContext,
-          message: 'Sending...',
+          message: notifyMessage,
         ).show();
-        _confirmCode.clear();
-        _updatePhoneRequestLabel = 'Re-send';
+      } else {
+        if (await auth.removePhone()) {
+          await context.read<FireStoreService>().updatePhoneNumber(
+                phoneNumber: '',
+              );
+          context.read<Account>().setPhoneNumber(phoneNumber: '');
+          _phoneNumber.clear();
+          _updatePhoneLabel = 'Add';
+          MessageBar(
+            _scaffoldContext,
+            message: 'Phone number removed',
+          ).show();
+        }
       }
-    } else {
-      MessageBar(
-        _scaffoldContext,
-        message: 'Phone Number Already Registered',
-      ).show();
     }
-    setState(() {});
+    setState(() => _showSpinner = false);
   }
 
   void _updatePhoneVerify() async {
-    if (_hasChanges(Field.Phone) && verifyCode != null) {
-      String errorMessage = await verifyCode(_confirmCode.text.trim());
+    setState(() => _showSpinner = true);
+    if (_hasChanges(Field.Phone) && _verifyCode != null) {
+      String errorMessage = await _verifyCode(_confirmCode.text.trim());
       if (errorMessage.isEmpty) {
         String phoneNumber = _phoneNumber.text.trim();
         await context.read<FireStoreService>().updatePhoneNumber(
@@ -330,42 +345,45 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               dialCode: _dialCode,
               phoneNumber: phoneNumber,
             );
+        _phoneNumber.text = phoneNumber;
         _confirmCode.clear();
-        _hasPhoneNumber = true;
-        _updatePhoneRequestLabel = 'Send';
-        errorMessage = 'Phone Number Updated';
+        _newPhoneNumber = false;
+        _updatePhoneLabel = 'Remove';
+        errorMessage = 'Phone number updated';
       }
       MessageBar(
         _scaffoldContext,
         message: errorMessage,
       ).show();
     }
-    setState(() {});
+    setState(() => _showSpinner = false);
   }
 
-  void _removePhone() async {
-    AuthService auth = context.read<AuthService>();
-    if (auth.user.phoneNumber.isNotEmpty) {
-      auth.removePhone().then((removed) async {
-        if (removed) {
-          await context.read<FireStoreService>().updatePhoneNumber(
-                phoneNumber: '',
-              );
-          context.read<Account>().setPhoneNumber(phoneNumber: '');
-          _phoneNumber.clear();
-          _hasPhoneNumber = false;
-          MessageBar(
-            _scaffoldContext,
-            message: 'Phone Number Removed',
-          ).show();
-        }
-        setState(() {});
-      });
-      MessageBar(
-        _scaffoldContext,
-        message: 'Removing Phone Number',
-      ).show();
+  void _deleteAccount() async {
+    String password = _deleteConfirm.text;
+    _deleteError = Validate.checkPassword(password);
+    if (_deleteError.isEmpty) {
+      setDialogState(() => _deleteMode = DeleteMode.Loading);
+      try {
+        await context.read<AuthService>().deleteAccount(
+              email: _email.text.trim(),
+              password: password,
+            );
+        context.read<Account>().clear();
+        setDialogState(() => _deleteMode = DeleteMode.Success);
+        await Future.delayed(Duration(milliseconds: 1500));
+        Navigator.of(context).pop();
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          SignOptionScreen.id,
+          (route) => false,
+        );
+        Navigator.of(context).pushNamed(SignInScreen.id);
+      } catch (errorMessage) {
+        _deleteError = errorMessage;
+        setDialogState(() => _deleteMode = DeleteMode.Input);
+      }
     }
+    setDialogState(() {});
   }
 
   @override
@@ -381,12 +399,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _email.dispose();
     _firstName.dispose();
     _lastName.dispose();
+    _phoneNumber.dispose();
+    _confirmCode.dispose();
     _newPassword.dispose();
     _confirmPassword.dispose();
     _street.dispose();
     _city.dispose();
     _state.dispose();
     _zip.dispose();
+    _deleteConfirm.dispose();
   }
 
   @override
@@ -433,7 +454,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ),
                       phoneNumberField(),
                       verifyCodeField(),
-                      removePhoneLink(),
+                      inputFieldSizeBox(),
                       inputGroupLabel(
                         'Address',
                         tag: Field.Address,
@@ -571,10 +592,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 prefixText: _dialCode,
                 helperText: null,
                 onChanged: (value) async {
+                  String phoneNumber = _phoneNumber.text.trim();
                   _phoneError = await Validate.phoneNumber(
-                    phoneNumber: _phoneNumber.text.trim(),
+                    phoneNumber: phoneNumber,
                     isoCode: _isoCode,
                   );
+                  _updatePhoneLabel =
+                      _hasChanges(Field.Phone) || phoneNumber.isEmpty
+                          ? 'Add'
+                          : 'Remove';
+                  _newPhoneNumber = false;
                   setState(() {});
                 },
                 onTap: () {
@@ -586,7 +613,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             Expanded(
               flex: 2,
               child: RoundedButton(
-                label: _updatePhoneRequestLabel,
+                label: _updatePhoneLabel,
                 labelColor: kPrimaryColor,
                 onPressed: () {
                   _updatePhoneRequest();
@@ -613,53 +640,38 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Widget verifyCodeField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              flex: 3,
-              child: InputField(
-                label: '6-Digit Code',
-                controller: _confirmCode,
-                errorMessage: _confirmCodeError,
-                onTap: () {
-                  MessageBar(_scaffoldContext).hide();
-                },
-              ),
-            ),
-            SizedBox(width: 5.0),
-            Expanded(
-              flex: 2,
-              child: RoundedButton(
-                label: 'Verify',
-                labelColor: kPrimaryColor,
-                onPressed: () {
-                  _updatePhoneVerify();
-                },
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget removePhoneLink() {
-    Size screen = MediaQuery.of(context).size;
     return Visibility(
-      visible: _hasPhoneNumber,
+      visible: _newPhoneNumber,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          LabelLink(
-            label: 'Remove phone number',
-            onTap: () {
-              _removePhone();
-            },
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 3,
+                child: InputField(
+                  label: '6-Digit Code',
+                  controller: _confirmCode,
+                  errorMessage: _confirmCodeError,
+                  onTap: () {
+                    MessageBar(_scaffoldContext).hide();
+                  },
+                ),
+              ),
+              SizedBox(width: 5.0),
+              Expanded(
+                flex: 2,
+                child: RoundedButton(
+                  label: 'Verify',
+                  labelColor: kPrimaryColor,
+                  onPressed: () {
+                    _updatePhoneVerify();
+                  },
+                ),
+              ),
+            ],
           ),
-          SizedBox(height: screen.height * 0.03),
         ],
       ),
     );
@@ -839,8 +851,135 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   Widget deleteAccountLink() {
     return LabelLink(
-      label: 'I want to delete this account',
-      onTap: () {},
+      label: 'Delete this account',
+      onTap: () {
+        showDeleteDialog();
+        MessageBar(_scaffoldContext).hide();
+      },
     );
+  }
+
+  Future<void> showDeleteDialog() async {
+    Alert(
+      context: context,
+      title: 'Delete Account',
+      style: AlertStyle(
+        alertBorder: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        titleStyle: TextStyle(
+          color: kLabelColor,
+          fontWeight: FontWeight.bold,
+        ),
+        backgroundColor: kPrimaryColor,
+        overlayColor: Colors.black.withOpacity(0.50),
+        isOverlayTapDismiss: false,
+      ),
+      closeIcon: Icon(
+        Icons.close_rounded,
+        color: kLabelColor,
+      ),
+      closeFunction: () {
+        _deleteMode = DeleteMode.Input;
+        _obscureDeletePassword = true;
+        _deleteConfirm.clear();
+        _deleteError = '';
+        Navigator.of(context).pop();
+        HapticFeedback.mediumImpact();
+      },
+      content: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          setDialogState = setState;
+          return Padding(
+            padding: EdgeInsets.only(top: 10.0),
+            child: deleteLayout(),
+          );
+        },
+      ),
+      buttons: [],
+    ).show();
+  }
+
+  Widget deleteLayout() {
+    switch (_deleteMode) {
+      case DeleteMode.Loading:
+        return Container(
+          height: 50.0,
+          child: Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation(kAppBarColor),
+            ),
+          ),
+        );
+        break;
+
+      case DeleteMode.Success:
+        return Container(
+          height: 50.0,
+          child: Center(
+            child: Text(
+              'Account deleted',
+              style: TextStyle(
+                color: kLabelColor,
+              ),
+            ),
+          ),
+        );
+        break;
+
+      default:
+        return Column(
+          children: [
+            Text(
+              'Please confirm your password',
+              style: TextStyle(
+                color: kLabelColor,
+                fontSize: 18.0,
+              ),
+            ),
+            SizedBox(height: 10.0),
+            Stack(
+              children: [
+                InputField(
+                  label: 'Password',
+                  controller: _deleteConfirm,
+                  errorMessage: _deleteError,
+                  obscureText: _obscureDeletePassword,
+                  onChanged: (value) {
+                    setDialogState(() {
+                      _deleteError =
+                          Validate.checkPassword(_deleteConfirm.text);
+                    });
+                  },
+                ),
+                Positioned(
+                  top: 12.0,
+                  right: 12.0,
+                  child: ObscureIcon(
+                    obscure: _obscureDeletePassword,
+                    onTap: () {
+                      setDialogState(() {
+                        _obscureDeletePassword = !_obscureDeletePassword;
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 10.0),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 50.0),
+              child: RoundedButton(
+                label: 'Delete',
+                labelColor: kPrimaryColor,
+                backgroundColor: kObjectBackgroundColor,
+                onPressed: () {
+                  _deleteAccount();
+                },
+              ),
+            ),
+          ],
+        );
+    }
   }
 }
