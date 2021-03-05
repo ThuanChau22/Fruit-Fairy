@@ -1,11 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'package:fruitfairy/utils/firestore_service.dart';
+import 'package:fruitfairy/services/firestore_service.dart';
 
-class AuthService {
+class FireAuthService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
-  AuthService();
+  FireAuthService();
 
   User get user {
     return _firebaseAuth.currentUser;
