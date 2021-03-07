@@ -32,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => _showSpinner = true);
     try {
       await context.read<FireAuthService>().signOut();
-      context.read<FireStoreService>().uid(null);
+      context.read<FireStoreService>().setUID(null);
       context.read<Account>().clear();
       Navigator.of(context).pushNamedAndRemoveUntil(
         SignOptionScreen.id,
@@ -60,14 +60,12 @@ class _HomeScreenState extends State<HomeScreen> {
           _showSpinner = false;
         }
         return Scaffold(
-          backgroundColor: kPrimaryColor,
           appBar: AppBar(
-              backgroundColor: kAppBarColor,
-              title: Text('Profile'),
-              centerTitle: true,
-              actions: [
-                initialIcon(),
-              ]),
+            title: Text('Profile'),
+            actions: [
+              initialIcon(),
+            ],
+          ),
           body: SafeArea(
             child: ModalProgressHUD(
               inAsyncCall: _showSpinner,
@@ -125,8 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       width: 50.0,
       child: PopupMenuButton<Profile>(
-        offset: Offset(0.0, 50),
-        tooltip: 'Show options',
+        offset: Offset(0.0, 25.0),
         icon: Container(
           decoration: ShapeDecoration(
             color: Colors.white,
@@ -176,13 +173,13 @@ class _HomeScreenState extends State<HomeScreen> {
         onSelected: (action) {
           switch (action) {
             case Profile.Edit:
-              Navigator.of(context).pushNamed(EditProfileScreen.id);
               HapticFeedback.mediumImpact();
+              Navigator.of(context).pushNamed(EditProfileScreen.id);
               break;
 
             case Profile.SignOut:
-              _signOut();
               HapticFeedback.mediumImpact();
+              _signOut();
               break;
             default:
           }

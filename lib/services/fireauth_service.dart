@@ -1,3 +1,4 @@
+import 'package:meta/meta.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:fruitfairy/services/firestore_service.dart';
@@ -12,10 +13,10 @@ class FireAuthService {
   }
 
   Future<String> signUp({
-    String email,
-    String password,
-    String firstName,
-    String lastName,
+    @required String email,
+    @required String password,
+    @required String firstName,
+    @required String lastName,
   }) async {
     try {
       await _firebaseAuth.createUserWithEmailAndPassword(
@@ -23,13 +24,13 @@ class FireAuthService {
         password: password,
       );
       FireStoreService fireStoreService = FireStoreService();
-      fireStoreService.uid(user.uid);
+      fireStoreService.setUID(user.uid);
       await fireStoreService.addAccount(
         email: email,
         firstName: firstName,
         lastName: lastName,
       );
-      await user.sendEmailVerification();
+      await user?.sendEmailVerification();
     } catch (e) {
       throw e.message;
     }
@@ -37,8 +38,8 @@ class FireAuthService {
   }
 
   Future<String> signIn({
-    String email,
-    String password,
+    @required String email,
+    @required String password,
   }) async {
     try {
       UserCredential userCredential =
@@ -70,10 +71,11 @@ class FireAuthService {
   // Android: set SHA-1, SHA-256, enable SafetyNet from Google Cloud Console
   // IOS: ???
   Future<String> signInWithPhone({
-    String phoneNumber,
-    Function completed,
-    Function(Future<String> Function(String smsCode) verifyCode) codeSent,
-    Function(String errorMessage) failed,
+    @required String phoneNumber,
+    @required Function completed,
+    @required
+        Function(Future<String> Function(String smsCode) verifyCode) codeSent,
+    @required Function(String errorMessage) failed,
   }) async {
     await _firebaseAuth.verifyPhoneNumber(
       timeout: Duration(seconds: 5),
@@ -132,10 +134,11 @@ class FireAuthService {
   }
 
   Future<String> registerPhone({
-    String phoneNumber,
+    @required String phoneNumber,
+    @required
+        Function(Future<String> Function(String smsCode) verifyCode) codeSent,
+    @required Function(String errorMessage) failed,
     bool update = false,
-    Function(Future<String> Function(String smsCode) verifyCode) codeSent,
-    Function(String errorMessage) failed,
   }) async {
     await _firebaseAuth.verifyPhoneNumber(
       timeout: Duration(seconds: 5),
@@ -192,9 +195,9 @@ class FireAuthService {
   }
 
   Future<void> updatePassword({
-    String email,
-    String oldPassword,
-    String newPassword,
+    @required String email,
+    @required String oldPassword,
+    @required String newPassword,
   }) async {
     try {
       EmailAuthCredential credential = EmailAuthProvider.credential(
@@ -221,8 +224,8 @@ class FireAuthService {
   }
 
   Future<void> deleteAccount({
-    String email,
-    String password,
+    @required String email,
+    @required String password,
   }) async {
     try {
       EmailAuthCredential credential = EmailAuthProvider.credential(
@@ -231,7 +234,7 @@ class FireAuthService {
       );
       await user.reauthenticateWithCredential(credential);
       FireStoreService fireStoreService = FireStoreService();
-      fireStoreService.uid(user.uid);
+      fireStoreService.setUID(user.uid);
       await fireStoreService.deleteAccount();
       await user.delete();
     } catch (e) {

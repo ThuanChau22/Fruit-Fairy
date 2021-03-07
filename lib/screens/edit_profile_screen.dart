@@ -2,17 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
-import 'package:fruitfairy/api_keys.dart';
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
 import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
 import 'package:fruitfairy/screens/authentication/signin_screen.dart';
+import 'package:fruitfairy/services/address_service.dart';
 import 'package:fruitfairy/services/fireauth_service.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
 import 'package:fruitfairy/services/validation.dart';
 import 'package:fruitfairy/widgets/auto_scroll.dart';
+import 'package:fruitfairy/widgets/input_field_suggestion.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
 import 'package:fruitfairy/widgets/label_link.dart';
 import 'package:fruitfairy/widgets/message_bar.dart';
@@ -21,7 +23,6 @@ import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
 
 enum Field { Name, Phone, Address, Password }
-
 enum DeleteMode { Input, Loading, Success }
 
 class EditProfileScreen extends StatefulWidget {
@@ -49,18 +50,24 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final TextEditingController _street = TextEditingController();
   final TextEditingController _city = TextEditingController();
   final TextEditingController _state = TextEditingController();
-  final TextEditingController _zip = TextEditingController();
+  final TextEditingController _zipCode = TextEditingController();
   final TextEditingController _oldPassword = TextEditingController();
   final TextEditingController _newPassword = TextEditingController();
   final TextEditingController _confirmPassword = TextEditingController();
   final TextEditingController _deleteConfirm = TextEditingController();
 
-  String _isoCode = 'US', _dialCode = '+1';
+  final Uuid uuid = Uuid();
+
+  String _isoCode = 'US';
+  String _dialCode = '+1';
 
   String _firstNameError = '';
   String _lastNameError = '';
   String _phoneError = '';
-  String _confirmCodeError = '';
+  String _streetError = '';
+  String _cityError = '';
+  String _stateError = '';
+  String _zipError = '';
   String _oldPasswordError = '';
   String _newPasswordError = '';
   String _confirmPasswordError = '';
@@ -79,7 +86,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   Future<String> Function(String smsCode) _verifyCode;
 
-  BuildContext _scaffoldContext;
+  String sessionToken;
 
   StateSetter setDialogState;
 
@@ -90,18 +97,33 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _lastName.text = account.lastName;
     Map<String, String> phone = account.phone;
     if (phone.isNotEmpty) {
-      _isoCode = phone[kDBPhoneCountry];
-      _dialCode = phone[kDBPhoneDialCode];
-      _phoneNumber.text = phone[kDBPhoneNumber];
+      _isoCode = phone[FireStoreService.kPhoneCountry];
+      _dialCode = phone[FireStoreService.kPhoneDialCode];
+      _phoneNumber.text = phone[FireStoreService.kPhoneNumber];
       _updatePhoneLabel = 'Remove';
     }
     Map<String, String> address = account.address;
     if (address.isNotEmpty) {
-      _street.text = address[kDBAddressStreet];
-      _city.text = address[kDBAddressCity];
-      _state.text = address[kDBAddressState];
-      _zip.text = address[kDBAddressZip];
+      _street.text = address[FireStoreService.kAddressStreet];
+      _city.text = address[FireStoreService.kAddressCity];
+      _state.text = address[FireStoreService.kAddressState];
+      _zipCode.text = address[FireStoreService.kAddressZip];
     }
+  }
+
+  bool _addressIsFilled() {
+    String street = _street.text.trim();
+    String city = _city.text.trim();
+    String state = _state.text.trim();
+    String zip = _zipCode.text.trim();
+    bool isFilled = street.isNotEmpty ||
+        city.isNotEmpty ||
+        state.isNotEmpty ||
+        zip.isNotEmpty;
+    if (!isFilled) {
+      _streetError = _cityError = _stateError = _zipError = '';
+    }
+    return isFilled;
   }
 
   bool _hasChanges(Field field) {
@@ -117,18 +139,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         String street = _street.text.trim();
         String city = _city.text.trim();
         String state = _state.text.trim();
-        String zip = _zip.text.trim();
+        String zip = _zipCode.text.trim();
         Map<String, String> address = account.address;
-        bool insert = address.isEmpty &&
-            (street.isNotEmpty ||
-                city.isNotEmpty ||
-                state.isNotEmpty ||
-                zip.isNotEmpty);
+        bool insert = address.isEmpty && _addressIsFilled();
         bool update = address.isNotEmpty &&
-            (street != address[kDBAddressStreet] ||
-                city != address[kDBAddressCity] ||
-                state != address[kDBAddressState] ||
-                zip != address[kDBAddressZip]);
+            (street != address[FireStoreService.kAddressStreet] ||
+                city != address[FireStoreService.kAddressCity] ||
+                state != address[FireStoreService.kAddressState] ||
+                zip != address[FireStoreService.kAddressZip]);
         return insert || update;
         break;
 
@@ -141,8 +159,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         Map<String, String> phone = account.phone;
         bool insert = phone.isEmpty && (phoneNumber.isNotEmpty);
         bool update = phone.isNotEmpty &&
-            (phoneNumber != phone[kDBPhoneNumber] ||
-                _isoCode != phone[kDBPhoneCountry]);
+            (phoneNumber != phone[FireStoreService.kPhoneNumber] ||
+                _isoCode != phone[FireStoreService.kPhoneCountry]);
         return insert || update;
         break;
     }
@@ -153,6 +171,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     Field tag;
     if (_firstNameError.isNotEmpty || _lastNameError.isNotEmpty) {
       tag = Field.Name;
+    } else if (_streetError.isNotEmpty ||
+        _cityError.isNotEmpty ||
+        _stateError.isNotEmpty ||
+        _zipError.isNotEmpty) {
+      tag = Field.Address;
     } else if (_oldPasswordError.isNotEmpty ||
         _newPasswordError.isNotEmpty ||
         _confirmPasswordError.isNotEmpty) {
@@ -166,11 +189,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       String firstName = _firstName.text.trim();
       String lastName = _lastName.text.trim();
       String error = _firstNameError = Validate.name(
-        label: 'First Name',
+        label: 'first name',
         name: firstName,
       );
       error += _lastNameError = Validate.name(
-        label: 'Last Name',
+        label: 'fast name',
         name: lastName,
       );
       if (error.isEmpty) {
@@ -198,23 +221,34 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       String street = _street.text.trim();
       String city = _city.text.trim();
       String state = _state.text.trim();
-      String zip = _zip.text.trim();
-      try {
-        await context.read<FireStoreService>().updateUserAddress(
-              street: street,
-              city: city,
-              state: state,
-              zip: zip,
-            );
-        context.read<Account>().setAddress(
-              street: street,
-              city: city,
-              state: state,
-              zip: zip,
-            );
-        _updatedAddress = true;
-      } catch (errorMessage) {
-        return errorMessage;
+      String zip = _zipCode.text.trim();
+      String error = '';
+      if (_addressIsFilled()) {
+        error += _streetError = Validate.checkStreet(street);
+        error += _cityError = Validate.checkCity(city);
+        error += _stateError = Validate.checkState(state);
+        error += _zipError = Validate.zipCode(zip);
+      }
+      if (error.isEmpty) {
+        try {
+          await context.read<FireStoreService>().updateUserAddress(
+                street: street,
+                city: city,
+                state: state,
+                zip: zip,
+              );
+          context.read<Account>().setAddress(
+                street: street,
+                city: city,
+                state: state,
+                zip: zip,
+              );
+          _updatedAddress = true;
+        } catch (errorMessage) {
+          return errorMessage;
+        }
+      } else {
+        return 'Please check your inputs!';
       }
     }
     return '';
@@ -274,10 +308,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       updateMessage = errorMessage;
     }
     setState(() => _showSpinner = false);
-    MessageBar(
-      _scaffoldContext,
-      message: updateMessage,
-    ).show();
+    MessageBar(context, message: updateMessage).show();
   }
 
   void _updatePhoneRequest() async {
@@ -300,7 +331,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           },
           failed: (errorMessage) {
             MessageBar(
-              _scaffoldContext,
+              context,
               message: errorMessage,
             ).show();
           },
@@ -308,22 +339,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         _confirmCode.clear();
         _newPhoneNumber = true;
         _updatePhoneLabel = 'Re-send';
-        MessageBar(
-          _scaffoldContext,
-          message: notifyMessage,
-        ).show();
+        MessageBar(context, message: notifyMessage).show();
       } else {
         if (await auth.removePhone()) {
           await context.read<FireStoreService>().updatePhoneNumber(
+                country: _isoCode,
+                dialCode: _dialCode,
                 phoneNumber: '',
               );
           context.read<Account>().setPhoneNumber(phoneNumber: '');
           _phoneNumber.clear();
           _updatePhoneLabel = 'Add';
-          MessageBar(
-            _scaffoldContext,
-            message: 'Phone number removed',
-          ).show();
+          MessageBar(context, message: 'Phone number removed').show();
         }
       }
     }
@@ -352,10 +379,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         _updatePhoneLabel = 'Remove';
         errorMessage = 'Phone number updated';
       }
-      MessageBar(
-        _scaffoldContext,
-        message: errorMessage,
-      ).show();
+      MessageBar(context, message: errorMessage).show();
     }
     setState(() => _showSpinner = false);
   }
@@ -391,7 +415,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   void initState() {
     super.initState();
     _getAccountInfo();
-    print(PLACES_API_KEY);
   }
 
   @override
@@ -408,7 +431,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _street.dispose();
     _city.dispose();
     _state.dispose();
-    _zip.dispose();
+    _zipCode.dispose();
     _deleteConfirm.dispose();
   }
 
@@ -416,79 +439,75 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
     return Scaffold(
-      backgroundColor: kPrimaryColor,
       appBar: AppBar(
-        backgroundColor: kAppBarColor,
         title: Text('Edit Profile'),
-        centerTitle: true,
       ),
-      body: Builder(
-        builder: (BuildContext context) {
-          _scaffoldContext = context;
-          return SafeArea(
-            child: ModalProgressHUD(
-              inAsyncCall: _showSpinner,
-              progressIndicator: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation(kAppBarColor),
+      body: SafeArea(
+        child: ModalProgressHUD(
+          inAsyncCall: _showSpinner,
+          progressIndicator: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation(kAppBarColor),
+          ),
+          child: ScrollableLayout(
+            controller: _scroller.controller,
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: screen.height * 0.03,
+                horizontal: screen.width * 0.15,
               ),
-              child: ScrollableLayout(
-                controller: _scroller.controller,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    vertical: screen.height * 0.03,
-                    horizontal: screen.width * 0.15,
+              child: Column(
+                children: [
+                  inputGroupLabel(
+                    'Account',
+                    tag: Field.Name,
                   ),
-                  child: Column(
-                    children: [
-                      inputGroupLabel(
-                        'Account',
-                        tag: Field.Name,
-                      ),
-                      emailInputField(),
-                      inputFieldSizeBox(),
-                      firstNameInputField(),
-                      inputFieldSizeBox(),
-                      lastNameInputField(),
-                      inputFieldSizeBox(),
-                      inputGroupLabel(
-                        'Mobile Contact',
-                        tag: Field.Phone,
-                      ),
-                      phoneNumberField(),
-                      verifyCodeField(),
-                      inputFieldSizeBox(),
-                      inputGroupLabel(
-                        'Address',
-                        tag: Field.Address,
-                      ),
-                      streetInputField(),
-                      inputFieldSizeBox(),
-                      cityInputField(),
-                      inputFieldSizeBox(),
-                      stateInputField(),
-                      inputFieldSizeBox(),
-                      zipInputField(),
-                      inputFieldSizeBox(),
-                      inputGroupLabel(
-                        'Change Password',
-                        tag: Field.Password,
-                      ),
-                      currentPasswordInputField(),
-                      inputFieldSizeBox(),
-                      newPasswordInputField(),
-                      inputFieldSizeBox(),
-                      confirmPasswordInputField(),
-                      inputFieldSizeBox(),
-                      saveButton(),
-                      SizedBox(height: screen.height * 0.05),
-                      deleteAccountLink(),
-                    ],
+                  emailInputField(),
+                  inputFieldSizedBox(),
+                  firstNameInputField(),
+                  inputFieldSizedBox(),
+                  lastNameInputField(),
+                  inputFieldSizedBox(),
+                  inputGroupSizedBox(),
+                  inputGroupLabel(
+                    'Mobile Contact',
+                    tag: Field.Phone,
                   ),
-                ),
+                  phoneNumberField(),
+                  verifyCodeField(),
+                  inputFieldSizedBox(),
+                  inputGroupSizedBox(),
+                  inputGroupLabel(
+                    'Address',
+                    tag: Field.Address,
+                  ),
+                  streetInputField(),
+                  inputFieldSizedBox(),
+                  cityInputField(),
+                  inputFieldSizedBox(),
+                  stateInputField(),
+                  inputFieldSizedBox(),
+                  zipInputField(),
+                  inputFieldSizedBox(),
+                  inputGroupSizedBox(),
+                  inputGroupLabel(
+                    'Change Password',
+                    tag: Field.Password,
+                  ),
+                  currentPasswordInputField(),
+                  inputFieldSizedBox(),
+                  newPasswordInputField(),
+                  inputFieldSizedBox(),
+                  confirmPasswordInputField(),
+                  inputFieldSizedBox(),
+                  inputGroupSizedBox(),
+                  saveButton(),
+                  SizedBox(height: screen.height * 0.05),
+                  deleteAccountLink(),
+                ],
               ),
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
@@ -525,9 +544,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  Widget inputFieldSizeBox() {
+  Widget inputFieldSizedBox() {
     Size screen = MediaQuery.of(context).size;
     return SizedBox(height: screen.height * 0.01);
+  }
+
+  Widget inputGroupSizedBox() {
+    Size screen = MediaQuery.of(context).size;
+    return SizedBox(height: screen.height * 0.02);
   }
 
   Widget emailInputField() {
@@ -544,17 +568,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       label: 'First Name',
       controller: _firstName,
       errorMessage: _firstNameError,
-      maxLength: 20,
       onChanged: (value) {
         setState(() {
           _firstNameError = Validate.name(
-            label: 'First Name',
+            label: 'first name',
             name: _firstName.text.trim(),
           );
         });
-      },
-      onTap: () {
-        MessageBar(_scaffoldContext).hide();
       },
     );
   }
@@ -564,17 +584,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       label: 'Last Name',
       controller: _lastName,
       errorMessage: _lastNameError,
-      maxLength: 20,
       onChanged: (value) {
         setState(() {
           _lastNameError = Validate.name(
-            label: 'Last Name',
+            label: 'last name',
             name: _lastName.text.trim(),
           );
         });
-      },
-      onTap: () {
-        MessageBar(_scaffoldContext).hide();
       },
     );
   }
@@ -595,19 +611,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 helperText: null,
                 onChanged: (value) async {
                   String phoneNumber = _phoneNumber.text.trim();
-                  _phoneError = await Validate.phoneNumber(
-                    phoneNumber: phoneNumber,
-                    isoCode: _isoCode,
-                  );
-                  _updatePhoneLabel =
-                      _hasChanges(Field.Phone) || phoneNumber.isEmpty
-                          ? 'Add'
-                          : 'Remove';
+                  _phoneError = '';
+                  if (phoneNumber.isNotEmpty) {
+                    _phoneError = await Validate.phoneNumber(
+                      phoneNumber: phoneNumber,
+                      isoCode: _isoCode,
+                    );
+                  }
+                  _updatePhoneLabel = 'Remove';
+                  if (_hasChanges(Field.Phone) || phoneNumber.isEmpty) {
+                    _updatePhoneLabel = 'Add';
+                  }
                   _newPhoneNumber = false;
                   setState(() {});
-                },
-                onTap: () {
-                  MessageBar(_scaffoldContext).hide();
                 },
               ),
             ),
@@ -626,11 +642,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ),
         Padding(
           padding: EdgeInsets.symmetric(
-            vertical: 4.0,
+            vertical: 1.5,
             horizontal: 20.0,
           ),
           child: Text(
-            _phoneError,
+            _phoneError.trim(),
             style: TextStyle(
               color: kErrorColor,
               fontSize: 16.0,
@@ -655,10 +671,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 child: InputField(
                   label: '6-Digit Code',
                   controller: _confirmCode,
-                  errorMessage: _confirmCodeError,
-                  onTap: () {
-                    MessageBar(_scaffoldContext).hide();
-                  },
                 ),
               ),
               SizedBox(width: 5.0),
@@ -679,51 +691,127 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  streetInputField() {
-    return InputField(
-      label: 'Street',
-      controller: _street,
-      onChanged: (value) {},
-      onTap: () {
-        MessageBar(_scaffoldContext).hide();
-      },
+  Widget streetInputField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        InputFieldSuggestion<Map<String, String>>(
+          label: 'Street',
+          controller: _street,
+          suggestionsCallback: (pattern) async {
+            if (pattern.isNotEmpty) {
+              sessionToken = sessionToken ?? uuid.v4();
+              return await AddressService.getSuggestions(
+                pattern,
+                sessionToken: sessionToken,
+              );
+            }
+            return null;
+          },
+          onChanged: (value) {
+            setState(() {
+              if (_addressIsFilled()) {
+                _streetError = Validate.checkStreet(_street.text.trim());
+              }
+            });
+          },
+          itemBuilder: (context, suggestion) {
+            return ListTile(
+              title: Text(
+                suggestion[AddressService.kDescription],
+                style: TextStyle(
+                  color: kPrimaryColor,
+                ),
+              ),
+            );
+          },
+          noItemsFoundBuilder: (context) {
+            return ListTile(
+              title: Text(
+                'Address not found!',
+                style: TextStyle(
+                  color: kPrimaryColor,
+                ),
+              ),
+            );
+          },
+          onSuggestionSelected: (suggestion) async {
+            Map<String, String> address = await AddressService.getDetails(
+              suggestion[AddressService.kPlaceId],
+              sessionToken: sessionToken,
+            );
+            if (address.isNotEmpty) {
+              _street.text = address[AddressService.kStreet];
+              _city.text = address[AddressService.kCity];
+              _state.text = address[AddressService.kState];
+              _zipCode.text = address[AddressService.kZipCode];
+            }
+            sessionToken = null;
+          },
+        ),
+        Padding(
+          padding: EdgeInsets.symmetric(
+            vertical: 1.5,
+            horizontal: 20.0,
+          ),
+          child: Text(
+            _streetError.trim(),
+            style: TextStyle(
+              color: kErrorColor,
+              fontSize: 16.0,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
-  cityInputField() {
+  Widget cityInputField() {
     return InputField(
       label: 'City',
       controller: _city,
-      onChanged: (value) {},
-      onTap: () {
-        MessageBar(_scaffoldContext).hide();
+      errorMessage: _cityError,
+      onChanged: (value) {
+        setState(() {
+          if (_addressIsFilled()) {
+            _cityError = Validate.checkCity(_city.text.trim());
+          }
+        });
       },
     );
   }
 
-  stateInputField() {
+  Widget stateInputField() {
     return InputField(
       label: 'State',
       controller: _state,
-      onChanged: (value) {},
-      onTap: () {
-        MessageBar(_scaffoldContext).hide();
+      errorMessage: _stateError,
+      onChanged: (value) {
+        setState(() {
+          if (_addressIsFilled()) {
+            _stateError = Validate.checkState(_state.text.trim());
+          }
+        });
       },
     );
   }
 
-  zipInputField() {
+  Widget zipInputField() {
     return InputField(
       label: 'Zip Code',
-      controller: _zip,
-      onChanged: (value) {},
-      onTap: () {
-        MessageBar(_scaffoldContext).hide();
+      controller: _zipCode,
+      errorMessage: _zipError,
+      onChanged: (value) {
+        setState(() {
+          if (_addressIsFilled()) {
+            _zipError = Validate.zipCode(_zipCode.text.trim());
+          }
+        });
       },
     );
   }
 
-  currentPasswordInputField() {
+  Widget currentPasswordInputField() {
     return Stack(
       children: [
         InputField(
@@ -733,15 +821,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           obscureText: _obscureOldPassword,
           onChanged: (value) {
             setState(() {
+              _oldPasswordError = '';
               if (_newPassword.text.isNotEmpty) {
                 _oldPasswordError = Validate.checkPassword(_oldPassword.text);
-              } else {
-                _oldPasswordError = '';
               }
             });
-          },
-          onTap: () {
-            MessageBar(_scaffoldContext).hide();
           },
         ),
         Positioned(
@@ -760,7 +844,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  newPasswordInputField() {
+  Widget newPasswordInputField() {
     return Stack(
       children: [
         InputField(
@@ -773,6 +857,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               String oldPassword = _oldPassword.text;
               String newPassword = _newPassword.text;
               String confirmPassword = _confirmPassword.text;
+              _oldPasswordError = '';
+              _newPasswordError = '';
+              _confirmPasswordError = '';
               if (newPassword.isNotEmpty) {
                 _oldPasswordError = Validate.checkPassword(oldPassword);
                 _newPasswordError = Validate.password(newPassword);
@@ -782,15 +869,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     confirmPassword: confirmPassword,
                   );
                 }
-              } else {
-                _oldPasswordError = '';
-                _newPasswordError = '';
-                _confirmPasswordError = '';
               }
             });
-          },
-          onTap: () {
-            MessageBar(_scaffoldContext).hide();
           },
         ),
         Positioned(
@@ -809,7 +889,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  confirmPasswordInputField() {
+  Widget confirmPasswordInputField() {
     return InputField(
       label: 'Confirm Password',
       controller: _confirmPassword,
@@ -818,18 +898,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       onChanged: (value) {
         setState(() {
           String newPassword = _newPassword.text;
+          _confirmPasswordError = '';
           if (newPassword.isNotEmpty) {
             _confirmPasswordError = Validate.confirmPassword(
               password: newPassword,
               confirmPassword: _confirmPassword.text,
             );
-          } else {
-            _confirmPasswordError = '';
           }
         });
-      },
-      onTap: () {
-        MessageBar(_scaffoldContext).hide();
       },
     );
   }
@@ -856,7 +932,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       label: 'Delete this account',
       onTap: () {
         showDeleteDialog();
-        MessageBar(_scaffoldContext).hide();
+        MessageBar(context).hide();
       },
     );
   }
@@ -882,12 +958,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         color: kLabelColor,
       ),
       closeFunction: () {
+        HapticFeedback.mediumImpact();
         _deleteMode = DeleteMode.Input;
         _obscureDeletePassword = true;
         _deleteConfirm.clear();
         _deleteError = '';
         Navigator.of(context).pop();
-        HapticFeedback.mediumImpact();
       },
       content: StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {

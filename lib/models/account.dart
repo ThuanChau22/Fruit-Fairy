@@ -1,7 +1,7 @@
 import 'dart:collection';
 import 'package:flutter/foundation.dart';
 
-import 'package:fruitfairy/constant.dart';
+import 'package:fruitfairy/services/firestore_service.dart';
 
 class Account extends ChangeNotifier {
   String _email = '';
@@ -32,71 +32,81 @@ class Account extends ChangeNotifier {
     return UnmodifiableMapView(_address);
   }
 
-  void setEmail(String email) {
-    this._email = email;
-    notifyListeners();
-  }
-
   void setFirstName(String firstName) {
-    this._firstName = firstName;
+    _firstName = firstName;
     notifyListeners();
   }
 
   void setLastName(String lastName) {
-    this._lastName = lastName;
+    _lastName = lastName;
     notifyListeners();
   }
 
-  void setPhoneNumber({String country, String dialCode, String phoneNumber}) {
+  void setPhoneNumber({
+    @required String phoneNumber,
+    String country,
+    String dialCode,
+  }) {
     if (phoneNumber.isEmpty) {
-      this._phone = {};
+      _phone = {};
     } else {
-      this._phone[kDBPhoneCountry] = country;
-      this._phone[kDBPhoneDialCode] = dialCode;
-      this._phone[kDBPhoneNumber] = phoneNumber;
+      _phone[FireStoreService.kPhoneCountry] = country;
+      _phone[FireStoreService.kPhoneDialCode] = dialCode;
+      _phone[FireStoreService.kPhoneNumber] = phoneNumber;
     }
     notifyListeners();
   }
 
-  void setAddress({String street, String city, String state, String zip}) {
+  void setAddress({
+    @required String street,
+    @required String city,
+    @required String state,
+    @required String zip,
+  }) {
     if (street.isEmpty && city.isEmpty && state.isEmpty && zip.isEmpty) {
-      this._address = {};
+      _address = {};
     } else {
-      this._address[kDBAddressStreet] = street;
-      this._address[kDBAddressCity] = city;
-      this._address[kDBAddressState] = state;
-      this._address[kDBAddressZip] = zip;
+      _address[FireStoreService.kAddressStreet] = street;
+      _address[FireStoreService.kAddressCity] = city;
+      _address[FireStoreService.kAddressState] = state;
+      _address[FireStoreService.kAddressZip] = zip;
     }
-
     notifyListeners();
   }
 
   void fromMap(Map<String, dynamic> accountData) {
-    this._email = accountData[kDBEmail];
-    this._firstName = accountData[kDBFirstName];
-    this._lastName = accountData[kDBLastName];
-    Map<String, dynamic> phone = accountData[kDBPhone];
+    _email = accountData[FireStoreService.kEmail];
+    _firstName = accountData[FireStoreService.kFirstName];
+    _lastName = accountData[FireStoreService.kLastName];
+    Map<String, dynamic> phone = accountData[FireStoreService.kPhone];
     if (phone != null) {
-      this._phone[kDBPhoneCountry] = phone[kDBPhoneCountry];
-      this._phone[kDBPhoneDialCode] = phone[kDBPhoneDialCode];
-      this._phone[kDBPhoneNumber] = phone[kDBPhoneNumber];
+      _phone[FireStoreService.kPhoneCountry] =
+          phone[FireStoreService.kPhoneCountry];
+      _phone[FireStoreService.kPhoneDialCode] =
+          phone[FireStoreService.kPhoneDialCode];
+      _phone[FireStoreService.kPhoneNumber] =
+          phone[FireStoreService.kPhoneNumber];
     }
-    Map<String, dynamic> address = accountData[kDBAddress];
+    Map<String, dynamic> address = accountData[FireStoreService.kAddress];
     if (address != null) {
-      this._address[kDBAddressStreet] = address[kDBAddressStreet];
-      this._address[kDBAddressCity] = address[kDBAddressCity];
-      this._address[kDBAddressState] = address[kDBAddressState];
-      this._address[kDBAddressZip] = address[kDBAddressZip];
+      _address[FireStoreService.kAddressStreet] =
+          address[FireStoreService.kAddressStreet];
+      _address[FireStoreService.kAddressCity] =
+          address[FireStoreService.kAddressCity];
+      _address[FireStoreService.kAddressState] =
+          address[FireStoreService.kAddressState];
+      _address[FireStoreService.kAddressZip] =
+          address[FireStoreService.kAddressZip];
     }
     notifyListeners();
   }
 
   void clear() {
-    this._email = '';
-    this._firstName = '';
-    this._lastName = '';
-    this._phone = {};
-    this._address = {};
+    _email = '';
+    _firstName = '';
+    _lastName = '';
+    _phone = {};
+    _address = {};
     notifyListeners();
   }
 }

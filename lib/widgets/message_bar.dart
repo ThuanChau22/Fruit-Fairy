@@ -1,39 +1,28 @@
 import 'package:flutter/material.dart';
-
-import 'package:fruitfairy/constant.dart';
+import 'package:flutter/services.dart';
 
 class MessageBar {
-  final BuildContext scaffoldContext;
+  final BuildContext context;
   final String message;
 
   MessageBar(
-    this.scaffoldContext, {
+    this.context, {
     this.message,
   });
 
   void show() {
     hide();
-    Scaffold.of(scaffoldContext).showSnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        backgroundColor: kAppBarColor,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15.0),
-        ),
         duration: Duration(seconds: 5),
         content: Text(
           message,
           textAlign: TextAlign.center,
-          style: TextStyle(
-            color: kLabelColor,
-            fontSize: 16.0,
-            fontWeight: FontWeight.bold,
-          ),
         ),
         action: SnackBarAction(
           label: 'Dismiss',
-          textColor: kLabelColor,
           onPressed: () {
+            HapticFeedback.mediumImpact();
             hide();
           },
         ),
@@ -42,6 +31,6 @@ class MessageBar {
   }
 
   void hide() {
-    Scaffold.of(scaffoldContext).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
   }
 }

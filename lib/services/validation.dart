@@ -1,21 +1,26 @@
-import 'package:international_phone_input/international_phone_input.dart';
+import 'package:meta/meta.dart';
+
+import 'package:phone_number/phone_number.dart';
 
 /// A class that provides methods for client validations
 class Validate {
-  static final passwordLength = 8;
-  static final maxNameLength = 20;
+  static const _passwordLength = 8;
+  static const _maxNameLength = 20;
 
   /// Private constructor to prevent instantiation
   Validate._();
 
   /// Validate name
   /// Return empty String on correct [name]
-  static String name({String name, String label}) {
+  static String name({
+    @required String name,
+    @required String label,
+  }) {
     if (name.isEmpty) {
       return 'Please enter $label\n';
     }
-    if (name.length > maxNameLength) {
-      return 'Only $maxNameLength characters allowed\n';
+    if (name.length > _maxNameLength) {
+      return 'Only $_maxNameLength characters allowed\n';
     }
     return '';
   }
@@ -49,15 +54,18 @@ class Validate {
     if (!RegExp(r'[0-9]').hasMatch(password)) {
       return 'Requires at least one number\n';
     }
-    if (password.length < passwordLength) {
-      return 'Requires at least $passwordLength characters\n';
+    if (password.length < _passwordLength) {
+      return 'Requires at least $_passwordLength characters\n';
     }
     return '';
   }
 
   /// Validate confirm password
   /// Return empty String on correct [confirmPassword]
-  static String confirmPassword({String password, String confirmPassword}) {
+  static String confirmPassword({
+    @required String password,
+    @required String confirmPassword,
+  }) {
     if (confirmPassword.isEmpty) {
       return 'Please confirm your password\n';
     }
@@ -69,13 +77,28 @@ class Validate {
 
   /// Validate phone number
   /// Return empty String on correct [phoneNumber] and [isoCode]
-  static Future<String> phoneNumber(
-      {String phoneNumber, String isoCode}) async {
-    if (phoneNumber.isNotEmpty && isoCode.isNotEmpty) {
-      bool isValid = await PhoneService.parsePhoneNumber(phoneNumber, isoCode);
-      return !isValid ? 'Please enter a valid phone number' : '';
+  static Future<String> phoneNumber({
+    @required String phoneNumber,
+    @required String isoCode,
+  }) async {
+    try {
+      bool isValid = await PhoneNumberUtil().validate(phoneNumber, isoCode);
+      return !isValid ? 'Please enter a valid phone number\n' : '';
+    } catch (e) {
+      return 'Please enter a valid phone number\n';
     }
-    return 'Please enter a valid phone number';
+  }
+
+  /// Validate zip code
+  /// Return empty String on correct [zipCode]
+  static String zipCode(String zipCode) {
+    if (zipCode.isEmpty) {
+      return 'Please enter zip code\n';
+    }
+    if (!RegExp(r'^\d{5}$').hasMatch(zipCode)) {
+      return 'Invalid zip code\n';
+    }
+    return '';
   }
 
   /// Simple check email on signin
@@ -94,5 +117,23 @@ class Validate {
   /// Return empty String on correct [confirmationCode]
   static String checkConfirmCode(String confirmationCode) {
     return confirmationCode.isEmpty ? 'Please enter verification code\n' : '';
+  }
+
+  /// Simple check confirmation code on verifying
+  /// Return empty String on correct [street]
+  static String checkStreet(String street) {
+    return street.isEmpty ? 'Please enter street\n' : '';
+  }
+
+  /// Simple check confirmation code on verifying
+  /// Return empty String on correct [city]
+  static String checkCity(String city) {
+    return city.isEmpty ? 'Please enter city\n' : '';
+  }
+
+  /// Simple check confirmation code on verifying
+  /// Return empty String on correct [state]
+  static String checkState(String state) {
+    return state.isEmpty ? 'Please enter state\n' : '';
   }
 }

@@ -1,41 +1,42 @@
+import 'package:meta/meta.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-class StoreCredential {
-  static const String email = 'email';
-  static const String password = 'password';
-  static const String phone = 'phone';
-  static const String isoCode = 'isoCode';
-  static const String dialCode = 'dialCode';
+class CredentialService {
+  static const String kEmail = 'email';
+  static const String kPassword = 'password';
+  static const String kPhone = 'phone';
+  static const String kIsoCode = 'isoCode';
+  static const String kDialCode = 'dialCode';
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
 
-  StoreCredential._();
+  CredentialService._();
 
   static Future<void> store({
-    String email,
-    String password,
-    String phoneNumber,
-    String isoCode,
-    String dialCode,
+    @required String email,
+    @required String password,
+    @required String phoneNumber,
+    @required String isoCode,
+    @required String dialCode,
   }) async {
     try {
       await _storage.write(
-        key: StoreCredential.email,
+        key: CredentialService.kEmail,
         value: email,
       );
       await _storage.write(
-        key: StoreCredential.password,
+        key: CredentialService.kPassword,
         value: password,
       );
       await _storage.write(
-        key: StoreCredential.phone,
+        key: CredentialService.kPhone,
         value: phoneNumber,
       );
       await _storage.write(
-        key: StoreCredential.isoCode,
+        key: CredentialService.kIsoCode,
         value: isoCode,
       );
       await _storage.write(
-        key: StoreCredential.dialCode,
+        key: CredentialService.kDialCode,
         value: dialCode,
       );
     } catch (e) {

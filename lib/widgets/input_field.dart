@@ -1,47 +1,43 @@
 import 'package:flutter/material.dart';
 
 import 'package:fruitfairy/constant.dart';
+import 'package:fruitfairy/widgets/message_bar.dart';
 
 class InputField extends StatelessWidget {
   final String label;
   final Color labelColor;
   final TextEditingController controller;
   final String errorMessage;
+  final String helperText;
   final TextInputType keyboardType;
   final bool obscureText;
   final bool readOnly;
-  final int maxLength;
-  final String helperText;
   final String prefixText;
   final ValueChanged<String> onChanged;
-  final GestureTapCallback onTap;
 
   InputField({
+    @required this.controller,
     this.label,
     this.labelColor = kLabelColor,
-    this.controller,
     this.errorMessage = '',
-    this.keyboardType,
+    this.helperText = '',
     this.obscureText = false,
     this.readOnly = false,
-    this.maxLength,
-    this.helperText = '',
+    this.keyboardType,
     this.prefixText,
     this.onChanged,
-    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextField(
-      maxLength: maxLength,
       cursorColor: labelColor,
       controller: controller,
       keyboardType: keyboardType,
       obscureText: obscureText,
       readOnly: readOnly,
       onChanged: onChanged,
-      onTap: onTap,
+      onTap: () => MessageBar(context).hide(),
       style: TextStyle(color: labelColor),
       decoration: kTextFieldDecoration.copyWith(
         labelText: label,

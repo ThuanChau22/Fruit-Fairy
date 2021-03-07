@@ -8,7 +8,7 @@ import 'package:fruitfairy/models/account.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
 import 'package:fruitfairy/services/fireauth_service.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
-import 'package:fruitfairy/services/store_credential.dart';
+import 'package:fruitfairy/services/credential_service.dart';
 import 'package:fruitfairy/services/validation.dart';
 import 'package:fruitfairy/widgets/fruit_fairy_logo.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
@@ -36,7 +36,8 @@ class _SignInScreenState extends State<SignInScreen> {
   final TextEditingController _phoneNumber = TextEditingController();
   final TextEditingController _confirmCode = TextEditingController();
 
-  String _isoCode = 'US', _dialCode = '+1';
+  String _isoCode = 'US';
+  String _dialCode = '+1';
 
   String _emailError = '';
   String _passwordError = '';
@@ -53,18 +54,16 @@ class _SignInScreenState extends State<SignInScreen> {
 
   Future<String> Function(String smsCode) _verifyCode;
 
-  BuildContext _scaffoldContext;
-
   void _getCredential() async {
     setState(() => _showSpinner = true);
-    Map<String, String> credentials = await StoreCredential.get();
+    Map<String, String> credentials = await CredentialService.get();
     if (credentials.isNotEmpty) {
       setState(() {
-        _email.text = credentials[StoreCredential.email];
-        _password.text = credentials[StoreCredential.password];
-        _phoneNumber.text = credentials[StoreCredential.phone];
-        _isoCode = credentials[StoreCredential.isoCode];
-        _dialCode = credentials[StoreCredential.dialCode];
+        _email.text = credentials[CredentialService.kEmail];
+        _password.text = credentials[CredentialService.kPassword];
+        _phoneNumber.text = credentials[CredentialService.kPhone];
+        _isoCode = credentials[CredentialService.kIsoCode];
+        _dialCode = credentials[CredentialService.kDialCode];
         _rememberMe = true;
       });
     }
@@ -112,10 +111,7 @@ class _SignInScreenState extends State<SignInScreen> {
             FireAuthService auth = context.read<FireAuthService>();
             String notifyMessage = await auth.resetPassword(_email.text.trim());
             _buttonLabel = 'Re-send';
-            MessageBar(
-              _scaffoldContext,
-              message: notifyMessage,
-            ).show();
+            MessageBar(context, message: notifyMessage).show();
           } catch (e) {
             print(e);
           }
@@ -129,10 +125,7 @@ class _SignInScreenState extends State<SignInScreen> {
               if (errorMessage.isEmpty) {
                 await _signInSuccess();
               } else {
-                MessageBar(
-                  _scaffoldContext,
-                  message: errorMessage,
-                ).show();
+                MessageBar(context, message: errorMessage).show();
               }
             },
             codeSent: (verifyCode) {
@@ -145,27 +138,20 @@ class _SignInScreenState extends State<SignInScreen> {
               }
             },
             failed: (errorMessage) {
-              MessageBar(
-                _scaffoldContext,
-                message: errorMessage,
-              ).show();
+              MessageBar(context, message: errorMessage).show();
             },
           );
-          MessageBar(
-            _scaffoldContext,
-            message: nofifyMessage,
-          ).show();
+          MessageBar(context, message: nofifyMessage).show();
           break;
 
         case AuthMode.VerifyCode:
-          String errorMessage = await _verifyCode(_confirmCode.text.trim());
-          if (errorMessage.isEmpty) {
-            await _signInSuccess();
-          } else {
-            MessageBar(
-              _scaffoldContext,
-              message: errorMessage,
-            ).show();
+          if (_verifyCode != null) {
+            String errorMessage = await _verifyCode(_confirmCode.text.trim());
+            if (errorMessage.isEmpty) {
+              await _signInSuccess();
+            } else {
+              MessageBar(context, message: errorMessage).show();
+            }
           }
           break;
 
@@ -182,16 +168,10 @@ class _SignInScreenState extends State<SignInScreen> {
             if (notifyMessage.isEmpty) {
               await _signInSuccess();
             } else {
-              MessageBar(
-                _scaffoldContext,
-                message: notifyMessage,
-              ).show();
+              MessageBar(context, message: notifyMessage).show();
             }
           } catch (errorMessage) {
-            MessageBar(
-              _scaffoldContext,
-              message: errorMessage,
-            ).show();
+            MessageBar(context, message: errorMessage).show();
           }
           break;
       }
@@ -200,9 +180,9 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   Future<void> _signInSuccess() async {
-    await StoreCredential.detele();
+    await CredentialService.detele();
     if (_rememberMe) {
-      await StoreCredential.store(
+      await CredentialService.store(
         email: _email.text.trim(),
         password: _password.text,
         phoneNumber: _phoneNumber.text.trim(),
@@ -211,7 +191,7 @@ class _SignInScreenState extends State<SignInScreen> {
       );
     }
     FireStoreService fireStoreService = context.read<FireStoreService>();
-    fireStoreService.uid(context.read<FireAuthService>().user.uid);
+    fireStoreService.setUID(context.read<FireAuthService>().user.uid);
     context.read<Account>().fromMap(await fireStoreService.userData);
     Navigator.of(context).pushNamedAndRemoveUntil(
       HomeScreen.id,
@@ -228,10 +208,7 @@ class _SignInScreenState extends State<SignInScreen> {
         _rememberMe = false;
         _email.text = args[SignInScreen.email];
         _password.text = args[SignInScreen.password];
-        MessageBar(
-          _scaffoldContext,
-          message: args[SignInScreen.message],
-        ).show();
+        MessageBar(context, message: args[SignInScreen.message]).show();
       } else {
         _getCredential();
       }
@@ -251,40 +228,32 @@ class _SignInScreenState extends State<SignInScreen> {
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
     return Scaffold(
-      backgroundColor: kPrimaryColor,
       appBar: AppBar(
-        backgroundColor: kAppBarColor,
         title: Text(_appBarLabel),
-        centerTitle: true,
       ),
-      body: Builder(
-        builder: (BuildContext context) {
-          _scaffoldContext = context;
-          return SafeArea(
-            child: ModalProgressHUD(
-              inAsyncCall: _showSpinner,
-              progressIndicator: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation(kAppBarColor),
+      body: SafeArea(
+        child: ModalProgressHUD(
+          inAsyncCall: _showSpinner,
+          progressIndicator: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation(kAppBarColor),
+          ),
+          child: ScrollableLayout(
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: screen.height * 0.03,
+                horizontal: screen.width * 0.15,
               ),
-              child: ScrollableLayout(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    vertical: screen.height * 0.03,
-                    horizontal: screen.width * 0.15,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      fairyLogo(),
-                      SizedBox(height: screen.height * 0.03),
-                      layoutMode(),
-                    ],
-                  ),
-                ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  fairyLogo(),
+                  SizedBox(height: screen.height * 0.03),
+                  layoutMode(),
+                ],
               ),
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
@@ -389,9 +358,6 @@ class _SignInScreenState extends State<SignInScreen> {
           _emailError = Validate.checkEmail(_email.text.trim());
         });
       },
-      onTap: () {
-        MessageBar(_scaffoldContext).hide();
-      },
     );
   }
 
@@ -407,9 +373,6 @@ class _SignInScreenState extends State<SignInScreen> {
             setState(() {
               _passwordError = Validate.checkPassword(_password.text);
             });
-          },
-          onTap: () {
-            MessageBar(_scaffoldContext).hide();
           },
         ),
         Positioned(
@@ -441,9 +404,6 @@ class _SignInScreenState extends State<SignInScreen> {
         );
         setState(() {});
       },
-      onTap: () {
-        MessageBar(_scaffoldContext).hide();
-      },
     );
   }
 
@@ -452,9 +412,6 @@ class _SignInScreenState extends State<SignInScreen> {
       label: '6-Digit Code',
       controller: _confirmCode,
       errorMessage: _confirmCodeError,
-      onTap: () {
-        MessageBar(_scaffoldContext).hide();
-      },
     );
   }
 
@@ -473,10 +430,10 @@ class _SignInScreenState extends State<SignInScreen> {
               activeColor: kLabelColor,
               checkColor: kPrimaryColor,
               onChanged: (bool value) {
+                HapticFeedback.mediumImpact();
                 setState(() {
                   _rememberMe = value;
                 });
-                HapticFeedback.mediumImpact();
               },
             ),
           ),
