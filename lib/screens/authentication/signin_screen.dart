@@ -59,11 +59,11 @@ class _SignInScreenState extends State<SignInScreen> {
     Map<String, String> credentials = await CredentialService.get();
     if (credentials.isNotEmpty) {
       setState(() {
-        _email.text = credentials[CredentialService.email];
-        _password.text = credentials[CredentialService.password];
-        _phoneNumber.text = credentials[CredentialService.phone];
-        _isoCode = credentials[CredentialService.isoCode];
-        _dialCode = credentials[CredentialService.dialCode];
+        _email.text = credentials[CredentialService.kEmail];
+        _password.text = credentials[CredentialService.kPassword];
+        _phoneNumber.text = credentials[CredentialService.kPhone];
+        _isoCode = credentials[CredentialService.kIsoCode];
+        _dialCode = credentials[CredentialService.kDialCode];
         _rememberMe = true;
       });
     }

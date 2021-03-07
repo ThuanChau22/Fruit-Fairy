@@ -97,17 +97,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _lastName.text = account.lastName;
     Map<String, String> phone = account.phone;
     if (phone.isNotEmpty) {
-      _isoCode = phone[kDBPhoneCountry];
-      _dialCode = phone[kDBPhoneDialCode];
-      _phoneNumber.text = phone[kDBPhoneNumber];
+      _isoCode = phone[FireStoreService.kPhoneCountry];
+      _dialCode = phone[FireStoreService.kPhoneDialCode];
+      _phoneNumber.text = phone[FireStoreService.kPhoneNumber];
       _updatePhoneLabel = 'Remove';
     }
     Map<String, String> address = account.address;
     if (address.isNotEmpty) {
-      _street.text = address[kDBAddressStreet];
-      _city.text = address[kDBAddressCity];
-      _state.text = address[kDBAddressState];
-      _zipCode.text = address[kDBAddressZip];
+      _street.text = address[FireStoreService.kAddressStreet];
+      _city.text = address[FireStoreService.kAddressCity];
+      _state.text = address[FireStoreService.kAddressState];
+      _zipCode.text = address[FireStoreService.kAddressZip];
     }
   }
 
@@ -143,10 +143,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         Map<String, String> address = account.address;
         bool insert = address.isEmpty && _addressIsFilled();
         bool update = address.isNotEmpty &&
-            (street != address[kDBAddressStreet] ||
-                city != address[kDBAddressCity] ||
-                state != address[kDBAddressState] ||
-                zip != address[kDBAddressZip]);
+            (street != address[FireStoreService.kAddressStreet] ||
+                city != address[FireStoreService.kAddressCity] ||
+                state != address[FireStoreService.kAddressState] ||
+                zip != address[FireStoreService.kAddressZip]);
         return insert || update;
         break;
 
@@ -159,8 +159,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         Map<String, String> phone = account.phone;
         bool insert = phone.isEmpty && (phoneNumber.isNotEmpty);
         bool update = phone.isNotEmpty &&
-            (phoneNumber != phone[kDBPhoneNumber] ||
-                _isoCode != phone[kDBPhoneCountry]);
+            (phoneNumber != phone[FireStoreService.kPhoneNumber] ||
+                _isoCode != phone[FireStoreService.kPhoneCountry]);
         return insert || update;
         break;
     }
@@ -718,7 +718,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           itemBuilder: (context, suggestion) {
             return ListTile(
               title: Text(
-                suggestion[AddressService.description],
+                suggestion[AddressService.kDescription],
                 style: TextStyle(
                   color: kPrimaryColor,
                 ),
@@ -737,14 +737,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           },
           onSuggestionSelected: (suggestion) async {
             Map<String, String> address = await AddressService.getDetails(
-              suggestion[AddressService.placeId],
+              suggestion[AddressService.kPlaceId],
               sessionToken: sessionToken,
             );
             if (address.isNotEmpty) {
-              _street.text = address[AddressService.street];
-              _city.text = address[AddressService.city];
-              _state.text = address[AddressService.state];
-              _zipCode.text = address[AddressService.zipCode];
+              _street.text = address[AddressService.kStreet];
+              _city.text = address[AddressService.kCity];
+              _state.text = address[AddressService.kState];
+              _zipCode.text = address[AddressService.kZipCode];
             }
             sessionToken = null;
           },

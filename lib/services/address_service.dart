@@ -4,12 +4,12 @@ import 'package:http/http.dart' as http;
 import 'package:fruitfairy/api_keys.dart';
 
 class AddressService {
-  static const String placeId = 'placeId';
-  static const String description = 'description';
-  static const String street = 'street';
-  static const String city = 'city';
-  static const String state = 'state';
-  static const String zipCode = 'zipCode';
+  static const String kPlaceId = 'placeId';
+  static const String kDescription = 'description';
+  static const String kStreet = 'street';
+  static const String kCity = 'city';
+  static const String kState = 'state';
+  static const String kZipCode = 'zipCode';
 
   AddressService._();
 
@@ -31,8 +31,8 @@ class AddressService {
       for (Map<String, dynamic> address in data['predictions']) {
         if (address['terms'].length >= 5) {
           results.add({
-            placeId: address['place_id'],
-            description: address['description'],
+            kPlaceId: address['place_id'],
+            kDescription: address['description'],
           });
         }
       }
@@ -62,25 +62,25 @@ class AddressService {
             switch (type) {
               case 'street_number':
                 String number = details['long_name'];
-                String route = results[street];
-                results[street] = route != null ? '$number $route' : number;
+                String route = results[kStreet];
+                results[kStreet] = route != null ? '$number $route' : number;
                 break;
               case 'route':
                 String route = details['long_name'];
-                String number = results[street];
-                results[street] = number != null ? '$number $route' : route;
+                String number = results[kStreet];
+                results[kStreet] = number != null ? '$number $route' : route;
                 break;
 
               case 'locality':
-                results[city] = details['long_name'];
+                results[kCity] = details['long_name'];
                 break;
 
               case 'administrative_area_level_1':
-                results[state] = details['long_name'];
+                results[kState] = details['long_name'];
                 break;
 
               case 'postal_code':
-                results[zipCode] = details['long_name'];
+                results[kZipCode] = details['long_name'];
                 break;
               default:
             }

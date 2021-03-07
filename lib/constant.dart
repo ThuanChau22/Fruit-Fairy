@@ -7,21 +7,6 @@ const Color kLabelColor = Colors.white;
 const Color kErrorColor = Colors.white;
 const Color kObjectBackgroundColor = Colors.white;
 
-/// Database fields
-const String kDBUsers = 'users';
-const String kDBEmail = 'email';
-const String kDBFirstName = 'firstname';
-const String kDBLastName = 'lastname';
-const String kDBPhone = 'phone';
-const String kDBPhoneNumber = 'number';
-const String kDBPhoneCountry = 'country';
-const String kDBPhoneDialCode = 'dialCode';
-const String kDBAddress = 'address';
-const String kDBAddressStreet = 'street';
-const String kDBAddressCity = 'city';
-const String kDBAddressState = 'state';
-const String kDBAddressZip = 'zip';
-
 // Widget Style
 const kTextFieldInputDecoration = InputDecoration(
   filled: true,

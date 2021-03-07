@@ -1,16 +1,29 @@
 import 'package:meta/meta.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'package:fruitfairy/constant.dart';
-
 class FireStoreService {
+  /// Database fields
+  static const String kUsers = 'users';
+  static const String kEmail = 'email';
+  static const String kFirstName = 'firstname';
+  static const String kLastName = 'lastname';
+  static const String kPhone = 'phone';
+  static const String kPhoneNumber = 'number';
+  static const String kPhoneCountry = 'country';
+  static const String kPhoneDialCode = 'dialCode';
+  static const String kAddress = 'address';
+  static const String kAddressStreet = 'street';
+  static const String kAddressCity = 'city';
+  static const String kAddressState = 'state';
+  static const String kAddressZip = 'zip';
+
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   String userId;
 
   FireStoreService();
 
   Future<Map<String, dynamic>> get userData async {
-    CollectionReference userDB = _firestore.collection(kDBUsers);
+    CollectionReference userDB = _firestore.collection(kUsers);
     return (await userDB.doc(userId).get()).data();
   }
 
@@ -28,10 +41,10 @@ class FireStoreService {
       return;
     }
     try {
-      await _firestore.collection(kDBUsers).doc(userId).set({
-        kDBEmail: email,
-        kDBFirstName: firstName,
-        kDBLastName: lastName,
+      await _firestore.collection(kUsers).doc(userId).set({
+        kEmail: email,
+        kFirstName: firstName,
+        kLastName: lastName,
       });
     } catch (e) {
       throw e.message;
@@ -47,9 +60,9 @@ class FireStoreService {
       return;
     }
     try {
-      await _firestore.collection(kDBUsers).doc(userId).update({
-        kDBFirstName: firstName,
-        kDBLastName: lastName,
+      await _firestore.collection(kUsers).doc(userId).update({
+        kFirstName: firstName,
+        kLastName: lastName,
       });
     } catch (e) {
       throw e.message;
@@ -67,18 +80,18 @@ class FireStoreService {
       return;
     }
     try {
-      DocumentReference doc = _firestore.collection(kDBUsers).doc(userId);
+      DocumentReference doc = _firestore.collection(kUsers).doc(userId);
       if (street.isEmpty && city.isEmpty && state.isEmpty && zip.isEmpty) {
         await doc.update({
-          kDBAddress: FieldValue.delete(),
+          kAddress: FieldValue.delete(),
         });
       } else {
         await doc.update({
-          kDBAddress: {
-            kDBAddressStreet: street,
-            kDBAddressCity: city,
-            kDBAddressState: state,
-            kDBAddressZip: zip,
+          kAddress: {
+            kAddressStreet: street,
+            kAddressCity: city,
+            kAddressState: state,
+            kAddressZip: zip,
           },
         });
       }
@@ -97,17 +110,17 @@ class FireStoreService {
       return;
     }
     try {
-      DocumentReference doc = _firestore.collection(kDBUsers).doc(userId);
+      DocumentReference doc = _firestore.collection(kUsers).doc(userId);
       if (phoneNumber.isEmpty) {
         await doc.update({
-          kDBPhone: FieldValue.delete(),
+          kPhone: FieldValue.delete(),
         });
       } else {
         await doc.update({
-          kDBPhone: {
-            kDBPhoneCountry: country,
-            kDBPhoneDialCode: dialCode,
-            kDBPhoneNumber: phoneNumber,
+          kPhone: {
+            kPhoneCountry: country,
+            kPhoneDialCode: dialCode,
+            kPhoneNumber: phoneNumber,
           },
         });
       }
@@ -122,7 +135,7 @@ class FireStoreService {
       return;
     }
     try {
-      await _firestore.collection(kDBUsers).doc(userId).delete();
+      await _firestore.collection(kUsers).doc(userId).delete();
     } catch (e) {
       throw e.message;
     }

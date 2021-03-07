@@ -4,8 +4,8 @@ import 'package:phone_number/phone_number.dart';
 
 /// A class that provides methods for client validations
 class Validate {
-  static final passwordLength = 8;
-  static final maxNameLength = 20;
+  static const _passwordLength = 8;
+  static const _maxNameLength = 20;
 
   /// Private constructor to prevent instantiation
   Validate._();
@@ -19,8 +19,8 @@ class Validate {
     if (name.isEmpty) {
       return 'Please enter $label\n';
     }
-    if (name.length > maxNameLength) {
-      return 'Only $maxNameLength characters allowed\n';
+    if (name.length > _maxNameLength) {
+      return 'Only $_maxNameLength characters allowed\n';
     }
     return '';
   }
@@ -54,8 +54,8 @@ class Validate {
     if (!RegExp(r'[0-9]').hasMatch(password)) {
       return 'Requires at least one number\n';
     }
-    if (password.length < passwordLength) {
-      return 'Requires at least $passwordLength characters\n';
+    if (password.length < _passwordLength) {
+      return 'Requires at least $_passwordLength characters\n';
     }
     return '';
   }
