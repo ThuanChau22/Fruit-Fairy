@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 
+import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
 import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
@@ -55,9 +56,29 @@ class Authentication extends StatelessWidget {
       });
     }
     return MaterialApp(
-      theme: Theme.of(context).copyWith(brightness: Brightness.dark),
-      onGenerateRoute: RouteGenerator.generate,
       initialRoute: signedIn ? HomeScreen.id : SignOptionScreen.id,
+      onGenerateRoute: RouteGenerator.generate,
+      theme: Theme.of(context).copyWith(
+        scaffoldBackgroundColor: kPrimaryColor,
+        appBarTheme: AppBarTheme(
+          brightness: Brightness.dark,
+          backgroundColor: kAppBarColor,
+          centerTitle: true,
+        ),
+        snackBarTheme: SnackBarThemeData(
+          backgroundColor: kAppBarColor,
+          actionTextColor: kLabelColor,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          contentTextStyle: TextStyle(
+            color: kLabelColor,
+            fontSize: 16.0,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
     );
   }
 }

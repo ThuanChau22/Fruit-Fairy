@@ -439,11 +439,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
     return Scaffold(
-      backgroundColor: kPrimaryColor,
       appBar: AppBar(
-        backgroundColor: kAppBarColor,
         title: Text('Edit Profile'),
-        centerTitle: true,
       ),
       body: SafeArea(
         child: ModalProgressHUD(

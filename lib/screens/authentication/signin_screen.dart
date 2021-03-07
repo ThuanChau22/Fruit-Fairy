@@ -228,11 +228,8 @@ class _SignInScreenState extends State<SignInScreen> {
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
     return Scaffold(
-      backgroundColor: kPrimaryColor,
       appBar: AppBar(
-        backgroundColor: kAppBarColor,
         title: Text(_appBarLabel),
-        centerTitle: true,
       ),
       body: SafeArea(
         child: ModalProgressHUD(

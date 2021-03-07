@@ -60,14 +60,12 @@ class _HomeScreenState extends State<HomeScreen> {
           _showSpinner = false;
         }
         return Scaffold(
-          backgroundColor: kPrimaryColor,
           appBar: AppBar(
-              backgroundColor: kAppBarColor,
-              title: Text('Profile'),
-              centerTitle: true,
-              actions: [
-                initialIcon(),
-              ]),
+            title: Text('Profile'),
+            actions: [
+              initialIcon(),
+            ],
+          ),
           body: SafeArea(
             child: ModalProgressHUD(
               inAsyncCall: _showSpinner,

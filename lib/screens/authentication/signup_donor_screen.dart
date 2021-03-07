@@ -92,11 +92,8 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
     return Scaffold(
-      backgroundColor: kPrimaryColor,
       appBar: AppBar(
-        backgroundColor: kAppBarColor,
         title: Text('Sign Up'),
-        centerTitle: true,
       ),
       body: SafeArea(
         child: ModalProgressHUD(
