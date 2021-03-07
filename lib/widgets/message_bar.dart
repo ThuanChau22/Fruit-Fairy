@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:fruitfairy/constant.dart';
 
 class MessageBar {
-  final BuildContext scaffoldContext;
+  final BuildContext context;
   final String message;
 
   MessageBar(
-    this.scaffoldContext, {
+    this.context, {
     this.message,
   });
 
   void show() {
     hide();
-    Scaffold.of(scaffoldContext).showSnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         backgroundColor: kAppBarColor,
         behavior: SnackBarBehavior.floating,
@@ -34,6 +35,7 @@ class MessageBar {
           label: 'Dismiss',
           textColor: kLabelColor,
           onPressed: () {
+            HapticFeedback.mediumImpact();
             hide();
           },
         ),
@@ -42,6 +44,6 @@ class MessageBar {
   }
 
   void hide() {
-    Scaffold.of(scaffoldContext).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
   }
 }

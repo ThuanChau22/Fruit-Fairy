@@ -16,9 +16,9 @@ class LabelLink extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        onTap();
         HapticFeedback.mediumImpact();
         FocusScope.of(context).unfocus();
+        onTap();
       },
       child: Text(
         label,

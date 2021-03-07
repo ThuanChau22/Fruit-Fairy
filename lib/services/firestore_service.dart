@@ -1,3 +1,4 @@
+import 'package:meta/meta.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:fruitfairy/constant.dart';
@@ -13,117 +14,117 @@ class FireStoreService {
     return (await userDB.doc(userId).get()).data();
   }
 
-  void uid(String uid) {
+  void setUID(String uid) {
     this.userId = uid;
   }
 
   Future<void> addAccount({
-    String email,
-    String firstName,
-    String lastName,
+    @required String email,
+    @required String firstName,
+    @required String lastName,
   }) async {
-    if (userId != null) {
-      try {
-        await _firestore.collection(kDBUsers).doc(userId).set({
-          kDBEmail: email,
-          kDBFirstName: firstName,
-          kDBLastName: lastName,
-        });
-      } catch (e) {
-        throw e.message;
-      }
-    } else {
+    if (userId == null) {
       print('UID Unset');
+      return;
+    }
+    try {
+      await _firestore.collection(kDBUsers).doc(userId).set({
+        kDBEmail: email,
+        kDBFirstName: firstName,
+        kDBLastName: lastName,
+      });
+    } catch (e) {
+      throw e.message;
     }
   }
 
   Future<void> updateUserName({
-    String firstName,
-    String lastName,
+    @required String firstName,
+    @required String lastName,
   }) async {
-    if (userId != null) {
-      try {
-        await _firestore.collection(kDBUsers).doc(userId).update({
-          kDBFirstName: firstName,
-          kDBLastName: lastName,
-        });
-      } catch (e) {
-        throw e.message;
-      }
-    } else {
+    if (userId == null) {
       print('UID Unset');
+      return;
+    }
+    try {
+      await _firestore.collection(kDBUsers).doc(userId).update({
+        kDBFirstName: firstName,
+        kDBLastName: lastName,
+      });
+    } catch (e) {
+      throw e.message;
     }
   }
 
   Future<void> updateUserAddress({
-    String street,
-    String city,
-    String state,
-    String zip,
+    @required String street,
+    @required String city,
+    @required String state,
+    @required String zip,
   }) async {
-    if (userId != null) {
-      try {
-        DocumentReference doc = _firestore.collection(kDBUsers).doc(userId);
-        if (street.isEmpty && city.isEmpty && state.isEmpty && zip.isEmpty) {
-          await doc.update({
-            kDBAddress: FieldValue.delete(),
-          });
-        } else {
-          await doc.update({
-            kDBAddress: {
-              kDBAddressStreet: street,
-              kDBAddressCity: city,
-              kDBAddressState: state,
-              kDBAddressZip: zip,
-            },
-          });
-        }
-      } catch (e) {
-        throw e.message;
-      }
-    } else {
+    if (userId == null) {
       print('UID Unset');
+      return;
+    }
+    try {
+      DocumentReference doc = _firestore.collection(kDBUsers).doc(userId);
+      if (street.isEmpty && city.isEmpty && state.isEmpty && zip.isEmpty) {
+        await doc.update({
+          kDBAddress: FieldValue.delete(),
+        });
+      } else {
+        await doc.update({
+          kDBAddress: {
+            kDBAddressStreet: street,
+            kDBAddressCity: city,
+            kDBAddressState: state,
+            kDBAddressZip: zip,
+          },
+        });
+      }
+    } catch (e) {
+      throw e.message;
     }
   }
 
   Future<void> updatePhoneNumber({
-    String country,
-    String dialCode,
-    String phoneNumber,
+    @required String country,
+    @required String dialCode,
+    @required String phoneNumber,
   }) async {
-    if (userId != null) {
-      try {
-        DocumentReference doc = _firestore.collection(kDBUsers).doc(userId);
-        if (phoneNumber.isEmpty) {
-          await doc.update({
-            kDBPhone: FieldValue.delete(),
-          });
-        } else {
-          await doc.update({
-            kDBPhone: {
-              kDBPhoneCountry: country,
-              kDBPhoneDialCode: dialCode,
-              kDBPhoneNumber: phoneNumber,
-            },
-          });
-        }
-      } catch (e) {
-        throw e.message;
-      }
-    } else {
+    if (userId == null) {
       print('UID Unset');
+      return;
+    }
+    try {
+      DocumentReference doc = _firestore.collection(kDBUsers).doc(userId);
+      if (phoneNumber.isEmpty) {
+        await doc.update({
+          kDBPhone: FieldValue.delete(),
+        });
+      } else {
+        await doc.update({
+          kDBPhone: {
+            kDBPhoneCountry: country,
+            kDBPhoneDialCode: dialCode,
+            kDBPhoneNumber: phoneNumber,
+          },
+        });
+      }
+    } catch (e) {
+      throw e.message;
     }
   }
 
   Future<void> deleteAccount() async {
-    if (userId != null) {
-      try {
-        await _firestore.collection(kDBUsers).doc(userId).delete();
-      } catch (e) {
-        throw e.message;
-      }
-    } else {
+    if (userId == null) {
       print('UID Unset');
+      return;
+    }
+    try {
+      await _firestore.collection(kDBUsers).doc(userId).delete();
+    } catch (e) {
+      throw e.message;
     }
   }
 }

@@ -1,6 +1,7 @@
+import 'package:meta/meta.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-class StoreCredential {
+class CredentialService {
   static const String email = 'email';
   static const String password = 'password';
   static const String phone = 'phone';
@@ -8,34 +9,34 @@ class StoreCredential {
   static const String dialCode = 'dialCode';
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
 
-  StoreCredential._();
+  CredentialService._();
 
   static Future<void> store({
-    String email,
-    String password,
-    String phoneNumber,
-    String isoCode,
-    String dialCode,
+    @required String email,
+    @required String password,
+    @required String phoneNumber,
+    @required String isoCode,
+    @required String dialCode,
   }) async {
     try {
       await _storage.write(
-        key: StoreCredential.email,
+        key: CredentialService.email,
         value: email,
       );
       await _storage.write(
-        key: StoreCredential.password,
+        key: CredentialService.password,
         value: password,
       );
       await _storage.write(
-        key: StoreCredential.phone,
+        key: CredentialService.phone,
         value: phoneNumber,
       );
       await _storage.write(
-        key: StoreCredential.isoCode,
+        key: CredentialService.isoCode,
         value: isoCode,
       );
       await _storage.write(
-        key: StoreCredential.dialCode,
+        key: CredentialService.dialCode,
         value: dialCode,
       );
     } catch (e) {

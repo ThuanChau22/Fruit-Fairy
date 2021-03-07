@@ -20,45 +20,44 @@ void main() async {
 class FruitFairy extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        Provider<FireAuthService>(create: (_) => FireAuthService()),
-        Provider<FireStoreService>(create: (_) => FireStoreService()),
-        ChangeNotifierProvider<Account>(create: (_) => Account()),
-      ],
-      child: Authentication(),
-    );
-  }
-}
-
-class Authentication extends StatelessWidget {
-  void _fetchAccount(BuildContext context) async {
-    FireStoreService fireStoreService = context.read<FireStoreService>();
-    fireStoreService.uid(context.read<FireAuthService>().user.uid);
-    context.read<Account>().fromMap(await fireStoreService.userData);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // Check user authentication status
-    User user = context.read<FireAuthService>().user;
-    bool signedIn = user != null && user.emailVerified;
-    if (signedIn) {
-      _fetchAccount(context);
-    }
     return GestureDetector(
       onTap: () {
         // Dismiss on screen keyboard
         FocusScopeNode currentFocus = FocusScope.of(context);
         if (!currentFocus.hasPrimaryFocus &&
             currentFocus.focusedChild != null) {
-          currentFocus.focusedChild.unfocus();
+          currentFocus.focusedChild?.unfocus();
         }
       },
-      child: MaterialApp(
-        onGenerateRoute: RouteGenerator.generate,
-        initialRoute: signedIn ? HomeScreen.id : SignOptionScreen.id,
+      child: MultiProvider(
+        providers: [
+          Provider<FireAuthService>(create: (_) => FireAuthService()),
+          Provider<FireStoreService>(create: (_) => FireStoreService()),
+          ChangeNotifierProvider<Account>(create: (_) => Account()),
+        ],
+        child: Authentication(),
       ),
+    );
+  }
+}
+
+class Authentication extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    // Check user authentication status
+    User user = context.read<FireAuthService>().user;
+    bool signedIn = user != null && user.emailVerified;
+    if (signedIn) {
+      FireStoreService fireStoreService = context.read<FireStoreService>();
+      fireStoreService.setUID(user.uid);
+      fireStoreService.userData.then((userData) {
+        context.read<Account>().fromMap(userData);
+      });
+    }
+    return MaterialApp(
+      theme: Theme.of(context).copyWith(brightness: Brightness.dark),
+      onGenerateRoute: RouteGenerator.generate,
+      initialRoute: signedIn ? HomeScreen.id : SignOptionScreen.id,
     );
   }
 }

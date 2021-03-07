@@ -37,16 +37,14 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
   bool _showSpinner = false;
   bool _obscurePassword = true;
 
-  BuildContext _scaffoldContext;
-
   bool _validate() {
     String errors = '';
     errors += _firstNameError = Validate.name(
-      label: 'First Name',
+      label: 'first name',
       name: _firstName.text.trim(),
     );
     errors += _lastNameError = Validate.name(
-      label: 'Last Name',
+      label: 'last name',
       name: _lastName.text.trim(),
     );
     errors += _emailError = Validate.email(_email.text.trim());
@@ -82,11 +80,8 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
             SignInScreen.message: notifyMessage,
           },
         );
-      } catch (e) {
-        MessageBar(
-          _scaffoldContext,
-          message: e,
-        ).show();
+      } catch (errorMessage) {
+        MessageBar(context, message: errorMessage).show();
       } finally {
         setState(() => _showSpinner = false);
       }
@@ -103,41 +98,36 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
         title: Text('Sign Up'),
         centerTitle: true,
       ),
-      body: Builder(
-        builder: (BuildContext context) {
-          _scaffoldContext = context;
-          return SafeArea(
-            child: ModalProgressHUD(
-              inAsyncCall: _showSpinner,
-              progressIndicator: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation(kAppBarColor),
+      body: SafeArea(
+        child: ModalProgressHUD(
+          inAsyncCall: _showSpinner,
+          progressIndicator: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation(kAppBarColor),
+          ),
+          child: ScrollableLayout(
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: screen.height * 0.06,
+                horizontal: screen.width * 0.15,
               ),
-              child: ScrollableLayout(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    vertical: screen.height * 0.06,
-                    horizontal: screen.width * 0.15,
-                  ),
-                  child: Column(
-                    children: [
-                      firstNameInputField(),
-                      inputFieldSizeBox(),
-                      lastNameInputField(),
-                      inputFieldSizeBox(),
-                      emailInputField(),
-                      inputFieldSizeBox(),
-                      passwordInputField(),
-                      inputFieldSizeBox(),
-                      confirmPasswordInputField(),
-                      SizedBox(height: screen.height * 0.05),
-                      signUpButton(context),
-                    ],
-                  ),
-                ),
+              child: Column(
+                children: [
+                  firstNameInputField(),
+                  inputFieldSizeBox(),
+                  lastNameInputField(),
+                  inputFieldSizeBox(),
+                  emailInputField(),
+                  inputFieldSizeBox(),
+                  passwordInputField(),
+                  inputFieldSizeBox(),
+                  confirmPasswordInputField(),
+                  SizedBox(height: screen.height * 0.05),
+                  signUpButton(context),
+                ],
               ),
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
@@ -152,18 +142,14 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
       label: 'First Name',
       controller: _firstName,
       errorMessage: _firstNameError,
-      maxLength: Validate.maxNameLength,
       keyboardType: TextInputType.name,
       onChanged: (value) {
         setState(() {
           _firstNameError = Validate.name(
-            label: 'First Name',
+            label: 'first name',
             name: _firstName.text.trim(),
           );
         });
-      },
-      onTap: () {
-        MessageBar(_scaffoldContext).hide();
       },
     );
   }
@@ -173,18 +159,14 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
       label: 'Last Name',
       controller: _lastName,
       errorMessage: _lastNameError,
-      maxLength: Validate.maxNameLength,
       keyboardType: TextInputType.name,
       onChanged: (value) {
         setState(() {
           _lastNameError = Validate.name(
-            label: 'Last Name',
+            label: 'last name',
             name: _lastName.text.trim(),
           );
         });
-      },
-      onTap: () {
-        MessageBar(_scaffoldContext).hide();
       },
     );
   }
@@ -199,9 +181,6 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
         setState(() {
           _emailError = Validate.email(_email.text.trim());
         });
-      },
-      onTap: () {
-        MessageBar(_scaffoldContext).hide();
       },
     );
   }
@@ -226,9 +205,6 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
                 );
               }
             });
-          },
-          onTap: () {
-            MessageBar(_scaffoldContext).hide();
           },
         ),
         Positioned(
@@ -260,9 +236,6 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
             confirmPassword: _confirmPassword.text,
           );
         });
-      },
-      onTap: () {
-        MessageBar(_scaffoldContext).hide();
       },
     );
   }

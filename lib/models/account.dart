@@ -32,11 +32,6 @@ class Account extends ChangeNotifier {
     return UnmodifiableMapView(_address);
   }
 
-  void setEmail(String email) {
-    this._email = email;
-    notifyListeners();
-  }
-
   void setFirstName(String firstName) {
     this._firstName = firstName;
     notifyListeners();
@@ -47,7 +42,11 @@ class Account extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setPhoneNumber({String country, String dialCode, String phoneNumber}) {
+  void setPhoneNumber({
+    @required String phoneNumber,
+    String country,
+    String dialCode,
+  }) {
     if (phoneNumber.isEmpty) {
       this._phone = {};
     } else {
@@ -58,7 +57,12 @@ class Account extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setAddress({String street, String city, String state, String zip}) {
+  void setAddress({
+    @required String street,
+    @required String city,
+    @required String state,
+    @required String zip,
+  }) {
     if (street.isEmpty && city.isEmpty && state.isEmpty && zip.isEmpty) {
       this._address = {};
     } else {
@@ -67,7 +71,6 @@ class Account extends ChangeNotifier {
       this._address[kDBAddressState] = state;
       this._address[kDBAddressZip] = zip;
     }
-
     notifyListeners();
   }
 

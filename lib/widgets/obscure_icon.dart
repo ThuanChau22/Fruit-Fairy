@@ -7,8 +7,8 @@ class ObscureIcon extends StatelessWidget {
   final bool obscure;
   final GestureTapCallback onTap;
   ObscureIcon({
-    this.obscure = true,
-    this.onTap,
+    @required this.obscure,
+    @required this.onTap,
   });
 
   @override
@@ -19,8 +19,8 @@ class ObscureIcon extends StatelessWidget {
         color: kLabelColor,
       ),
       onTap: () {
-        onTap();
         HapticFeedback.mediumImpact();
+        onTap();
       },
     );
   }

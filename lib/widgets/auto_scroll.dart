@@ -5,13 +5,16 @@ class AutoScroll<T> {
   final AutoScrollController _scrollController = AutoScrollController();
   final Map<T, int> elements;
 
-  AutoScroll({this.elements});
+  AutoScroll({@required this.elements});
 
   AutoScrollController get controller {
     return this._scrollController;
   }
 
-  Widget wrap({T tag, Widget child}) {
+  Widget wrap({
+    @required T tag,
+    @required Widget child,
+  }) {
     return AutoScrollTag(
       index: elements[tag],
       key: ValueKey(tag),

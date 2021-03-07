@@ -30,9 +30,9 @@ class RoundedButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(30.0),
         ),
         onPressed: () {
-          onPressed();
           HapticFeedback.mediumImpact();
           FocusScope.of(context).unfocus();
+          onPressed();
         },
         child: Row(
           children: [
