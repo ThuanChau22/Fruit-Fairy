@@ -10,8 +10,6 @@ class Account extends ChangeNotifier {
   Map<String, String> _phone = {};
   Map<String, String> _address = {};
 
-
-
   Account();
 
   String get email {

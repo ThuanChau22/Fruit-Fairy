@@ -130,7 +130,7 @@ class FireAuthService {
       },
       codeAutoRetrievalTimeout: (String verificationId) {},
     );
-    return 'Verification code sent';
+    return 'Sending verification code';
   }
 
   Future<String> registerPhone({
@@ -181,7 +181,7 @@ class FireAuthService {
       verificationCompleted: (PhoneAuthCredential credential) {},
       codeAutoRetrievalTimeout: (String verificationId) {},
     );
-    return 'Verification code sent';
+    return 'Sending verification code';
   }
 
   Future<bool> removePhone() async {

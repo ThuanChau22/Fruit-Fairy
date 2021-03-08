@@ -33,7 +33,6 @@ class InputFieldSuggestion<T> extends StatelessWidget {
       hideSuggestionsOnKeyboardHide: false,
       keepSuggestionsOnLoading: false,
       suggestionsBoxVerticalOffset: 1.0,
-      debounceDuration: Duration(milliseconds: 500),
       suggestionsBoxDecoration: SuggestionsBoxDecoration(
         borderRadius: BorderRadius.circular(20.0),
         constraints: BoxConstraints(maxHeight: 175.0),
