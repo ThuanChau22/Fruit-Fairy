@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
-import 'package:uuid/uuid.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
 import 'package:fruitfairy/constant.dart';
@@ -12,6 +11,7 @@ import 'package:fruitfairy/screens/authentication/signin_screen.dart';
 import 'package:fruitfairy/services/address_service.dart';
 import 'package:fruitfairy/services/fireauth_service.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
+import 'package:fruitfairy/services/session_token.dart';
 import 'package:fruitfairy/services/validation.dart';
 import 'package:fruitfairy/widgets/auto_scroll.dart';
 import 'package:fruitfairy/widgets/input_field_suggestion.dart';
@@ -56,7 +56,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final TextEditingController _confirmPassword = TextEditingController();
   final TextEditingController _deleteConfirm = TextEditingController();
 
-  final Uuid uuid = Uuid();
+  final SessionToken sessionToken = SessionToken();
 
   String _isoCode = 'US';
   String _dialCode = '+1';
@@ -85,8 +85,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   bool _obscureDeletePassword = true;
 
   Future<String> Function(String smsCode) _verifyCode;
-
-  String sessionToken;
 
   StateSetter setDialogState;
 
@@ -698,10 +696,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           controller: _street,
           suggestionsCallback: (pattern) async {
             if (pattern.isNotEmpty) {
-              sessionToken = sessionToken ?? uuid.v4();
               return await AddressService.getSuggestions(
                 pattern,
-                sessionToken: sessionToken,
+                sessionToken: sessionToken.getToken(),
               );
             }
             return null;
@@ -736,15 +733,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           onSuggestionSelected: (suggestion) async {
             Map<String, String> address = await AddressService.getDetails(
               suggestion[AddressService.kPlaceId],
-              sessionToken: sessionToken,
+              sessionToken: sessionToken.getToken(),
             );
             if (address.isNotEmpty) {
               _street.text = address[AddressService.kStreet];
               _city.text = address[AddressService.kCity];
               _state.text = address[AddressService.kState];
               _zipCode.text = address[AddressService.kZipCode];
+              sessionToken.clear();
             }
-            sessionToken = null;
           },
         ),
         Padding(
