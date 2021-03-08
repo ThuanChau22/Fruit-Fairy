@@ -35,6 +35,7 @@ class FruitFairy extends StatelessWidget {
           Provider<FireAuthService>(create: (_) => FireAuthService()),
           Provider<FireStoreService>(create: (_) => FireStoreService()),
           ChangeNotifierProvider<Account>(create: (_) => Account()),
+          ChangeNotifierProvider<Basket>(create: (_) => Basket()),
         ],
         child: Authentication(),
       ),

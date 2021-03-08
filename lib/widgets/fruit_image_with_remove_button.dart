@@ -5,8 +5,13 @@ import 'package:fruitfairy/widgets/remove_fruit_button.dart';
 class FruitImageWithRemove extends StatelessWidget {
   final AssetImage fruitImage;
   final Text fruitName;
+  final Function removeFunction;
 
-  FruitImageWithRemove({this.fruitName, this.fruitImage});
+  FruitImageWithRemove({
+    this.fruitName,
+    this.fruitImage,
+    this.removeFunction,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +46,9 @@ class FruitImageWithRemove extends StatelessWidget {
           right: 0.0,
           child: Container(
             color: Colors.transparent,
-            child: kRemoveButton(),
+            child: kRemoveButton(
+              onPressed: removeFunction,
+            ),
           ),
         ),
       ],

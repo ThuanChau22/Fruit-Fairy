@@ -440,7 +440,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     Size screen = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Profile'),
+        title: Text('Profile'),
       ),
       body: SafeArea(
         child: ModalProgressHUD(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+
 /// Color Theme
 const Color kAppBarColor = Color.fromRGBO(128, 0, 0, 1.0);
 const Color kPrimaryColor = Color.fromRGBO(240, 94, 92, 1.0);
@@ -81,39 +82,4 @@ Widget kDivider() {
   );
 }
 
-List<String> kFruitImages = [
-  'images/Peach.png',
-  'images/Avocado.png',
-  'images/Lemon.png',
-  'images/Orange.png',
-  'images/Peach.png',
-  'images/Avocado.png',
-  'images/Lemon.png',
-  'images/Orange.png',
-  'images/Peach.png',
-  'images/Avocado.png',
-  'images/Lemon.png',
-  'images/Orange.png',
-  'images/Peach.png',
-  'images/Avocado.png',
-  'images/Lemon.png',
-  'images/Orange.png',
-];
-List<String> kFruitNames = [
-  'Peach',
-  'Avocado',
-  'Lemon',
-  'Orange',
-  'Peach',
-  'Avocado',
-  'Lemon',
-  'Orange',
-  'Peach',
-  'Avocado',
-  'Lemon',
-  'Orange',
-  'Peach',
-  'Avocado',
-  'Lemon',
-  'Orange',
-];
+

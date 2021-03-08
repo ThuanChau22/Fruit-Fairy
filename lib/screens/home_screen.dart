@@ -61,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
         }
         return Scaffold(
           appBar: AppBar(
-            title: Text('Profile'),
+            title: Text('Home'),
             actions: [
               initialIcon(),
             ],

@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:fruitfairy/constant.dart';
 
-Widget kRemoveButton() {
+Widget kRemoveButton({Function onPressed}) {
+  //declare a onpressed function for remove button
   return Material(
     color: Colors.transparent,
     child: Center(
@@ -22,7 +23,7 @@ Widget kRemoveButton() {
               color: kLabelColor,
               size: 16.0,
             ),
-            onPressed: () {},
+            onPressed: onPressed,
           ),
         ),
       ),
