@@ -62,9 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
         return Scaffold(
           appBar: AppBar(
             title: Text('Home'),
-            actions: [
-              initialIcon(),
-            ],
+            actions: [initialIcon()],
           ),
           body: SafeArea(
             child: ModalProgressHUD(
@@ -151,22 +149,20 @@ class _HomeScreenState extends State<HomeScreen> {
         itemBuilder: (context) => [
           PopupMenuItem(
             value: Profile.Edit,
-            child: Text(
-              "Edit Profile",
-              style: TextStyle(
-                color: kPrimaryColor,
-                fontWeight: FontWeight.bold,
-              ),
+            child: Text("Profile"),
+            textStyle: TextStyle(
+              color: kPrimaryColor,
+              fontSize: 16.0,
+              fontWeight: FontWeight.bold,
             ),
           ),
           PopupMenuItem(
             value: Profile.SignOut,
-            child: Text(
-              "Sign Out",
-              style: TextStyle(
-                color: kPrimaryColor,
-                fontWeight: FontWeight.bold,
-              ),
+            child: Text("Sign Out"),
+            textStyle: TextStyle(
+              color: kPrimaryColor,
+              fontSize: 16.0,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ],

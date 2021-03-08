@@ -14,9 +14,7 @@ class SignUpRoleScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Create Account'),
-      ),
+      appBar: AppBar(title: Text('Create Account')),
       body: SafeArea(
         child: ScrollableLayout(
           child: Padding(

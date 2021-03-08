@@ -92,9 +92,7 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Sign Up'),
-      ),
+      appBar: AppBar(title: Text('Sign Up')),
       body: SafeArea(
         child: ModalProgressHUD(
           inAsyncCall: _showSpinner,

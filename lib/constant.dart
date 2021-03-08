@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 /// Color Theme
 const Color kAppBarColor = Color.fromRGBO(128, 0, 0, 1.0);
 const Color kPrimaryColor = Color.fromRGBO(240, 94, 92, 1.0);
@@ -81,5 +80,3 @@ Widget kDivider() {
     endIndent: 20.0,
   );
 }
-
-
