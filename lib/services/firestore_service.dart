@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -18,17 +19,26 @@ class FireStoreService {
   static const String kAddressZip = 'zip';
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  String userId;
+  CollectionReference _userDB;
+  String _uid;
 
-  FireStoreService();
-
-  Future<Map<String, dynamic>> get userData async {
-    CollectionReference userDB = _firestore.collection(kUsers);
-    return (await userDB.doc(userId).get()).data();
+  FireStoreService() {
+    _userDB = _firestore.collection(kUsers);
   }
 
-  void setUID(String uid) {
-    this.userId = uid;
+  StreamSubscription<DocumentSnapshot> userStream(
+    Function(DocumentSnapshot) onData,
+  ) {
+    return _userDB.doc(_uid).snapshots().listen(
+      onData,
+      onError: (e) {
+        print(e);
+      },
+    );
+  }
+
+  void uid(String uid) {
+    this._uid = uid;
   }
 
   Future<void> addAccount({
@@ -36,12 +46,12 @@ class FireStoreService {
     @required String firstName,
     @required String lastName,
   }) async {
-    if (userId == null) {
+    if (_uid == null) {
       print('UID Unset');
       return;
     }
     try {
-      await _firestore.collection(kUsers).doc(userId).set({
+      await _userDB.doc(_uid).set({
         kEmail: email,
         kFirstName: firstName,
         kLastName: lastName,
@@ -55,12 +65,12 @@ class FireStoreService {
     @required String firstName,
     @required String lastName,
   }) async {
-    if (userId == null) {
+    if (_uid == null) {
       print('UID Unset');
       return;
     }
     try {
-      await _firestore.collection(kUsers).doc(userId).update({
+      await _userDB.doc(_uid).update({
         kFirstName: firstName,
         kLastName: lastName,
       });
@@ -75,12 +85,12 @@ class FireStoreService {
     @required String state,
     @required String zip,
   }) async {
-    if (userId == null) {
+    if (_uid == null) {
       print('UID Unset');
       return;
     }
     try {
-      DocumentReference doc = _firestore.collection(kUsers).doc(userId);
+      DocumentReference doc = _userDB.doc(_uid);
       if (street.isEmpty && city.isEmpty && state.isEmpty && zip.isEmpty) {
         await doc.update({
           kAddress: FieldValue.delete(),
@@ -105,12 +115,12 @@ class FireStoreService {
     @required String dialCode,
     @required String phoneNumber,
   }) async {
-    if (userId == null) {
+    if (_uid == null) {
       print('UID Unset');
       return;
     }
     try {
-      DocumentReference doc = _firestore.collection(kUsers).doc(userId);
+      DocumentReference doc = _userDB.doc(_uid);
       if (phoneNumber.isEmpty) {
         await doc.update({
           kPhone: FieldValue.delete(),
@@ -130,14 +140,18 @@ class FireStoreService {
   }
 
   Future<void> deleteAccount() async {
-    if (userId == null) {
+    if (_uid == null) {
       print('UID Unset');
       return;
     }
     try {
-      await _firestore.collection(kUsers).doc(userId).delete();
+      await _userDB.doc(_uid).delete();
     } catch (e) {
       throw e.message;
     }
+  }
+
+  void clear() {
+    _uid = null;
   }
 }

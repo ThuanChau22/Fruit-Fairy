@@ -190,9 +190,8 @@ class _SignInScreenState extends State<SignInScreen> {
         dialCode: _dialCode,
       );
     }
-    FireStoreService fireStoreService = context.read<FireStoreService>();
-    fireStoreService.setUID(context.read<FireAuthService>().user.uid);
-    context.read<Account>().fromMap(await fireStoreService.userData);
+    String uid = context.read<FireAuthService>().user.uid;
+    context.read<FireStoreService>().uid(uid);
     Navigator.of(context).pushNamedAndRemoveUntil(
       HomeScreen.id,
       (route) => false,
