@@ -25,9 +25,7 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
     Size screen = MediaQuery.of(context).size;
     Basket basket = context.watch<Basket>();
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Donation'),
-      ),
+      appBar: AppBar(title: Text('Donation')),
       body: SafeArea(
         child: Center(
           child: Column(

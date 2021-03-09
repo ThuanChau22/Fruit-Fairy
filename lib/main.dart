@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 
 import 'package:fruitfairy/constant.dart';
@@ -50,13 +50,7 @@ class Authentication extends StatelessWidget {
     // Check user authentication status
     User user = context.read<FireAuthService>().user;
     bool signedIn = user != null && user.emailVerified;
-    if (signedIn) {
-      FireStoreService fireStoreService = context.read<FireStoreService>();
-      fireStoreService.setUID(user.uid);
-      fireStoreService.userData.then((userData) {
-        context.read<Account>().fromMap(userData);
-      });
-    }
+    context.read<FireStoreService>().uid(signedIn ? user.uid : null);
     return MaterialApp(
       initialRoute: signedIn ? HomeScreen.id : SignOptionScreen.id,
       onGenerateRoute: RouteGenerator.generate,

@@ -25,12 +25,7 @@ class _DonationCartScreenState extends State<DonationCartScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kPrimaryColor,
-      appBar: AppBar(
-        backgroundColor: kAppBarColor,
-        title: Text('Donation Cart'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: Text('Donation')),
       body: SafeArea(
         child: myColumn(),
       ),
@@ -123,30 +118,31 @@ class _DonationCartScreenState extends State<DonationCartScreen> {
     );
   }
 
-  List<Widget> selectedFruits(){
+  List<Widget> selectedFruits() {
     List<Widget> selectedFruits = [];
     Basket basket = context.read<Basket>();
     List<int> list = basket.selectedFruits;
-    for (int i = 0; i < list.length; i++){
-      selectedFruits.add(FruitImageWithRemove(
-        fruitImage: AssetImage(basket.fruitImages[list[i]]),
-        fruitName: Text(
-          basket.fruitNames[list[i]],
-          style: TextStyle(
-              color: kPrimaryColor,
-              fontWeight: FontWeight.bold,
-              fontSize: 20.0),
+    for (int i = 0; i < list.length; i++) {
+      selectedFruits.add(
+        FruitImageWithRemove(
+          fruitImage: AssetImage(basket.fruitImages[list[i]]),
+          fruitName: Text(
+            basket.fruitNames[list[i]],
+            style: TextStyle(
+                color: kPrimaryColor,
+                fontWeight: FontWeight.bold,
+                fontSize: 20.0),
+          ),
+          removeFunction: () {
+            setState(() {
+              basket.remove(list[i]);
+            });
+          },
         ),
-        removeFunction: () {
-          setState(() {
-            basket.remove(list[i]);
-          });
-        },
-      ),);
+      );
     }
     return selectedFruits;
   }
-
 
   Widget button() {
     Size screen = MediaQuery.of(context).size;

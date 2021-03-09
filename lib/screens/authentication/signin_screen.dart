@@ -190,9 +190,8 @@ class _SignInScreenState extends State<SignInScreen> {
         dialCode: _dialCode,
       );
     }
-    FireStoreService fireStoreService = context.read<FireStoreService>();
-    fireStoreService.setUID(context.read<FireAuthService>().user.uid);
-    context.read<Account>().fromMap(await fireStoreService.userData);
+    String uid = context.read<FireAuthService>().user.uid;
+    context.read<FireStoreService>().uid(uid);
     Navigator.of(context).pushNamedAndRemoveUntil(
       HomeScreen.id,
       (route) => false,
@@ -228,9 +227,7 @@ class _SignInScreenState extends State<SignInScreen> {
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_appBarLabel),
-      ),
+      appBar: AppBar(title: Text(_appBarLabel)),
       body: SafeArea(
         child: ModalProgressHUD(
           inAsyncCall: _showSpinner,

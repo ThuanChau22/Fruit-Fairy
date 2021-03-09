@@ -15,12 +15,7 @@ class _ConfirmationDonationScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kPrimaryColor,
-      appBar: AppBar(
-        backgroundColor: kAppBarColor,
-        title: Text('Confirmation Page'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: Text('Confirmation')),
       body: SafeArea(
         child: Container(child: fillInFields()),
       ),
@@ -67,8 +62,4 @@ class _ConfirmationDonationScreenState
       ),
     );
   }
-
-
-
-
 }

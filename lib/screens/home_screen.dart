@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:strings/strings.dart';
@@ -28,94 +30,99 @@ class _HomeScreenState extends State<HomeScreen> {
   String _name = '';
   String _initialName = '';
 
-  void _signOut() async {
+  StreamSubscription<DocumentSnapshot> subscription;
+
+  void _getAccountInfo() {
     setState(() => _showSpinner = true);
-    try {
-      await context.read<FireAuthService>().signOut();
-      context.read<FireStoreService>().setUID(null);
-      context.read<Account>().clear();
-      Navigator.of(context).pushNamedAndRemoveUntil(
-        SignOptionScreen.id,
-        (route) => false,
-      );
-      Navigator.of(context).pushNamed(SignInScreen.id);
-    } catch (e) {
-      print(e);
-    } finally {
+    Account account = context.watch<Account>();
+    String firstName = account.firstName;
+    String lastName = account.lastName;
+    if (firstName.isNotEmpty && lastName.isNotEmpty) {
+      _initialName = '${firstName[0] + lastName[0]}'.toUpperCase();
+      _name = camelize(firstName);
       setState(() => _showSpinner = false);
     }
   }
 
+  void _signOut() async {
+    setState(() => _showSpinner = true);
+    await context.read<FireAuthService>().signOut();
+    context.read<FireStoreService>().clear();
+    context.read<Account>().clear();
+    subscription.cancel();
+    Navigator.of(context).pushNamedAndRemoveUntil(
+      SignOptionScreen.id,
+      (route) => false,
+    );
+    Navigator.of(context).pushNamed(SignInScreen.id);
+    setState(() => _showSpinner = false);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    subscription = context.read<FireStoreService>().userStream((data) {
+      context.read<Account>().fromMap(data.data());
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    _getAccountInfo();
     Size screen = MediaQuery.of(context).size;
-    return Consumer<Account>(
-      builder: (context, account, child) {
-        String firstName = account.firstName;
-        String lastName = account.lastName;
-        _showSpinner = true;
-        if (firstName.isNotEmpty && lastName.isNotEmpty) {
-          _initialName = '${firstName[0] + lastName[0]}'.toUpperCase();
-          _name = camelize(firstName);
-          _showSpinner = false;
-        }
-        return Scaffold(
-          appBar: AppBar(
-            title: Text('Home'),
-            actions: [
-              initialIcon(),
-            ],
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Home'),
+        actions: [initialIcon()],
+      ),
+      body: SafeArea(
+        child: ModalProgressHUD(
+          inAsyncCall: _showSpinner,
+          progressIndicator: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation(kAppBarColor),
           ),
-          body: SafeArea(
-            child: ModalProgressHUD(
-              inAsyncCall: _showSpinner,
-              progressIndicator: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation(kAppBarColor),
+          child: ScrollableLayout(
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: screen.height * 0.05,
               ),
-              child: ScrollableLayout(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    vertical: screen.height * 0.05,
+              child: Column(
+                children: [
+                  greeting(),
+                  donateButton(),
+                  //TODO: Donation tracking status
+                  Text(
+                    'Donation History',
+                    style: TextStyle(
+                      fontSize: 30.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
-                  child: Column(
-                    children: [
-                      greeting(),
-                      donateButton(),
-                      //TODO: Donation tracking status
-                      Text(
-                        'Donation History',
-                        style: TextStyle(
-                          fontSize: 30.0,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                  Container(
+                    height: MediaQuery.of(context).size.height * 0.5,
+                    width: MediaQuery.of(context).size.width * 0.8,
+                    color: Colors.white,
+                    child: ListView(
+                      children: [
+                        ListTile(
+                          title: Text('1'),
                         ),
-                      ),
-                      Container(
-                        height: MediaQuery.of(context).size.height * 0.5,
-                        width: MediaQuery.of(context).size.width * 0.8,
-                        color: Colors.white,
-                        child: ListView(
-                          children: [
-                            ListTile(
-                              title: Text('1'),
-                            ),
-                            ListTile(
-                              title: Text('2'),
-                            ),
-                            ListTile(
-                              title: Text('3'),
-                            ),
-                          ],
+                        ListTile(
+                          title: Text('2'),
                         ),
-                      ),
-                    ],
+                        ListTile(
+                          title: Text('3'),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -151,22 +158,20 @@ class _HomeScreenState extends State<HomeScreen> {
         itemBuilder: (context) => [
           PopupMenuItem(
             value: Profile.Edit,
-            child: Text(
-              "Edit Profile",
-              style: TextStyle(
-                color: kPrimaryColor,
-                fontWeight: FontWeight.bold,
-              ),
+            child: Text("Profile"),
+            textStyle: TextStyle(
+              color: kPrimaryColor,
+              fontSize: 16.0,
+              fontWeight: FontWeight.bold,
             ),
           ),
           PopupMenuItem(
             value: Profile.SignOut,
-            child: Text(
-              "Sign Out",
-              style: TextStyle(
-                color: kPrimaryColor,
-                fontWeight: FontWeight.bold,
-              ),
+            child: Text("Sign Out"),
+            textStyle: TextStyle(
+              color: kPrimaryColor,
+              fontSize: 16.0,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ],

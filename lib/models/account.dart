@@ -10,9 +10,11 @@ class Account extends ChangeNotifier {
   Map<String, String> _phone = {};
   Map<String, String> _address = {};
 
-
-
-  Account();
+  Account({Map<String, dynamic> data}) {
+    if (data != null) {
+      fromMap(data);
+    }
+  }
 
   String get email {
     return _email;
@@ -34,49 +36,8 @@ class Account extends ChangeNotifier {
     return UnmodifiableMapView(_address);
   }
 
-  void setFirstName(String firstName) {
-    _firstName = firstName;
-    notifyListeners();
-  }
-
-  void setLastName(String lastName) {
-    _lastName = lastName;
-    notifyListeners();
-  }
-
-  void setPhoneNumber({
-    @required String phoneNumber,
-    String country,
-    String dialCode,
-  }) {
-    if (phoneNumber.isEmpty) {
-      _phone = {};
-    } else {
-      _phone[FireStoreService.kPhoneCountry] = country;
-      _phone[FireStoreService.kPhoneDialCode] = dialCode;
-      _phone[FireStoreService.kPhoneNumber] = phoneNumber;
-    }
-    notifyListeners();
-  }
-
-  void setAddress({
-    @required String street,
-    @required String city,
-    @required String state,
-    @required String zip,
-  }) {
-    if (street.isEmpty && city.isEmpty && state.isEmpty && zip.isEmpty) {
-      _address = {};
-    } else {
-      _address[FireStoreService.kAddressStreet] = street;
-      _address[FireStoreService.kAddressCity] = city;
-      _address[FireStoreService.kAddressState] = state;
-      _address[FireStoreService.kAddressZip] = zip;
-    }
-    notifyListeners();
-  }
-
   void fromMap(Map<String, dynamic> accountData) {
+    clear();
     _email = accountData[FireStoreService.kEmail];
     _firstName = accountData[FireStoreService.kFirstName];
     _lastName = accountData[FireStoreService.kLastName];

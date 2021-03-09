@@ -29,11 +29,13 @@ class AddressService {
     if (response.statusCode == 200) {
       dynamic data = jsonDecode(response.body);
       for (Map<String, dynamic> address in data['predictions']) {
-        if (address['terms'].length >= 5) {
-          results.add({
-            kPlaceId: address['place_id'],
-            kDescription: address['description'],
-          });
+        for (String type in address['types']) {
+          if (type == 'premise' || type == 'street_address') {
+            results.add({
+              kPlaceId: address['place_id'],
+              kDescription: address['description'],
+            });
+          }
         }
       }
     } else {
