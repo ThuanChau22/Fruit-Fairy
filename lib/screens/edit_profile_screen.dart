@@ -124,77 +124,29 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     setState(() {});
   }
 
-  bool _addressIsFilled() {
-    String street = _street.text.trim();
-    String city = _city.text.trim();
-    String state = _state.text.trim();
-    String zip = _zipCode.text.trim();
-    bool isFilled = street.isNotEmpty ||
-        city.isNotEmpty ||
-        state.isNotEmpty ||
-        zip.isNotEmpty;
-    if (!isFilled) {
-      _streetError = _cityError = _stateError = _zipError = '';
+  void _updateProfile() async {
+    setState(() => _showSpinner = true);
+    String errorMessage = await _updateName();
+    if (errorMessage.isEmpty) {
+      errorMessage = await _updateAddress();
     }
-    return isFilled;
-  }
-
-  bool _hasChanges(Field field) {
-    Account account = context.read<Account>();
-    switch (field) {
-      case Field.Name:
-        bool hasChange = _firstName.text.trim() != account.firstName;
-        hasChange = hasChange || _lastName.text.trim() != account.lastName;
-        return hasChange;
-        break;
-
-      case Field.Address:
-        String street = _street.text.trim();
-        String city = _city.text.trim();
-        String state = _state.text.trim();
-        String zip = _zipCode.text.trim();
-        Map<String, String> address = account.address;
-        bool insert = address.isEmpty && _addressIsFilled();
-        bool update = address.isNotEmpty &&
-            (street != address[FireStoreService.kAddressStreet] ||
-                city != address[FireStoreService.kAddressCity] ||
-                state != address[FireStoreService.kAddressState] ||
-                zip != address[FireStoreService.kAddressZip]);
-        return insert || update;
-        break;
-
-      case Field.Password:
-        return _newPassword.text.isNotEmpty;
-        break;
-
-      case Field.Phone:
-        String phoneNumber = _phoneNumber.text.trim();
-        Map<String, String> phone = account.phone;
-        bool insert = phone.isEmpty && (phoneNumber.isNotEmpty);
-        bool update = phone.isNotEmpty &&
-            (phoneNumber != phone[FireStoreService.kPhoneNumber] ||
-                _isoCode != phone[FireStoreService.kPhoneCountry]);
-        return insert || update;
-        break;
+    if (errorMessage.isEmpty) {
+      errorMessage = await _updatePassword();
     }
-    return false;
-  }
-
-  void _scrollToError() async {
-    Field tag;
-    if (_firstNameError.isNotEmpty || _lastNameError.isNotEmpty) {
-      tag = Field.Name;
-    } else if (_streetError.isNotEmpty ||
-        _cityError.isNotEmpty ||
-        _stateError.isNotEmpty ||
-        _zipError.isNotEmpty) {
-      tag = Field.Address;
-    } else if (_oldPasswordError.isNotEmpty ||
-        _newPasswordError.isNotEmpty ||
-        _confirmPasswordError.isNotEmpty) {
-      tag = Field.Password;
+    String updateMessage;
+    if (errorMessage.isEmpty) {
+      if (_updatedName || _updatedAddress || _updatedPassword) {
+        _updatedName = _updatedAddress = _updatedPassword = false;
+        updateMessage = 'Profile updated';
+      } else {
+        updateMessage = 'Profile is up-to-date';
+      }
+    } else {
+      _scrollToError();
+      updateMessage = errorMessage;
     }
-    _scroller.scroll(tag);
+    setState(() => _showSpinner = false);
+    MessageBar(context, message: updateMessage).show();
   }
 
   Future<String> _updateName() async {
@@ -289,31 +241,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return '';
   }
 
-  void _updateProfile() async {
-    setState(() => _showSpinner = true);
-    String errorMessage = await _updateName();
-    if (errorMessage.isEmpty) {
-      errorMessage = await _updateAddress();
-    }
-    if (errorMessage.isEmpty) {
-      errorMessage = await _updatePassword();
-    }
-    String updateMessage;
-    if (errorMessage.isEmpty) {
-      if (_updatedName || _updatedAddress || _updatedPassword) {
-        _updatedName = _updatedAddress = _updatedPassword = false;
-        updateMessage = 'Profile updated';
-      } else {
-        updateMessage = 'Profile is up-to-date';
-      }
-    } else {
-      _scrollToError();
-      updateMessage = errorMessage;
-    }
-    setState(() => _showSpinner = false);
-    MessageBar(context, message: updateMessage).show();
-  }
-
   void _updatePhoneRequest() async {
     setState(() => _showSpinner = true);
     String phoneNumber = _phoneNumber.text.trim();
@@ -334,10 +261,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             }
           },
           failed: (errorMessage) {
-            MessageBar(
-              context,
-              message: errorMessage,
-            ).show();
+            MessageBar(context, message: errorMessage).show();
           },
         );
         _confirmCode.clear();
@@ -380,6 +304,79 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       MessageBar(context, message: errorMessage).show();
     }
     setState(() => _showSpinner = false);
+  }
+
+  bool _hasChanges(Field field) {
+    Account account = context.read<Account>();
+    switch (field) {
+      case Field.Name:
+        bool hasChange = _firstName.text.trim() != account.firstName;
+        hasChange = hasChange || _lastName.text.trim() != account.lastName;
+        return hasChange;
+        break;
+
+      case Field.Address:
+        String street = _street.text.trim();
+        String city = _city.text.trim();
+        String state = _state.text.trim();
+        String zip = _zipCode.text.trim();
+        Map<String, String> address = account.address;
+        bool insert = address.isEmpty && _addressIsFilled();
+        bool update = address.isNotEmpty &&
+            (street != address[FireStoreService.kAddressStreet] ||
+                city != address[FireStoreService.kAddressCity] ||
+                state != address[FireStoreService.kAddressState] ||
+                zip != address[FireStoreService.kAddressZip]);
+        return insert || update;
+        break;
+
+      case Field.Password:
+        return _newPassword.text.isNotEmpty;
+        break;
+
+      case Field.Phone:
+        String phoneNumber = _phoneNumber.text.trim();
+        Map<String, String> phone = account.phone;
+        bool insert = phone.isEmpty && (phoneNumber.isNotEmpty);
+        bool update = phone.isNotEmpty &&
+            (phoneNumber != phone[FireStoreService.kPhoneNumber] ||
+                _isoCode != phone[FireStoreService.kPhoneCountry]);
+        return insert || update;
+        break;
+    }
+    return false;
+  }
+
+  bool _addressIsFilled() {
+    String street = _street.text.trim();
+    String city = _city.text.trim();
+    String state = _state.text.trim();
+    String zip = _zipCode.text.trim();
+    bool isFilled = street.isNotEmpty ||
+        city.isNotEmpty ||
+        state.isNotEmpty ||
+        zip.isNotEmpty;
+    if (!isFilled) {
+      _streetError = _cityError = _stateError = _zipError = '';
+    }
+    return isFilled;
+  }
+
+  void _scrollToError() async {
+    Field tag;
+    if (_firstNameError.isNotEmpty || _lastNameError.isNotEmpty) {
+      tag = Field.Name;
+    } else if (_streetError.isNotEmpty ||
+        _cityError.isNotEmpty ||
+        _stateError.isNotEmpty ||
+        _zipError.isNotEmpty) {
+      tag = Field.Address;
+    } else if (_oldPasswordError.isNotEmpty ||
+        _newPasswordError.isNotEmpty ||
+        _confirmPasswordError.isNotEmpty) {
+      tag = Field.Password;
+    }
+    _scroller.scroll(tag);
   }
 
   void _deleteAccount() async {
