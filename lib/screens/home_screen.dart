@@ -27,8 +27,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool _showSpinner = false;
-  String _name = '';
   String _initialName = '';
+  String _name = '';
 
   StreamSubscription<DocumentSnapshot> subscription;
 
