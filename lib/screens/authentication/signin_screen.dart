@@ -1,68 +1,69 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:provider/provider.dart';
+
 import 'package:fruitfairy/constant.dart';
-import 'package:fruitfairy/utils/auth_service.dart';
-import 'package:fruitfairy/utils/store_credential.dart';
-import 'package:fruitfairy/utils/validation.dart';
+import 'package:fruitfairy/models/account.dart';
+import 'package:fruitfairy/screens/home_screen.dart';
+import 'package:fruitfairy/services/fireauth_service.dart';
+import 'package:fruitfairy/services/firestore_service.dart';
+import 'package:fruitfairy/services/credential_service.dart';
+import 'package:fruitfairy/services/validation.dart';
 import 'package:fruitfairy/widgets/fruit_fairy_logo.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
 import 'package:fruitfairy/widgets/label_link.dart';
 import 'package:fruitfairy/widgets/message_bar.dart';
-import 'package:fruitfairy/widgets/phone_input_field.dart';
+import 'package:fruitfairy/widgets/obscure_icon.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
-import 'package:fruitfairy/screens/home_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 enum AuthMode { SignIn, Reset, Phone, VerifyCode }
 
 class SignInScreen extends StatefulWidget {
   static const String id = 'signin_screen';
-  static const String credentialObject = 'credential';
   static const String email = 'email';
   static const String password = 'password';
+  static const String message = 'message';
 
   @override
   _SignInScreenState createState() => _SignInScreenState();
 }
 
 class _SignInScreenState extends State<SignInScreen> {
-  final AuthService _auth = AuthService(FirebaseAuth.instance);
-  AuthMode _mode = AuthMode.SignIn;
-  String appBarLabel = 'Sign In';
-  String buttonLabel = 'Sign In';
+  final TextEditingController _email = TextEditingController();
+  final TextEditingController _password = TextEditingController();
+  final TextEditingController _phoneNumber = TextEditingController();
+  final TextEditingController _confirmCode = TextEditingController();
 
-  bool _showSpinner = false;
-  bool _obscureText = true;
-  bool _rememberMe = false;
-
-  TextEditingController _emailController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
-  String _email = '';
-  String _password = '';
-  String _phone = '';
-  String _dialCode = '';
   String _isoCode = 'US';
-  String _confirmCode = '';
+  String _dialCode = '+1';
 
   String _emailError = '';
   String _passwordError = '';
   String _phoneError = '';
   String _confirmCodeError = '';
 
-  Future<String> Function(String smsCode) verifyCode;
+  AuthMode _mode = AuthMode.SignIn;
+  String _appBarLabel = 'Sign In';
+  String _buttonLabel = 'Sign In';
 
-  BuildContext _scaffoldContext;
+  bool _showSpinner = false;
+  bool _rememberMe = false;
+  bool _obscurePassword = true;
+
+  Future<String> Function(String smsCode) _verifyCode;
 
   void _getCredential() async {
     setState(() => _showSpinner = true);
-    Map<String, String> credentials = await StoreCredential.get();
+    Map<String, String> credentials = await CredentialService.get();
     if (credentials.isNotEmpty) {
       setState(() {
-        _emailController.text = credentials[StoreCredential.email];
-        _email = _emailController.text;
-        _passwordController.text = credentials[StoreCredential.password];
-        _password = _passwordController.text;
+        _email.text = credentials[CredentialService.kEmail];
+        _password.text = credentials[CredentialService.kPassword];
+        _phoneNumber.text = credentials[CredentialService.kPhone];
+        _isoCode = credentials[CredentialService.kIsoCode];
+        _dialCode = credentials[CredentialService.kDialCode];
         _rememberMe = true;
       });
     }
@@ -71,34 +72,30 @@ class _SignInScreenState extends State<SignInScreen> {
 
   Future<bool> _validate() async {
     String errors = '';
+    String email = _email.text.trim();
+    String password = _password.text;
     switch (_mode) {
       case AuthMode.Reset:
-        errors = _emailError = Validate.checkEmail(
-          email: _email,
-        );
+        errors = _emailError = Validate.checkEmail(email);
         break;
 
       case AuthMode.Phone:
-        errors = _phoneError = await Validate.validatePhoneNumber(
-          phoneNumber: _phone,
+        errors = _phoneError = await Validate.phoneNumber(
+          phoneNumber: _phoneNumber.text.trim(),
           isoCode: _isoCode,
         );
         break;
 
       case AuthMode.VerifyCode:
-        errors = _confirmCodeError = Validate.checkConfirmationCode(
-          confirmationCode: _confirmCode,
+        errors = _confirmCodeError = Validate.checkConfirmCode(
+          _confirmCode.text.trim(),
         );
         break;
 
       // Sign In Mode
       default:
-        errors = _emailError = Validate.checkEmail(
-          email: _email,
-        );
-        errors += _passwordError = Validate.checkPassword(
-          password: _password,
-        );
+        errors = _emailError = Validate.checkEmail(email);
+        errors += _passwordError = Validate.checkPassword(password);
         break;
     }
     setState(() {});
@@ -111,99 +108,70 @@ class _SignInScreenState extends State<SignInScreen> {
       switch (_mode) {
         case AuthMode.Reset:
           try {
-            _auth.resetPassword(email: _email);
-            buttonLabel = 'Re-send';
-            MessageBar(
-              _scaffoldContext,
-              message: 'Reset password email sent',
-            ).show();
+            FireAuthService auth = context.read<FireAuthService>();
+            String notifyMessage = await auth.resetPassword(_email.text.trim());
+            _buttonLabel = 'Re-send';
+            MessageBar(context, message: notifyMessage).show();
           } catch (e) {
             print(e);
           }
           break;
 
         case AuthMode.Phone:
-          await _auth.signInWithPhone(
-            phoneNumber: '$_dialCode$_phone',
-            completed: (String errorMessage) {
+          FireAuthService auth = context.read<FireAuthService>();
+          String nofifyMessage = await auth.signInWithPhone(
+            phoneNumber: '$_dialCode${_phoneNumber.text.trim()}',
+            completed: (String errorMessage) async {
               if (errorMessage.isEmpty) {
-                Navigator.of(context).pushNamedAndRemoveUntil(
-                  HomeScreen.id,
-                  (route) => false,
-                );
+                await _signInSuccess();
               } else {
-                MessageBar(
-                  _scaffoldContext,
-                  message: errorMessage,
-                ).show();
+                MessageBar(context, message: errorMessage).show();
               }
             },
-            codeSent: (Future<String> Function(String smsCode) verifyFunction) {
-              if (verifyFunction != null) {
-                verifyCode = verifyFunction;
+            codeSent: (verifyCode) {
+              if (verifyCode != null) {
+                _verifyCode = verifyCode;
                 setState(() {
                   _mode = AuthMode.VerifyCode;
-                  buttonLabel = 'Verify';
+                  _buttonLabel = 'Verify';
                 });
               }
             },
-            failed: (String errorMessage) {
-              MessageBar(
-                _scaffoldContext,
-                message: errorMessage,
-              ).show();
+            failed: (errorMessage) {
+              MessageBar(context, message: errorMessage).show();
             },
           );
-          // TODO: After continue
-          MessageBar(
-            _scaffoldContext,
-            message: 'Doing something...',
-          ).show();
+          MessageBar(context, message: nofifyMessage).show();
           break;
 
         case AuthMode.VerifyCode:
-          String errorMessage = await verifyCode(_confirmCode);
-          if (errorMessage.isEmpty) {
-            Navigator.of(context).pushNamedAndRemoveUntil(
-              HomeScreen.id,
-              (route) => false,
-            );
-          } else {
-            //TODO: Error message from code sent
-            MessageBar(
-              _scaffoldContext,
-              message: errorMessage,
-            ).show();
+          if (_verifyCode != null) {
+            String errorMessage = await _verifyCode(_confirmCode.text.trim());
+            if (errorMessage.isEmpty) {
+              await _signInSuccess();
+            } else {
+              MessageBar(context, message: errorMessage).show();
+            }
           }
           break;
 
         // Sign In Mode
         default:
           try {
-            bool signIn = await _auth.signIn(
-              email: _email,
-              password: _password,
+            String email = _email.text.trim();
+            String password = _password.text;
+            FireAuthService auth = context.read<FireAuthService>();
+            String notifyMessage = await auth.signIn(
+              email: email,
+              password: password,
             );
-            if (signIn) {
-              await StoreCredential.detele();
-              if (_rememberMe) {
-                await StoreCredential.store(
-                  email: _email,
-                  password: _password,
-                );
-              }
-              Navigator.of(context).pushNamedAndRemoveUntil(
-                HomeScreen.id,
-                (route) => false,
-              );
+            if (notifyMessage.isEmpty) {
+              await _signInSuccess();
             } else {
-              _showConfirmEmailMessage();
+              MessageBar(context, message: notifyMessage).show();
             }
           } catch (errorMessage) {
-            MessageBar(
-              _scaffoldContext,
-              message: errorMessage,
-            ).show();
+            MessageBar(context, message: errorMessage).show();
           }
           break;
       }
@@ -211,11 +179,23 @@ class _SignInScreenState extends State<SignInScreen> {
     }
   }
 
-  void _showConfirmEmailMessage() {
-    MessageBar(
-      _scaffoldContext,
-      message: 'Please check your email for a verification link',
-    ).show();
+  Future<void> _signInSuccess() async {
+    await CredentialService.detele();
+    if (_rememberMe) {
+      await CredentialService.store(
+        email: _email.text.trim(),
+        password: _password.text,
+        phoneNumber: _phoneNumber.text.trim(),
+        isoCode: _isoCode,
+        dialCode: _dialCode,
+      );
+    }
+    String uid = context.read<FireAuthService>().user.uid;
+    context.read<FireStoreService>().uid(uid);
+    Navigator.of(context).pushNamedAndRemoveUntil(
+      HomeScreen.id,
+      (route) => false,
+    );
   }
 
   @override
@@ -224,15 +204,10 @@ class _SignInScreenState extends State<SignInScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       Map<String, Object> args = ModalRoute.of(context).settings.arguments;
       if (args != null) {
-        UserCredential user = args[SignInScreen.credentialObject];
-        if (user != null && user.additionalUserInfo.isNewUser) {
-          _emailController.text = args[SignInScreen.email];
-          _email = _emailController.text;
-          _passwordController.text = args[SignInScreen.password];
-          _password = _passwordController.text;
-          _rememberMe = false;
-          _showConfirmEmailMessage();
-        }
+        _rememberMe = false;
+        _email.text = args[SignInScreen.email];
+        _password.text = args[SignInScreen.password];
+        MessageBar(context, message: args[SignInScreen.message]).show();
       } else {
         _getCredential();
       }
@@ -240,43 +215,42 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    _email.dispose();
+    _password.dispose();
+    _phoneNumber.dispose();
+    _confirmCode.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
     return Scaffold(
-      backgroundColor: kPrimaryColor,
-      appBar: AppBar(
-        backgroundColor: kAppBarColor,
-        title: Text(appBarLabel),
-        centerTitle: true,
-      ),
-      body: Builder(
-        builder: (BuildContext context) {
-          _scaffoldContext = context;
-          return SafeArea(
-            child: ModalProgressHUD(
-              inAsyncCall: _showSpinner,
-              progressIndicator: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation(kAppBarColor),
+      appBar: AppBar(title: Text(_appBarLabel)),
+      body: SafeArea(
+        child: ModalProgressHUD(
+          inAsyncCall: _showSpinner,
+          progressIndicator: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation(kAppBarColor),
+          ),
+          child: ScrollableLayout(
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: screen.height * 0.03,
+                horizontal: screen.width * 0.15,
               ),
-              child: ScrollableLayout(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    vertical: screen.height * 0.03,
-                    horizontal: screen.width * 0.15,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      fairyLogo(),
-                      SizedBox(height: screen.height * 0.03),
-                      layoutMode(),
-                    ],
-                  ),
-                ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  fairyLogo(),
+                  SizedBox(height: screen.height * 0.03),
+                  layoutMode(),
+                ],
               ),
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
@@ -298,7 +272,7 @@ class _SignInScreenState extends State<SignInScreen> {
         return Column(
           children: [
             instructionLabel('Enter email for password reset:'),
-            SizedBox(height: screen.height * 0.03),
+            SizedBox(height: screen.height * 0.02),
             emailInputField(),
             SizedBox(height: screen.height * 0.02),
             submitButton(context),
@@ -312,7 +286,7 @@ class _SignInScreenState extends State<SignInScreen> {
         return Column(
           children: [
             instructionLabel('Enter phone number to sign in:'),
-            SizedBox(height: screen.height * 0.03),
+            SizedBox(height: screen.height * 0.02),
             phoneNumberField(),
             SizedBox(height: screen.height * 0.02),
             submitButton(context),
@@ -326,7 +300,7 @@ class _SignInScreenState extends State<SignInScreen> {
         return Column(
           children: [
             instructionLabel('Enter verification code:'),
-            SizedBox(height: screen.height * 0.03),
+            SizedBox(height: screen.height * 0.02),
             verifyCodeField(),
             SizedBox(height: screen.height * 0.02),
             submitButton(context),
@@ -340,11 +314,10 @@ class _SignInScreenState extends State<SignInScreen> {
       default:
         return Column(
           children: [
-            SizedBox(height: screen.height * 0.02),
             emailInputField(),
             SizedBox(height: screen.height * 0.01),
             passwordInputField(),
-            optionTile(),
+            rememberMe(),
             SizedBox(height: screen.height * 0.02),
             submitButton(context),
             SizedBox(height: screen.height * 0.03),
@@ -374,61 +347,59 @@ class _SignInScreenState extends State<SignInScreen> {
   Widget emailInputField() {
     return InputField(
       label: 'Email',
-      controller: _emailController,
+      controller: _email,
       keyboardType: TextInputType.emailAddress,
       errorMessage: _emailError,
       onChanged: (value) {
         setState(() {
-          _email = value.trim();
-          _emailError = Validate.checkEmail(
-            email: _email,
-          );
+          _emailError = Validate.checkEmail(_email.text.trim());
         });
-      },
-      onTap: () {
-        MessageBar(_scaffoldContext).hide();
       },
     );
   }
 
   Widget passwordInputField() {
-    return InputField(
-      label: 'Password',
-      controller: _passwordController,
-      obscureText: _obscureText,
-      errorMessage: _passwordError,
-      onChanged: (value) {
-        setState(() {
-          _password = value;
-          _passwordError = Validate.checkPassword(
-            password: _password,
-          );
-        });
-      },
-      onTap: () {
-        MessageBar(_scaffoldContext).hide();
-      },
+    return Stack(
+      children: [
+        InputField(
+          label: 'Password',
+          controller: _password,
+          obscureText: _obscurePassword,
+          errorMessage: _passwordError,
+          onChanged: (value) {
+            setState(() {
+              _passwordError = Validate.checkPassword(_password.text);
+            });
+          },
+        ),
+        Positioned(
+          top: 12.0,
+          right: 12.0,
+          child: ObscureIcon(
+            obscure: _obscurePassword,
+            onTap: () {
+              setState(() {
+                _obscurePassword = !_obscurePassword;
+              });
+            },
+          ),
+        ),
+      ],
     );
   }
 
   Widget phoneNumberField() {
-    return PhoneInputField(
-      initialPhoneNumber: _phone,
-      initialSelection: _isoCode,
+    return InputField(
+      label: 'Phone Number',
+      controller: _phoneNumber,
+      prefixText: _dialCode,
       errorMessage: _phoneError,
-      showDropdownIcon: false,
-      onPhoneNumberChanged: (phoneNumber, intlNumber, isoCode) async {
-        _phone = phoneNumber;
-        _isoCode = isoCode;
-        _dialCode = intlNumber.substring(0, intlNumber.indexOf(phoneNumber));
-        _phoneError = await Validate.validatePhoneNumber(
-          phoneNumber: _phone,
+      onChanged: (value) async {
+        _phoneError = await Validate.phoneNumber(
+          phoneNumber: _phoneNumber.text.trim(),
           isoCode: _isoCode,
         );
         setState(() {});
-      },
-      onTap: () {
-        MessageBar(_scaffoldContext).hide();
       },
     );
   }
@@ -436,67 +407,41 @@ class _SignInScreenState extends State<SignInScreen> {
   Widget verifyCodeField() {
     return InputField(
       label: '6-Digit Code',
-      keyboardType: TextInputType.number,
+      controller: _confirmCode,
       errorMessage: _confirmCodeError,
-      onChanged: (value) {
-        setState(() {
-          _confirmCode = value;
-        });
-      },
-      onTap: () {
-        MessageBar(_scaffoldContext).hide();
-      },
     );
   }
 
-  Widget optionTile() {
+  Widget rememberMe() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          children: [
-            SizedBox(
-              width: 30,
-              height: 30,
-              child: Theme(
-                data: ThemeData(
-                  unselectedWidgetColor: kLabelColor,
-                ),
-                child: Checkbox(
-                  value: _rememberMe,
-                  activeColor: kLabelColor,
-                  checkColor: kPrimaryColor,
-                  onChanged: (bool value) {
-                    setState(() {
-                      _rememberMe = value;
-                    });
-                  },
-                ),
-              ),
+        SizedBox(
+          width: 30,
+          height: 30,
+          child: Theme(
+            data: ThemeData(
+              unselectedWidgetColor: kLabelColor,
             ),
-            Text(
-              'Remember me',
-              style: TextStyle(
-                color: kLabelColor,
-                fontSize: 16,
-              ),
-            )
-          ],
-        ),
-        Padding(
-          padding: EdgeInsets.only(right: 15.0),
-          child: GestureDetector(
-            onTap: () {
-              setState(() {
-                _obscureText = !_obscureText;
-              });
-            },
-            child: Icon(
-              _obscureText ? Icons.visibility_off : Icons.visibility,
-              color: kLabelColor,
+            child: Checkbox(
+              value: _rememberMe,
+              activeColor: kLabelColor,
+              checkColor: kPrimaryColor,
+              onChanged: (bool value) {
+                HapticFeedback.mediumImpact();
+                setState(() {
+                  _rememberMe = value;
+                });
+              },
             ),
           ),
         ),
+        Text(
+          'Remember me',
+          style: TextStyle(
+            color: kLabelColor,
+            fontSize: 16,
+          ),
+        )
       ],
     );
   }
@@ -507,11 +452,10 @@ class _SignInScreenState extends State<SignInScreen> {
         horizontal: MediaQuery.of(context).size.width * 0.15,
       ),
       child: RoundedButton(
-        label: buttonLabel,
+        label: _buttonLabel,
         labelColor: kPrimaryColor,
         backgroundColor: kObjectBackgroundColor,
         onPressed: () {
-          FocusScope.of(context).unfocus();
           submit();
         },
       ),
@@ -524,8 +468,8 @@ class _SignInScreenState extends State<SignInScreen> {
       onTap: () {
         setState(() {
           _mode = AuthMode.SignIn;
-          appBarLabel = 'Sign In';
-          buttonLabel = 'Sign In';
+          _appBarLabel = 'Sign In';
+          _buttonLabel = 'Sign In';
         });
       },
     );
@@ -537,8 +481,8 @@ class _SignInScreenState extends State<SignInScreen> {
       onTap: () {
         setState(() {
           _mode = AuthMode.Reset;
-          appBarLabel = 'Reset Password';
-          buttonLabel = 'Send';
+          _appBarLabel = 'Reset Password';
+          _buttonLabel = 'Send';
         });
       },
     );
@@ -550,8 +494,8 @@ class _SignInScreenState extends State<SignInScreen> {
       onTap: () {
         setState(() {
           _mode = AuthMode.Phone;
-          appBarLabel = 'Sign In with Phone Number';
-          buttonLabel = 'Continue';
+          _appBarLabel = 'Sign In with Phone Number';
+          _buttonLabel = 'Continue';
         });
       },
     );
@@ -563,7 +507,8 @@ class _SignInScreenState extends State<SignInScreen> {
       onTap: () {
         setState(() {
           _mode = AuthMode.Phone;
-          buttonLabel = 'Continue';
+          _buttonLabel = 'Continue';
+          _confirmCode.clear();
         });
       },
     );

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+
 import 'package:fruitfairy/constant.dart';
+import 'package:fruitfairy/screens/authentication/signin_screen.dart';
+import 'package:fruitfairy/screens/authentication/signup_role_screen.dart';
 import 'package:fruitfairy/widgets/fruit_fairy_logo.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
-import 'package:fruitfairy/screens/authentication/signin_screen.dart';
-import 'package:fruitfairy/screens/authentication/signup_role_screen.dart';
 
 class SignOptionScreen extends StatefulWidget {
   static const String id = 'sign_option_screen';
@@ -17,7 +18,6 @@ class _SignOptionScreenState extends State<SignOptionScreen> {
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
     return Scaffold(
-      backgroundColor: kPrimaryColor,
       body: SafeArea(
         child: ScrollableLayout(
           child: Center(

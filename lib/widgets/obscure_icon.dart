@@ -3,31 +3,25 @@ import 'package:flutter/services.dart';
 
 import 'package:fruitfairy/constant.dart';
 
-class LabelLink extends StatelessWidget {
-  final String label;
+class ObscureIcon extends StatelessWidget {
+  final bool obscure;
   final GestureTapCallback onTap;
-
-  LabelLink({
-    @required this.label,
+  ObscureIcon({
+    @required this.obscure,
     @required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      child: Icon(
+        obscure ? Icons.visibility_off : Icons.visibility,
+        color: kLabelColor,
+      ),
       onTap: () {
         HapticFeedback.mediumImpact();
-        FocusScope.of(context).unfocus();
         onTap();
       },
-      child: Text(
-        label,
-        style: TextStyle(
-          color: kLabelColor,
-          fontSize: 18,
-          decoration: TextDecoration.underline,
-        ),
-      ),
     );
   }
 }

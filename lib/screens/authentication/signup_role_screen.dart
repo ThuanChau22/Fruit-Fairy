@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/screens/authentication/signup_donor_screen.dart';
 import 'package:fruitfairy/widgets/fruit_fairy_logo.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class SignUpRoleScreen extends StatelessWidget {
   static const String id = 'signup_role_screen';
@@ -13,12 +14,7 @@ class SignUpRoleScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
     return Scaffold(
-      backgroundColor: kPrimaryColor,
-      appBar: AppBar(
-        backgroundColor: kAppBarColor,
-        title: Text('Create Account'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: Text('Create Account')),
       body: SafeArea(
         child: ScrollableLayout(
           child: Padding(
@@ -41,7 +37,6 @@ class SignUpRoleScreen extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: screen.height * 0.04),
-                // SizedBox(height: screen.height * 0.15),
                 Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: screen.width * 0.12,
@@ -109,7 +104,7 @@ class SignUpRoleScreen extends StatelessWidget {
         ),
         trailing: SizedBox(width: 35.0),
         //ToDo: redirect to sign up charity screen
-        onPressed: null,
+        onPressed: () {},
       ),
     );
   }

@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:provider/provider.dart';
+
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
 import 'package:fruitfairy/screens/authentication/signin_screen.dart';
-import 'package:fruitfairy/utils/auth_service.dart';
-import 'package:fruitfairy/utils/validation.dart';
+import 'package:fruitfairy/services/fireauth_service.dart';
+import 'package:fruitfairy/services/validation.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
 import 'package:fruitfairy/widgets/message_bar.dart';
+import 'package:fruitfairy/widgets/obscure_icon.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 class SignUpDonorScreen extends StatefulWidget {
   static const String id = 'signup_donor_screen';
@@ -20,14 +22,11 @@ class SignUpDonorScreen extends StatefulWidget {
 }
 
 class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
-  final AuthService _auth = AuthService(FirebaseAuth.instance);
-  bool _showSpinner = false;
-
-  String _firstName = '';
-  String _lastName = '';
-  String _email = '';
-  String _password = '';
-  String _confirmPassword = '';
+  final TextEditingController _firstName = TextEditingController();
+  final TextEditingController _lastName = TextEditingController();
+  final TextEditingController _email = TextEditingController();
+  final TextEditingController _password = TextEditingController();
+  final TextEditingController _confirmPassword = TextEditingController();
 
   String _firstNameError = '';
   String _lastNameError = '';
@@ -35,27 +34,24 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
   String _passwordError = '';
   String _confirmPasswordError = '';
 
-  BuildContext _scaffoldContext;
+  bool _showSpinner = false;
+  bool _obscurePassword = true;
 
   bool _validate() {
     String errors = '';
     errors += _firstNameError = Validate.name(
-      label: 'First Name',
-      name: _firstName,
+      label: 'first name',
+      name: _firstName.text.trim(),
     );
     errors += _lastNameError = Validate.name(
-      label: 'Last Name',
-      name: _lastName,
+      label: 'last name',
+      name: _lastName.text.trim(),
     );
-    errors += _emailError = Validate.email(
-      email: _email,
-    );
-    errors += _passwordError = Validate.password(
-      password: _password,
-    );
+    errors += _emailError = Validate.email(_email.text.trim());
+    errors += _passwordError = Validate.password(_password.text);
     errors += _confirmPasswordError = Validate.confirmPassword(
-      password: _password,
-      confirmPassword: _confirmPassword,
+      password: _password.text,
+      confirmPassword: _confirmPassword.text,
     );
     return errors.isEmpty;
   }
@@ -64,11 +60,14 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
     if (_validate()) {
       setState(() => _showSpinner = true);
       try {
-        UserCredential newUser = await _auth.signUp(
-          email: _email,
-          password: _password,
-          firstName: _firstName,
-          lastName: _lastName,
+        String email = _email.text.trim();
+        String password = _password.text;
+        FireAuthService auth = context.read<FireAuthService>();
+        String notifyMessage = await auth.signUp(
+          email: email,
+          password: password,
+          firstName: _firstName.text.trim(),
+          lastName: _lastName.text.trim(),
         );
         Navigator.of(context).pushNamedAndRemoveUntil(
           SignInScreen.id,
@@ -76,16 +75,13 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
             return route.settings.name == SignOptionScreen.id;
           },
           arguments: {
-            SignInScreen.credentialObject: newUser,
-            SignInScreen.email: _email,
-            SignInScreen.password: _password,
+            SignInScreen.email: email,
+            SignInScreen.password: password,
+            SignInScreen.message: notifyMessage,
           },
         );
-      } catch (e) {
-        MessageBar(
-          _scaffoldContext,
-          message: e,
-        ).show();
+      } catch (errorMessage) {
+        MessageBar(context, message: errorMessage).show();
       } finally {
         setState(() => _showSpinner = false);
       }
@@ -96,68 +92,59 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
     return Scaffold(
-      backgroundColor: kPrimaryColor,
-      appBar: AppBar(
-        backgroundColor: kAppBarColor,
-        title: Text('Sign Up'),
-        centerTitle: true,
-      ),
-      body: Builder(
-        builder: (BuildContext context) {
-          _scaffoldContext = context;
-          return SafeArea(
-            child: ModalProgressHUD(
-              inAsyncCall: _showSpinner,
-              progressIndicator: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation(kAppBarColor),
+      appBar: AppBar(title: Text('Sign Up')),
+      body: SafeArea(
+        child: ModalProgressHUD(
+          inAsyncCall: _showSpinner,
+          progressIndicator: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation(kAppBarColor),
+          ),
+          child: ScrollableLayout(
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: screen.height * 0.06,
+                horizontal: screen.width * 0.15,
               ),
-              child: ScrollableLayout(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    vertical: screen.height * 0.06,
-                    horizontal: screen.width * 0.15,
-                  ),
-                  child: Column(
-                    children: [
-                      firstNameInputField(),
-                      SizedBox(height: screen.height * 0.02),
-                      lastNameInputField(),
-                      SizedBox(height: screen.height * 0.02),
-                      emailInputField(),
-                      SizedBox(height: screen.height * 0.02),
-                      passwordInputField(),
-                      SizedBox(height: screen.height * 0.02),
-                      confirmPasswordInputField(),
-                      SizedBox(height: screen.height * 0.03),
-                      signUpButton(context),
-                    ],
-                  ),
-                ),
+              child: Column(
+                children: [
+                  firstNameInputField(),
+                  inputFieldSizeBox(),
+                  lastNameInputField(),
+                  inputFieldSizeBox(),
+                  emailInputField(),
+                  inputFieldSizeBox(),
+                  passwordInputField(),
+                  inputFieldSizeBox(),
+                  confirmPasswordInputField(),
+                  SizedBox(height: screen.height * 0.05),
+                  signUpButton(context),
+                ],
               ),
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
+  }
+
+  Widget inputFieldSizeBox() {
+    Size screen = MediaQuery.of(context).size;
+    return SizedBox(height: screen.height * 0.01);
   }
 
   Widget firstNameInputField() {
     return InputField(
       label: 'First Name',
+      controller: _firstName,
       errorMessage: _firstNameError,
-      maxLength: Validate.maxNameLength,
       keyboardType: TextInputType.name,
       onChanged: (value) {
         setState(() {
-          _firstName = value.trim();
           _firstNameError = Validate.name(
-            label: 'First Name',
-            name: _firstName,
+            label: 'first name',
+            name: _firstName.text.trim(),
           );
         });
-      },
-      onTap: () {
-        MessageBar(_scaffoldContext).hide();
       },
     );
   }
@@ -165,20 +152,16 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
   Widget lastNameInputField() {
     return InputField(
       label: 'Last Name',
+      controller: _lastName,
       errorMessage: _lastNameError,
-      maxLength: Validate.maxNameLength,
       keyboardType: TextInputType.name,
       onChanged: (value) {
         setState(() {
-          _lastName = value.trim();
           _lastNameError = Validate.name(
-            label: 'Last Name',
-            name: _lastName,
+            label: 'last name',
+            name: _lastName.text.trim(),
           );
         });
-      },
-      onTap: () {
-        MessageBar(_scaffoldContext).hide();
       },
     );
   }
@@ -186,63 +169,68 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
   Widget emailInputField() {
     return InputField(
       label: 'Email',
+      controller: _email,
       errorMessage: _emailError,
       keyboardType: TextInputType.emailAddress,
       onChanged: (value) {
         setState(() {
-          _email = value.trim();
-          _emailError = Validate.email(
-            email: _email,
-          );
+          _emailError = Validate.email(_email.text.trim());
         });
-      },
-      onTap: () {
-        MessageBar(_scaffoldContext).hide();
       },
     );
   }
 
   Widget passwordInputField() {
-    return InputField(
-      label: 'Password',
-      errorMessage: _passwordError,
-      obscureText: true,
-      onChanged: (value) {
-        setState(() {
-          _password = value;
-          _passwordError = Validate.password(
-            password: _password,
-          );
-          if (_confirmPassword.isNotEmpty) {
-            _confirmPasswordError = Validate.confirmPassword(
-              password: _password,
-              confirmPassword: _confirmPassword,
-            );
-          }
-        });
-      },
-      onTap: () {
-        MessageBar(_scaffoldContext).hide();
-      },
+    return Stack(
+      children: [
+        InputField(
+          label: 'Password',
+          controller: _password,
+          errorMessage: _passwordError,
+          obscureText: _obscurePassword,
+          onChanged: (value) {
+            setState(() {
+              String password = _password.text;
+              String confirmPassword = _confirmPassword.text;
+              _passwordError = Validate.password(password);
+              if (confirmPassword.isNotEmpty) {
+                _confirmPasswordError = Validate.confirmPassword(
+                  password: password,
+                  confirmPassword: confirmPassword,
+                );
+              }
+            });
+          },
+        ),
+        Positioned(
+          top: 12.0,
+          right: 12.0,
+          child: ObscureIcon(
+            obscure: _obscurePassword,
+            onTap: () {
+              setState(() {
+                _obscurePassword = !_obscurePassword;
+              });
+            },
+          ),
+        ),
+      ],
     );
   }
 
   Widget confirmPasswordInputField() {
     return InputField(
       label: 'Confirm Password',
+      controller: _confirmPassword,
       errorMessage: _confirmPasswordError,
       obscureText: true,
       onChanged: (value) {
         setState(() {
-          _confirmPassword = value;
           _confirmPasswordError = Validate.confirmPassword(
-            password: _password,
-            confirmPassword: _confirmPassword,
+            password: _password.text,
+            confirmPassword: _confirmPassword.text,
           );
         });
-      },
-      onTap: () {
-        MessageBar(_scaffoldContext).hide();
       },
     );
   }
@@ -251,7 +239,6 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
     Size screen = MediaQuery.of(context).size;
     return Padding(
       padding: EdgeInsets.symmetric(
-        vertical: screen.height * 0.02,
         horizontal: screen.width * 0.15,
       ),
       child: RoundedButton(
@@ -259,8 +246,9 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
         labelColor: kPrimaryColor,
         backgroundColor: kObjectBackgroundColor,
         onPressed: () {
-          FocusScope.of(context).unfocus();
-          _signUp();
+          setState(() {
+            _signUp();
+          });
         },
       ),
     );

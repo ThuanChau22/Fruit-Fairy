@@ -7,13 +7,7 @@ const Color kLabelColor = Colors.white;
 const Color kErrorColor = Colors.white;
 const Color kObjectBackgroundColor = Colors.white;
 
-/// Database fields
-const String kDBUserCollection = 'users';
-const String kDBEmailField = 'email';
-const String kDBFirstNameField = 'firstname';
-const String kDBLastNameField = 'lastname';
-const String kDBPhoneField = 'phone';
-
+// Widget Style
 const kTextFieldInputDecoration = InputDecoration(
   filled: true,
   fillColor: Colors.white,
@@ -34,21 +28,55 @@ const kTextFieldInputDecoration = InputDecoration(
   ),
 );
 
+const kTextFieldDecoration = InputDecoration(
+  labelStyle: TextStyle(
+    color: kLabelColor,
+    fontSize: 18.0,
+  ),
+  errorStyle: TextStyle(
+    color: kErrorColor,
+    fontSize: 16.0,
+  ),
+  errorMaxLines: 1,
+  helperStyle: TextStyle(
+    color: kLabelColor,
+  ),
+  prefixStyle: TextStyle(
+    color: kLabelColor,
+    fontSize: 16.0,
+  ),
+  contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+  filled: true,
+  border: OutlineInputBorder(
+    borderRadius: BorderRadius.all(Radius.circular(30.0)),
+  ),
+  enabledBorder: OutlineInputBorder(
+    borderSide: BorderSide(color: kLabelColor, width: 1.0),
+    borderRadius: BorderRadius.all(Radius.circular(30.0)),
+  ),
+  disabledBorder: OutlineInputBorder(
+    borderSide: BorderSide(color: kLabelColor, width: 1.0),
+    borderRadius: BorderRadius.all(Radius.circular(30.0)),
+  ),
+  errorBorder: OutlineInputBorder(
+    borderSide: BorderSide(color: kErrorColor, width: 1.0),
+    borderRadius: BorderRadius.all(Radius.circular(30.0)),
+  ),
+  focusedBorder: OutlineInputBorder(
+    borderSide: BorderSide(color: kLabelColor, width: 2.0),
+    borderRadius: BorderRadius.all(Radius.circular(15.0)),
+  ),
+  focusedErrorBorder: OutlineInputBorder(
+    borderSide: BorderSide(color: kErrorColor, width: 2.0),
+    borderRadius: BorderRadius.all(Radius.circular(15.0)),
+  ),
+);
 
-List <Widget> kFruitImages = [
-  Image.asset('images/Orange.jpg'),
-  Image.asset('images/Apple.jpg'),
-  Image.asset('images/Avocado.jpg'),
-  Image.asset('images/Lemon.jpg'),
-  Image.asset('images/Peach.jpg'),
-  Image.asset('images/Orange.jpg'),
-  Image.asset('images/Apple.jpg'),
-  Image.asset('images/Avocado.jpg'),
-  Image.asset('images/Lemon.jpg'),
-  Image.asset('images/Peach.jpg'),
-  Image.asset('images/Orange.jpg'),
-  Image.asset('images/Apple.jpg'),
-  Image.asset('images/Avocado.jpg'),
-  Image.asset('images/Lemon.jpg'),
-  Image.asset('images/Peach.jpg'),
-];
+Widget kDivider() {
+  return Divider(
+    color: kLabelColor,
+    thickness: 3.0,
+    indent: 20.0,
+    endIndent: 20.0,
+  );
+}

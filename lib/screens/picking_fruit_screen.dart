@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+
 import 'package:fruitfairy/constant.dart';
+import 'package:fruitfairy/models/basket.dart';
+import 'package:fruitfairy/screens/donation_cart_screen.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
+import 'package:provider/provider.dart';
 
 class PickingFruitScreen extends StatefulWidget {
   static const String id = 'picking_fruit_screen';
@@ -11,26 +15,17 @@ class PickingFruitScreen extends StatefulWidget {
 }
 
 class _PickingFruitScreenState extends State<PickingFruitScreen> {
-  List<bool> selectedFruits = [];
-
   @override
   void initState() {
     super.initState();
-    for (int i = 0; i < kFruitImages.length; i++) {
-      selectedFruits.add(false);
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
+    Basket basket = context.watch<Basket>();
     return Scaffold(
-      backgroundColor: kPrimaryColor,
-      appBar: AppBar(
-        backgroundColor: kAppBarColor,
-        title: Text('Donation Page'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: Text('Donation')),
       body: SafeArea(
         child: Center(
           child: Column(
@@ -59,37 +54,26 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
                 child: GridView.count(
                   primary: false,
                   padding: EdgeInsets.all(10),
-                  crossAxisSpacing: 5,
-                  mainAxisSpacing: 5,
+                  crossAxisSpacing: 20,
+                  mainAxisSpacing: 20,
                   crossAxisCount: 3,
-                  children: [
-                    for (int i = 0; i < kFruitImages.length; i++)
-                      FruitTile(
-                        fruitImage: kFruitImages[i],
-                        index: i,
-                        selected: selectedFruits[i],
-                        onTap: (index) {
-                          setState(() {
-                            selectedFruits[index] = !selectedFruits[index];
-                          });
-                        },
-                      ),
-                  ],
+                  children: fruitList(basket),
                 ),
               ),
               SizedBox(height: screen.height * 0.02),
-              divider(),
+              kDivider(),
               SizedBox(height: screen.height * 0.02),
               Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: MediaQuery.of(context).size.width * 0.15,
                 ),
                 child: RoundedButton(
-                  label: 'Go To Cart',
-                  labelColor: kPrimaryColor,
-                  backgroundColor: kObjectBackgroundColor,
-                  onPressed: () {},
-                ),
+                    label: 'Go To Cart',
+                    labelColor: kPrimaryColor,
+                    backgroundColor: kObjectBackgroundColor,
+                    onPressed: () {
+                      Navigator.pushNamed(context, DonationCartScreen.id);
+                    }),
               ),
               SizedBox(height: screen.height * 0.02),
             ],
@@ -98,13 +82,39 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
       ),
     );
   }
-}
 
-Widget divider() {
-  return Divider(
-    color: kLabelColor,
-    thickness: 3.0,
-    indent: 20.0,
-    endIndent: 20.0,
-  );
+  List<Widget> fruitList(Basket basket) {
+    List<Widget> list = [];
+    for (int i = 0; i < basket.fruitImages.length; i++) {
+      list.add(
+        Container(
+          color: kObjectBackgroundColor,
+          child: FruitTile(
+            fruitImage: AssetImage(basket.fruitImages[i]),
+            fruitName: Text(
+              basket.fruitNames[i],
+              style: TextStyle(
+                color: kPrimaryColor,
+                fontWeight: FontWeight.bold,
+                fontSize: 20.0,
+              ),
+            ),
+            index: i,
+            selected: basket.selectedFruits.contains(i),
+            onTap: (index) {
+              setState(() {
+                //add the selected fruit into the list
+                if (basket.selectedFruits.contains(i)) {
+                  basket.remove(i);
+                } else {
+                  basket.pickFruit(i);
+                }
+              });
+            },
+          ),
+        ),
+      );
+    }
+    return list;
+  }
 }

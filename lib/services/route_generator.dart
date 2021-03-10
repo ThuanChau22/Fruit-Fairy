@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+
 import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
 import 'package:fruitfairy/screens/authentication/signin_screen.dart';
 import 'package:fruitfairy/screens/authentication/signup_role_screen.dart';
 import 'package:fruitfairy/screens/authentication/signup_donor_screen.dart';
+import 'package:fruitfairy/screens/donation_cart_screen.dart';
 import 'package:fruitfairy/screens/edit_profile_screen.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
 import 'package:fruitfairy/screens/picking_fruit_screen.dart';
+import 'package:fruitfairy/screens/confirmation_donation_screen.dart';
+import 'package:fruitfairy/screens/temp_fruit_with_quantity.dart';
 
 // A class that generate screen routes associate with screen names
 // including animation and passing arguments in transition
@@ -19,6 +23,10 @@ class RouteGenerator {
     HomeScreen.id: HomeScreen(),
     EditProfileScreen.id: EditProfileScreen(),
     PickingFruitScreen.id: PickingFruitScreen(),
+    DonationCartScreen.id: DonationCartScreen(),
+    ConfirmationDonationScreen.id: ConfirmationDonationScreen(),
+    FruitQuantity.id: FruitQuantity(),
+
   };
 
   static Route<dynamic> generate(RouteSettings settings) {
