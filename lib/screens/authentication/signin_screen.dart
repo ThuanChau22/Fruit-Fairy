@@ -4,7 +4,6 @@ import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
 
 import 'package:fruitfairy/constant.dart';
-import 'package:fruitfairy/models/account.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
 import 'package:fruitfairy/services/fireauth_service.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
@@ -148,6 +147,7 @@ class _SignInScreenState extends State<SignInScreen> {
           if (_verifyCode != null) {
             String errorMessage = await _verifyCode(_confirmCode.text.trim());
             if (errorMessage.isEmpty) {
+              _verifyCode = null;
               await _signInSuccess();
             } else {
               MessageBar(context, message: errorMessage).show();
