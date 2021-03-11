@@ -6,10 +6,12 @@
          additional functionality it is fine to subclass or reimplement
          FlutterApplication and put your custom class here. -->
   <uses-permission android:name="android.permission.VIBRATE" />
-    <application
+  <application
         android:name="io.flutter.app.FlutterApplication"
         android:label="Fruit Fairy"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:allowBackup="false"
+        android:fullBackupContent="false">
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
@@ -45,4 +47,5 @@
             android:name="flutterEmbedding"
             android:value="2" />
     </application>
+    
 </manifest>
