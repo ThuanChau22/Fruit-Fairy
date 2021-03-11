@@ -147,6 +147,7 @@ class _SignInScreenState extends State<SignInScreen> {
           if (_verifyCode != null) {
             String errorMessage = await _verifyCode(_confirmCode.text.trim());
             if (errorMessage.isEmpty) {
+              _verifyCode = null;
               await _signInSuccess();
             } else {
               MessageBar(context, message: errorMessage).show();
