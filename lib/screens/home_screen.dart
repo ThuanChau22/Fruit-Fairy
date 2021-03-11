@@ -146,7 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
               _initialName,
               style: TextStyle(
                 color: kPrimaryColor,
-                fontSize: 20.0,
+                fontSize: 18.0,
                 fontWeight: FontWeight.bold,
               ),
             ),

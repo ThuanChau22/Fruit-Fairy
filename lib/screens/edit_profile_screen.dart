@@ -81,8 +81,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   bool _updatedName = false;
   bool _updatedAddress = false;
   bool _updatedPassword = false;
+  bool _needVerifyPhone = false;
   String _updatePhoneLabel = 'Add';
-  bool _newPhoneNumber = false;
   DeleteMode _deleteMode = DeleteMode.Input;
   bool _obscureDeletePassword = true;
 
@@ -126,12 +126,36 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   void _updateProfile() async {
     setState(() => _showSpinner = true);
-    String errorMessage = await _updateName();
+
+    // Holding user inputs while updating
+    String firstName = _firstName.text.trim();
+    String lastName = _lastName.text.trim();
+    String street = _street.text.trim();
+    String city = _city.text.trim();
+    String state = _state.text.trim();
+    String zip = _zipCode.text.trim();
+    String oldPassword = _oldPassword.text;
+    String newPassword = _newPassword.text;
+    String confirmPassword = _confirmPassword.text;
+
+    String errorMessage = await _updateName(
+      firstName: firstName,
+      lastName: lastName,
+    );
     if (errorMessage.isEmpty) {
-      errorMessage = await _updateAddress();
+      errorMessage = await _updateAddress(
+        street: street,
+        city: city,
+        state: state,
+        zip: zip,
+      );
     }
     if (errorMessage.isEmpty) {
-      errorMessage = await _updatePassword();
+      errorMessage = await _updatePassword(
+        oldPassword: oldPassword,
+        newPassword: newPassword,
+        confirmPassword: confirmPassword,
+      );
     }
     String updateMessage;
     if (errorMessage.isEmpty) {
@@ -145,14 +169,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       _scrollToError();
       updateMessage = errorMessage;
     }
+    _needVerifyPhone = false;
+    _verifyCode = null;
     setState(() => _showSpinner = false);
     MessageBar(context, message: updateMessage).show();
   }
 
-  Future<String> _updateName() async {
-    if (_hasChanges(Field.Name)) {
-      String firstName = _firstName.text.trim();
-      String lastName = _lastName.text.trim();
+  Future<String> _updateName({
+    @required firstName,
+    @required lastName,
+  }) async {
+    Account account = context.read<Account>();
+    if (firstName != account.firstName || lastName != account.lastName) {
       String error = _firstNameError = Validate.name(
         label: 'first name',
         name: firstName,
@@ -178,14 +206,26 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return '';
   }
 
-  Future<String> _updateAddress() async {
-    if (_hasChanges(Field.Address)) {
-      String street = _street.text.trim();
-      String city = _city.text.trim();
-      String state = _state.text.trim();
-      String zip = _zipCode.text.trim();
+  Future<String> _updateAddress({
+    @required String street,
+    @required String city,
+    @required String state,
+    @required String zip,
+  }) async {
+    Map<String, String> address = context.read<Account>().address;
+    bool isFilled = street.isNotEmpty ||
+        city.isNotEmpty ||
+        state.isNotEmpty ||
+        zip.isNotEmpty;
+    bool insert = address.isEmpty && isFilled;
+    bool update = address.isNotEmpty &&
+        (street != address[FireStoreService.kAddressStreet] ||
+            city != address[FireStoreService.kAddressCity] ||
+            state != address[FireStoreService.kAddressState] ||
+            zip != address[FireStoreService.kAddressZip]);
+    if (insert || update) {
       String error = '';
-      if (_addressIsFilled()) {
+      if (isFilled) {
         error += _streetError = Validate.checkStreet(street);
         error += _cityError = Validate.checkCity(city);
         error += _stateError = Validate.checkState(state);
@@ -210,15 +250,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return '';
   }
 
-  Future<String> _updatePassword() async {
-    if (_hasChanges(Field.Password)) {
-      String oldPassword = _oldPassword.text;
-      String newPassword = _newPassword.text;
+  Future<String> _updatePassword({
+    @required String oldPassword,
+    @required String newPassword,
+    @required String confirmPassword,
+  }) async {
+    if (newPassword.isNotEmpty) {
       String error = _oldPasswordError = Validate.checkPassword(oldPassword);
       error += _newPasswordError = Validate.password(newPassword);
       error += _confirmPasswordError = Validate.confirmPassword(
         password: newPassword,
-        confirmPassword: _confirmPassword.text,
+        confirmPassword: confirmPassword,
       );
       if (error.isEmpty) {
         try {
@@ -251,7 +293,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (_phoneError.isEmpty) {
       FireAuthService auth = context.read<FireAuthService>();
       Account account = context.read<Account>();
-      if (_hasChanges(Field.Phone)) {
+      Map<String, String> phone = account.phone;
+      bool insert = phone.isEmpty && (phoneNumber.isNotEmpty);
+      bool update = phone.isNotEmpty &&
+          (phoneNumber != phone[FireStoreService.kPhoneNumber] ||
+              _isoCode != phone[FireStoreService.kPhoneCountry]);
+      if (insert || update) {
         String notifyMessage = await auth.registerPhone(
           phoneNumber: '$_dialCode$phoneNumber',
           update: account.phone.isNotEmpty,
@@ -265,7 +312,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           },
         );
         _confirmCode.clear();
-        _newPhoneNumber = true;
+        _needVerifyPhone = true;
         _updatePhoneLabel = 'Re-send';
         MessageBar(context, message: notifyMessage).show();
       } else {
@@ -286,7 +333,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   void _updatePhoneVerify() async {
     setState(() => _showSpinner = true);
-    if (_hasChanges(Field.Phone) && _verifyCode != null) {
+    if (_verifyCode != null) {
       String errorMessage = await _verifyCode(_confirmCode.text.trim());
       if (errorMessage.isEmpty) {
         String phoneNumber = _phoneNumber.text.trim();
@@ -297,8 +344,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             );
         _phoneNumber.text = phoneNumber;
         _confirmCode.clear();
-        _newPhoneNumber = false;
+        _needVerifyPhone = false;
         _updatePhoneLabel = 'Remove';
+        _verifyCode = null;
         errorMessage = 'Phone number updated';
       }
       MessageBar(context, message: errorMessage).show();
@@ -306,56 +354,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     setState(() => _showSpinner = false);
   }
 
-  bool _hasChanges(Field field) {
-    Account account = context.read<Account>();
-    switch (field) {
-      case Field.Name:
-        bool hasChange = _firstName.text.trim() != account.firstName;
-        hasChange = hasChange || _lastName.text.trim() != account.lastName;
-        return hasChange;
-        break;
-
-      case Field.Address:
-        String street = _street.text.trim();
-        String city = _city.text.trim();
-        String state = _state.text.trim();
-        String zip = _zipCode.text.trim();
-        Map<String, String> address = account.address;
-        bool insert = address.isEmpty && _addressIsFilled();
-        bool update = address.isNotEmpty &&
-            (street != address[FireStoreService.kAddressStreet] ||
-                city != address[FireStoreService.kAddressCity] ||
-                state != address[FireStoreService.kAddressState] ||
-                zip != address[FireStoreService.kAddressZip]);
-        return insert || update;
-        break;
-
-      case Field.Password:
-        return _newPassword.text.isNotEmpty;
-        break;
-
-      case Field.Phone:
-        String phoneNumber = _phoneNumber.text.trim();
-        Map<String, String> phone = account.phone;
-        bool insert = phone.isEmpty && (phoneNumber.isNotEmpty);
-        bool update = phone.isNotEmpty &&
-            (phoneNumber != phone[FireStoreService.kPhoneNumber] ||
-                _isoCode != phone[FireStoreService.kPhoneCountry]);
-        return insert || update;
-        break;
-    }
-    return false;
-  }
-
   bool _addressIsFilled() {
-    String street = _street.text.trim();
-    String city = _city.text.trim();
-    String state = _state.text.trim();
-    String zip = _zipCode.text.trim();
-    bool isFilled = street.isNotEmpty ||
-        city.isNotEmpty ||
-        state.isNotEmpty ||
-        zip.isNotEmpty;
+    bool isFilled = _street.text.trim().isNotEmpty ||
+        _city.text.trim().isNotEmpty ||
+        _state.text.trim().isNotEmpty ||
+        _zipCode.text.trim().isNotEmpty;
     if (!isFilled) {
       _streetError = _cityError = _stateError = _zipError = '';
     }
@@ -620,11 +623,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       isoCode: _isoCode,
                     );
                   }
+                  _needVerifyPhone = false;
                   _updatePhoneLabel = 'Remove';
-                  if (_hasChanges(Field.Phone) || phoneNumber.isEmpty) {
+                  Map<String, String> phone = context.read<Account>().phone;
+                  bool insert = phone.isEmpty && (phoneNumber.isNotEmpty);
+                  bool update = phone.isNotEmpty &&
+                      (phoneNumber != phone[FireStoreService.kPhoneNumber] ||
+                          _isoCode != phone[FireStoreService.kPhoneCountry]);
+                  if (insert || update || phoneNumber.isEmpty) {
                     _updatePhoneLabel = 'Add';
                   }
-                  _newPhoneNumber = false;
                   setState(() {});
                 },
               ),
@@ -661,7 +669,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   Widget verifyCodeField() {
     return Visibility(
-      visible: _newPhoneNumber,
+      visible: _needVerifyPhone,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

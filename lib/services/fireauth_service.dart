@@ -30,11 +30,11 @@ class FireAuthService {
         firstName: firstName,
         lastName: lastName,
       );
-      await user?.sendEmailVerification();
+      await user.sendEmailVerification();
+      return 'Please check your email for a verification link!';
     } catch (e) {
       throw e.message;
     }
-    return 'Please check your email for a verification link!';
   }
 
   Future<String> signIn({
@@ -47,14 +47,11 @@ class FireAuthService {
         email: email,
         password: password,
       );
-      if (userCredential != null) {
-        if (user.emailVerified) {
-          return '';
-        } else {
-          await user.sendEmailVerification();
-          return 'Please check your email for a verification link!';
-        }
+      if (!userCredential.user.emailVerified) {
+        await user.sendEmailVerification();
+        return 'Please check your email for a verification link!';
       }
+      return '';
     } catch (e) {
       if (e.code == 'too-many-requests') {
         throw 'Please wait a moment and sign in again shortly!';
@@ -65,7 +62,6 @@ class FireAuthService {
         throw 'Incorrect Email or Password. Please try again!';
       }
     }
-    return 'Error';
   }
 
   // Android: set SHA-1, SHA-256, enable SafetyNet from Google Cloud Console
@@ -101,14 +97,13 @@ class FireAuthService {
               verificationId: verificationId,
               smsCode: smsCode,
             );
-            if (await _firebaseAuth.signInWithCredential(credential) != null) {
-              if (user.email != null) {
-                return '';
-              } else {
-                await user.delete();
-                return 'Phone number not linked with registered email';
-              }
+            UserCredential userCredential =
+                await _firebaseAuth.signInWithCredential(credential);
+            if (userCredential.user.email == null) {
+              await user.delete();
+              return 'Phone number not linked with registered email';
             }
+            return '';
           } catch (e) {
             if (e.code == 'invalid-verification-code') {
               return 'Invalid verification code. Please try again!';
@@ -117,8 +112,8 @@ class FireAuthService {
               return 'Verification code has expired. Please re-send to try again!';
             }
             print(e);
+            return 'Error';
           }
-          return 'Error';
         });
       },
       verificationFailed: (FirebaseAuthException e) {
@@ -155,6 +150,7 @@ class FireAuthService {
             } else {
               await user.linkWithCredential(credential);
             }
+            return '';
           } catch (e) {
             if (e.code == 'invalid-verification-code' ||
                 e.code == 'invalid-verification-id') {
@@ -167,8 +163,8 @@ class FireAuthService {
               return 'Phone number is being used by a different account';
             }
             print(e);
+            return 'Error';
           }
-          return '';
         });
       },
       verificationFailed: (FirebaseAuthException e) {
