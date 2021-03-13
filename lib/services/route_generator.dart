@@ -4,7 +4,7 @@ import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
 import 'package:fruitfairy/screens/authentication/signin_screen.dart';
 import 'package:fruitfairy/screens/authentication/signup_role_screen.dart';
 import 'package:fruitfairy/screens/authentication/signup_donor_screen.dart';
-import 'package:fruitfairy/screens/donation_cart_screen.dart';
+import 'package:fruitfairy/screens/donation_basket_screen.dart';
 import 'package:fruitfairy/screens/profile_screen.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
 import 'package:fruitfairy/screens/picking_fruit_screen.dart';
@@ -23,7 +23,7 @@ class RouteGenerator {
     HomeScreen.id: HomeScreen(),
     ProfileScreen.id: ProfileScreen(),
     PickingFruitScreen.id: PickingFruitScreen(),
-    DonationCartScreen.id: DonationCartScreen(),
+    DonationBasketScreen.id: DonationBasketScreen(),
     ConfirmationDonationScreen.id: ConfirmationDonationScreen(),
     FruitQuantity.id: FruitQuantity(),
   };

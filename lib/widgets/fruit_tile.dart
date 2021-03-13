@@ -1,48 +1,53 @@
 import 'package:flutter/material.dart';
+import 'package:strings/strings.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+
+import 'package:fruitfairy/constant.dart';
 
 class FruitTile extends StatelessWidget {
-  final AssetImage fruitImage;
-  final bool selected;
-  final int index;
-  final void Function(int index) onTap;
-  final Text fruitName;
+  final String fruitName;
+  final String fruitImage;
 
   FruitTile({
-    this.fruitImage,
-    this.selected = false,
-    this.index,
-    this.onTap,
-    this.fruitName,
+    @required this.fruitName,
+    @required this.fruitImage,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        onTap(index);
-      },
-      child: Stack(
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              fruitName,
-              Expanded(
-                child: Container(
+    return Column(
+      children: [
+        label(fruitName),
+        Expanded(
+          child: CachedNetworkImage(
+              imageUrl: fruitImage,
+              imageBuilder: (context, imageProvider) {
+                return Container(
                   decoration: BoxDecoration(
                     image: DecorationImage(
-                      image: fruitImage,
+                      image: imageProvider,
                       fit: BoxFit.contain,
                     ),
                   ),
-                ),
-              ),
-            ],
-          ),
-          Container(
-            color: Colors.grey.shade700.withOpacity(selected ? 0.5 : 0),
-          ),
-        ],
+                );
+              },
+              placeholder: (context, url) {
+                return Center(
+                  child: label('loading...'),
+                );
+              }),
+        ),
+      ],
+    );
+  }
+
+  Widget label(String label) {
+    return Text(
+      camelize(label),
+      style: TextStyle(
+        color: kPrimaryColor,
+        fontWeight: FontWeight.bold,
+        fontSize: 20.0,
       ),
     );
   }

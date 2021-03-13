@@ -8,6 +8,7 @@ import 'package:strings/strings.dart';
 
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
+import 'package:fruitfairy/models/basket.dart';
 import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
 import 'package:fruitfairy/screens/authentication/signin_screen.dart';
 import 'package:fruitfairy/screens/profile_screen.dart';
@@ -49,6 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
     await context.read<FireAuthService>().signOut();
     context.read<FireStoreService>().clear();
     context.read<Account>().clear();
+    context.read<Basket>().clear();
     subscription.cancel();
     Navigator.of(context).pushNamedAndRemoveUntil(
       SignOptionScreen.id,
