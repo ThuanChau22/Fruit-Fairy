@@ -4,8 +4,9 @@ import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/basket.dart';
 import 'package:fruitfairy/widgets/fruit_image_with_remove_button.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
-import 'package:fruitfairy/screens/temp_fruit_with_quantity.dart';
 import 'package:provider/provider.dart';
+
+import 'confirmation_donation_screen.dart';
 
 class DonationCartScreen extends StatefulWidget {
   static const String id = 'donation_cart_screen';
@@ -154,7 +155,7 @@ class _DonationCartScreenState extends State<DonationCartScreen> {
         labelColor: kPrimaryColor,
         backgroundColor: kObjectBackgroundColor,
         onPressed: () {
-          Navigator.of(context).pushNamed(FruitQuantity.id);
+          Navigator.of(context).pushNamed(ConfirmationDonationScreen.id);
         },
       ),
     );

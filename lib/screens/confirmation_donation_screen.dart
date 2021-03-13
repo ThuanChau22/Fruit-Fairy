@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
+import 'package:fruitfairy/widgets/rounded_button.dart';
 
 class ConfirmationDonationScreen extends StatefulWidget {
   static const String id = 'confirmation_donation_screen';
@@ -53,11 +54,18 @@ class _ConfirmationDonationScreenState
           InputField(
             label: 'Street',
             onChanged: null,
+            controller: null,
           ),
-          InputField(label: 'City', onChanged: null),
-          InputField(label: 'Zip Code', onChanged: null),
-          InputField(label: 'State', onChanged: null),
-          InputField(label: 'Phone number', onChanged: null),
+          InputField(label: 'City', onChanged: null, controller: null,),
+          InputField(label: 'Zip Code', onChanged: null, controller: null,),
+          InputField(label: 'State', onChanged: null,controller: null, ),
+          InputField(label: 'Phone number', onChanged: null,controller: null,),
+          SizedBox(height: screen.height * 0.02),
+          RoundedButton(
+            label: 'Confirm',
+            onPressed: () {},
+            labelColor: kPrimaryColor,
+          ),
         ],
       ),
     );
