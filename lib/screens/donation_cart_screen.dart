@@ -112,6 +112,7 @@ class _DonationCartScreenState extends State<DonationCartScreen> {
         ),
         SizedBox(height: screen.height * 0.02),
         kDivider(),
+        SizedBox(height: screen.height * 0.02),
         button(),
         SizedBox(height: screen.height * 0.02),
       ],

@@ -88,7 +88,11 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
     for (int i = 0; i < basket.fruitImages.length; i++) {
       list.add(
         Container(
-          color: kObjectBackgroundColor,
+          decoration: BoxDecoration(
+            color: kObjectBackgroundColor,
+              borderRadius: BorderRadius.all(Radius.circular(20),
+              ),
+          ),
           child: FruitTile(
             fruitImage: AssetImage(basket.fruitImages[i]),
             fruitName: Text(

@@ -29,6 +29,7 @@ class FruitTile extends StatelessWidget {
               fruitName,
               Expanded(
                 child: Container(
+                  //color: Colors.grey.shade700.withOpacity(selected ? 0.5 : 0),
                   decoration: BoxDecoration(
                     image: DecorationImage(
                       image: fruitImage,
@@ -40,7 +41,11 @@ class FruitTile extends StatelessWidget {
             ],
           ),
           Container(
-            color: Colors.grey.shade700.withOpacity(selected ? 0.5 : 0),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade700.withOpacity(selected ? 0.5 : 0),
+              borderRadius: BorderRadius.all(Radius.circular(20),
+              ),
+            ),
           ),
         ],
       ),
