@@ -73,8 +73,6 @@ class SignUpRoleScreen extends StatelessWidget {
       ),
       child: RoundedButton(
         label: 'Donor',
-        labelColor: kPrimaryColor,
-        backgroundColor: kObjectBackgroundColor,
         leading: Icon(
           Icons.person,
           size: 40.0,
@@ -99,8 +97,6 @@ class SignUpRoleScreen extends StatelessWidget {
       ),
       child: RoundedButton(
         label: 'Charity',
-        labelColor: kPrimaryColor,
-        backgroundColor: kObjectBackgroundColor,
         leading: Icon(
           FontAwesomeIcons.handHoldingHeart,
           size: 35.0,

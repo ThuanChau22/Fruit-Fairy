@@ -453,8 +453,6 @@ class _SignInScreenState extends State<SignInScreen> {
       ),
       child: RoundedButton(
         label: _buttonLabel,
-        labelColor: kPrimaryColor,
-        backgroundColor: kObjectBackgroundColor,
         onPressed: () {
           submit();
         },

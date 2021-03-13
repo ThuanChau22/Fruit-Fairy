@@ -215,8 +215,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       child: RoundedButton(
         label: 'Donate',
-        labelColor: kPrimaryColor,
-        backgroundColor: kObjectBackgroundColor,
         onPressed: () {
           Navigator.of(context).pushNamed(PickingFruitScreen.id);
         },

@@ -642,7 +642,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               flex: 2,
               child: RoundedButton(
                 label: _updatePhoneLabel,
-                labelColor: kPrimaryColor,
                 onPressed: () {
                   _updatePhoneRequest();
                 },
@@ -688,7 +687,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 flex: 2,
                 child: RoundedButton(
                   label: 'Verify',
-                  labelColor: kPrimaryColor,
                   onPressed: () {
                     _updatePhoneVerify();
                   },
@@ -927,8 +925,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       ),
       child: RoundedButton(
         label: 'Save',
-        labelColor: kPrimaryColor,
-        backgroundColor: kObjectBackgroundColor,
         onPressed: () {
           _updateProfile();
         },
@@ -1058,8 +1054,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               padding: EdgeInsets.symmetric(horizontal: 50.0),
               child: RoundedButton(
                 label: 'Delete',
-                labelColor: kPrimaryColor,
-                backgroundColor: kObjectBackgroundColor,
                 onPressed: () {
                   _deleteAccount();
                 },

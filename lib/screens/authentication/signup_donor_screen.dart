@@ -243,8 +243,6 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
       ),
       child: RoundedButton(
         label: 'Sign Up',
-        labelColor: kPrimaryColor,
-        backgroundColor: kObjectBackgroundColor,
         onPressed: () {
           setState(() {
             _signUp();

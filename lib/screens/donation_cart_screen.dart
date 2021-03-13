@@ -53,7 +53,9 @@ class _DonationCartScreenState extends State<DonationCartScreen> {
                 padding: EdgeInsets.symmetric(horizontal: screen.width * 0.08),
                 child: RoundedButton(
                   label: 'Yes',
-                  labelColor: kPrimaryColor,
+                  backgroundColor: selectedOption == YesOrNoSelection.yes
+                      ? Colors.green.shade100
+                      : Colors.white,
                   onPressed: () {
                     setState(() {
                       selectedOption == YesOrNoSelection.yes
@@ -61,9 +63,6 @@ class _DonationCartScreenState extends State<DonationCartScreen> {
                           : selectedOption = YesOrNoSelection.yes;
                     });
                   },
-                  backgroundColor: selectedOption == YesOrNoSelection.yes
-                      ? Colors.green.shade100
-                      : Colors.white,
                 ),
               ),
             ),
@@ -72,7 +71,9 @@ class _DonationCartScreenState extends State<DonationCartScreen> {
                 padding: EdgeInsets.symmetric(horizontal: screen.width * 0.08),
                 child: RoundedButton(
                   label: 'No',
-                  labelColor: kPrimaryColor,
+                  backgroundColor: selectedOption == YesOrNoSelection.no
+                      ? Colors.green.shade100
+                      : Colors.white,
                   onPressed: () {
                     setState(() {
                       selectedOption == YesOrNoSelection.no
@@ -80,9 +81,6 @@ class _DonationCartScreenState extends State<DonationCartScreen> {
                           : selectedOption = YesOrNoSelection.no;
                     });
                   },
-                  backgroundColor: selectedOption == YesOrNoSelection.no
-                      ? Colors.green.shade100
-                      : Colors.white,
                 ),
               ),
             )
@@ -150,8 +148,6 @@ class _DonationCartScreenState extends State<DonationCartScreen> {
       padding: EdgeInsets.symmetric(horizontal: screen.width * 0.3),
       child: RoundedButton(
         label: 'Next',
-        labelColor: kPrimaryColor,
-        backgroundColor: kObjectBackgroundColor,
         onPressed: () {
           Navigator.of(context).pushNamed(FruitQuantity.id);
         },
