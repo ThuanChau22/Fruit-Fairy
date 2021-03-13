@@ -8,9 +8,10 @@ import 'package:strings/strings.dart';
 
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
+import 'package:fruitfairy/models/basket.dart';
 import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
 import 'package:fruitfairy/screens/authentication/signin_screen.dart';
-import 'package:fruitfairy/screens/edit_profile_screen.dart';
+import 'package:fruitfairy/screens/profile_screen.dart';
 import 'package:fruitfairy/screens/picking_fruit_screen.dart';
 import 'package:fruitfairy/services/fireauth_service.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
@@ -49,6 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
     await context.read<FireAuthService>().signOut();
     context.read<FireStoreService>().clear();
     context.read<Account>().clear();
+    context.read<Basket>().clear();
     subscription.cancel();
     Navigator.of(context).pushNamedAndRemoveUntil(
       SignOptionScreen.id,
@@ -62,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     subscription = context.read<FireStoreService>().userStream((data) {
-      context.read<Account>().fromMap(data.data());
+      context.read<Account>().fromDB(data.data());
     });
   }
 
@@ -179,7 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
           switch (action) {
             case Profile.Edit:
               HapticFeedback.mediumImpact();
-              Navigator.of(context).pushNamed(EditProfileScreen.id);
+              Navigator.of(context).pushNamed(ProfileScreen.id);
               break;
 
             case Profile.SignOut:
@@ -215,8 +217,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       child: RoundedButton(
         label: 'Donate',
-        labelColor: kPrimaryColor,
-        backgroundColor: kObjectBackgroundColor,
         onPressed: () {
           Navigator.of(context).pushNamed(PickingFruitScreen.id);
         },

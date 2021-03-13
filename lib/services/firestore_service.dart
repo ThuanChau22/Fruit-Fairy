@@ -4,6 +4,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FireStoreService {
   /// Database fields
+
+  /// fruits
+  static const String kFruits = 'fruits';
+  static const String kFruitName = 'name';
+  static const String kFruitPath = 'path';
+  static const String kFruitURL = 'url';
+
+  /// users
   static const String kUsers = 'users';
   static const String kEmail = 'email';
   static const String kFirstName = 'firstname';
@@ -18,18 +26,27 @@ class FireStoreService {
   static const String kAddressState = 'state';
   static const String kAddressZip = 'zip';
 
+  ///////////////
+
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  CollectionReference _userDB;
+  CollectionReference _usersDB;
+  CollectionReference _fruitsDB;
+
   String _uid;
 
   FireStoreService() {
-    _userDB = _firestore.collection(kUsers);
+    _usersDB = _firestore.collection(kUsers);
+    _fruitsDB = _firestore.collection(kFruits);
+  }
+
+  void uid(String uid) {
+    this._uid = uid;
   }
 
   StreamSubscription<DocumentSnapshot> userStream(
     Function(DocumentSnapshot) onData,
   ) {
-    return _userDB.doc(_uid).snapshots().listen(
+    return _usersDB.doc(_uid).snapshots().listen(
       onData,
       onError: (e) {
         print(e);
@@ -37,8 +54,8 @@ class FireStoreService {
     );
   }
 
-  void uid(String uid) {
-    this._uid = uid;
+  Future<List<QueryDocumentSnapshot>> fruits() async {
+    return (await _fruitsDB.get()).docs;
   }
 
   Future<void> addAccount({
@@ -51,7 +68,7 @@ class FireStoreService {
       return;
     }
     try {
-      await _userDB.doc(_uid).set({
+      await _usersDB.doc(_uid).set({
         kEmail: email,
         kFirstName: firstName,
         kLastName: lastName,
@@ -70,7 +87,7 @@ class FireStoreService {
       return;
     }
     try {
-      await _userDB.doc(_uid).update({
+      await _usersDB.doc(_uid).update({
         kFirstName: firstName,
         kLastName: lastName,
       });
@@ -90,7 +107,7 @@ class FireStoreService {
       return;
     }
     try {
-      DocumentReference doc = _userDB.doc(_uid);
+      DocumentReference doc = _usersDB.doc(_uid);
       if (street.isEmpty && city.isEmpty && state.isEmpty && zip.isEmpty) {
         await doc.update({
           kAddress: FieldValue.delete(),
@@ -120,7 +137,7 @@ class FireStoreService {
       return;
     }
     try {
-      DocumentReference doc = _userDB.doc(_uid);
+      DocumentReference doc = _usersDB.doc(_uid);
       if (phoneNumber.isEmpty) {
         await doc.update({
           kPhone: FieldValue.delete(),
@@ -145,7 +162,7 @@ class FireStoreService {
       return;
     }
     try {
-      await _userDB.doc(_uid).delete();
+      await _usersDB.doc(_uid).delete();
     } catch (e) {
       throw e.message;
     }

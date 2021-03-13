@@ -1,46 +1,47 @@
 import 'dart:collection';
 import 'package:flutter/foundation.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'package:fruitfairy/models/fruit.dart';
+import 'package:fruitfairy/services/firestore_service.dart';
 
 class Basket extends ChangeNotifier {
-  final List<String> _fruitImages = [
-    'images/Peach.png',
-    'images/Avocado.png',
-    'images/Lemon.png',
-    'images/Orange.png',
-  ];
+  final Map<String, Fruit> _fruits = {};
+  final List<Fruit> _selectedFruits = [];
 
-  final List<String> _fruitNames = [
-    'Peach',
-    'Avocado',
-    'Lemon',
-    'Orange',
-  ];
-
-  final List<int> _selectedFruits = [];
-
-  Basket();
-
-  UnmodifiableListView get fruitImages{
-    return UnmodifiableListView(_fruitImages);
+  UnmodifiableMapView<String, Fruit> get fruits {
+    return UnmodifiableMapView(_fruits);
   }
 
-  UnmodifiableListView get fruitNames{
-    return UnmodifiableListView(_fruitNames);
-  }
-
-  UnmodifiableListView<int> get selectedFruits {
+  UnmodifiableListView<Fruit> get selectedFruits {
     return UnmodifiableListView(_selectedFruits);
   }
 
-  void pickFruit(int index){
-    _selectedFruits.add(index);
+  void pickFruit(Fruit fruit) {
+    _selectedFruits.add(fruit);
     notifyListeners();
   }
 
-  void remove(int index){
-    _selectedFruits.remove(index);
+  void removeFruit(Fruit fruit) {
+    _selectedFruits.remove(fruit);
     notifyListeners();
   }
 
+  void fromDB(List<QueryDocumentSnapshot> fruitList) {
+    for (QueryDocumentSnapshot snapshot in fruitList) {
+      String id = snapshot.id;
+      Map<String, dynamic> data = snapshot.data();
+      _fruits[id] = Fruit(
+        id: id,
+        name: data[FireStoreService.kFruitName],
+        path: data[FireStoreService.kFruitPath],
+        url: data[FireStoreService.kFruitURL],
+      );
+    }
+  }
 
+  void clear() {
+    _fruits.clear();
+    _selectedFruits.clear();
+  }
 }

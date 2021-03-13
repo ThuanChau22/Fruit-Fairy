@@ -12,7 +12,7 @@ class Account extends ChangeNotifier {
 
   Account({Map<String, dynamic> data}) {
     if (data != null) {
-      fromMap(data);
+      fromDB(data);
     }
   }
 
@@ -36,7 +36,7 @@ class Account extends ChangeNotifier {
     return UnmodifiableMapView(_address);
   }
 
-  void fromMap(Map<String, dynamic> accountData) {
+  void fromDB(Map<String, dynamic> accountData) {
     clear();
     _email = accountData[FireStoreService.kEmail];
     _firstName = accountData[FireStoreService.kFirstName];

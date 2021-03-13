@@ -16,6 +16,7 @@ import 'package:fruitfairy/services/firestore_service.dart';
 import 'package:fruitfairy/services/session_token.dart';
 import 'package:fruitfairy/services/validation.dart';
 import 'package:fruitfairy/widgets/auto_scroll.dart';
+import 'package:fruitfairy/widgets/gesture_wrapper.dart';
 import 'package:fruitfairy/widgets/input_field_suggestion.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
 import 'package:fruitfairy/widgets/label_link.dart';
@@ -27,14 +28,14 @@ import 'package:fruitfairy/widgets/scrollable_layout.dart';
 enum Field { Name, Phone, Address, Password }
 enum DeleteMode { Input, Loading, Success }
 
-class EditProfileScreen extends StatefulWidget {
-  static const String id = 'edit_profile_screen';
+class ProfileScreen extends StatefulWidget {
+  static const String id = 'profile_screen';
 
   @override
-  _EditProfileScreenState createState() => _EditProfileScreenState();
+  _ProfileScreenState createState() => _ProfileScreenState();
 }
 
-class _EditProfileScreenState extends State<EditProfileScreen> {
+class _ProfileScreenState extends State<ProfileScreen> {
   final AutoScroll<Field> _scroller = AutoScroll(
     elements: {
       Field.Name: 0,
@@ -446,68 +447,70 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       },
       child: Scaffold(
         appBar: AppBar(title: Text('Profile')),
-        body: SafeArea(
-          child: ModalProgressHUD(
-            inAsyncCall: _showSpinner,
-            progressIndicator: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(kAppBarColor),
-            ),
-            child: ScrollableLayout(
-              controller: _scroller.controller,
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  vertical: screen.height * 0.03,
-                  horizontal: screen.width * 0.15,
-                ),
-                child: Column(
-                  children: [
-                    inputGroupLabel(
-                      'Account',
-                      tag: Field.Name,
-                    ),
-                    emailInputField(),
-                    inputFieldSizedBox(),
-                    firstNameInputField(),
-                    inputFieldSizedBox(),
-                    lastNameInputField(),
-                    inputFieldSizedBox(),
-                    inputGroupSizedBox(),
-                    inputGroupLabel(
-                      'Mobile Contact',
-                      tag: Field.Phone,
-                    ),
-                    phoneNumberField(),
-                    verifyCodeField(),
-                    inputFieldSizedBox(),
-                    inputGroupSizedBox(),
-                    inputGroupLabel(
-                      'Address',
-                      tag: Field.Address,
-                    ),
-                    streetInputField(),
-                    inputFieldSizedBox(),
-                    cityInputField(),
-                    inputFieldSizedBox(),
-                    stateInputField(),
-                    inputFieldSizedBox(),
-                    zipInputField(),
-                    inputFieldSizedBox(),
-                    inputGroupSizedBox(),
-                    inputGroupLabel(
-                      'Change Password',
-                      tag: Field.Password,
-                    ),
-                    currentPasswordInputField(),
-                    inputFieldSizedBox(),
-                    newPasswordInputField(),
-                    inputFieldSizedBox(),
-                    confirmPasswordInputField(),
-                    inputFieldSizedBox(),
-                    inputGroupSizedBox(),
-                    saveButton(),
-                    SizedBox(height: screen.height * 0.05),
-                    deleteAccountLink(),
-                  ],
+        body: GestureWrapper(
+          child: SafeArea(
+            child: ModalProgressHUD(
+              inAsyncCall: _showSpinner,
+              progressIndicator: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation(kAppBarColor),
+              ),
+              child: ScrollableLayout(
+                controller: _scroller.controller,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    vertical: screen.height * 0.03,
+                    horizontal: screen.width * 0.15,
+                  ),
+                  child: Column(
+                    children: [
+                      inputGroupLabel(
+                        'Account',
+                        tag: Field.Name,
+                      ),
+                      emailInputField(),
+                      inputFieldSizedBox(),
+                      firstNameInputField(),
+                      inputFieldSizedBox(),
+                      lastNameInputField(),
+                      inputFieldSizedBox(),
+                      inputGroupSizedBox(),
+                      inputGroupLabel(
+                        'Phone Number',
+                        tag: Field.Phone,
+                      ),
+                      phoneNumberField(),
+                      verifyCodeField(),
+                      inputFieldSizedBox(),
+                      inputGroupSizedBox(),
+                      inputGroupLabel(
+                        'Address',
+                        tag: Field.Address,
+                      ),
+                      streetInputField(),
+                      inputFieldSizedBox(),
+                      cityInputField(),
+                      inputFieldSizedBox(),
+                      stateInputField(),
+                      inputFieldSizedBox(),
+                      zipInputField(),
+                      inputFieldSizedBox(),
+                      inputGroupSizedBox(),
+                      inputGroupLabel(
+                        'Change Password',
+                        tag: Field.Password,
+                      ),
+                      currentPasswordInputField(),
+                      inputFieldSizedBox(),
+                      newPasswordInputField(),
+                      inputFieldSizedBox(),
+                      confirmPasswordInputField(),
+                      inputFieldSizedBox(),
+                      inputGroupSizedBox(),
+                      saveButton(),
+                      SizedBox(height: screen.height * 0.05),
+                      deleteAccountLink(),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -642,7 +645,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               flex: 2,
               child: RoundedButton(
                 label: _updatePhoneLabel,
-                labelColor: kPrimaryColor,
                 onPressed: () {
                   _updatePhoneRequest();
                 },
@@ -688,7 +690,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 flex: 2,
                 child: RoundedButton(
                   label: 'Verify',
-                  labelColor: kPrimaryColor,
                   onPressed: () {
                     _updatePhoneVerify();
                   },
@@ -927,8 +928,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       ),
       child: RoundedButton(
         label: 'Save',
-        labelColor: kPrimaryColor,
-        backgroundColor: kObjectBackgroundColor,
         onPressed: () {
           _updateProfile();
         },
@@ -1058,8 +1057,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               padding: EdgeInsets.symmetric(horizontal: 50.0),
               child: RoundedButton(
                 label: 'Delete',
-                labelColor: kPrimaryColor,
-                backgroundColor: kObjectBackgroundColor,
                 onPressed: () {
                   _deleteAccount();
                 },
