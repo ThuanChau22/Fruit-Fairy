@@ -10,6 +10,7 @@ import 'package:fruitfairy/services/firestore_service.dart';
 import 'package:fruitfairy/services/credential_service.dart';
 import 'package:fruitfairy/services/validation.dart';
 import 'package:fruitfairy/widgets/fruit_fairy_logo.dart';
+import 'package:fruitfairy/widgets/gesture_wrapper.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
 import 'package:fruitfairy/widgets/label_link.dart';
 import 'package:fruitfairy/widgets/message_bar.dart';
@@ -228,25 +229,27 @@ class _SignInScreenState extends State<SignInScreen> {
     Size screen = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(title: Text(_appBarLabel)),
-      body: SafeArea(
-        child: ModalProgressHUD(
-          inAsyncCall: _showSpinner,
-          progressIndicator: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation(kAppBarColor),
-          ),
-          child: ScrollableLayout(
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                vertical: screen.height * 0.03,
-                horizontal: screen.width * 0.15,
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  fairyLogo(),
-                  SizedBox(height: screen.height * 0.03),
-                  layoutMode(),
-                ],
+      body: GestureWrapper(
+        child: SafeArea(
+          child: ModalProgressHUD(
+            inAsyncCall: _showSpinner,
+            progressIndicator: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation(kAppBarColor),
+            ),
+            child: ScrollableLayout(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  vertical: screen.height * 0.03,
+                  horizontal: screen.width * 0.15,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    fairyLogo(),
+                    SizedBox(height: screen.height * 0.03),
+                    layoutMode(),
+                  ],
+                ),
               ),
             ),
           ),

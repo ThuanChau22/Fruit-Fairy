@@ -22,24 +22,14 @@ void main() async {
 class FruitFairy extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        // Dismiss on screen keyboard
-        FocusScopeNode currentFocus = FocusScope.of(context);
-        if (!currentFocus.hasPrimaryFocus &&
-            currentFocus.focusedChild != null) {
-          currentFocus.focusedChild?.unfocus();
-        }
-      },
-      child: MultiProvider(
-        providers: [
-          Provider<FireAuthService>(create: (_) => FireAuthService()),
-          Provider<FireStoreService>(create: (_) => FireStoreService()),
-          ChangeNotifierProvider<Account>(create: (_) => Account()),
-          ChangeNotifierProvider<Basket>(create: (_) => Basket()),
-        ],
-        child: Authentication(),
-      ),
+    return MultiProvider(
+      providers: [
+        Provider<FireAuthService>(create: (_) => FireAuthService()),
+        Provider<FireStoreService>(create: (_) => FireStoreService()),
+        ChangeNotifierProvider<Account>(create: (_) => Account()),
+        ChangeNotifierProvider<Basket>(create: (_) => Basket()),
+      ],
+      child: Authentication(),
     );
   }
 }
