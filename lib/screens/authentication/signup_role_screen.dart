@@ -14,7 +14,7 @@ class SignUpRoleScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
     return Scaffold(
-      appBar: AppBar(title: Text('Create Account')),
+      appBar: AppBar(title: Text('Sign Up')),
       body: SafeArea(
         child: ScrollableLayout(
           child: Padding(
@@ -27,26 +27,13 @@ class SignUpRoleScreen extends StatelessWidget {
               children: [
                 fairyLogo(context),
                 SizedBox(height: screen.height * 0.03),
-                Text(
-                  'Solve Food Waste\nOne Donation\nAt A Time',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: kLabelColor,
-                    fontSize: 25.0,
-                    fontFamily: 'Pacifico',
-                  ),
-                ),
+                slogan(),
                 SizedBox(height: screen.height * 0.04),
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: screen.width * 0.12,
-                  ),
-                  child: Column(
-                    children: [
-                      donorButton(context),
-                      charityButton(context),
-                    ],
-                  ),
+                Column(
+                  children: [
+                    donorButton(context),
+                    charityButton(context),
+                  ],
                 ),
               ],
             ),
@@ -66,10 +53,24 @@ class SignUpRoleScreen extends StatelessWidget {
     );
   }
 
+  Widget slogan() {
+    return Text(
+      'Solve Food Waste\nOne Donation\nAt A Time',
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        color: kLabelColor,
+        fontSize: 30.0,
+      ),
+    );
+  }
+
   Widget donorButton(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: screen.height * 0.025),
+      padding: EdgeInsets.symmetric(
+        vertical: screen.height * 0.025,
+        horizontal: screen.width * 0.12,
+      ),
       child: RoundedButton(
         label: 'Donor',
         labelColor: kPrimaryColor,
@@ -92,7 +93,10 @@ class SignUpRoleScreen extends StatelessWidget {
   Widget charityButton(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: screen.height * 0.025),
+      padding: EdgeInsets.symmetric(
+        vertical: screen.height * 0.025,
+        horizontal: screen.width * 0.12,
+      ),
       child: RoundedButton(
         label: 'Charity',
         labelColor: kPrimaryColor,

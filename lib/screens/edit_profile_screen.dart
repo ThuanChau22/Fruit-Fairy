@@ -473,7 +473,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     inputFieldSizedBox(),
                     inputGroupSizedBox(),
                     inputGroupLabel(
-                      'Mobile Contact',
+                      'Phone Number',
                       tag: Field.Phone,
                     ),
                     phoneNumberField(),
