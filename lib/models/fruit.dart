@@ -1,13 +1,13 @@
 class Fruit {
   final String id;
   final String name;
-  final String path;
-  final String url;
+  final String imagePath;
+  final String imageURL;
 
   Fruit({
     this.id,
     this.name,
-    this.path,
-    this.url,
+    this.imagePath,
+    this.imageURL,
   });
 }

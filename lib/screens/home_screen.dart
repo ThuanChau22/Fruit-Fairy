@@ -64,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _subscription = context.read<FireStoreService>().userStream((data) {
-      context.read<Account>().fromDB(data.data());
+      context.read<Account>().fromDB(data);
     });
   }
 
