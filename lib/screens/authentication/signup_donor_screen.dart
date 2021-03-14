@@ -92,10 +92,10 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
   @override
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
-    return Scaffold(
-      appBar: AppBar(title: Text('Sign Up')),
-      body: GestureWrapper(
-        child: SafeArea(
+    return GestureWrapper(
+      child: Scaffold(
+        appBar: AppBar(title: Text('Sign Up')),
+        body: SafeArea(
           child: ModalProgressHUD(
             inAsyncCall: _showSpinner,
             progressIndicator: CircularProgressIndicator(

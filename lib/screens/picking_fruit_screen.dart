@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
@@ -22,37 +24,35 @@ class PickingFruitScreen extends StatefulWidget {
 class _PickingFruitScreenState extends State<PickingFruitScreen> {
   final Color _selectedColor = Colors.grey.shade700.withOpacity(0.5);
   final TextEditingController _search = TextEditingController();
+
   bool _showSpinner = false;
 
-  void initBasket() async {
-    setState(() => _showSpinner = true);
-    Basket basket = context.read<Basket>();
-    if (basket.fruits.isEmpty) {
-      basket.fromDB(await context.read<FireStoreService>().fruits());
-    }
-    setState(() => _showSpinner = false);
-  }
+  StreamSubscription<QuerySnapshot> _subscription;
 
   @override
   void initState() {
     super.initState();
-    initBasket();
+    _subscription = context.read<FireStoreService>().fruitsStream((data) {
+      context.read<Basket>().fromDB(data);
+    });
   }
 
   @override
   void dispose() {
     super.dispose();
     _search.dispose();
+    _subscription.cancel();
   }
 
   @override
   Widget build(BuildContext context) {
+    _showSpinner = context.read<Basket>().fruits.isEmpty;
     Size screen = MediaQuery.of(context).size;
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: AppBar(title: Text('Donation')),
-      body: GestureWrapper(
-        child: SafeArea(
+    return GestureWrapper(
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        appBar: AppBar(title: Text('Donation')),
+        body: SafeArea(
           child: ModalProgressHUD(
             inAsyncCall: _showSpinner,
             progressIndicator: CircularProgressIndicator(
@@ -136,29 +136,36 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
         '^${_search.text.trim()}',
         caseSensitive: false,
       ).hasMatch(fruit.id)) {
-        bool selected = basket.selectedFruits.contains(fruit);
+        bool selected = basket.selectedFruits.contains(fruit.id);
         fruitTiles.add(selectableFruitTile(
           fruitName: fruit.name,
-          fruitImage: fruit.url,
+          fruitImage: fruit.imageURL,
           selected: selected,
           onTap: () {
             setState(() {
               if (selected) {
-                basket.removeFruit(fruit);
+                basket.removeFruit(fruit.id);
               } else {
-                basket.pickFruit(fruit);
+                basket.pickFruit(fruit.id);
               }
             });
           },
         ));
       }
     });
+    Size screen = MediaQuery.of(context).size;
+    int axisCount = 2;
+    if (screen.width >= 600) {
+      axisCount = 5;
+    } else if (screen.width >= 320) {
+      axisCount = 3;
+    }
     return Expanded(
       child: GridView.count(
         primary: false,
         crossAxisSpacing: 20,
         mainAxisSpacing: 20,
-        crossAxisCount: 3,
+        crossAxisCount: axisCount,
         children: fruitTiles,
       ),
     );
