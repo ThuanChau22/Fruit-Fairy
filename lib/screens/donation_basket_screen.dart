@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
-
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/basket.dart';
 import 'package:fruitfairy/models/fruit.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
+import 'package:provider/provider.dart';
 
-import 'package:fruitfairy/screens/temp_fruit_with_quantity.dart';
+import 'package:fruitfairy/widgets/temp_fruit_with_quantity.dart';
 
 class DonationBasketScreen extends StatefulWidget {
   static const String id = 'donation_basket_screen';
@@ -42,7 +41,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
               SizedBox(height: screen.height * 0.02),
               sectionLabel('Adjust percentage of produce you want to donate:'),
               SizedBox(height: screen.height * 0.02),
-              fruitsSelected(),
+              selectedFruit(),
               divider(),
               SizedBox(height: screen.height * 0.03),
               nextButton(),
@@ -125,9 +124,16 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
     );
   }
 
-  Widget fruitsSelected() {
+  Widget selectedFruit() {
+    if (_selectedOption == CollectOption.Yes) {
+      return collectNeedHelp();
+    }
+    return collectWithoutHelp();
+  }
+
+  Widget collectWithoutHelp() {
     List<Widget> fruitTiles = [];
-    Basket basket = context.watch<Basket>();
+    Basket basket = context.read<Basket>();
     Map<String, Fruit> fruits = basket.fruits;
     basket.selectedFruits.forEach((fruitId) {
       fruitTiles.add(
@@ -157,6 +163,113 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
       ),
     );
   }
+
+  //Todo: the images dont shwo up, need to work on it a little bit?
+  Widget collectNeedHelp() {
+    Size screen = MediaQuery.of(context).size;
+    Basket basket = context.read<Basket>();
+    Map<String, Fruit> fruits = basket.fruits;
+    List<String> selectedFruit = basket.selectedFruits;
+    return Expanded(
+      child: SizedBox(
+        height: screen.height * 0.02,
+        child: ListView.builder(
+          itemBuilder: (context, index) {
+            Fruit fruit = fruits[selectedFruit[index]];
+            return Container(
+              width: 350.0,
+              height: 200.0,
+              //a testing color
+              color: Colors.white70,
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: screen.width * 0.05,
+                  ),
+                  SizedBox(width: screen.width * 0.2),
+                  FruitTile(
+                    fruitName: fruit.name,
+                    fruitImage: fruit.imageURL,
+                  ),
+                  SizedBox(width: screen.width * 0.1),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black, width: 3.0),
+                        ),
+                        child: Text(
+                          'Number' + ' %',
+                          style: TextStyle(
+                            fontSize: 30.0,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: screen.height * 0.03),
+                      Row(
+                        children: [
+                          GestureDetector(
+                            onTap: () {},
+                            child: Icon(
+                              Icons.add_circle,
+                              size: 35.0,
+                            ),
+                          ),
+                          SizedBox(width: screen.width * 0.075),
+                          GestureDetector(
+                            onTap: () {},
+                            child: Icon(
+                              Icons.remove_circle,
+                              size: 35.0,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+          itemCount: selectedFruit.length,
+        ),
+      ),
+    );
+  }
+
+  // Widget fruitsSelected() {
+  //   List<Widget> fruitTiles = [];
+  //   Basket basket = context.watch<Basket>();
+  //   Map<String, Fruit> fruits = basket.fruits;
+  //   basket.selectedFruits.forEach((fruitId) {
+  //     fruitTiles.add(
+  //       removableFruitTile(
+  //         fruitName: fruits[fruitId].name,
+  //         fruitImage: fruits[fruitId].imageURL,
+  //         onPress: () {
+  //           setState(() {
+  //             basket.removeFruit(fruitId);
+  //           });
+  //         },
+  //       ),
+  //     );
+  //   });
+  //   Size screen = MediaQuery.of(context).size;
+  //   int axisCount = 2;
+  //   if (screen.width >= 600) {
+  //     axisCount = 4;
+  //   }
+  //   return Expanded(
+  //     child: GridView.count(
+  //       primary: false,
+  //       crossAxisSpacing: 15,
+  //       mainAxisSpacing: 15,
+  //       crossAxisCount: axisCount,
+  //       children: fruitTiles,
+  //     ),
+  //   );
+  // }
 
   Widget removableFruitTile({
     @required String fruitName,
