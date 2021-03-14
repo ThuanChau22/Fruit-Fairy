@@ -103,61 +103,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   Container(
-                    height: screen.height * 0.5,
-                    width: screen.width * 0.8,
-                    color: kPrimaryColor,
                     child: Column(
                       children: [
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            'Today',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20.0,
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: SizedBox(
-                            height: 100.0,
-                            child: ListView(
-                              children: [
-                                SizedBox(height: screen.height * 0.02),
-                                Container(
-                                  height: screen.height * 0.075,
-                                  width: screen.width * 0.075,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(15.0),
-                                  ),
-                                ),
-                                SizedBox(height: screen.height * 0.02),
-                                Container(
-                                  height: screen.height * 0.075,
-                                  width: screen.width * 0.075,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(15.0),
-                                  ),
-                                ),
-                                SizedBox(height: screen.height * 0.02),
-                                Container(
-                                  height: screen.height * 0.075,
-                                  width: screen.width * 0.075,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(15.0),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+                        HistoryTile(today: 'Today'),
+                        HistoryTile(today: 'Today'),
+                        HistoryTile(today: 'Yesterday'),
                       ],
                     ),
-                  ),
+                  )
+
                 ],
               ),
             ),
@@ -259,6 +213,107 @@ class _HomeScreenState extends State<HomeScreen> {
         onPressed: () {
           Navigator.of(context).pushNamed(PickingFruitScreen.id);
         },
+      ),
+    );
+  }
+}
+
+class HistoryTile extends StatefulWidget {
+  HistoryTile({@required this.today});
+
+  String today;
+
+  @override
+  _HistoryTileState createState() => _HistoryTileState();
+}
+
+class _HistoryTileState extends State<HistoryTile> {
+  @override
+  Widget build(BuildContext context) {
+    Size screen = MediaQuery.of(context).size;
+    return Container(
+      height: screen.height * 0.3,
+      width: screen.width * 0.8,
+      color: kPrimaryColor,
+      child: Column(
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              //TODO get value from DB
+              widget.today,
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 20.0,
+              ),
+            ),
+          ),
+          //TODO future for loop to see how many donations were done on either today or yesterday or 2 days ago
+          Expanded(
+            child: SizedBox(
+              child: ListView(
+                physics:  NeverScrollableScrollPhysics(),
+                children: [
+                  SizedBox(height: screen.height * 0.02),
+                  Container(
+                    height: screen.height * 0.13,
+                    width: screen.width * 0.15,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(15.0),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.all(8.0),
+                          //TODO: get real donation number from db
+                          child: Text(
+                            'Donation #23',
+                            style: TextStyle(
+                              color: kPrimaryColor,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 25.0,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: screen.height * 0.02),
+                        Row(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 8.0),
+                              //TODO: get donation date from db
+                              child: Text(
+                                'Date: 02/30/2021',
+                                style: TextStyle(
+                                  color: kPrimaryColor,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 25.0,
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: screen.width * 0.05),
+                            //TODO get status from db
+                            Text(
+                              'Completed',
+                              style: TextStyle(
+                                color: Colors.green,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: screen.height * 0.02),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
