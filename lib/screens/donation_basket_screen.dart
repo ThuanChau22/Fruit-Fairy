@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/basket.dart';
+import 'package:fruitfairy/models/fruit.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 
@@ -126,26 +127,32 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
 
   Widget fruitsSelected() {
     List<Widget> fruitTiles = [];
-    Basket basket = context.read<Basket>();
-    basket.selectedFruits.forEach((fruit) {
+    Basket basket = context.watch<Basket>();
+    Map<String, Fruit> fruits = basket.fruits;
+    basket.selectedFruits.forEach((fruitId) {
       fruitTiles.add(
         removableFruitTile(
-          fruitName: fruit.name,
-          fruitImage: fruit.url,
+          fruitName: fruits[fruitId].name,
+          fruitImage: fruits[fruitId].imageURL,
           onPress: () {
             setState(() {
-              basket.removeFruit(fruit);
+              basket.removeFruit(fruitId);
             });
           },
         ),
       );
     });
+    Size screen = MediaQuery.of(context).size;
+    int axisCount = 2;
+    if (screen.width >= 600) {
+      axisCount = 4;
+    }
     return Expanded(
       child: GridView.count(
         primary: false,
         crossAxisSpacing: 15,
         mainAxisSpacing: 15,
-        crossAxisCount: 2,
+        crossAxisCount: axisCount,
         children: fruitTiles,
       ),
     );
