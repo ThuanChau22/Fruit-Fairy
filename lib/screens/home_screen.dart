@@ -31,7 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String _initialName = '';
   String _name = '';
 
-  StreamSubscription<DocumentSnapshot> subscription;
+  StreamSubscription<DocumentSnapshot> _subscription;
 
   void _getAccountInfo() {
     setState(() => _showSpinner = true);
@@ -51,7 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
     context.read<FireStoreService>().clear();
     context.read<Account>().clear();
     context.read<Basket>().clear();
-    subscription.cancel();
+    _subscription.cancel();
     Navigator.of(context).pushNamedAndRemoveUntil(
       SignOptionScreen.id,
       (route) => false,
@@ -63,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    subscription = context.read<FireStoreService>().userStream((data) {
+    _subscription = context.read<FireStoreService>().userStream((data) {
       context.read<Account>().fromDB(data.data());
     });
   }

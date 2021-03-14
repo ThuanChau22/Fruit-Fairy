@@ -87,11 +87,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   DeleteMode _deleteMode = DeleteMode.Input;
   bool _obscureDeletePassword = true;
 
-  StreamSubscription<DocumentSnapshot> subscription;
+  StreamSubscription<DocumentSnapshot> _subscription;
 
   Future<String> Function(String smsCode) _verifyCode;
 
-  StateSetter setDialogState;
+  StateSetter _setDialogState;
 
   void _fillInputFields() {
     Account account = context.read<Account>();
@@ -387,14 +387,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     String password = _deleteConfirm.text;
     _deleteError = Validate.checkPassword(password);
     if (_deleteError.isEmpty) {
-      setDialogState(() => _deleteMode = DeleteMode.Loading);
+      _setDialogState(() => _deleteMode = DeleteMode.Loading);
       try {
         await context.read<FireAuthService>().deleteAccount(
               email: _email.text.trim(),
               password: password,
             );
         context.read<Account>().clear();
-        setDialogState(() => _deleteMode = DeleteMode.Success);
+        _setDialogState(() => _deleteMode = DeleteMode.Success);
         await Future.delayed(Duration(milliseconds: 1500));
         Navigator.of(context).pop();
         Navigator.of(context).pushNamedAndRemoveUntil(
@@ -404,17 +404,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Navigator.of(context).pushNamed(SignInScreen.id);
       } catch (errorMessage) {
         _deleteError = errorMessage;
-        setDialogState(() => _deleteMode = DeleteMode.Input);
+        _setDialogState(() => _deleteMode = DeleteMode.Input);
       }
     }
-    setDialogState(() {});
+    _setDialogState(() {});
   }
 
   @override
   void initState() {
     super.initState();
     _fillInputFields();
-    subscription = context.read<FireStoreService>().userStream((userData) {
+    _subscription = context.read<FireStoreService>().userStream((userData) {
       _fillInputFields();
     });
   }
@@ -435,82 +435,77 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _state.dispose();
     _zipCode.dispose();
     _deleteConfirm.dispose();
+    _subscription.cancel();
   }
 
   @override
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
     return GestureWrapper(
-      child: WillPopScope(
-        onWillPop: () async {
-          subscription.cancel();
-          return true;
-        },
-        child: Scaffold(
-          appBar: AppBar(title: Text('Profile')),
-          body: SafeArea(
-            child: ModalProgressHUD(
-              inAsyncCall: _showSpinner,
-              progressIndicator: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation(kAppBarColor),
-              ),
-              child: ScrollableLayout(
-                controller: _scroller.controller,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    vertical: screen.height * 0.03,
-                    horizontal: screen.width * 0.15,
-                  ),
-                  child: Column(
-                    children: [
-                      inputGroupLabel(
-                        'Account',
-                        tag: Field.Name,
-                      ),
-                      emailInputField(),
-                      inputFieldSizedBox(),
-                      firstNameInputField(),
-                      inputFieldSizedBox(),
-                      lastNameInputField(),
-                      inputFieldSizedBox(),
-                      inputGroupSizedBox(),
-                      inputGroupLabel(
-                        'Phone Number',
-                        tag: Field.Phone,
-                      ),
-                      phoneNumberField(),
-                      verifyCodeField(),
-                      inputFieldSizedBox(),
-                      inputGroupSizedBox(),
-                      inputGroupLabel(
-                        'Address',
-                        tag: Field.Address,
-                      ),
-                      streetInputField(),
-                      inputFieldSizedBox(),
-                      cityInputField(),
-                      inputFieldSizedBox(),
-                      stateInputField(),
-                      inputFieldSizedBox(),
-                      zipInputField(),
-                      inputFieldSizedBox(),
-                      inputGroupSizedBox(),
-                      inputGroupLabel(
-                        'Change Password',
-                        tag: Field.Password,
-                      ),
-                      currentPasswordInputField(),
-                      inputFieldSizedBox(),
-                      newPasswordInputField(),
-                      inputFieldSizedBox(),
-                      confirmPasswordInputField(),
-                      inputFieldSizedBox(),
-                      inputGroupSizedBox(),
-                      saveButton(),
-                      SizedBox(height: screen.height * 0.05),
-                      deleteAccountLink(),
-                    ],
-                  ),
+      child: Scaffold(
+        appBar: AppBar(title: Text('Profile')),
+        body: SafeArea(
+          child: ModalProgressHUD(
+            inAsyncCall: _showSpinner,
+            progressIndicator: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation(kAppBarColor),
+            ),
+            child: ScrollableLayout(
+              controller: _scroller.controller,
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  vertical: screen.height * 0.03,
+                  horizontal: screen.width * 0.15,
+                ),
+                child: Column(
+                  children: [
+                    inputGroupLabel(
+                      'Account',
+                      tag: Field.Name,
+                    ),
+                    emailInputField(),
+                    inputFieldSizedBox(),
+                    firstNameInputField(),
+                    inputFieldSizedBox(),
+                    lastNameInputField(),
+                    inputFieldSizedBox(),
+                    inputGroupSizedBox(),
+                    inputGroupLabel(
+                      'Phone Number',
+                      tag: Field.Phone,
+                    ),
+                    phoneNumberField(),
+                    verifyCodeField(),
+                    inputFieldSizedBox(),
+                    inputGroupSizedBox(),
+                    inputGroupLabel(
+                      'Address',
+                      tag: Field.Address,
+                    ),
+                    streetInputField(),
+                    inputFieldSizedBox(),
+                    cityInputField(),
+                    inputFieldSizedBox(),
+                    stateInputField(),
+                    inputFieldSizedBox(),
+                    zipInputField(),
+                    inputFieldSizedBox(),
+                    inputGroupSizedBox(),
+                    inputGroupLabel(
+                      'Change Password',
+                      tag: Field.Password,
+                    ),
+                    currentPasswordInputField(),
+                    inputFieldSizedBox(),
+                    newPasswordInputField(),
+                    inputFieldSizedBox(),
+                    confirmPasswordInputField(),
+                    inputFieldSizedBox(),
+                    inputGroupSizedBox(),
+                    saveButton(),
+                    SizedBox(height: screen.height * 0.05),
+                    deleteAccountLink(),
+                  ],
                 ),
               ),
             ),
@@ -975,7 +970,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       },
       content: StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
-          setDialogState = setState;
+          _setDialogState = setState;
           return Padding(
             padding: EdgeInsets.only(top: 10.0),
             child: deleteLayout(),
@@ -1032,7 +1027,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   errorMessage: _deleteError,
                   obscureText: _obscureDeletePassword,
                   onChanged: (value) {
-                    setDialogState(() {
+                    _setDialogState(() {
                       _deleteError =
                           Validate.checkPassword(_deleteConfirm.text);
                     });
@@ -1044,7 +1039,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: ObscureIcon(
                     obscure: _obscureDeletePassword,
                     onTap: () {
-                      setDialogState(() {
+                      _setDialogState(() {
                         _obscureDeletePassword = !_obscureDeletePassword;
                       });
                     },
