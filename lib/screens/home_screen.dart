@@ -22,6 +22,7 @@ enum Profile { Edit, SignOut }
 
 class HomeScreen extends StatefulWidget {
   static const String id = 'home_screen';
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -102,19 +103,57 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   Container(
-                    height: MediaQuery.of(context).size.height * 0.5,
-                    width: MediaQuery.of(context).size.width * 0.8,
-                    color: Colors.white,
-                    child: ListView(
+                    height: screen.height * 0.5,
+                    width: screen.width * 0.8,
+                    color: kPrimaryColor,
+                    child: Column(
                       children: [
-                        ListTile(
-                          title: Text('1'),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Today',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20.0,
+                            ),
+                          ),
                         ),
-                        ListTile(
-                          title: Text('2'),
-                        ),
-                        ListTile(
-                          title: Text('3'),
+                        Expanded(
+                          child: SizedBox(
+                            height: 100.0,
+                            child: ListView(
+                              children: [
+                                SizedBox(height: screen.height * 0.02),
+                                Container(
+                                  height: screen.height * 0.075,
+                                  width: screen.width * 0.075,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(15.0),
+                                  ),
+                                ),
+                                SizedBox(height: screen.height * 0.02),
+                                Container(
+                                  height: screen.height * 0.075,
+                                  width: screen.width * 0.075,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(15.0),
+                                  ),
+                                ),
+                                SizedBox(height: screen.height * 0.02),
+                                Container(
+                                  height: screen.height * 0.075,
+                                  width: screen.width * 0.075,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(15.0),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ],
                     ),
