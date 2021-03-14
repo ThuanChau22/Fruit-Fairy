@@ -140,12 +140,17 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
         ),
       );
     });
+    Size screen = MediaQuery.of(context).size;
+    int axisCount = 2;
+    if (screen.width >= 600) {
+      axisCount = 4;
+    }
     return Expanded(
       child: GridView.count(
         primary: false,
         crossAxisSpacing: 15,
         mainAxisSpacing: 15,
-        crossAxisCount: 2,
+        crossAxisCount: axisCount,
         children: fruitTiles,
       ),
     );

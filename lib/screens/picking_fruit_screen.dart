@@ -153,12 +153,19 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
         ));
       }
     });
+    Size screen = MediaQuery.of(context).size;
+    int axisCount = 2;
+    if (screen.width >= 600) {
+      axisCount = 5;
+    } else if (screen.width >= 320) {
+      axisCount = 3;
+    }
     return Expanded(
       child: GridView.count(
         primary: false,
         crossAxisSpacing: 20,
         mainAxisSpacing: 20,
-        crossAxisCount: 3,
+        crossAxisCount: axisCount,
         children: fruitTiles,
       ),
     );
