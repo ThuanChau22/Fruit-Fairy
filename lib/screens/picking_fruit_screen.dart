@@ -48,11 +48,11 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
   @override
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: AppBar(title: Text('Donation')),
-      body: GestureWrapper(
-        child: SafeArea(
+    return GestureWrapper(
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        appBar: AppBar(title: Text('Donation')),
+        body: SafeArea(
           child: ModalProgressHUD(
             inAsyncCall: _showSpinner,
             progressIndicator: CircularProgressIndicator(

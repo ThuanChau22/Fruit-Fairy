@@ -440,15 +440,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
-    return WillPopScope(
-      onWillPop: () async {
-        subscription.cancel();
-        return true;
-      },
-      child: Scaffold(
-        appBar: AppBar(title: Text('Profile')),
-        body: GestureWrapper(
-          child: SafeArea(
+    return GestureWrapper(
+      child: WillPopScope(
+        onWillPop: () async {
+          subscription.cancel();
+          return true;
+        },
+        child: Scaffold(
+          appBar: AppBar(title: Text('Profile')),
+          body: SafeArea(
             child: ModalProgressHUD(
               inAsyncCall: _showSpinner,
               progressIndicator: CircularProgressIndicator(

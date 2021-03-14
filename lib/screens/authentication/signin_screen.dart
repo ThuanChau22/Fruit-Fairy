@@ -227,10 +227,10 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
-    return Scaffold(
-      appBar: AppBar(title: Text(_appBarLabel)),
-      body: GestureWrapper(
-        child: SafeArea(
+    return GestureWrapper(
+      child: Scaffold(
+        appBar: AppBar(title: Text(_appBarLabel)),
+        body: SafeArea(
           child: ModalProgressHUD(
             inAsyncCall: _showSpinner,
             progressIndicator: CircularProgressIndicator(
