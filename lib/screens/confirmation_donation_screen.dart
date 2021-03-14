@@ -56,10 +56,26 @@ class _ConfirmationDonationScreenState
             onChanged: null,
             controller: null,
           ),
-          InputField(label: 'City', onChanged: null, controller: null,),
-          InputField(label: 'Zip Code', onChanged: null, controller: null,),
-          InputField(label: 'State', onChanged: null,controller: null, ),
-          InputField(label: 'Phone number', onChanged: null,controller: null,),
+          InputField(
+            label: 'City',
+            onChanged: null,
+            controller: null,
+          ),
+          InputField(
+            label: 'Zip Code',
+            onChanged: null,
+            controller: null,
+          ),
+          InputField(
+            label: 'State',
+            onChanged: null,
+            controller: null,
+          ),
+          InputField(
+            label: 'Phone number',
+            onChanged: null,
+            controller: null,
+          ),
           SizedBox(height: screen.height * 0.02),
           RoundedButton(
             label: 'Confirm',

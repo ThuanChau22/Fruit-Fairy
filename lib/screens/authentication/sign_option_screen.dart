@@ -61,8 +61,6 @@ class _SignOptionScreenState extends State<SignOptionScreen> {
       padding: EdgeInsets.symmetric(vertical: screen.height * 0.02),
       child: RoundedButton(
         label: 'Sign In',
-        labelColor: kPrimaryColor,
-        backgroundColor: kObjectBackgroundColor,
         onPressed: () {
           Navigator.of(context).pushNamed(SignInScreen.id);
         },
@@ -76,8 +74,6 @@ class _SignOptionScreenState extends State<SignOptionScreen> {
       padding: EdgeInsets.symmetric(vertical: screen.height * 0.02),
       child: RoundedButton(
         label: 'Sign Up',
-        labelColor: kPrimaryColor,
-        backgroundColor: kObjectBackgroundColor,
         onPressed: () {
           Navigator.of(context).pushNamed(SignUpRoleScreen.id);
         },

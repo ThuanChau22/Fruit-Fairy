@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/basket.dart';
-import 'package:fruitfairy/screens/donation_cart_screen.dart';
-import 'package:fruitfairy/widgets/rounded_button.dart';
+import 'package:fruitfairy/screens/donation_basket_screen.dart';
+import 'package:fruitfairy/services/firestore_service.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
-import 'package:provider/provider.dart';
+import 'package:fruitfairy/widgets/gesture_wrapper.dart';
+import 'package:fruitfairy/widgets/input_field.dart';
+import 'package:fruitfairy/widgets/rounded_button.dart';
 
 class PickingFruitScreen extends StatefulWidget {
   static const String id = 'picking_fruit_screen';
@@ -15,110 +20,197 @@ class PickingFruitScreen extends StatefulWidget {
 }
 
 class _PickingFruitScreenState extends State<PickingFruitScreen> {
+  final Color _selectedColor = Colors.grey.shade700.withOpacity(0.5);
+  final TextEditingController _search = TextEditingController();
+  bool _showSpinner = false;
+
+  void initBasket() async {
+    setState(() => _showSpinner = true);
+    Basket basket = context.read<Basket>();
+    if (basket.fruits.isEmpty) {
+      basket.fromDB(await context.read<FireStoreService>().fruits());
+    }
+    setState(() => _showSpinner = false);
+  }
+
   @override
   void initState() {
     super.initState();
+    initBasket();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _search.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
-    Basket basket = context.watch<Basket>();
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(title: Text('Donation')),
-      body: SafeArea(
-        child: Center(
-          child: Column(
-            children: [
-              SizedBox(height: screen.height * 0.02),
-              Text(
-                'Choose fruit to donate:',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 30.0),
+      body: GestureWrapper(
+        child: SafeArea(
+          child: ModalProgressHUD(
+            inAsyncCall: _showSpinner,
+            progressIndicator: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation(kAppBarColor),
+            ),
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: screen.height * 0.03,
+                horizontal: screen.width * 0.05,
               ),
-              SizedBox(height: screen.height * 0.02),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: screen.height * 0.05),
-                child: TextField(
-                    onChanged: (value) {},
-                    style: TextStyle(
-                      color: Colors.black,
-                    ),
-                    decoration: kTextFieldInputDecoration),
+              child: Column(
+                children: [
+                  instructionLabel(),
+                  searchInputField(),
+                  fruitOptions(),
+                  divider(),
+                  basketButton(),
+                ],
               ),
-              SizedBox(height: screen.height * 0.02),
-              Expanded(
-                //Already scrollable
-                child: GridView.count(
-                  primary: false,
-                  padding: EdgeInsets.all(10),
-                  crossAxisSpacing: 20,
-                  mainAxisSpacing: 20,
-                  crossAxisCount: 3,
-                  children: fruitList(basket),
-                ),
-              ),
-              SizedBox(height: screen.height * 0.02),
-              kDivider(),
-              SizedBox(height: screen.height * 0.02),
-              Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: MediaQuery.of(context).size.width * 0.15,
-                ),
-                child: RoundedButton(
-                    label: 'Go To Cart',
-                    labelColor: kPrimaryColor,
-                    backgroundColor: kObjectBackgroundColor,
-                    onPressed: () {
-                      Navigator.pushNamed(context, DonationCartScreen.id);
-                    }),
-              ),
-              SizedBox(height: screen.height * 0.02),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  List<Widget> fruitList(Basket basket) {
-    List<Widget> list = [];
-    for (int i = 0; i < basket.fruitImages.length; i++) {
-      list.add(
-        Container(
-          decoration: BoxDecoration(
-            color: kObjectBackgroundColor,
-              borderRadius: BorderRadius.all(Radius.circular(20),
-              ),
-          ),
-          child: FruitTile(
-            fruitImage: AssetImage(basket.fruitImages[i]),
-            fruitName: Text(
-              basket.fruitNames[i],
-              style: TextStyle(
-                color: kPrimaryColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 20.0,
+  Widget divider() {
+    Size screen = MediaQuery.of(context).size;
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: screen.height * 0.03,
+      ),
+      child: Divider(
+        color: kLabelColor,
+        height: 5.0,
+        thickness: 3.0,
+      ),
+    );
+  }
+
+  Widget instructionLabel() {
+    return Text(
+      'Choose fruit to donate:',
+      style: TextStyle(
+        color: Colors.white,
+        fontWeight: FontWeight.bold,
+        fontSize: 30.0,
+      ),
+    );
+  }
+
+  Widget searchInputField() {
+    Size screen = MediaQuery.of(context).size;
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        vertical: screen.height * 0.02,
+        horizontal: screen.width * 0.05,
+      ),
+      child: InputField(
+        label: 'Enter Fruit Name',
+        controller: _search,
+        helperText: null,
+        prefixIcon: Icon(
+          Icons.search,
+          color: kLabelColor,
+          size: 30.0,
+        ),
+        onChanged: (value) {
+          // Rebuild with search term
+          setState(() {});
+        },
+      ),
+    );
+  }
+
+  Widget fruitOptions() {
+    List<Widget> fruitTiles = [];
+    Basket basket = context.watch<Basket>();
+    basket.fruits.forEach((id, fruit) {
+      if (RegExp(
+        '^${_search.text.trim()}',
+        caseSensitive: false,
+      ).hasMatch(fruit.id)) {
+        bool selected = basket.selectedFruits.contains(fruit);
+        fruitTiles.add(selectableFruitTile(
+          fruitName: fruit.name,
+          fruitImage: fruit.url,
+          selected: selected,
+          onTap: () {
+            setState(() {
+              if (selected) {
+                basket.removeFruit(fruit);
+              } else {
+                basket.pickFruit(fruit);
+              }
+            });
+          },
+        ));
+      }
+    });
+    return Expanded(
+      child: GridView.count(
+        primary: false,
+        crossAxisSpacing: 20,
+        mainAxisSpacing: 20,
+        crossAxisCount: 3,
+        children: fruitTiles,
+      ),
+    );
+  }
+
+  Widget selectableFruitTile({
+    @required String fruitName,
+    @required String fruitImage,
+    @required bool selected,
+    @required GestureTapCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        FocusScope.of(context).unfocus();
+        onTap();
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: kObjectBackgroundColor,
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        child: Stack(
+          children: [
+            FruitTile(
+              fruitName: fruitName,
+              fruitImage: fruitImage,
+            ),
+            Container(
+              decoration: BoxDecoration(
+                color: selected ? _selectedColor : Colors.transparent,
+                borderRadius: BorderRadius.circular(20.0),
               ),
             ),
-            index: i,
-            selected: basket.selectedFruits.contains(i),
-            onTap: (index) {
-              setState(() {
-                //add the selected fruit into the list
-                if (basket.selectedFruits.contains(i)) {
-                  basket.remove(i);
-                } else {
-                  basket.pickFruit(i);
-                }
-              });
-            },
-          ),
+          ],
         ),
-      );
-    }
-    return list;
+      ),
+    );
+  }
+
+  Widget basketButton() {
+    Size screen = MediaQuery.of(context).size;
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: screen.width * 0.2,
+      ),
+      child: RoundedButton(
+        label: 'My Basket',
+        onPressed: () {
+          Navigator.of(context).pushNamed(DonationBasketScreen.id);
+        },
+      ),
+    );
   }
 }
