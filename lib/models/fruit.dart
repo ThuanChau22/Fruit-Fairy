@@ -1,6 +1,6 @@
 class Fruit {
   static const Max = 100;
-  static const Min = 50;
+  static const Min = 25;
   final String id;
   final String name;
   final String imagePath;

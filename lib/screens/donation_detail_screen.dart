@@ -1,7 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../constant.dart';
-
+import 'home_screen.dart';
 
 //TODO This screen needs to get the corresponding data from the database of a chosen donation. It needs the donation number,data,status,charity name, and the picture of fruit and percentage donated
 
@@ -32,18 +33,16 @@ class DonationDetailScreen extends StatelessWidget {
               height: screen.height * 0.02,
             ),
             divider(screen),
-            SizedBox(
-              height: screen.height * 0.02,
-            ),
+            // SizedBox(
+            //   height: screen.height * 0.01,
+            // ),
             Container(
-                //TODO get the data of donation number, date and status
-                height: 200.0,
-                width: 300.0,
-                color: Colors.white,
-                ),
-            SizedBox(
-              height: screen.height * 0.02,
+              child: HistoryTile(),
             ),
+            SizedBox(
+              height: screen.height * 0.04,
+            ),
+
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 50.0),
               child: Align(
@@ -79,13 +78,13 @@ class DonationDetailScreen extends StatelessWidget {
             SizedBox(
               height: screen.height * 0.04,
             ),
-
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 50.0),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'Status:',
+                  //TODO: get status from database
+                  'Status: From Database',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 25.0,
@@ -111,8 +110,59 @@ class DonationDetailScreen extends StatelessWidget {
                 ),
               ),
             ),
-
-
+            SizedBox(
+              height: screen.height * 0.04,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                //TODO: refactor to a separate class ?
+                Container(
+                  decoration: BoxDecoration(
+                    color: kObjectBackgroundColor,
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  height: 125.0,
+                  width: 125.0,
+                  child: Column(
+                    children: [
+                      Text(
+                        'Fruit Name', //TODO: get fruit name from database
+                        style: TextStyle(
+                          color: kPrimaryColor,
+                          fontSize: 15.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: screen.height * 0.1,),
+                      Text('Number %', //TODO: get percentage from database
+                        style: TextStyle(
+                          color: kPrimaryColor,
+                          fontSize: 15.0,
+                          fontWeight: FontWeight.bold,
+                        ),)
+                      //TODO: get correct fruit pictures from database and add them to container and also get the percentage from the database
+                    ],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    color: kObjectBackgroundColor,
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  height: 125.0,
+                  width: 125.0,
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    color: kObjectBackgroundColor,
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  height: 125.0,
+                  width: 125.0,
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -120,17 +170,12 @@ class DonationDetailScreen extends StatelessWidget {
   }
 
   Widget divider(Size screen) {
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: screen.height * 0.03,
-      ),
-      child: Divider(
-        color: kLabelColor,
-        height: 5.0,
-        thickness: 4.0,
-        indent: 35.0,
-        endIndent: 35.0,
-      ),
+    return Divider(
+      color: kLabelColor,
+      height: 1.0,
+      thickness: 4.0,
+      indent: 35.0,
+      endIndent: 35.0,
     );
   }
 }

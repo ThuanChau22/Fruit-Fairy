@@ -110,16 +110,57 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: Colors.white,
                     ),
                   ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 36.0),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Today',
+                        style: TextStyle(
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
                   Container(
                     child: Column(
                       children: [
-                        HistoryTile(today: 'Today'),
-                        HistoryTile(today: 'Today'),
-                        HistoryTile(today: 'Yesterday'),
+                        GestureDetector(
+                            onTap: () {
+                              Navigator.of(context)
+                                  .pushNamed(DonationDetailScreen.id);
+                            },
+                            child: HistoryTile()),
+                        HistoryTile(),
+                        HistoryTile(),
                       ],
                     ),
-                  )
-
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 36.0),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Yesterday',
+                        style: TextStyle(
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    child: Column(
+                      children: [
+                        HistoryTile(),
+                        HistoryTile(),
+                        HistoryTile(),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -227,10 +268,6 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class HistoryTile extends StatefulWidget {
-  HistoryTile({@required this.today});
-
-  String today;
-
   @override
   _HistoryTileState createState() => _HistoryTileState();
 }
@@ -239,36 +276,22 @@ class _HistoryTileState extends State<HistoryTile> {
   @override
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
-    return Container(
-      height: screen.height * 0.3,
-      width: screen.width * 0.8,
-      color: kPrimaryColor,
-      child: Column(
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              //TODO get value from DB
-              widget.today,
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 20.0,
-              ),
-            ),
-          ),
-          //TODO future for loop to see how many donations were done on either today or yesterday or 2 days ago
-          Expanded(
-            child: SizedBox(
-              child: ListView(
-                physics:  NeverScrollableScrollPhysics(),
-                children: [
-                  SizedBox(height: screen.height * 0.02),
-                  GestureDetector(
-                    onTap: (){
-                      Navigator.of(context).pushNamed(DonationDetailScreen.id);
-                    },
-                    child: Container(
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 5.0),
+      child: Container(
+        height: screen.height * 0.15,
+        width: screen.width * 0.8,
+        color: kPrimaryColor,
+        child: Column(
+          children: [
+            //TODO future for loop to see how many donations were done on either today or yesterday or 2 days ago
+            Expanded(
+              child: SizedBox(
+                child: ListView(
+                  physics: NeverScrollableScrollPhysics(),
+                  children: [
+                    SizedBox(height: screen.height * 0.02),
+                    Container(
                       height: screen.height * 0.13,
                       width: screen.width * 0.15,
                       decoration: BoxDecoration(
@@ -320,13 +343,13 @@ class _HistoryTileState extends State<HistoryTile> {
                         ],
                       ),
                     ),
-                  ),
-                  SizedBox(height: screen.height * 0.02),
-                ],
+                    SizedBox(height: screen.height * 0.02),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

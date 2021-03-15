@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fruitfairy/constant.dart';
+import 'package:fruitfairy/screens/charity_selection_screen.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 
@@ -16,7 +17,8 @@ class _ConfirmationDonationScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Confirmation')),
+      resizeToAvoidBottomInset: false,
+      appBar: AppBar(title: Text('Address Confirmation')),
       body: SafeArea(
         child: Container(child: fillInFields()),
       ),
@@ -30,16 +32,6 @@ class _ConfirmationDonationScreenState
       child: Column(
         //mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(height: screen.height * 0.02),
-          Text(
-            'Donation Information:',
-            textAlign: TextAlign.left,
-            style: TextStyle(
-              fontSize: 20.0,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
           SizedBox(height: screen.height * 0.02),
           Text(
             'Address:',
@@ -76,10 +68,12 @@ class _ConfirmationDonationScreenState
             onChanged: null,
             controller: null,
           ),
-          SizedBox(height: screen.height * 0.02),
+          SizedBox(height: screen.height * 0.1),
           RoundedButton(
-            label: 'Confirm',
-            onPressed: () {},
+            label: 'Next',
+            onPressed: () {
+              Navigator.of(context).pushNamed(CharitySelectionScreen.id);
+            },
             labelColor: kPrimaryColor,
           ),
         ],
