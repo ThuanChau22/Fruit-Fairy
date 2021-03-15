@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/widgets/message_bar.dart';
 

@@ -5,7 +5,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:strings/strings.dart';
-
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
 import 'package:fruitfairy/models/basket.dart';
@@ -18,10 +17,13 @@ import 'package:fruitfairy/services/firestore_service.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
 
+import 'donation_detail_screen.dart';
+
 enum Profile { Edit, SignOut }
 
 class HomeScreen extends StatefulWidget {
   static const String id = 'home_screen';
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -109,23 +111,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   Container(
-                    height: MediaQuery.of(context).size.height * 0.5,
-                    width: MediaQuery.of(context).size.width * 0.8,
-                    color: Colors.white,
-                    child: ListView(
+                    child: Column(
                       children: [
-                        ListTile(
-                          title: Text('1'),
-                        ),
-                        ListTile(
-                          title: Text('2'),
-                        ),
-                        ListTile(
-                          title: Text('3'),
-                        ),
+                        HistoryTile(today: 'Today'),
+                        HistoryTile(today: 'Today'),
+                        HistoryTile(today: 'Yesterday'),
                       ],
                     ),
-                  ),
+                  )
+
                 ],
               ),
             ),
@@ -227,6 +221,112 @@ class _HomeScreenState extends State<HomeScreen> {
         onPressed: () {
           Navigator.of(context).pushNamed(PickingFruitScreen.id);
         },
+      ),
+    );
+  }
+}
+
+class HistoryTile extends StatefulWidget {
+  HistoryTile({@required this.today});
+
+  String today;
+
+  @override
+  _HistoryTileState createState() => _HistoryTileState();
+}
+
+class _HistoryTileState extends State<HistoryTile> {
+  @override
+  Widget build(BuildContext context) {
+    Size screen = MediaQuery.of(context).size;
+    return Container(
+      height: screen.height * 0.3,
+      width: screen.width * 0.8,
+      color: kPrimaryColor,
+      child: Column(
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              //TODO get value from DB
+              widget.today,
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 20.0,
+              ),
+            ),
+          ),
+          //TODO future for loop to see how many donations were done on either today or yesterday or 2 days ago
+          Expanded(
+            child: SizedBox(
+              child: ListView(
+                physics:  NeverScrollableScrollPhysics(),
+                children: [
+                  SizedBox(height: screen.height * 0.02),
+                  GestureDetector(
+                    onTap: (){
+                      Navigator.of(context).pushNamed(DonationDetailScreen.id);
+                    },
+                    child: Container(
+                      height: screen.height * 0.13,
+                      width: screen.width * 0.15,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(15.0),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.all(8.0),
+                            //TODO: get real donation number from db
+                            child: Text(
+                              'Donation #23',
+                              style: TextStyle(
+                                color: kPrimaryColor,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 25.0,
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: screen.height * 0.02),
+                          Row(
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 8.0),
+                                //TODO: get donation date from db
+                                child: Text(
+                                  'Date: 02/30/2021',
+                                  style: TextStyle(
+                                    color: kPrimaryColor,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 25.0,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: screen.width * 0.05),
+                              //TODO get status from db
+                              Text(
+                                'Completed',
+                                style: TextStyle(
+                                  color: Colors.green,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20.0,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: screen.height * 0.02),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

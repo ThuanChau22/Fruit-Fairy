@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-
-import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/screens/authentication/signin_screen.dart';
 import 'package:fruitfairy/screens/authentication/signup_role_screen.dart';
 import 'package:fruitfairy/widgets/fruit_fairy_logo.dart';
