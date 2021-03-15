@@ -4,11 +4,10 @@ import 'package:provider/provider.dart';
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/basket.dart';
 import 'package:fruitfairy/models/fruit.dart';
+import 'package:fruitfairy/screens/confirmation_donation_screen.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/rounded_icon_button.dart';
-
-import 'package:fruitfairy/widgets/temp_fruit_with_quantity.dart';
 
 class DonationBasketScreen extends StatefulWidget {
   static const String id = 'donation_basket_screen';
@@ -39,9 +38,21 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
               sectionLabel('Do you need help collecting?'),
               collectOptionTile(),
               divider(),
-              SizedBox(height: screen.height * 0.02),
-              sectionLabel('Adjust percentage of produce you want to donate:'),
-              SizedBox(height: screen.height * 0.02),
+              Visibility(
+                visible: _collectOption == CollectOption.Yes,
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        vertical: screen.height * 0.01,
+                      ),
+                      child: sectionLabel(
+                        'Adjust percentage of produce you want to donate:',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               selectedFruits(),
               divider(),
               SizedBox(height: screen.height * 0.03),
@@ -314,7 +325,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
       child: RoundedButton(
         label: 'Next',
         onPressed: () {
-          Navigator.of(context).pushNamed(FruitQuantity.id);
+          Navigator.of(context).pushNamed(ConfirmationDonationScreen.id);
         },
       ),
     );
