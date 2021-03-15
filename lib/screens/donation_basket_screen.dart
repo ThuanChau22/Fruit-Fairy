@@ -249,12 +249,15 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  '\t\t\t${fruit.amount}%',
-                  style: TextStyle(
-                    color: kPrimaryColor,
-                    fontSize: 30.0,
-                    fontWeight: FontWeight.bold,
+                Padding(
+                  padding: EdgeInsets.only(left: 20.0),
+                  child: Text(
+                    '${fruit.amount}%',
+                    style: TextStyle(
+                      color: kPrimaryColor,
+                      fontSize: 30.0,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 Row(
