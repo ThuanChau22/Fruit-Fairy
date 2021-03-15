@@ -21,6 +21,7 @@ class Basket extends ChangeNotifier {
   }
 
   void removeFruit(String fruitId) {
+    _fruits[fruitId].clear();
     _selectedFruits.remove(fruitId);
     notifyListeners();
   }

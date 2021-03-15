@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/basket.dart';
 import 'package:fruitfairy/models/fruit.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
-import 'package:provider/provider.dart';
+import 'package:fruitfairy/widgets/rounded_icon_button.dart';
 
 import 'package:fruitfairy/widgets/temp_fruit_with_quantity.dart';
 
@@ -20,7 +21,7 @@ enum CollectOption { Yes, No }
 
 class _DonationBasketScreenState extends State<DonationBasketScreen> {
   final Color _selectedColor = Colors.green.shade100;
-  CollectOption _selectedOption = CollectOption.No;
+  CollectOption _collectOption = CollectOption.Yes;
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +42,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
               SizedBox(height: screen.height * 0.02),
               sectionLabel('Adjust percentage of produce you want to donate:'),
               SizedBox(height: screen.height * 0.02),
-              selectedFruit(),
+              selectedFruits(),
               divider(),
               SizedBox(height: screen.height * 0.03),
               nextButton(),
@@ -72,7 +73,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
         style: TextStyle(
           fontSize: 20.0,
           fontWeight: FontWeight.bold,
-          color: Colors.white,
+          color: kLabelColor,
         ),
       ),
     );
@@ -111,12 +112,12 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
         ),
         child: RoundedButton(
           label: label,
-          backgroundColor: _selectedOption == option
+          backgroundColor: _collectOption == option
               ? _selectedColor
               : kObjectBackgroundColor,
           onPressed: () {
             setState(() {
-              _selectedOption = option;
+              _collectOption = option;
             });
           },
         ),
@@ -124,23 +125,33 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
     );
   }
 
-  Widget selectedFruit() {
-    if (_selectedOption == CollectOption.Yes) {
-      return collectNeedHelp();
+  Widget selectedFruits() {
+    Size screen = MediaQuery.of(context).size;
+    int axisCount = 2;
+    if (screen.width >= 600) {
+      axisCount = 4;
     }
-    return collectWithoutHelp();
+    bool squeeze = screen.height < screen.width;
+    bool needCollect = _collectOption == CollectOption.Yes;
+    return Expanded(
+      child: GridView.count(
+        primary: false,
+        childAspectRatio: needCollect ? (squeeze ? 5 : 2.5) : 1.0,
+        crossAxisCount: needCollect ? 1 : axisCount,
+        children: fruitTiles(),
+      ),
+    );
   }
 
-  Widget collectWithoutHelp() {
-    List<Widget> fruitTiles = [];
-    Basket basket = context.read<Basket>();
+  List<Widget> fruitTiles() {
+    List<Widget> list = [];
+    Basket basket = context.watch<Basket>();
     Map<String, Fruit> fruits = basket.fruits;
     basket.selectedFruits.forEach((fruitId) {
-      fruitTiles.add(
+      list.add(
         removableFruitTile(
-          fruitName: fruits[fruitId].name,
-          fruitImage: fruits[fruitId].imageURL,
-          onPress: () {
+          fruit: fruits[fruitId],
+          onPressed: () {
             setState(() {
               basket.removeFruit(fruitId);
             });
@@ -148,190 +159,146 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
         ),
       );
     });
-    Size screen = MediaQuery.of(context).size;
-    int axisCount = 2;
-    if (screen.width >= 600) {
-      axisCount = 4;
-    }
-    return Expanded(
-      child: GridView.count(
-        primary: false,
-        crossAxisSpacing: 15,
-        mainAxisSpacing: 15,
-        crossAxisCount: axisCount,
-        children: fruitTiles,
-      ),
-    );
+    return list;
   }
-
-  //Todo: the images dont shwo up, need to work on it a little bit?
-  Widget collectNeedHelp() {
-    Size screen = MediaQuery.of(context).size;
-    Basket basket = context.read<Basket>();
-    Map<String, Fruit> fruits = basket.fruits;
-    List<String> selectedFruit = basket.selectedFruits;
-    return Expanded(
-      child: SizedBox(
-        height: screen.height * 0.02,
-        child: ListView.builder(
-          itemBuilder: (context, index) {
-            Fruit fruit = fruits[selectedFruit[index]];
-            return Container(
-              width: 350.0,
-              height: 200.0,
-              //a testing color
-              color: Colors.white70,
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: screen.width * 0.05,
-                  ),
-                  SizedBox(width: screen.width * 0.2),
-                  FruitTile(
-                    fruitName: fruit.name,
-                    fruitImage: fruit.imageURL,
-                  ),
-                  SizedBox(width: screen.width * 0.1),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black, width: 3.0),
-                        ),
-                        child: Text(
-                          'Number' + ' %',
-                          style: TextStyle(
-                            fontSize: 30.0,
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: screen.height * 0.03),
-                      Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () {},
-                            child: Icon(
-                              Icons.add_circle,
-                              size: 35.0,
-                            ),
-                          ),
-                          SizedBox(width: screen.width * 0.075),
-                          GestureDetector(
-                            onTap: () {},
-                            child: Icon(
-                              Icons.remove_circle,
-                              size: 35.0,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            );
-          },
-          itemCount: selectedFruit.length,
-        ),
-      ),
-    );
-  }
-
-  // Widget fruitsSelected() {
-  //   List<Widget> fruitTiles = [];
-  //   Basket basket = context.watch<Basket>();
-  //   Map<String, Fruit> fruits = basket.fruits;
-  //   basket.selectedFruits.forEach((fruitId) {
-  //     fruitTiles.add(
-  //       removableFruitTile(
-  //         fruitName: fruits[fruitId].name,
-  //         fruitImage: fruits[fruitId].imageURL,
-  //         onPress: () {
-  //           setState(() {
-  //             basket.removeFruit(fruitId);
-  //           });
-  //         },
-  //       ),
-  //     );
-  //   });
-  //   Size screen = MediaQuery.of(context).size;
-  //   int axisCount = 2;
-  //   if (screen.width >= 600) {
-  //     axisCount = 4;
-  //   }
-  //   return Expanded(
-  //     child: GridView.count(
-  //       primary: false,
-  //       crossAxisSpacing: 15,
-  //       mainAxisSpacing: 15,
-  //       crossAxisCount: axisCount,
-  //       children: fruitTiles,
-  //     ),
-  //   );
-  // }
 
   Widget removableFruitTile({
-    @required String fruitName,
-    @required String fruitImage,
-    @required VoidCallback onPress,
+    @required Fruit fruit,
+    @required VoidCallback onPressed,
   }) {
-    return Stack(
-      children: [
-        Padding(
-          padding: EdgeInsets.all(10.0),
-          child: Container(
-            decoration: BoxDecoration(
-              color: kObjectBackgroundColor,
-              borderRadius: BorderRadius.circular(20.0),
+    Size screen = MediaQuery.of(context).size;
+    bool squeeze = screen.height < screen.width;
+    bool needCollect = _collectOption == CollectOption.Yes;
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: screen.width * (needCollect ? (squeeze ? 0.2 : 0.02) : 0.0),
+      ),
+      child: Stack(
+        children: [
+          Padding(
+            padding: EdgeInsets.only(
+              top: 20.0,
+              left: 20.0,
+              right: 20.0,
+              bottom: needCollect ? 0.0 : 20.0,
             ),
-            child: FruitTile(
-              fruitName: fruitName,
-              fruitImage: fruitImage,
+            child: Container(
+              decoration: BoxDecoration(
+                color: kObjectBackgroundColor,
+                borderRadius: BorderRadius.circular(20.0),
+              ),
+              child: _collectOption == CollectOption.Yes
+                  ? adjustableFruitTile(fruit)
+                  : FruitTile(
+                      fruitName: fruit.name,
+                      fruitImage: fruit.imageURL,
+                    ),
             ),
           ),
-        ),
-        Positioned(
-          top: 0.0,
-          right: 0.0,
-          child: removeButton(
-            onPressed: onPress,
+          Positioned(
+            top: 0.0,
+            right: 0.0,
+            child: removeButton(onPressed),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
-  Widget removeButton({
-    @required VoidCallback onPressed,
-  }) {
-    return Material(
-      color: Colors.transparent,
-      child: Center(
-        child: Ink(
-          decoration: ShapeDecoration(
-            shape: CircleBorder(),
-            color: kAppBarColor,
+  Widget removeButton(VoidCallback onPressed) {
+    return RoundedIconButton(
+      radius: 24.0,
+      icon: Icon(
+        Icons.close,
+        color: kLabelColor,
+        size: 16.0,
+      ),
+      buttonColor: kAppBarColor,
+      onPressed: onPressed,
+    );
+  }
+
+  Widget adjustableFruitTile(Fruit fruit) {
+    Size screen = MediaQuery.of(context).size;
+    return Container(
+      decoration: BoxDecoration(
+        color: kObjectBackgroundColor,
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Expanded(
+            flex: 1,
+            child: SizedBox.shrink(),
           ),
-          child: SizedBox(
-            width: 24.0,
-            height: 24.0,
-            child: IconButton(
-              padding: EdgeInsets.all(0.0),
-              splashRadius: 10.0,
-              icon: Icon(
-                Icons.close,
-                color: kLabelColor,
-                size: 16.0,
+          Expanded(
+            flex: 4,
+            child: Padding(
+              padding: EdgeInsets.only(
+                top: screen.height * 0.02,
               ),
-              onPressed: () {
-                HapticFeedback.mediumImpact();
-                onPressed();
-              },
+              child: FruitTile(
+                fruitName: fruit.name,
+                fruitImage: fruit.imageURL,
+              ),
             ),
           ),
-        ),
+          Expanded(
+            flex: 7,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '\t\t\t${fruit.amount}%',
+                  style: TextStyle(
+                    color: kPrimaryColor,
+                    fontSize: 30.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    adjustButton(
+                      icon: Icons.remove,
+                      onPressed: () {
+                        setState(() {
+                          fruit.decrease(5);
+                        });
+                      },
+                    ),
+                    adjustButton(
+                      icon: Icons.add,
+                      onPressed: () {
+                        setState(() {
+                          fruit.increase(5);
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget adjustButton({
+    @required IconData icon,
+    @required VoidCallback onPressed,
+  }) {
+    return RoundedIconButton(
+      radius: 30.0,
+      icon: Icon(
+        icon,
+        color: kLabelColor,
+        size: 30.0,
+      ),
+      buttonColor: kPrimaryColor,
+      onPressed: onPressed,
     );
   }
 

@@ -1,14 +1,12 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/basket.dart';
+import 'package:fruitfairy/models/fruit.dart';
 import 'package:fruitfairy/screens/donation_basket_screen.dart';
-import 'package:fruitfairy/services/firestore_service.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
 import 'package:fruitfairy/widgets/gesture_wrapper.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
@@ -27,26 +25,14 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
 
   bool _showSpinner = false;
 
-  StreamSubscription<QuerySnapshot> _subscription;
-
-  @override
-  void initState() {
-    super.initState();
-    _subscription = context.read<FireStoreService>().fruitsStream((data) {
-      context.read<Basket>().fromDB(data);
-    });
-  }
-
   @override
   void dispose() {
     super.dispose();
     _search.dispose();
-    _subscription.cancel();
   }
 
   @override
   Widget build(BuildContext context) {
-    _showSpinner = context.read<Basket>().fruits.isEmpty;
     Size screen = MediaQuery.of(context).size;
     return GestureWrapper(
       child: Scaffold(
@@ -69,6 +55,7 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
                   searchInputField(),
                   fruitOptions(),
                   divider(),
+                  SizedBox(height: screen.height * 0.03),
                   basketButton(),
                 ],
               ),
@@ -80,16 +67,10 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
   }
 
   Widget divider() {
-    Size screen = MediaQuery.of(context).size;
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: screen.height * 0.03,
-      ),
-      child: Divider(
-        color: kLabelColor,
-        height: 5.0,
-        thickness: 3.0,
-      ),
+    return Divider(
+      color: kLabelColor,
+      height: 5.0,
+      thickness: 3.0,
     );
   }
 
@@ -129,7 +110,26 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
   }
 
   Widget fruitOptions() {
-    List<Widget> fruitTiles = [];
+    Size screen = MediaQuery.of(context).size;
+    int axisCount = 2;
+    if (screen.width >= 600) {
+      axisCount = 5;
+    } else if (screen.width >= 320) {
+      axisCount = 3;
+    }
+    return Expanded(
+      child: GridView.count(
+        primary: false,
+        mainAxisSpacing: 20,
+        crossAxisSpacing: 20,
+        crossAxisCount: axisCount,
+        children: fruitTiles(),
+      ),
+    );
+  }
+
+  List<Widget> fruitTiles() {
+    List<Widget> fruitList = [];
     Basket basket = context.watch<Basket>();
     basket.fruits.forEach((id, fruit) {
       if (RegExp(
@@ -137,9 +137,8 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
         caseSensitive: false,
       ).hasMatch(fruit.id)) {
         bool selected = basket.selectedFruits.contains(fruit.id);
-        fruitTiles.add(selectableFruitTile(
-          fruitName: fruit.name,
-          fruitImage: fruit.imageURL,
+        fruitList.add(selectableFruitTile(
+          fruit: fruit,
           selected: selected,
           onTap: () {
             setState(() {
@@ -153,27 +152,11 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
         ));
       }
     });
-    Size screen = MediaQuery.of(context).size;
-    int axisCount = 2;
-    if (screen.width >= 600) {
-      axisCount = 5;
-    } else if (screen.width >= 320) {
-      axisCount = 3;
-    }
-    return Expanded(
-      child: GridView.count(
-        primary: false,
-        crossAxisSpacing: 20,
-        mainAxisSpacing: 20,
-        crossAxisCount: axisCount,
-        children: fruitTiles,
-      ),
-    );
+    return fruitList;
   }
 
   Widget selectableFruitTile({
-    @required String fruitName,
-    @required String fruitImage,
+    @required Fruit fruit,
     @required bool selected,
     @required GestureTapCallback onTap,
   }) {
@@ -191,8 +174,8 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
         child: Stack(
           children: [
             FruitTile(
-              fruitName: fruitName,
-              fruitImage: fruitImage,
+              fruitName: fruit.name,
+              fruitImage: fruit.imageURL,
             ),
             Container(
               decoration: BoxDecoration(
