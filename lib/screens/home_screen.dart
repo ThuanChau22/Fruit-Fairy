@@ -5,7 +5,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:strings/strings.dart';
-
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
 import 'package:fruitfairy/models/basket.dart';
@@ -17,6 +16,8 @@ import 'package:fruitfairy/services/fireauth_service.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
+
+import 'donation_detail_screen.dart';
 
 enum Profile { Edit, SignOut }
 
@@ -256,56 +257,61 @@ class _HistoryTileState extends State<HistoryTile> {
                 physics:  NeverScrollableScrollPhysics(),
                 children: [
                   SizedBox(height: screen.height * 0.02),
-                  Container(
-                    height: screen.height * 0.13,
-                    width: screen.width * 0.15,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(15.0),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.all(8.0),
-                          //TODO: get real donation number from db
-                          child: Text(
-                            'Donation #23',
-                            style: TextStyle(
-                              color: kPrimaryColor,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 25.0,
+                  GestureDetector(
+                    onTap: (){
+                      Navigator.of(context).pushNamed(DonationDetailScreen.id);
+                    },
+                    child: Container(
+                      height: screen.height * 0.13,
+                      width: screen.width * 0.15,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(15.0),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.all(8.0),
+                            //TODO: get real donation number from db
+                            child: Text(
+                              'Donation #23',
+                              style: TextStyle(
+                                color: kPrimaryColor,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 25.0,
+                              ),
                             ),
                           ),
-                        ),
-                        SizedBox(height: screen.height * 0.02),
-                        Row(
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 8.0),
-                              //TODO: get donation date from db
-                              child: Text(
-                                'Date: 02/30/2021',
-                                style: TextStyle(
-                                  color: kPrimaryColor,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 25.0,
+                          SizedBox(height: screen.height * 0.02),
+                          Row(
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 8.0),
+                                //TODO: get donation date from db
+                                child: Text(
+                                  'Date: 02/30/2021',
+                                  style: TextStyle(
+                                    color: kPrimaryColor,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 25.0,
+                                  ),
                                 ),
                               ),
-                            ),
-                            SizedBox(width: screen.width * 0.05),
-                            //TODO get status from db
-                            Text(
-                              'Completed',
-                              style: TextStyle(
-                                color: Colors.green,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20.0,
+                              SizedBox(width: screen.width * 0.05),
+                              //TODO get status from db
+                              Text(
+                                'Completed',
+                                style: TextStyle(
+                                  color: Colors.green,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20.0,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ],
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   SizedBox(height: screen.height * 0.02),
