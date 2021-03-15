@@ -31,9 +31,10 @@ class _HomeScreenState extends State<HomeScreen> {
   String _initialName = '';
   String _name = '';
 
-  StreamSubscription<DocumentSnapshot> _subscription;
+  StreamSubscription<DocumentSnapshot> _userStream;
+  StreamSubscription<QuerySnapshot> _fruitsStream;
 
-  void _getAccountInfo() {
+  void _fetchData() {
     setState(() => _showSpinner = true);
     Account account = context.watch<Account>();
     String firstName = account.firstName;
@@ -43,6 +44,8 @@ class _HomeScreenState extends State<HomeScreen> {
       _name = camelize(firstName);
       setState(() => _showSpinner = false);
     }
+    Basket basket = context.watch<Basket>();
+    setState(() => _showSpinner = basket.fruits.isEmpty);
   }
 
   void _signOut() async {
@@ -51,7 +54,8 @@ class _HomeScreenState extends State<HomeScreen> {
     context.read<FireStoreService>().clear();
     context.read<Account>().clear();
     context.read<Basket>().clear();
-    _subscription.cancel();
+    _userStream.cancel();
+    _fruitsStream.cancel();
     Navigator.of(context).pushNamedAndRemoveUntil(
       SignOptionScreen.id,
       (route) => false,
@@ -63,14 +67,17 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _subscription = context.read<FireStoreService>().userStream((data) {
+    _userStream = context.read<FireStoreService>().userStream((data) {
       context.read<Account>().fromDB(data);
+    });
+    _fruitsStream = context.read<FireStoreService>().fruitsStream((data) {
+      context.read<Basket>().fromDB(data);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    _getAccountInfo();
+    _fetchData();
     Size screen = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
