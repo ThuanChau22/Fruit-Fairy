@@ -33,7 +33,7 @@ class Basket extends ChangeNotifier {
     });
     for (String fruitId in List.from(selectedFruits)) {
       if (!fruitsData.containsKey(fruitId)) {
-        removeFruit(fruitId);
+        _selectedFruits.remove(fruitId);
       }
     }
     notifyListeners();
