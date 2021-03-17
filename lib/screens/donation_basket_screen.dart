@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+//
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/basket.dart';
 import 'package:fruitfairy/models/fruit.dart';
@@ -123,9 +123,8 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
         ),
         child: RoundedButton(
           label: label,
-          backgroundColor: _collectOption == option
-              ? _selectedColor
-              : kObjectBackgroundColor,
+          backgroundColor:
+              _collectOption == option ? _selectedColor : kObjectColor,
           onPressed: () {
             setState(() {
               _collectOption = option;
@@ -195,7 +194,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
             ),
             child: Container(
               decoration: BoxDecoration(
-                color: kObjectBackgroundColor,
+                color: kObjectColor,
                 borderRadius: BorderRadius.circular(20.0),
               ),
               child: _collectOption == CollectOption.Yes
@@ -224,7 +223,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
         color: kLabelColor,
         size: 16.0,
       ),
-      buttonColor: kAppBarColor,
+      buttonColor: kDarkPrimaryColor,
       onPressed: onPressed,
     );
   }
@@ -233,7 +232,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
     Size screen = MediaQuery.of(context).size;
     return Container(
       decoration: BoxDecoration(
-        color: kObjectBackgroundColor,
+        color: kObjectColor,
         borderRadius: BorderRadius.circular(20.0),
       ),
       child: Row(

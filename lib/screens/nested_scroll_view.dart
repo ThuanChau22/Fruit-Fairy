@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
-
+//
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
 
@@ -30,7 +30,7 @@ class _TestNestedScrollViewState extends State<TestNestedScrollView> {
                 ),
                 centerTitle: true,
                 title: Text('App bar label'),
-                backgroundColor: kAppBarColor,
+                backgroundColor: kDarkPrimaryColor,
                 floating: true,
                 snap: true,
                 // pinned: true,

@@ -2,16 +2,11 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-
+//
 import 'package:fruitfairy/models/fruit.dart';
 
 class FireStoreService {
   /// Database fields
-
-  /// fruits
-  static const String kFruits = 'fruits';
-  static const String kFruitName = 'name';
-  static const String kFruitPath = 'path';
 
   /// users
   static const String kUsers = 'users';
@@ -27,6 +22,11 @@ class FireStoreService {
   static const String kAddressCity = 'city';
   static const String kAddressState = 'state';
   static const String kAddressZip = 'zip';
+
+  /// fruits
+  static const String kFruits = 'fruits';
+  static const String kFruitName = 'name';
+  static const String kFruitPath = 'path';
 
   ///////////////
 

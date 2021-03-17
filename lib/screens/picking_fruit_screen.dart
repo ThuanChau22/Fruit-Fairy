@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
-
+//
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/basket.dart';
 import 'package:fruitfairy/models/fruit.dart';
@@ -42,7 +42,7 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
           child: ModalProgressHUD(
             inAsyncCall: _showSpinner,
             progressIndicator: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(kAppBarColor),
+              valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
             ),
             child: Padding(
               padding: EdgeInsets.symmetric(
@@ -168,7 +168,7 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: kObjectBackgroundColor,
+          color: kObjectColor,
           borderRadius: BorderRadius.circular(20.0),
         ),
         child: Stack(

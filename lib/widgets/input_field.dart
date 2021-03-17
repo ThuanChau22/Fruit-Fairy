@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+//
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/widgets/message_bar.dart';
 
@@ -46,7 +47,7 @@ class InputField extends StatelessWidget {
         helperText: helperText,
         prefixText: prefixText,
         prefixIcon: prefixIcon,
-        fillColor: kObjectBackgroundColor.withOpacity(0.2),
+        fillColor: kObjectColor.withOpacity(0.2),
         enabled: !readOnly,
       ),
     );

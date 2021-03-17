@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+//
 import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
 import 'package:fruitfairy/screens/authentication/signin_screen.dart';
 import 'package:fruitfairy/screens/authentication/signup_role_screen.dart';
@@ -10,7 +10,6 @@ import 'package:fruitfairy/screens/profile_screen.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
 import 'package:fruitfairy/screens/picking_fruit_screen.dart';
 import 'package:fruitfairy/screens/confirmation_donation_screen.dart';
-
 
 // A class that generate screen routes associate with screen names
 // including animation and passing arguments in transition

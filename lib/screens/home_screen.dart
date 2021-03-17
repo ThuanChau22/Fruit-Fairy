@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:strings/strings.dart';
+//
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
 import 'package:fruitfairy/models/basket.dart';
@@ -90,7 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: ModalProgressHUD(
           inAsyncCall: _showSpinner,
           progressIndicator: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation(kAppBarColor),
+            valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
           ),
           child: ScrollableLayout(
             child: Padding(
@@ -119,7 +120,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                   )
-
                 ],
               ),
             ),
@@ -261,11 +261,11 @@ class _HistoryTileState extends State<HistoryTile> {
           Expanded(
             child: SizedBox(
               child: ListView(
-                physics:  NeverScrollableScrollPhysics(),
+                physics: NeverScrollableScrollPhysics(),
                 children: [
                   SizedBox(height: screen.height * 0.02),
                   GestureDetector(
-                    onTap: (){
+                    onTap: () {
                       Navigator.of(context).pushNamed(DonationDetailScreen.id);
                     },
                     child: Container(

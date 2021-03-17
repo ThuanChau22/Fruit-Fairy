@@ -1,6 +1,6 @@
 import 'dart:collection';
 import 'package:flutter/foundation.dart';
-
+//
 import 'package:fruitfairy/models/fruit.dart';
 
 class Basket extends ChangeNotifier {
@@ -33,7 +33,7 @@ class Basket extends ChangeNotifier {
     });
     for (String fruitId in List.from(selectedFruits)) {
       if (!fruitsData.containsKey(fruitId)) {
-        removeFruit(fruitId);
+        _selectedFruits.remove(fruitId);
       }
     }
     notifyListeners();
