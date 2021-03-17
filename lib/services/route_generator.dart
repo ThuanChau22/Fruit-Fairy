@@ -10,7 +10,7 @@ import 'package:fruitfairy/screens/donation_detail_screen.dart';
 import 'package:fruitfairy/screens/profile_screen.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
 import 'package:fruitfairy/screens/picking_fruit_screen.dart';
-import 'package:fruitfairy/screens/address_confirmation.dart';
+import 'package:fruitfairy/screens/contact_confirmation.dart';
 
 
 // A class that generate screen routes associate with screen names
@@ -26,7 +26,7 @@ class RouteGenerator {
     ProfileScreen.id: ProfileScreen(),
     PickingFruitScreen.id: PickingFruitScreen(),
     DonationBasketScreen.id: DonationBasketScreen(),
-    ConfirmationDonationScreen.id: ConfirmationDonationScreen(),
+    ContactConfirmationScreen.id: ContactConfirmationScreen(),
     DonationDetailScreen.id: DonationDetailScreen(),
     CharitySelectionScreen.id: CharitySelectionScreen(),
   };

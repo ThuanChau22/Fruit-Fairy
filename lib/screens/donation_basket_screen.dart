@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/basket.dart';
 import 'package:fruitfairy/models/fruit.dart';
-import 'package:fruitfairy/screens/address_confirmation.dart';
+import 'package:fruitfairy/screens/contact_confirmation.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/rounded_icon_button.dart';
@@ -325,7 +325,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
       child: RoundedButton(
         label: 'Next',
         onPressed: () {
-          Navigator.of(context).pushNamed(ConfirmationDonationScreen.id);
+          Navigator.of(context).pushNamed(ContactConfirmationScreen.id);
         },
       ),
     );

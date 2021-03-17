@@ -33,9 +33,6 @@ class DonationDetailScreen extends StatelessWidget {
               height: screen.height * 0.02,
             ),
             divider(screen),
-            // SizedBox(
-            //   height: screen.height * 0.01,
-            // ),
             Container(
               child: HistoryTile(),
             ),
