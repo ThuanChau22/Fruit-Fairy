@@ -41,7 +41,7 @@ class FruitTile extends StatelessWidget {
             placeholder: (context, url) {
               return Center(
                 child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation(kAppBarColor),
+                  valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
                   strokeWidth: 1.5,
                 ),
               );

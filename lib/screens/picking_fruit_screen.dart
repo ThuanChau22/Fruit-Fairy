@@ -42,7 +42,7 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
           child: ModalProgressHUD(
             inAsyncCall: _showSpinner,
             progressIndicator: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(kAppBarColor),
+              valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
             ),
             child: Padding(
               padding: EdgeInsets.symmetric(
@@ -168,7 +168,7 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: kObjectBackgroundColor,
+          color: kObjectColor,
           borderRadius: BorderRadius.circular(20.0),
         ),
         child: Stack(

@@ -8,13 +8,8 @@ import 'package:fruitfairy/models/fruit.dart';
 class FireStoreService {
   /// Database fields
 
-  /// fruits
-  static const String kFruits = 'fruits';
-  static const String kFruitName = 'name';
-  static const String kFruitPath = 'path';
-
-  /// users
-  static const String kUsers = 'users';
+  /// donors
+  static const String kDonors = 'donors';
   static const String kEmail = 'email';
   static const String kFirstName = 'firstname';
   static const String kLastName = 'lastname';
@@ -28,26 +23,31 @@ class FireStoreService {
   static const String kAddressState = 'state';
   static const String kAddressZip = 'zip';
 
+  /// fruits
+  static const String kFruits = 'fruits';
+  static const String kFruitName = 'name';
+  static const String kFruitPath = 'path';
+
   ///////////////
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
   final String _storagePath = 'gs://fruit-fairy.appspot.com';
 
-  CollectionReference _usersDB;
+  CollectionReference _donorsDB;
   CollectionReference _fruitsDB;
 
   String _uid;
 
   FireStoreService() {
-    _usersDB = _firestore.collection(kUsers);
+    _donorsDB = _firestore.collection(kDonors);
     _fruitsDB = _firestore.collection(kFruits);
   }
 
-  StreamSubscription<DocumentSnapshot> userStream(
+  StreamSubscription<DocumentSnapshot> donorStream(
     Function(Map<String, dynamic>) onData,
   ) {
-    return _usersDB.doc(_uid).snapshots().listen(
+    return _donorsDB.doc(_uid).snapshots().listen(
       (snapshot) {
         onData(snapshot.data());
       },
@@ -101,7 +101,7 @@ class FireStoreService {
       return;
     }
     try {
-      await _usersDB.doc(_uid).set({
+      await _donorsDB.doc(_uid).set({
         kEmail: email,
         kFirstName: firstName,
         kLastName: lastName,
@@ -120,7 +120,7 @@ class FireStoreService {
       return;
     }
     try {
-      await _usersDB.doc(_uid).update({
+      await _donorsDB.doc(_uid).update({
         kFirstName: firstName,
         kLastName: lastName,
       });
@@ -140,7 +140,7 @@ class FireStoreService {
       return;
     }
     try {
-      DocumentReference doc = _usersDB.doc(_uid);
+      DocumentReference doc = _donorsDB.doc(_uid);
       if (street.isEmpty && city.isEmpty && state.isEmpty && zip.isEmpty) {
         await doc.update({
           kAddress: FieldValue.delete(),
@@ -170,7 +170,7 @@ class FireStoreService {
       return;
     }
     try {
-      DocumentReference doc = _usersDB.doc(_uid);
+      DocumentReference doc = _donorsDB.doc(_uid);
       if (phoneNumber.isEmpty) {
         await doc.update({
           kPhone: FieldValue.delete(),
@@ -195,7 +195,7 @@ class FireStoreService {
       return;
     }
     try {
-      await _usersDB.doc(_uid).delete();
+      await _donorsDB.doc(_uid).delete();
     } catch (e) {
       throw e.message;
     }

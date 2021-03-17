@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 /// Color Theme
-const Color kAppBarColor = Color.fromRGBO(128, 0, 0, 1.0);
+const Color kDarkPrimaryColor = Color.fromRGBO(128, 0, 0, 1.0);
 const Color kPrimaryColor = Color.fromRGBO(240, 94, 92, 1.0);
 const Color kLabelColor = Colors.white;
+const Color kObjectColor = Colors.white;
 const Color kErrorColor = Colors.white;
-const Color kObjectBackgroundColor = Colors.white;
 
 // Widget Style
 const kTextFieldDecoration = InputDecoration(

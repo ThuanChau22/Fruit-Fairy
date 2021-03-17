@@ -30,7 +30,7 @@ class _TestNestedScrollViewState extends State<TestNestedScrollView> {
                 ),
                 centerTitle: true,
                 title: Text('App bar label'),
-                backgroundColor: kAppBarColor,
+                backgroundColor: kDarkPrimaryColor,
                 floating: true,
                 snap: true,
                 // pinned: true,

@@ -69,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _userStream = context.read<FireStoreService>().userStream((data) {
+    _userStream = context.read<FireStoreService>().donorStream((data) {
       context.read<Account>().fromDB(data);
     });
     _fruitsStream = context.read<FireStoreService>().fruitsStream((data) {
@@ -90,7 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: ModalProgressHUD(
           inAsyncCall: _showSpinner,
           progressIndicator: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation(kAppBarColor),
+            valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
           ),
           child: ScrollableLayout(
             child: Padding(
@@ -119,7 +119,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                   )
-
                 ],
               ),
             ),
@@ -261,11 +260,11 @@ class _HistoryTileState extends State<HistoryTile> {
           Expanded(
             child: SizedBox(
               child: ListView(
-                physics:  NeverScrollableScrollPhysics(),
+                physics: NeverScrollableScrollPhysics(),
                 children: [
                   SizedBox(height: screen.height * 0.02),
                   GestureDetector(
-                    onTap: (){
+                    onTap: () {
                       Navigator.of(context).pushNamed(DonationDetailScreen.id);
                     },
                     child: Container(

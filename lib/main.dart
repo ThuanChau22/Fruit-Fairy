@@ -48,11 +48,11 @@ class Authentication extends StatelessWidget {
         scaffoldBackgroundColor: kPrimaryColor,
         appBarTheme: AppBarTheme(
           brightness: Brightness.dark,
-          backgroundColor: kAppBarColor,
+          backgroundColor: kDarkPrimaryColor,
           centerTitle: true,
         ),
         snackBarTheme: SnackBarThemeData(
-          backgroundColor: kAppBarColor,
+          backgroundColor: kDarkPrimaryColor,
           actionTextColor: kLabelColor,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(

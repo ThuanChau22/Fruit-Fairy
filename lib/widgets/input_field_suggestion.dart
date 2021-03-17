@@ -50,7 +50,7 @@ class InputFieldSuggestion<T> extends StatelessWidget {
         ),
         decoration: kTextFieldDecoration.copyWith(
           labelText: label,
-          fillColor: kObjectBackgroundColor.withOpacity(0.2),
+          fillColor: kObjectColor.withOpacity(0.2),
         ),
       ),
       suggestionsCallback: suggestionsCallback,

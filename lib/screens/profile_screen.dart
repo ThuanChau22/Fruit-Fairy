@@ -414,7 +414,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     _fillInputFields();
-    _subscription = context.read<FireStoreService>().userStream((userData) {
+    _subscription = context.read<FireStoreService>().donorStream((userData) {
       _fillInputFields();
     });
   }
@@ -448,7 +448,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: ModalProgressHUD(
             inAsyncCall: _showSpinner,
             progressIndicator: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(kAppBarColor),
+              valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
             ),
             child: ScrollableLayout(
               controller: _scroller.controller,
@@ -988,7 +988,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           height: 50.0,
           child: Center(
             child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(kAppBarColor),
+              valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
             ),
           ),
         );
