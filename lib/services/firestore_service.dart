@@ -8,8 +8,8 @@ import 'package:fruitfairy/models/fruit.dart';
 class FireStoreService {
   /// Database fields
 
-  /// donors
-  static const String kDonors = 'donors';
+  /// users
+  static const String kUsers = 'users';
   static const String kEmail = 'email';
   static const String kFirstName = 'firstname';
   static const String kLastName = 'lastname';
@@ -34,20 +34,20 @@ class FireStoreService {
   final FirebaseStorage _storage = FirebaseStorage.instance;
   final String _storagePath = 'gs://fruit-fairy.appspot.com';
 
-  CollectionReference _donorsDB;
+  CollectionReference _usersDB;
   CollectionReference _fruitsDB;
 
   String _uid;
 
   FireStoreService() {
-    _donorsDB = _firestore.collection(kDonors);
+    _usersDB = _firestore.collection(kUsers);
     _fruitsDB = _firestore.collection(kFruits);
   }
 
-  StreamSubscription<DocumentSnapshot> donorStream(
+  StreamSubscription<DocumentSnapshot> userStream(
     Function(Map<String, dynamic>) onData,
   ) {
-    return _donorsDB.doc(_uid).snapshots().listen(
+    return _usersDB.doc(_uid).snapshots().listen(
       (snapshot) {
         onData(snapshot.data());
       },
@@ -101,7 +101,7 @@ class FireStoreService {
       return;
     }
     try {
-      await _donorsDB.doc(_uid).set({
+      await _usersDB.doc(_uid).set({
         kEmail: email,
         kFirstName: firstName,
         kLastName: lastName,
@@ -120,7 +120,7 @@ class FireStoreService {
       return;
     }
     try {
-      await _donorsDB.doc(_uid).update({
+      await _usersDB.doc(_uid).update({
         kFirstName: firstName,
         kLastName: lastName,
       });
@@ -140,7 +140,7 @@ class FireStoreService {
       return;
     }
     try {
-      DocumentReference doc = _donorsDB.doc(_uid);
+      DocumentReference doc = _usersDB.doc(_uid);
       if (street.isEmpty && city.isEmpty && state.isEmpty && zip.isEmpty) {
         await doc.update({
           kAddress: FieldValue.delete(),
@@ -170,7 +170,7 @@ class FireStoreService {
       return;
     }
     try {
-      DocumentReference doc = _donorsDB.doc(_uid);
+      DocumentReference doc = _usersDB.doc(_uid);
       if (phoneNumber.isEmpty) {
         await doc.update({
           kPhone: FieldValue.delete(),
@@ -195,7 +195,7 @@ class FireStoreService {
       return;
     }
     try {
-      await _donorsDB.doc(_uid).delete();
+      await _usersDB.doc(_uid).delete();
     } catch (e) {
       throw e.message;
     }

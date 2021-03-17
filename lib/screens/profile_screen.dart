@@ -414,7 +414,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     _fillInputFields();
-    _subscription = context.read<FireStoreService>().donorStream((userData) {
+    _subscription = context.read<FireStoreService>().userStream((userData) {
       _fillInputFields();
     });
   }

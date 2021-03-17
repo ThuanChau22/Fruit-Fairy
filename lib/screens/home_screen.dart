@@ -70,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _userStream = context.read<FireStoreService>().donorStream((data) {
+    _userStream = context.read<FireStoreService>().userStream((data) {
       context.read<Account>().fromDB(data);
     });
     _fruitsStream = context.read<FireStoreService>().fruitsStream((data) {
