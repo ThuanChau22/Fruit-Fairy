@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:strings/strings.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-
+//
 import 'package:fruitfairy/constant.dart';
 
 class FruitTile extends StatelessWidget {

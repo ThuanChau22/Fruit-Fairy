@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
-import '../constant.dart';
-
+//
+import 'package:fruitfairy/constant.dart';
 
 //TODO This screen needs to get the corresponding data from the database of a chosen donation. It needs the donation number,data,status,charity name, and the picture of fruit and percentage donated
 
@@ -36,11 +35,11 @@ class DonationDetailScreen extends StatelessWidget {
               height: screen.height * 0.02,
             ),
             Container(
-                //TODO get the data of donation number, date and status
-                height: 200.0,
-                width: 300.0,
-                color: Colors.white,
-                ),
+              //TODO get the data of donation number, date and status
+              height: 200.0,
+              width: 300.0,
+              color: Colors.white,
+            ),
             SizedBox(
               height: screen.height * 0.02,
             ),
@@ -111,8 +110,6 @@ class DonationDetailScreen extends StatelessWidget {
                 ),
               ),
             ),
-
-
           ],
         ),
       ),

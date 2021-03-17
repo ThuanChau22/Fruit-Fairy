@@ -1,5 +1,4 @@
 import 'package:meta/meta.dart';
-
 import 'package:phone_number/phone_number.dart';
 
 /// A class that provides methods for client validations
