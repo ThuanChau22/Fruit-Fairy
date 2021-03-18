@@ -31,23 +31,23 @@ const kTextFieldDecoration = InputDecoration(
     borderRadius: BorderRadius.all(Radius.circular(30.0)),
   ),
   enabledBorder: OutlineInputBorder(
-    borderSide: BorderSide(color: kLabelColor, width: 1.0),
+    borderSide: BorderSide(color: kLabelColor, width: 2.0),
     borderRadius: BorderRadius.all(Radius.circular(30.0)),
   ),
   disabledBorder: OutlineInputBorder(
-    borderSide: BorderSide(color: kLabelColor, width: 1.0),
+    borderSide: BorderSide(color: kLabelColor, width: 2.0),
     borderRadius: BorderRadius.all(Radius.circular(30.0)),
   ),
   errorBorder: OutlineInputBorder(
-    borderSide: BorderSide(color: kErrorColor, width: 1.0),
+    borderSide: BorderSide(color: kErrorColor, width: 2.0),
     borderRadius: BorderRadius.all(Radius.circular(30.0)),
   ),
   focusedBorder: OutlineInputBorder(
-    borderSide: BorderSide(color: kLabelColor, width: 2.0),
+    borderSide: BorderSide(color: kLabelColor, width: 3.0),
     borderRadius: BorderRadius.all(Radius.circular(15.0)),
   ),
   focusedErrorBorder: OutlineInputBorder(
-    borderSide: BorderSide(color: kErrorColor, width: 2.0),
+    borderSide: BorderSide(color: kErrorColor, width: 3.0),
     borderRadius: BorderRadius.all(Radius.circular(15.0)),
   ),
 );

@@ -16,7 +16,6 @@ import 'package:fruitfairy/widgets/input_field.dart';
 import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
-
 import 'charity_selection_screen.dart';
 
 enum Field { Phone, Address }
@@ -214,14 +213,7 @@ class _ContactConfirmation extends State<ContactConfirmationScreen> {
                 ),
                 child: Column(
                   children: [
-                    inputGroupLabel(
-                      'Phone Number',
-                      tag: Field.Phone,
-                    ),
-                    phoneNumberField(),
-                    verifyCodeField(),
-                    inputFieldSizedBox(),
-                    inputGroupSizedBox(),
+
                     inputGroupLabel(
                       'Address',
                       tag: Field.Address,
@@ -235,7 +227,12 @@ class _ContactConfirmation extends State<ContactConfirmationScreen> {
                     zipInputField(),
                     inputFieldSizedBox(),
                     inputGroupSizedBox(),
-                    inputFieldSizedBox(),
+                    inputGroupLabel(
+                      'Phone Number',
+                      tag: Field.Phone,
+                    ),
+                    phoneNumberField(),
+                    verifyCodeField(),
                     inputGroupSizedBox(),
                     nextButton(),
                     SizedBox(height: screen.height * 0.05),
