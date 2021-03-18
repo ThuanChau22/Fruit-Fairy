@@ -5,7 +5,6 @@ import 'package:fruitfairy/constant.dart';
 class CharityButton extends StatelessWidget {
   final String label;
   final Color backgroundColor;
-  final Widget leading;
   final VoidCallback onPressed;
   final String number;
 
@@ -13,7 +12,6 @@ class CharityButton extends StatelessWidget {
     @required this.label,
     @required this.onPressed,
     this.backgroundColor,
-    this.leading,
     this.number,
     Color labelColor,
   });
@@ -37,26 +35,7 @@ class CharityButton extends StatelessWidget {
         },
         child: Row(
           children: [
-            Container(
-              width: 40.0,
-              height: 40.0,
-              decoration: new BoxDecoration(
-                border: Border.all(
-                  color: kPrimaryColor,
-                  width: 3,
-                ),
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Text(
-                  number,
-                  style: TextStyle(
-                    color: kPrimaryColor,
-                    fontSize: 30,
-                  ),
-                ),
-              ),
-            ),
+            circleWithNumber(),
             SizedBox(width: screen.width * 0.15,),
             Text(
               label,
@@ -72,4 +51,29 @@ class CharityButton extends StatelessWidget {
       ),
     );
   }
+
+  Widget circleWithNumber() {
+    return Container(
+      width: 40.0,
+      height: 40.0,
+      decoration: new BoxDecoration(
+        border: Border.all(
+          color: kPrimaryColor,
+          width: 3,
+        ),
+        shape: BoxShape.circle,
+      ),
+      child: Center(
+        child: Text(
+          number,
+          style: TextStyle(
+            color: kPrimaryColor,
+            fontSize: 30,
+          ),
+        ),
+      ),
+    );
+  }
+
+
 }
