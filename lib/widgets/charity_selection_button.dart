@@ -7,17 +7,20 @@ class CharityButton extends StatelessWidget {
   final Color backgroundColor;
   final Widget leading;
   final VoidCallback onPressed;
+  final String number;
 
   CharityButton({
     @required this.label,
     @required this.onPressed,
     this.backgroundColor,
-    @required this.leading,
+    this.leading,
+    this.number,
     Color labelColor,
   });
 
   @override
   Widget build(BuildContext context) {
+    Size screen = MediaQuery.of(context).size;
     return Material(
       elevation: 5.0,
       color: backgroundColor ?? kObjectBackgroundColor,
@@ -33,18 +36,35 @@ class CharityButton extends StatelessWidget {
           onPressed();
         },
         child: Row(
-          //mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            leading,
-            Expanded(
-              child: Text(
-                label,
-                textAlign: TextAlign.center,
-                style: TextStyle(
+            Container(
+              width: 40.0,
+              height: 40.0,
+              decoration: new BoxDecoration(
+                border: Border.all(
                   color: kPrimaryColor,
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.bold,
+                  width: 3,
                 ),
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(
+                  number,
+                  style: TextStyle(
+                    color: kPrimaryColor,
+                    fontSize: 30,
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(width: screen.width * 0.15,),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: kPrimaryColor,
+                fontSize: 20.0,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ],

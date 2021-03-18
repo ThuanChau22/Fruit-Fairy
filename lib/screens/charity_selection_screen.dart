@@ -47,7 +47,7 @@ class _CharitySelectionScreenState extends State<CharitySelectionScreen> {
               height: screen.height * 0.03,
             ),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 32.0),
+              padding: EdgeInsets.symmetric(horizontal: screen.width * 0.05),
               child: Text(
                 'Select the top 3 charities to donate to:',
                 textAlign: TextAlign.center,
@@ -61,38 +61,51 @@ class _CharitySelectionScreenState extends State<CharitySelectionScreen> {
             SizedBox(
               height: screen.height * 0.02,
             ),
-
             SizedBox(
               height: screen.height * 0.02,
             ),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 32.0),
-              child: CharityButton(label: 'Charity #1', leading: circle, onPressed: (){},),
+              padding: EdgeInsets.symmetric(horizontal: screen.width * 0.1),
+              child: CharityButton(label: 'Charity #1', onPressed: (){}, number: '1',),
+            ),
+            SizedBox(
+              height: screen.height * 0.02,
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: screen.width * 0.1),
+              child: CharityButton(label: 'short', onPressed: (){}, number: '2',),
+            ),
+            SizedBox(
+              height: screen.height * 0.02,
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: screen.width * 0.1),
+              child: CharityButton(label: 'verylongnamecharity', onPressed: (){}, number: '4',),
             ),
           ],
         ),
       ),
     );
   }
-
-  Widget circle = new Container(
-    width: 40.0,
-    height: 40.0,
-    decoration: new BoxDecoration(
-      border: Border.all(
-        color: kPrimaryColor,
-        width: 3,
-      ),
-      shape: BoxShape.circle,
-    ),
-    child: Center(
-      child: Text(
-        '1',
-        style: TextStyle(
-          color: kPrimaryColor,
-          fontSize: 30,
-        ),
-      ),
-    ),
-  );
+  //
+  // Widget circle = new Container(
+  //   width: 40.0,
+  //   height: 40.0,
+  //   decoration: new BoxDecoration(
+  //     border: Border.all(
+  //       color: kPrimaryColor,
+  //       width: 3,
+  //     ),
+  //     shape: BoxShape.circle,
+  //   ),
+  //   child: Center(
+  //     child: Text(
+  //       '1',
+  //       style: TextStyle(
+  //         color: kPrimaryColor,
+  //         fontSize: 30,
+  //       ),
+  //     ),
+  //   ),
+  // );
 }
