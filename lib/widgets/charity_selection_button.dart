@@ -6,14 +6,14 @@ class CharityButton extends StatelessWidget {
   final String label;
   final Color backgroundColor;
   final VoidCallback onPressed;
-  final String number;
+  final Widget leading;
 
   CharityButton({
     @required this.label,
     @required this.onPressed,
     this.backgroundColor,
-    this.number,
     Color labelColor,
+    this.leading,
   });
 
   @override
@@ -33,10 +33,13 @@ class CharityButton extends StatelessWidget {
           FocusScope.of(context).unfocus();
           onPressed();
         },
+        //TODO: make the circle with number appear only after clicking on a charity button
         child: Row(
           children: [
-            circleWithNumber(),
-            SizedBox(width: screen.width * 0.15,),
+            leading,
+            SizedBox(
+              width: screen.width * 0.15,
+            ),
             Text(
               label,
               textAlign: TextAlign.center,
@@ -51,29 +54,4 @@ class CharityButton extends StatelessWidget {
       ),
     );
   }
-
-  Widget circleWithNumber() {
-    return Container(
-      width: 40.0,
-      height: 40.0,
-      decoration: new BoxDecoration(
-        border: Border.all(
-          color: kPrimaryColor,
-          width: 3,
-        ),
-        shape: BoxShape.circle,
-      ),
-      child: Center(
-        child: Text(
-          number,
-          style: TextStyle(
-            color: kPrimaryColor,
-            fontSize: 30,
-          ),
-        ),
-      ),
-    );
-  }
-
-
 }

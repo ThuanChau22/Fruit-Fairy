@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fruitfairy/widgets/charity_selection_button.dart';
+import 'package:fruitfairy/widgets/rounded_button.dart';
 
 import '../constant.dart';
 
@@ -66,46 +67,98 @@ class _CharitySelectionScreenState extends State<CharitySelectionScreen> {
             ),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: screen.width * 0.1),
-              child: CharityButton(label: 'Charity #1', onPressed: (){}, number: '1',),
+              child: CharityButton(
+                  label: 'Charity #1',
+                  onPressed: () {},
+                  leading: circleWithNumber(1)),
             ),
             SizedBox(
               height: screen.height * 0.02,
             ),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: screen.width * 0.1),
-              child: CharityButton(label: 'short', onPressed: (){}, number: '2',),
+              child: CharityButton(
+                label: 'short',
+                onPressed: () {},
+                leading: circleWithNumber(2),
+              ),
             ),
             SizedBox(
               height: screen.height * 0.02,
             ),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: screen.width * 0.1),
-              child: CharityButton(label: 'verylongnamecharity', onPressed: (){}, number: '4',),
+              child: CharityButton(
+                label: 'verylongnamecharity',
+                onPressed: () {},
+                leading: circleWithNumber(3),
+              ),
             ),
+            SizedBox(
+              height: screen.height * 0.02,
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: screen.width * 0.1),
+              child: CharityButton(
+                label: 'CHARITY 4',
+                onPressed: () {},
+                leading: circleWithNumber(4),
+              ),
+            ),
+            SizedBox(
+              height: screen.height * 0.02,
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: screen.width * 0.1),
+              child: CharityButton(
+                label: 'verylongnamecharity',
+                onPressed: () {},
+                leading: circleWithNumber(5),
+              ),
+            ),
+            SizedBox(
+              height: screen.height * 0.1,
+            ),
+            Divider(
+              color: kLabelColor,
+              height: 5.0,
+              thickness: 5.0,
+              indent: 20.0,
+              endIndent: 20.0,
+            ),
+            SizedBox(
+              height: screen.height * 0.02,
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: screen.width * 0.1),
+              child: RoundedButton(label: 'Next', onPressed: (){}),
+            )
           ],
         ),
       ),
     );
   }
-  //
-  // Widget circle = new Container(
-  //   width: 40.0,
-  //   height: 40.0,
-  //   decoration: new BoxDecoration(
-  //     border: Border.all(
-  //       color: kPrimaryColor,
-  //       width: 3,
-  //     ),
-  //     shape: BoxShape.circle,
-  //   ),
-  //   child: Center(
-  //     child: Text(
-  //       '1',
-  //       style: TextStyle(
-  //         color: kPrimaryColor,
-  //         fontSize: 30,
-  //       ),
-  //     ),
-  //   ),
-  // );
+
+  Widget circleWithNumber(int number) {
+    return Container(
+      width: 40.0,
+      height: 40.0,
+      decoration: new BoxDecoration(
+        border: Border.all(
+          color: kPrimaryColor,
+          width: 3,
+        ),
+        shape: BoxShape.circle,
+      ),
+      child: Center(
+        child: Text(
+          number.toString(),
+          style: TextStyle(
+            color: kPrimaryColor,
+            fontSize: 30,
+          ),
+        ),
+      ),
+    );
+  }
 }
