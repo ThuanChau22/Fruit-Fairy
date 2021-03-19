@@ -11,13 +11,14 @@ class CharitySelectionScreen extends StatefulWidget {
 }
 
 class _CharitySelectionScreenState extends State<CharitySelectionScreen> {
-
-  bool circleVisible1 = false;
-  bool circleVisible2 = false;
-  bool circleVisible3 = false;
-  bool circleVisible4 = false;
-  bool circleVisible5 = false;
-
+  List<String> selectedCharity = [
+    'charity1',
+    'charity2',
+    'charity3',
+    'charity4',
+    'charity5'
+  ];
+  List<String> numbers = [];
 
   @override
   Widget build(BuildContext context) {
@@ -69,39 +70,10 @@ class _CharitySelectionScreenState extends State<CharitySelectionScreen> {
             SizedBox(
               height: screen.height * 0.02,
             ),
-            SizedBox(
-              height: screen.height * 0.02,
-            ),
             //TODO: make a charity button
-            GestureDetector(
-                onTap:(){
-                  setState(() {
-                    circleVisible1 =! circleVisible1;
-                  });
-                },
-                child: charityButton('Charity #1', 1,circleVisible1)),
-            SizedBox(
-              height: screen.height * 0.02,
+            Column(
+              children: charities(),
             ),
-            GestureDetector(
-                onTap:(){
-                  setState(() {
-                    circleVisible2 =! circleVisible2;
-                  });
-                },
-                child: charityButton('Charity #2', 2, circleVisible2)),
-            SizedBox(
-              height: screen.height * 0.02,
-            ),
-            charityButton('Charity #3', 3, circleVisible3),
-            SizedBox(
-              height: screen.height * 0.02,
-            ),
-            charityButton('Charity #4', 4, circleVisible4),
-            SizedBox(
-              height: screen.height * 0.02,
-            ),
-            charityButton('Charity #5', 5,circleVisible5),
             SizedBox(
               height: screen.height * 0.1,
             ),
@@ -125,47 +97,81 @@ class _CharitySelectionScreenState extends State<CharitySelectionScreen> {
     );
   }
 
-  Widget charityButton(String charityName, int number, bool circleVisible) {
+  List<Widget> charities() {
+    List<Widget> list = [];
+    for (String name in selectedCharity) {
+      list.add(charityButton(
+          charityName: name,
+          onTap: () {
+            setState(() {
+              if(numbers.contains(name)){
+                numbers.remove(name);
+              } else {
+                if (numbers.length < 3) {
+                  numbers.add(name);
+                }
+              }
+            });
+          }));
+    }
+    return list;
+  }
+
+  Widget charityButton({
+    @required String charityName,
+    @required VoidCallback onTap,
+  }) {
     Size screen = MediaQuery.of(context).size;
-    return Container(
-      height: 50.0,
-      width: 300.0,
-      decoration: BoxDecoration(
-        color: kObjectBackgroundColor,
-        borderRadius: BorderRadius.all(Radius.circular(20)),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-              flex: 2,
-              child: circleWithNumber(number, circleVisible)),
-          Expanded(
-            flex: 1,
-            child: SizedBox(
-              width: screen.width * 0.1,
+    return Column(
+      children: [
+        SizedBox(
+          height: screen.height * 0.02,
+        ),
+        GestureDetector(
+          onTap: onTap,
+          child: Container(
+            height: 50.0,
+            width: 300.0,
+            decoration: BoxDecoration(
+              color: kObjectBackgroundColor,
+              borderRadius: BorderRadius.all(Radius.circular(20)),
+            ),
+            child: Row(
+              children: [
+                Expanded(flex: 2, child: circleWithNumber(charityName)),
+                Expanded(
+                  flex: 1,
+                  child: SizedBox(
+                    width: screen.width * 0.1,
+                  ),
+                ),
+                Expanded(
+                  flex: 6,
+                  child: Container(
+                    alignment: Alignment.centerLeft,
+                    height: 50.0,
+                    width: 200.0,
+                    child: Text(
+                      charityName,
+                      style: TextStyle(
+                        color: kPrimaryColor,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          Expanded(
-            flex: 6,
-            child: Container(
-              alignment: Alignment.centerLeft,
-              height: 50.0,
-              width: 200.0,
-              child: Text(charityName, style: TextStyle(
-                color: kPrimaryColor,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
-  Widget circleWithNumber(int number, bool circleVisible) {
+  Widget circleWithNumber(String charityName) {
     return Visibility(
-      visible: circleVisible,
+      visible: numbers.contains(charityName),
       child: Container(
         alignment: Alignment.centerLeft,
         width: 40.0,
@@ -179,7 +185,7 @@ class _CharitySelectionScreenState extends State<CharitySelectionScreen> {
         ),
         child: Center(
           child: Text(
-            number.toString(),
+            '${numbers.indexOf(charityName) + 1}',
             style: TextStyle(
               color: kPrimaryColor,
               fontSize: 30,
