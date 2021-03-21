@@ -189,9 +189,9 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
   }
 
   Widget buttonSection() {
-    bool show = MediaQuery.of(context).viewInsets.bottom == 0.0;
+    EdgeInsets view = MediaQuery.of(context).viewInsets;
     return Visibility(
-      visible: show,
+      visible: view.bottom == 0.0,
       child: Column(
         children: [
           divider(),
