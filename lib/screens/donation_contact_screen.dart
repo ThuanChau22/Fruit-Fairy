@@ -554,7 +554,7 @@ class _ContactConfirmation extends State<DonationContactScreen> {
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Colors.green,
-                              fontSize: 20.0,
+                              fontSize: 18.0,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
