@@ -79,8 +79,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _showSpinner = false;
   bool _obscureOldPassword = true;
   bool _obscureNewPassword = true;
-  bool _updatedName = false;
-  bool _updatedAddress = false;
+  bool _updatedName = true;
+  bool _updatedPhone = true;
+  bool _updatedAddress = true;
   bool _updatedPassword = false;
   bool _showVerifyPhone = false;
   String _phoneButtonLabel = 'Add';
@@ -96,72 +97,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _fillInputFields() {
     Account account = context.read<Account>();
     _email.text = account.email;
-    _firstName.text = account.firstName;
-    _lastName.text = account.lastName;
+    if (_updatedName) {
+      _firstName.text = account.firstName;
+      _lastName.text = account.lastName;
+      _updatedName = false;
+    }
     Map<String, String> phone = account.phone;
-    if (phone.isNotEmpty) {
+    if (phone.isNotEmpty && _updatedPhone) {
       _isoCode = phone[FireStoreService.kPhoneCountry];
       _dialCode = phone[FireStoreService.kPhoneDialCode];
       _phoneNumber.text = phone[FireStoreService.kPhoneNumber];
       _phoneButtonLabel = 'Remove';
-    } else {
-      _isoCode = 'US';
-      _dialCode = '+1';
-      _phoneNumber.clear();
-      _phoneButtonLabel = 'Add';
+      _updatedPhone = false;
     }
     Map<String, String> address = account.address;
-    if (address.isNotEmpty) {
+    if (address.isNotEmpty && _updatedAddress) {
       _street.text = address[FireStoreService.kAddressStreet];
       _city.text = address[FireStoreService.kAddressCity];
       _state.text = address[FireStoreService.kAddressState];
       _zipCode.text = address[FireStoreService.kAddressZip];
-    } else {
-      _street.clear();
-      _city.clear();
-      _state.clear();
-      _zipCode.clear();
+      _updatedAddress = false;
     }
     setState(() {});
   }
 
   void _updateProfile() async {
     setState(() => _showSpinner = true);
-
-    // Holding user inputs while updating
-    String firstName = _firstName.text.trim();
-    String lastName = _lastName.text.trim();
-    String street = _street.text.trim();
-    String city = _city.text.trim();
-    String state = _state.text.trim();
-    String zip = _zipCode.text.trim();
-    String oldPassword = _oldPassword.text;
-    String newPassword = _newPassword.text;
-    String confirmPassword = _confirmPassword.text;
-
-    String errorMessage = await _updateName(
-      firstName: firstName,
-      lastName: lastName,
-    );
+    String errorMessage = await _updateName();
     if (errorMessage.isEmpty) {
-      errorMessage = await _updateAddress(
-        street: street,
-        city: city,
-        state: state,
-        zip: zip,
-      );
+      errorMessage = await _updateAddress();
     }
     if (errorMessage.isEmpty) {
-      errorMessage = await _updatePassword(
-        oldPassword: oldPassword,
-        newPassword: newPassword,
-        confirmPassword: confirmPassword,
-      );
+      errorMessage = await _updatePassword();
     }
     String updateMessage;
     if (errorMessage.isEmpty) {
       if (_updatedName || _updatedAddress || _updatedPassword) {
-        _updatedName = _updatedAddress = _updatedPassword = false;
+        _updatedPassword = false;
         updateMessage = 'Profile updated';
       } else {
         updateMessage = 'Profile is up-to-date';
@@ -176,10 +148,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     MessageBar(context, message: updateMessage).show();
   }
 
-  Future<String> _updateName({
-    @required firstName,
-    @required lastName,
-  }) async {
+  Future<String> _updateName() async {
+    String firstName = _firstName.text.trim();
+    String lastName = _lastName.text.trim();
     Account account = context.read<Account>();
     if (firstName != account.firstName || lastName != account.lastName) {
       String error = _firstNameError = Validate.name(
@@ -207,12 +178,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return '';
   }
 
-  Future<String> _updateAddress({
-    @required String street,
-    @required String city,
-    @required String state,
-    @required String zip,
-  }) async {
+  Future<String> _updateAddress() async {
+    String street = _street.text.trim();
+    String city = _city.text.trim();
+    String state = _state.text.trim();
+    String zip = _zipCode.text.trim();
     Map<String, String> address = context.read<Account>().address;
     bool isFilled = street.isNotEmpty ||
         city.isNotEmpty ||
@@ -251,11 +221,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return '';
   }
 
-  Future<String> _updatePassword({
-    @required String oldPassword,
-    @required String newPassword,
-    @required String confirmPassword,
-  }) async {
+  Future<String> _updatePassword() async {
+    String oldPassword = _oldPassword.text;
+    String newPassword = _newPassword.text;
+    String confirmPassword = _confirmPassword.text;
     if (newPassword.isNotEmpty) {
       String error = _oldPasswordError = Validate.checkPassword(oldPassword);
       error += _newPasswordError = Validate.password(newPassword);
@@ -366,6 +335,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _showVerifyPhone = false;
     _phoneButtonLabel = 'Remove';
     _verifyCode = null;
+    _updatedPhone = true;
   }
 
   bool _addressIsFilled() {
