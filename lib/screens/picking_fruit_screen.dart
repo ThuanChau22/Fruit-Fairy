@@ -26,6 +26,11 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
   bool _showSpinner = false;
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   void dispose() {
     super.dispose();
     _search.dispose();
@@ -36,7 +41,6 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
     Size screen = MediaQuery.of(context).size;
     return GestureWrapper(
       child: Scaffold(
-        resizeToAvoidBottomInset: false,
         appBar: AppBar(title: Text('Donation')),
         body: SafeArea(
           child: ModalProgressHUD(
@@ -46,7 +50,6 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
             ),
             child: Padding(
               padding: EdgeInsets.symmetric(
-                vertical: screen.height * 0.03,
                 horizontal: screen.width * 0.05,
               ),
               child: Column(
@@ -54,9 +57,7 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
                   instructionLabel(),
                   searchInputField(),
                   fruitOptions(),
-                  divider(),
-                  SizedBox(height: screen.height * 0.03),
-                  basketButton(),
+                  buttonSection(),
                 ],
               ),
             ),
@@ -66,21 +67,19 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
     );
   }
 
-  Widget divider() {
-    return Divider(
-      color: kLabelColor,
-      height: 5.0,
-      thickness: 3.0,
-    );
-  }
-
   Widget instructionLabel() {
-    return Text(
-      'Choose fruit to donate:',
-      style: TextStyle(
-        color: Colors.white,
-        fontWeight: FontWeight.bold,
-        fontSize: 30.0,
+    Size screen = MediaQuery.of(context).size;
+    return Padding(
+      padding: EdgeInsets.only(
+        top: screen.height * 0.03,
+      ),
+      child: Text(
+        'Choose fruit to donate:',
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 30.0,
+        ),
       ),
     );
   }
@@ -189,16 +188,40 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
     );
   }
 
+  Widget buttonSection() {
+    bool show = MediaQuery.of(context).viewInsets.bottom == 0.0;
+    return Visibility(
+      visible: show,
+      child: Column(
+        children: [
+          divider(),
+          basketButton(),
+        ],
+      ),
+    );
+  }
+
+  Widget divider() {
+    return Divider(
+      color: kLabelColor,
+      height: 5.0,
+      thickness: 3.0,
+    );
+  }
+
   Widget basketButton() {
     Size screen = MediaQuery.of(context).size;
     return Padding(
       padding: EdgeInsets.symmetric(
+        vertical: screen.height * 0.03,
         horizontal: screen.width * 0.2,
       ),
       child: RoundedButton(
         label: 'My Basket',
         onPressed: () {
-          Navigator.of(context).pushNamed(DonationBasketScreen.id);
+          if (context.read<Basket>().selectedFruits.isNotEmpty) {
+            Navigator.of(context).pushNamed(DonationBasketScreen.id);
+          }
         },
       ),
     );
