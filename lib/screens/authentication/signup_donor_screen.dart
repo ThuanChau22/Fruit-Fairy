@@ -92,35 +92,41 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
   @override
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
-    return GestureWrapper(
-      child: Scaffold(
-        appBar: AppBar(title: Text('Sign Up')),
-        body: SafeArea(
-          child: ModalProgressHUD(
-            inAsyncCall: _showSpinner,
-            progressIndicator: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(kAppBarColor),
-            ),
-            child: ScrollableLayout(
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  vertical: screen.height * 0.06,
-                  horizontal: screen.width * 0.15,
-                ),
-                child: Column(
-                  children: [
-                    firstNameInputField(),
-                    inputFieldSizeBox(),
-                    lastNameInputField(),
-                    inputFieldSizeBox(),
-                    emailInputField(),
-                    inputFieldSizeBox(),
-                    passwordInputField(),
-                    inputFieldSizeBox(),
-                    confirmPasswordInputField(),
-                    SizedBox(height: screen.height * 0.05),
-                    signUpButton(context),
-                  ],
+    return WillPopScope(
+      onWillPop: () async {
+        MessageBar(context).hide();
+        return true;
+      },
+      child: GestureWrapper(
+        child: Scaffold(
+          appBar: AppBar(title: Text('Sign Up')),
+          body: SafeArea(
+            child: ModalProgressHUD(
+              inAsyncCall: _showSpinner,
+              progressIndicator: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation(kAppBarColor),
+              ),
+              child: ScrollableLayout(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    vertical: screen.height * 0.06,
+                    horizontal: screen.width * 0.15,
+                  ),
+                  child: Column(
+                    children: [
+                      firstNameInputField(),
+                      inputFieldSizeBox(),
+                      lastNameInputField(),
+                      inputFieldSizeBox(),
+                      emailInputField(),
+                      inputFieldSizeBox(),
+                      passwordInputField(),
+                      inputFieldSizeBox(),
+                      confirmPasswordInputField(),
+                      SizedBox(height: screen.height * 0.05),
+                      signUpButton(context),
+                    ],
+                  ),
                 ),
               ),
             ),
