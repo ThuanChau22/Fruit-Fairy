@@ -130,6 +130,7 @@ class FireAuthService {
 
   Future<String> registerPhone({
     @required String phoneNumber,
+    @required Function completed,
     @required
         Function(Future<String> Function(String smsCode) verifyCode) codeSent,
     @required Function(String errorMessage) failed,
@@ -138,6 +139,22 @@ class FireAuthService {
     await _firebaseAuth.verifyPhoneNumber(
       timeout: Duration(seconds: 5),
       phoneNumber: phoneNumber,
+      verificationCompleted: (PhoneAuthCredential credential) async {
+        try {
+          if (update) {
+            await user.updatePhoneNumber(credential);
+          } else {
+            await user.linkWithCredential(credential);
+          }
+          completed('');
+        } catch (e) {
+          if (e.code == 'credential-already-in-use') {
+            completed('Phone number is being used by a different account');
+          }
+          print(e);
+          completed('Error');
+        }
+      },
       codeSent: (String verificationId, int resendToken) {
         codeSent((smsCode) async {
           try {
@@ -174,7 +191,6 @@ class FireAuthService {
         }
         print(e);
       },
-      verificationCompleted: (PhoneAuthCredential credential) {},
       codeAutoRetrievalTimeout: (String verificationId) {},
     );
     return 'Sending verification code';

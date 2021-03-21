@@ -303,6 +303,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
         String notifyMessage = await auth.registerPhone(
           phoneNumber: '$_dialCode$phoneNumber',
           update: account.phone.isNotEmpty,
+          completed: (errorMessage) async {
+            setState(() => _showSpinner = true);
+            if (errorMessage.isEmpty) {
+              await updatePhoneNumber();
+              errorMessage = 'Phone number updated';
+            }
+            MessageBar(context, message: errorMessage).show();
+            setState(() => _showSpinner = false);
+          },
           codeSent: (verifyCode) async {
             if (verifyCode != null) {
               _verifyCode = verifyCode;
@@ -337,22 +346,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (_verifyCode != null) {
       String errorMessage = await _verifyCode(_confirmCode.text.trim());
       if (errorMessage.isEmpty) {
-        String phoneNumber = _phoneNumber.text.trim();
-        await context.read<FireStoreService>().updatePhoneNumber(
-              country: _isoCode,
-              dialCode: _dialCode,
-              phoneNumber: phoneNumber,
-            );
-        _phoneNumber.text = phoneNumber;
-        _confirmCode.clear();
-        _showVerifyPhone = false;
-        _phoneButtonLabel = 'Remove';
-        _verifyCode = null;
+        await updatePhoneNumber();
         errorMessage = 'Phone number updated';
       }
       MessageBar(context, message: errorMessage).show();
     }
     setState(() => _showSpinner = false);
+  }
+
+  Future<void> updatePhoneNumber() async {
+    String phoneNumber = _phoneNumber.text.trim();
+    await context.read<FireStoreService>().updatePhoneNumber(
+          country: _isoCode,
+          dialCode: _dialCode,
+          phoneNumber: phoneNumber,
+        );
+    _phoneNumber.text = phoneNumber;
+    _confirmCode.clear();
+    _showVerifyPhone = false;
+    _phoneButtonLabel = 'Remove';
+    _verifyCode = null;
   }
 
   bool _addressIsFilled() {
