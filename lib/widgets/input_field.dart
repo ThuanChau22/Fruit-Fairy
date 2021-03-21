@@ -6,6 +6,7 @@ class InputField extends StatelessWidget {
   final String label;
   final Color labelColor;
   final TextEditingController controller;
+  final FocusNode focusNode;
   final String errorMessage;
   final String helperText;
   final TextInputType keyboardType;
@@ -26,6 +27,7 @@ class InputField extends StatelessWidget {
     this.keyboardType,
     this.prefixText,
     this.prefixIcon,
+    this.focusNode,
     this.onChanged,
   });
 
@@ -37,6 +39,7 @@ class InputField extends StatelessWidget {
       keyboardType: keyboardType,
       obscureText: obscureText,
       readOnly: readOnly,
+      focusNode: focusNode,
       onChanged: onChanged,
       onTap: () => MessageBar(context).hide(),
       style: TextStyle(color: labelColor),
