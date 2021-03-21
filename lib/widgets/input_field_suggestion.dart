@@ -8,7 +8,6 @@ class InputFieldSuggestion<T> extends StatelessWidget {
   final String label;
   final Color labelColor;
   final TextEditingController controller;
-  final FocusNode focusNode;
   final ValueChanged<String> onChanged;
   final SuggestionsCallback<T> suggestionsCallback;
   final ItemBuilder<T> itemBuilder;
@@ -19,7 +18,6 @@ class InputFieldSuggestion<T> extends StatelessWidget {
     this.label,
     this.labelColor = kLabelColor,
     this.controller,
-    this.focusNode,
     this.onChanged,
     this.suggestionsCallback,
     this.itemBuilder,
@@ -42,7 +40,6 @@ class InputFieldSuggestion<T> extends StatelessWidget {
       ),
       textFieldConfiguration: TextFieldConfiguration(
         controller: controller,
-        focusNode: focusNode,
         cursorColor: labelColor,
         onChanged: onChanged,
         onTap: () => MessageBar(context).hide(),
