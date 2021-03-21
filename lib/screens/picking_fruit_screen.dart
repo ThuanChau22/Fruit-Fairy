@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import 'package:provider/provider.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
@@ -10,6 +11,7 @@ import 'package:fruitfairy/screens/donation_basket_screen.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
 import 'package:fruitfairy/widgets/gesture_wrapper.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
+import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 
 class PickingFruitScreen extends StatefulWidget {
@@ -26,6 +28,11 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
   bool _showSpinner = false;
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   void dispose() {
     super.dispose();
     _search.dispose();
@@ -34,30 +41,32 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
   @override
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
-    return GestureWrapper(
-      child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        appBar: AppBar(title: Text('Donation')),
-        body: SafeArea(
-          child: ModalProgressHUD(
-            inAsyncCall: _showSpinner,
-            progressIndicator: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(kAppBarColor),
-            ),
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                vertical: screen.height * 0.03,
-                horizontal: screen.width * 0.05,
+    return WillPopScope(
+      onWillPop: () async {
+        MessageBar(context).hide();
+        return true;
+      },
+      child: GestureWrapper(
+        child: Scaffold(
+          appBar: AppBar(title: Text('Donation')),
+          body: SafeArea(
+            child: ModalProgressHUD(
+              inAsyncCall: _showSpinner,
+              progressIndicator: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation(kAppBarColor),
               ),
-              child: Column(
-                children: [
-                  instructionLabel(),
-                  searchInputField(),
-                  fruitOptions(),
-                  divider(),
-                  SizedBox(height: screen.height * 0.03),
-                  basketButton(),
-                ],
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: screen.width * 0.05,
+                ),
+                child: Column(
+                  children: [
+                    instructionLabel(),
+                    searchInputField(),
+                    fruitOptions(),
+                    buttonSection(),
+                  ],
+                ),
               ),
             ),
           ),
@@ -66,21 +75,19 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
     );
   }
 
-  Widget divider() {
-    return Divider(
-      color: kLabelColor,
-      height: 5.0,
-      thickness: 3.0,
-    );
-  }
-
   Widget instructionLabel() {
-    return Text(
-      'Choose fruit to donate:',
-      style: TextStyle(
-        color: Colors.white,
-        fontWeight: FontWeight.bold,
-        fontSize: 30.0,
+    Size screen = MediaQuery.of(context).size;
+    return Padding(
+      padding: EdgeInsets.only(
+        top: screen.height * 0.03,
+      ),
+      child: Text(
+        'Choose fruit to donate:',
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 30.0,
+        ),
       ),
     );
   }
@@ -164,6 +171,7 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
       onTap: () {
         HapticFeedback.mediumImpact();
         FocusScope.of(context).unfocus();
+        MessageBar(context).hide();
         onTap();
       },
       child: Container(
@@ -189,16 +197,42 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
     );
   }
 
+  Widget buttonSection() {
+    EdgeInsets view = MediaQuery.of(context).viewInsets;
+    return Visibility(
+      visible: view.bottom == 0.0,
+      child: Column(
+        children: [
+          divider(),
+          basketButton(),
+        ],
+      ),
+    );
+  }
+
+  Widget divider() {
+    return Divider(
+      color: kLabelColor,
+      height: 5.0,
+      thickness: 3.0,
+    );
+  }
+
   Widget basketButton() {
     Size screen = MediaQuery.of(context).size;
     return Padding(
       padding: EdgeInsets.symmetric(
+        vertical: screen.height * 0.03,
         horizontal: screen.width * 0.2,
       ),
       child: RoundedButton(
         label: 'My Basket',
         onPressed: () {
-          Navigator.of(context).pushNamed(DonationBasketScreen.id);
+          if (context.read<Basket>().selectedFruits.isNotEmpty) {
+            Navigator.of(context).pushNamed(DonationBasketScreen.id);
+          } else {
+            MessageBar(context, message: 'Your basket is empty!').show();
+          }
         },
       ),
     );
