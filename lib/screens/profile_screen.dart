@@ -39,8 +39,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final AutoScroll<Field> _scroller = AutoScroll(
     elements: {
       Field.Name: 0,
-      Field.Phone: 1,
-      Field.Address: 2,
+      Field.Address: 1,
+      Field.Phone: 2,
       Field.Password: 3,
     },
   );
@@ -457,13 +457,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       inputFieldSizedBox(),
                       lastNameInputField(),
                       inputGroupLabel(
-                        'Phone Number',
-                        tag: Field.Phone,
-                      ),
-                      phoneNumberField(),
-                      verifyCodeField(),
-                      inputFieldSizedBox(),
-                      inputGroupLabel(
                         'Address',
                         tag: Field.Address,
                       ),
@@ -474,6 +467,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       stateInputField(),
                       inputFieldSizedBox(),
                       zipInputField(),
+                      inputFieldSizedBox(),
+                      inputGroupLabel(
+                        'Phone Number',
+                        tag: Field.Phone,
+                      ),
+                      phoneNumberField(),
+                      verifyCodeField(),
                       inputFieldSizedBox(),
                       inputGroupLabel(
                         'Change Password',
@@ -574,106 +574,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           );
         });
       },
-    );
-  }
-
-  Widget phoneNumberField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              flex: 3,
-              child: InputField(
-                label: 'Phone Number',
-                controller: _phoneNumber,
-                prefixText: _dialCode,
-                helperText: null,
-                onChanged: (value) async {
-                  String phoneNumber = _phoneNumber.text.trim();
-                  _phoneError = '';
-                  if (phoneNumber.isNotEmpty) {
-                    _phoneError = await Validate.phoneNumber(
-                      phoneNumber: phoneNumber,
-                      isoCode: _isoCode,
-                    );
-                  }
-                  _showVerifyPhone = false;
-                  _phoneButtonLabel = 'Remove';
-                  Map<String, String> phone = context.read<Account>().phone;
-                  bool insert = phone.isEmpty && (phoneNumber.isNotEmpty);
-                  bool update = phone.isNotEmpty &&
-                      (phoneNumber != phone[FireStoreService.kPhoneNumber] ||
-                          _isoCode != phone[FireStoreService.kPhoneCountry]);
-                  if (insert || update || phoneNumber.isEmpty) {
-                    _phoneButtonLabel = 'Add';
-                  }
-                  setState(() {});
-                },
-              ),
-            ),
-            SizedBox(width: 5.0),
-            Expanded(
-              flex: 2,
-              child: RoundedButton(
-                label: _phoneButtonLabel,
-                onPressed: () {
-                  _updatePhoneRequest();
-                },
-              ),
-            ),
-          ],
-        ),
-        Padding(
-          padding: EdgeInsets.symmetric(
-            vertical: 1.5,
-            horizontal: 20.0,
-          ),
-          child: Text(
-            _phoneError.trim(),
-            style: TextStyle(
-              color: kErrorColor,
-              fontSize: 16.0,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget verifyCodeField() {
-    return Visibility(
-      visible: _showVerifyPhone,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                flex: 3,
-                child: InputField(
-                  label: '6-Digit Code',
-                  controller: _confirmCode,
-                  helperText: null,
-                ),
-              ),
-              SizedBox(width: 5.0),
-              Expanded(
-                flex: 2,
-                child: RoundedButton(
-                  label: 'Verify',
-                  onPressed: () {
-                    _updatePhoneVerify();
-                  },
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 16.0),
-        ],
-      ),
     );
   }
 
@@ -799,6 +699,106 @@ class _ProfileScreenState extends State<ProfileScreen> {
           }
         });
       },
+    );
+  }
+
+  Widget phoneNumberField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 3,
+              child: InputField(
+                label: 'Phone Number',
+                controller: _phoneNumber,
+                prefixText: _dialCode,
+                helperText: null,
+                onChanged: (value) async {
+                  String phoneNumber = _phoneNumber.text.trim();
+                  _phoneError = '';
+                  if (phoneNumber.isNotEmpty) {
+                    _phoneError = await Validate.phoneNumber(
+                      phoneNumber: phoneNumber,
+                      isoCode: _isoCode,
+                    );
+                  }
+                  _showVerifyPhone = false;
+                  _phoneButtonLabel = 'Remove';
+                  Map<String, String> phone = context.read<Account>().phone;
+                  bool insert = phone.isEmpty && (phoneNumber.isNotEmpty);
+                  bool update = phone.isNotEmpty &&
+                      (phoneNumber != phone[FireStoreService.kPhoneNumber] ||
+                          _isoCode != phone[FireStoreService.kPhoneCountry]);
+                  if (insert || update || phoneNumber.isEmpty) {
+                    _phoneButtonLabel = 'Add';
+                  }
+                  setState(() {});
+                },
+              ),
+            ),
+            SizedBox(width: 5.0),
+            Expanded(
+              flex: 2,
+              child: RoundedButton(
+                label: _phoneButtonLabel,
+                onPressed: () {
+                  _updatePhoneRequest();
+                },
+              ),
+            ),
+          ],
+        ),
+        Padding(
+          padding: EdgeInsets.symmetric(
+            vertical: 1.5,
+            horizontal: 20.0,
+          ),
+          child: Text(
+            _phoneError.trim(),
+            style: TextStyle(
+              color: kErrorColor,
+              fontSize: 16.0,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget verifyCodeField() {
+    return Visibility(
+      visible: _showVerifyPhone,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: InputField(
+                  label: '6-Digit Code',
+                  controller: _confirmCode,
+                  helperText: null,
+                ),
+              ),
+              SizedBox(width: 5.0),
+              Expanded(
+                flex: 2,
+                child: RoundedButton(
+                  label: 'Verify',
+                  onPressed: () {
+                    _updatePhoneVerify();
+                  },
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 16.0),
+        ],
+      ),
     );
   }
 
