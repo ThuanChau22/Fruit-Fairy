@@ -114,8 +114,10 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
   Widget collectOptionButton({
     @required String label,
     @required CollectOption option,
+    Fruit fruit,
   }) {
     Size screen = MediaQuery.of(context).size;
+
     return Expanded(
       child: Padding(
         padding: EdgeInsets.symmetric(
@@ -129,6 +131,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
           onPressed: () {
             setState(() {
               _collectOption = option;
+
             });
           },
         ),
@@ -180,6 +183,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
     Size screen = MediaQuery.of(context).size;
     bool squeeze = screen.height < screen.width;
     bool needCollect = _collectOption == CollectOption.Yes;
+    fruit.changeOption(false);
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: screen.width * (needCollect ? (squeeze ? 0.2 : 0.02) : 0.0),
@@ -214,6 +218,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
         ],
       ),
     );
+
   }
 
   Widget removeButton(VoidCallback onPressed) {
@@ -231,6 +236,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
 
   Widget adjustableFruitTile(Fruit fruit) {
     Size screen = MediaQuery.of(context).size;
+    fruit.changeOption(true);
     return Container(
       decoration: BoxDecoration(
         color: kObjectBackgroundColor,
