@@ -82,8 +82,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _updatedName = false;
   bool _updatedAddress = false;
   bool _updatedPassword = false;
-  bool _needVerifyPhone = false;
-  String _updatePhoneLabel = 'Add';
+  bool _showVerifyPhone = false;
+  String _phoneButtonLabel = 'Add';
   DeleteMode _deleteMode = DeleteMode.Input;
   bool _obscureDeletePassword = true;
 
@@ -103,12 +103,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _isoCode = phone[FireStoreService.kPhoneCountry];
       _dialCode = phone[FireStoreService.kPhoneDialCode];
       _phoneNumber.text = phone[FireStoreService.kPhoneNumber];
-      _updatePhoneLabel = 'Remove';
+      _phoneButtonLabel = 'Remove';
     } else {
       _isoCode = 'US';
       _dialCode = '+1';
       _phoneNumber.clear();
-      _updatePhoneLabel = 'Add';
+      _phoneButtonLabel = 'Add';
     }
     Map<String, String> address = account.address;
     if (address.isNotEmpty) {
@@ -170,7 +170,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _scrollToError();
       updateMessage = errorMessage;
     }
-    _needVerifyPhone = false;
+    _showVerifyPhone = false;
     _verifyCode = null;
     setState(() => _showSpinner = false);
     MessageBar(context, message: updateMessage).show();
@@ -313,8 +313,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           },
         );
         _confirmCode.clear();
-        _needVerifyPhone = true;
-        _updatePhoneLabel = 'Re-send';
+        _showVerifyPhone = true;
+        _phoneButtonLabel = 'Re-send';
         MessageBar(context, message: notifyMessage).show();
       } else {
         if (await auth.removePhone()) {
@@ -324,7 +324,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 phoneNumber: '',
               );
           _phoneNumber.clear();
-          _updatePhoneLabel = 'Add';
+          _phoneButtonLabel = 'Add';
           MessageBar(context, message: 'Phone number removed').show();
         }
       }
@@ -345,8 +345,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             );
         _phoneNumber.text = phoneNumber;
         _confirmCode.clear();
-        _needVerifyPhone = false;
-        _updatePhoneLabel = 'Remove';
+        _showVerifyPhone = false;
+        _phoneButtonLabel = 'Remove';
         _verifyCode = null;
         errorMessage = 'Phone number updated';
       }
@@ -441,71 +441,72 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
-    return GestureWrapper(
-      child: Scaffold(
-        appBar: AppBar(title: Text('Profile')),
-        body: SafeArea(
-          child: ModalProgressHUD(
-            inAsyncCall: _showSpinner,
-            progressIndicator: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(kAppBarColor),
-            ),
-            child: ScrollableLayout(
-              controller: _scroller.controller,
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  vertical: screen.height * 0.03,
-                  horizontal: screen.width * 0.15,
-                ),
-                child: Column(
-                  children: [
-                    inputGroupLabel(
-                      'Account',
-                      tag: Field.Name,
-                    ),
-                    emailInputField(),
-                    inputFieldSizedBox(),
-                    firstNameInputField(),
-                    inputFieldSizedBox(),
-                    lastNameInputField(),
-                    inputFieldSizedBox(),
-                    inputGroupSizedBox(),
-                    inputGroupLabel(
-                      'Phone Number',
-                      tag: Field.Phone,
-                    ),
-                    phoneNumberField(),
-                    verifyCodeField(),
-                    inputFieldSizedBox(),
-                    inputGroupSizedBox(),
-                    inputGroupLabel(
-                      'Address',
-                      tag: Field.Address,
-                    ),
-                    streetInputField(),
-                    inputFieldSizedBox(),
-                    cityInputField(),
-                    inputFieldSizedBox(),
-                    stateInputField(),
-                    inputFieldSizedBox(),
-                    zipInputField(),
-                    inputFieldSizedBox(),
-                    inputGroupSizedBox(),
-                    inputGroupLabel(
-                      'Change Password',
-                      tag: Field.Password,
-                    ),
-                    currentPasswordInputField(),
-                    inputFieldSizedBox(),
-                    newPasswordInputField(),
-                    inputFieldSizedBox(),
-                    confirmPasswordInputField(),
-                    inputFieldSizedBox(),
-                    inputGroupSizedBox(),
-                    saveButton(),
-                    SizedBox(height: screen.height * 0.05),
-                    deleteAccountLink(),
-                  ],
+    return WillPopScope(
+      onWillPop: () async {
+        MessageBar(context).hide();
+        return true;
+      },
+      child: GestureWrapper(
+        child: Scaffold(
+          appBar: AppBar(title: Text('Profile')),
+          body: SafeArea(
+            child: ModalProgressHUD(
+              inAsyncCall: _showSpinner,
+              progressIndicator: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation(kAppBarColor),
+              ),
+              child: ScrollableLayout(
+                controller: _scroller.controller,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    vertical: screen.height * 0.03,
+                    horizontal: screen.width * 0.15,
+                  ),
+                  child: Column(
+                    children: [
+                      inputGroupLabel(
+                        'Account',
+                        tag: Field.Name,
+                      ),
+                      emailInputField(),
+                      inputFieldSizedBox(),
+                      firstNameInputField(),
+                      inputFieldSizedBox(),
+                      lastNameInputField(),
+                      inputGroupLabel(
+                        'Phone Number',
+                        tag: Field.Phone,
+                      ),
+                      phoneNumberField(),
+                      verifyCodeField(),
+                      inputFieldSizedBox(),
+                      inputGroupLabel(
+                        'Address',
+                        tag: Field.Address,
+                      ),
+                      streetInputField(),
+                      inputFieldSizedBox(),
+                      cityInputField(),
+                      inputFieldSizedBox(),
+                      stateInputField(),
+                      inputFieldSizedBox(),
+                      zipInputField(),
+                      inputFieldSizedBox(),
+                      inputGroupLabel(
+                        'Change Password',
+                        tag: Field.Password,
+                      ),
+                      currentPasswordInputField(),
+                      inputFieldSizedBox(),
+                      newPasswordInputField(),
+                      inputFieldSizedBox(),
+                      confirmPasswordInputField(),
+                      inputFieldSizedBox(),
+                      saveButton(),
+                      SizedBox(height: screen.height * 0.05),
+                      deleteAccountLink(),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -540,7 +541,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               height: 2.0,
               thickness: 2.0,
             ),
-            SizedBox(height: screen.height * 0.02),
+            SizedBox(height: screen.height * 0.01),
           ],
         ),
       ),
@@ -550,11 +551,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget inputFieldSizedBox() {
     Size screen = MediaQuery.of(context).size;
     return SizedBox(height: screen.height * 0.01);
-  }
-
-  Widget inputGroupSizedBox() {
-    Size screen = MediaQuery.of(context).size;
-    return SizedBox(height: screen.height * 0.02);
   }
 
   Widget emailInputField() {
@@ -621,15 +617,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       isoCode: _isoCode,
                     );
                   }
-                  _needVerifyPhone = false;
-                  _updatePhoneLabel = 'Remove';
+                  _showVerifyPhone = false;
+                  _phoneButtonLabel = 'Remove';
                   Map<String, String> phone = context.read<Account>().phone;
                   bool insert = phone.isEmpty && (phoneNumber.isNotEmpty);
                   bool update = phone.isNotEmpty &&
                       (phoneNumber != phone[FireStoreService.kPhoneNumber] ||
                           _isoCode != phone[FireStoreService.kPhoneCountry]);
                   if (insert || update || phoneNumber.isEmpty) {
-                    _updatePhoneLabel = 'Add';
+                    _phoneButtonLabel = 'Add';
                   }
                   setState(() {});
                 },
@@ -639,7 +635,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Expanded(
               flex: 2,
               child: RoundedButton(
-                label: _updatePhoneLabel,
+                label: _phoneButtonLabel,
                 onPressed: () {
                   _updatePhoneRequest();
                 },
@@ -666,18 +662,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget verifyCodeField() {
     return Visibility(
-      visible: _needVerifyPhone,
+      visible: _showVerifyPhone,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 flex: 3,
                 child: InputField(
                   label: '6-Digit Code',
                   controller: _confirmCode,
+                  helperText: null,
                 ),
               ),
               SizedBox(width: 5.0),
@@ -692,6 +688,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ],
           ),
+          SizedBox(height: 16.0),
         ],
       ),
     );
@@ -746,10 +743,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
               sessionToken: sessionToken.getToken(),
             );
             if (address.isNotEmpty) {
-              _street.text = address[AddressService.kStreet];
-              _city.text = address[AddressService.kCity];
-              _state.text = address[AddressService.kState];
-              _zipCode.text = address[AddressService.kZipCode];
+              setState(() {
+                _street.text = address[AddressService.kStreet];
+                _city.text = address[AddressService.kCity];
+                _state.text = address[AddressService.kState];
+                _zipCode.text = address[AddressService.kZipCode];
+                _streetError = Validate.checkStreet(_street.text.trim());
+                _cityError = Validate.checkCity(_city.text.trim());
+                _stateError = Validate.checkState(_state.text.trim());
+                _zipError = Validate.zipCode(_zipCode.text.trim());
+              });
               sessionToken.clear();
             }
           },
