@@ -152,7 +152,6 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
           onPressed: () {
             setState(() {
               _collectOption = option;
-
             });
           },
         ),
@@ -239,7 +238,6 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
         ],
       ),
     );
-
   }
 
   Widget removeButton(VoidCallback onPressed) {

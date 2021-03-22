@@ -28,6 +28,7 @@ dependencies:
   phone_number: ^0.8.1+1
   modal_progress_hud: ^0.1.3
   scroll_to_index: ^1.0.6
+  simple_tooltip: ^0.1.16
   rflutter_alert: ^1.1.0
   strings: ^0.1.4
   cached_network_image: ^2.5.1

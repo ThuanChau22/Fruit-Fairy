@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:simple_tooltip/simple_tooltip.dart';
+//
+import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
-
-import '../constant.dart';
 import 'donation_confirm_screen.dart';
 
 class CharitySelectionScreen extends StatefulWidget {

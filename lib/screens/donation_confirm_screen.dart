@@ -6,8 +6,8 @@ import 'package:fruitfairy/widgets/fruit_tile.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:provider/provider.dart';
 import 'package:fruitfairy/models/fruit.dart';
-
-import '../constant.dart';
+//
+import 'package:fruitfairy/constant.dart';
 
 class DonationConfirmScreen extends StatefulWidget {
   static const String id = 'donation_confirm_screen';

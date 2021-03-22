@@ -464,6 +464,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.6"
+  simple_tooltip:
+    dependency: "direct main"
+    description:
+      name: simple_tooltip
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.16"
   sky_engine:
     dependency: transitive
     description: flutter
