@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/basket.dart';
 import 'package:fruitfairy/models/fruit.dart';
-import 'package:fruitfairy/screens/confirmation_donation_screen.dart';
+import 'package:fruitfairy/screens/donation_contact_screen.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/rounded_icon_button.dart';
@@ -22,42 +22,64 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
   final Color _selectedColor = Colors.green.shade100;
   CollectOption _collectOption = CollectOption.Yes;
 
+  VoidCallback listener;
+
+  @override
+  void initState() {
+    super.initState();
+    Basket basket = context.read<Basket>();
+    listener = () {
+      if (basket.selectedFruits.isEmpty) {
+        basket.removeListener(listener);
+        Navigator.of(context).pop();
+      }
+    };
+    basket.addListener(listener);
+  }
+
   @override
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
-    return Scaffold(
-      appBar: AppBar(title: Text('Donation')),
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            vertical: screen.height * 0.03,
-            horizontal: screen.width * 0.05,
-          ),
-          child: Column(
-            children: [
-              sectionLabel('Do you need help collecting?'),
-              collectOptionTile(),
-              divider(),
-              Visibility(
-                visible: _collectOption == CollectOption.Yes,
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                        vertical: screen.height * 0.01,
+    return WillPopScope(
+      onWillPop: () async {
+        Basket basket = context.read<Basket>();
+        basket.removeListener(listener);
+        return true;
+      },
+      child: Scaffold(
+        appBar: AppBar(title: Text('Donation')),
+        body: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              vertical: screen.height * 0.03,
+              horizontal: screen.width * 0.05,
+            ),
+            child: Column(
+              children: [
+                sectionLabel('Do you need help collecting?'),
+                collectOptionTile(),
+                divider(),
+                Visibility(
+                  visible: _collectOption == CollectOption.Yes,
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                          vertical: screen.height * 0.01,
+                        ),
+                        child: sectionLabel(
+                          'Adjust percentage of produce you want to donate:',
+                        ),
                       ),
-                      child: sectionLabel(
-                        'Adjust percentage of produce you want to donate:',
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              selectedFruits(),
-              divider(),
-              SizedBox(height: screen.height * 0.03),
-              nextButton(),
-            ],
+                selectedFruits(),
+                divider(),
+                SizedBox(height: screen.height * 0.03),
+                nextButton(),
+              ],
+            ),
           ),
         ),
       ),
@@ -114,8 +136,10 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
   Widget collectOptionButton({
     @required String label,
     @required CollectOption option,
+    Fruit fruit,
   }) {
     Size screen = MediaQuery.of(context).size;
+
     return Expanded(
       child: Padding(
         padding: EdgeInsets.symmetric(
@@ -128,6 +152,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
           onPressed: () {
             setState(() {
               _collectOption = option;
+
             });
           },
         ),
@@ -179,6 +204,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
     Size screen = MediaQuery.of(context).size;
     bool squeeze = screen.height < screen.width;
     bool needCollect = _collectOption == CollectOption.Yes;
+    fruit.changeOption(false);
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: screen.width * (needCollect ? (squeeze ? 0.2 : 0.02) : 0.0),
@@ -213,6 +239,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
         ],
       ),
     );
+
   }
 
   Widget removeButton(VoidCallback onPressed) {
@@ -230,6 +257,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
 
   Widget adjustableFruitTile(Fruit fruit) {
     Size screen = MediaQuery.of(context).size;
+    fruit.changeOption(true);
     return Container(
       decoration: BoxDecoration(
         color: kObjectColor,
@@ -246,7 +274,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
             flex: 4,
             child: Padding(
               padding: EdgeInsets.only(
-                top: screen.height * 0.02,
+                top: screen.height * 0.01,
               ),
               child: FruitTile(
                 fruitName: fruit.name,
@@ -324,7 +352,9 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
       child: RoundedButton(
         label: 'Next',
         onPressed: () {
-          Navigator.of(context).pushNamed(ConfirmationDonationScreen.id);
+          if (context.read<Basket>().selectedFruits.isNotEmpty) {
+            Navigator.of(context).pushNamed(DonationContactScreen.id);
+          }
         },
       ),
     );

@@ -16,7 +16,6 @@ class RoundedButton extends StatelessWidget {
     this.backgroundColor,
     this.leading,
     this.trailing,
-    Color labelColor,
   });
 
   @override

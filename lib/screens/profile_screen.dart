@@ -39,8 +39,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final AutoScroll<Field> _scroller = AutoScroll(
     elements: {
       Field.Name: 0,
-      Field.Phone: 1,
-      Field.Address: 2,
+      Field.Address: 1,
+      Field.Phone: 2,
       Field.Password: 3,
     },
   );
@@ -79,11 +79,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _showSpinner = false;
   bool _obscureOldPassword = true;
   bool _obscureNewPassword = true;
-  bool _updatedName = false;
-  bool _updatedAddress = false;
+  bool _updatedName = true;
+  bool _updatedPhone = true;
+  bool _updatedAddress = true;
   bool _updatedPassword = false;
-  bool _needVerifyPhone = false;
-  String _updatePhoneLabel = 'Add';
+  bool _showVerifyPhone = false;
+  String _phoneButtonLabel = 'Add';
   DeleteMode _deleteMode = DeleteMode.Input;
   bool _obscureDeletePassword = true;
 
@@ -96,72 +97,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _fillInputFields() {
     Account account = context.read<Account>();
     _email.text = account.email;
-    _firstName.text = account.firstName;
-    _lastName.text = account.lastName;
+    if (_updatedName) {
+      _firstName.text = account.firstName;
+      _lastName.text = account.lastName;
+      _updatedName = false;
+    }
     Map<String, String> phone = account.phone;
-    if (phone.isNotEmpty) {
+    if (phone.isNotEmpty && _updatedPhone) {
       _isoCode = phone[FireStoreService.kPhoneCountry];
       _dialCode = phone[FireStoreService.kPhoneDialCode];
       _phoneNumber.text = phone[FireStoreService.kPhoneNumber];
-      _updatePhoneLabel = 'Remove';
-    } else {
-      _isoCode = 'US';
-      _dialCode = '+1';
-      _phoneNumber.clear();
-      _updatePhoneLabel = 'Add';
+      _phoneButtonLabel = 'Remove';
+      _updatedPhone = false;
     }
     Map<String, String> address = account.address;
-    if (address.isNotEmpty) {
+    if (address.isNotEmpty && _updatedAddress) {
       _street.text = address[FireStoreService.kAddressStreet];
       _city.text = address[FireStoreService.kAddressCity];
       _state.text = address[FireStoreService.kAddressState];
       _zipCode.text = address[FireStoreService.kAddressZip];
-    } else {
-      _street.clear();
-      _city.clear();
-      _state.clear();
-      _zipCode.clear();
+      _updatedAddress = false;
     }
     setState(() {});
   }
 
   void _updateProfile() async {
     setState(() => _showSpinner = true);
-
-    // Holding user inputs while updating
-    String firstName = _firstName.text.trim();
-    String lastName = _lastName.text.trim();
-    String street = _street.text.trim();
-    String city = _city.text.trim();
-    String state = _state.text.trim();
-    String zip = _zipCode.text.trim();
-    String oldPassword = _oldPassword.text;
-    String newPassword = _newPassword.text;
-    String confirmPassword = _confirmPassword.text;
-
-    String errorMessage = await _updateName(
-      firstName: firstName,
-      lastName: lastName,
-    );
+    String errorMessage = await _updateName();
     if (errorMessage.isEmpty) {
-      errorMessage = await _updateAddress(
-        street: street,
-        city: city,
-        state: state,
-        zip: zip,
-      );
+      errorMessage = await _updateAddress();
     }
     if (errorMessage.isEmpty) {
-      errorMessage = await _updatePassword(
-        oldPassword: oldPassword,
-        newPassword: newPassword,
-        confirmPassword: confirmPassword,
-      );
+      errorMessage = await _updatePassword();
     }
     String updateMessage;
     if (errorMessage.isEmpty) {
       if (_updatedName || _updatedAddress || _updatedPassword) {
-        _updatedName = _updatedAddress = _updatedPassword = false;
+        _updatedPassword = false;
         updateMessage = 'Profile updated';
       } else {
         updateMessage = 'Profile is up-to-date';
@@ -170,16 +142,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _scrollToError();
       updateMessage = errorMessage;
     }
-    _needVerifyPhone = false;
+    _showVerifyPhone = false;
     _verifyCode = null;
     setState(() => _showSpinner = false);
     MessageBar(context, message: updateMessage).show();
   }
 
-  Future<String> _updateName({
-    @required firstName,
-    @required lastName,
-  }) async {
+  Future<String> _updateName() async {
+    String firstName = _firstName.text.trim();
+    String lastName = _lastName.text.trim();
     Account account = context.read<Account>();
     if (firstName != account.firstName || lastName != account.lastName) {
       String error = _firstNameError = Validate.name(
@@ -207,12 +178,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return '';
   }
 
-  Future<String> _updateAddress({
-    @required String street,
-    @required String city,
-    @required String state,
-    @required String zip,
-  }) async {
+  Future<String> _updateAddress() async {
+    String street = _street.text.trim();
+    String city = _city.text.trim();
+    String state = _state.text.trim();
+    String zip = _zipCode.text.trim();
     Map<String, String> address = context.read<Account>().address;
     bool isFilled = street.isNotEmpty ||
         city.isNotEmpty ||
@@ -251,11 +221,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return '';
   }
 
-  Future<String> _updatePassword({
-    @required String oldPassword,
-    @required String newPassword,
-    @required String confirmPassword,
-  }) async {
+  Future<String> _updatePassword() async {
+    String oldPassword = _oldPassword.text;
+    String newPassword = _newPassword.text;
+    String confirmPassword = _confirmPassword.text;
     if (newPassword.isNotEmpty) {
       String error = _oldPasswordError = Validate.checkPassword(oldPassword);
       error += _newPasswordError = Validate.password(newPassword);
@@ -303,6 +272,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
         String notifyMessage = await auth.registerPhone(
           phoneNumber: '$_dialCode$phoneNumber',
           update: account.phone.isNotEmpty,
+          completed: (errorMessage) async {
+            setState(() => _showSpinner = true);
+            if (errorMessage.isEmpty) {
+              await updatePhoneNumber();
+              errorMessage = 'Phone number updated';
+            }
+            MessageBar(context, message: errorMessage).show();
+            setState(() => _showSpinner = false);
+          },
           codeSent: (verifyCode) async {
             if (verifyCode != null) {
               _verifyCode = verifyCode;
@@ -313,8 +291,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           },
         );
         _confirmCode.clear();
-        _needVerifyPhone = true;
-        _updatePhoneLabel = 'Re-send';
+        _showVerifyPhone = true;
+        _phoneButtonLabel = 'Re-send';
         MessageBar(context, message: notifyMessage).show();
       } else {
         if (await auth.removePhone()) {
@@ -324,7 +302,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 phoneNumber: '',
               );
           _phoneNumber.clear();
-          _updatePhoneLabel = 'Add';
+          _phoneButtonLabel = 'Add';
           MessageBar(context, message: 'Phone number removed').show();
         }
       }
@@ -337,22 +315,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (_verifyCode != null) {
       String errorMessage = await _verifyCode(_confirmCode.text.trim());
       if (errorMessage.isEmpty) {
-        String phoneNumber = _phoneNumber.text.trim();
-        await context.read<FireStoreService>().updatePhoneNumber(
-              country: _isoCode,
-              dialCode: _dialCode,
-              phoneNumber: phoneNumber,
-            );
-        _phoneNumber.text = phoneNumber;
-        _confirmCode.clear();
-        _needVerifyPhone = false;
-        _updatePhoneLabel = 'Remove';
-        _verifyCode = null;
+        await updatePhoneNumber();
         errorMessage = 'Phone number updated';
       }
       MessageBar(context, message: errorMessage).show();
     }
     setState(() => _showSpinner = false);
+  }
+
+  Future<void> updatePhoneNumber() async {
+    String phoneNumber = _phoneNumber.text.trim();
+    await context.read<FireStoreService>().updatePhoneNumber(
+          country: _isoCode,
+          dialCode: _dialCode,
+          phoneNumber: phoneNumber,
+        );
+    _phoneNumber.text = phoneNumber;
+    _confirmCode.clear();
+    _showVerifyPhone = false;
+    _phoneButtonLabel = 'Remove';
+    _verifyCode = null;
+    _updatedPhone = true;
   }
 
   bool _addressIsFilled() {
@@ -441,71 +424,72 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
-    return GestureWrapper(
-      child: Scaffold(
-        appBar: AppBar(title: Text('Profile')),
-        body: SafeArea(
-          child: ModalProgressHUD(
-            inAsyncCall: _showSpinner,
-            progressIndicator: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
-            ),
-            child: ScrollableLayout(
-              controller: _scroller.controller,
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  vertical: screen.height * 0.03,
-                  horizontal: screen.width * 0.15,
-                ),
-                child: Column(
-                  children: [
-                    inputGroupLabel(
-                      'Account',
-                      tag: Field.Name,
-                    ),
-                    emailInputField(),
-                    inputFieldSizedBox(),
-                    firstNameInputField(),
-                    inputFieldSizedBox(),
-                    lastNameInputField(),
-                    inputFieldSizedBox(),
-                    inputGroupSizedBox(),
-                    inputGroupLabel(
-                      'Phone Number',
-                      tag: Field.Phone,
-                    ),
-                    phoneNumberField(),
-                    verifyCodeField(),
-                    inputFieldSizedBox(),
-                    inputGroupSizedBox(),
-                    inputGroupLabel(
-                      'Address',
-                      tag: Field.Address,
-                    ),
-                    streetInputField(),
-                    inputFieldSizedBox(),
-                    cityInputField(),
-                    inputFieldSizedBox(),
-                    stateInputField(),
-                    inputFieldSizedBox(),
-                    zipInputField(),
-                    inputFieldSizedBox(),
-                    inputGroupSizedBox(),
-                    inputGroupLabel(
-                      'Change Password',
-                      tag: Field.Password,
-                    ),
-                    currentPasswordInputField(),
-                    inputFieldSizedBox(),
-                    newPasswordInputField(),
-                    inputFieldSizedBox(),
-                    confirmPasswordInputField(),
-                    inputFieldSizedBox(),
-                    inputGroupSizedBox(),
-                    saveButton(),
-                    SizedBox(height: screen.height * 0.05),
-                    deleteAccountLink(),
-                  ],
+    return WillPopScope(
+      onWillPop: () async {
+        MessageBar(context).hide();
+        return true;
+      },
+      child: GestureWrapper(
+        child: Scaffold(
+          appBar: AppBar(title: Text('Profile')),
+          body: SafeArea(
+            child: ModalProgressHUD(
+              inAsyncCall: _showSpinner,
+              progressIndicator: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
+              ),
+              child: ScrollableLayout(
+                controller: _scroller.controller,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    vertical: screen.height * 0.03,
+                    horizontal: screen.width * 0.15,
+                  ),
+                  child: Column(
+                    children: [
+                      inputGroupLabel(
+                        'Account',
+                        tag: Field.Name,
+                      ),
+                      emailInputField(),
+                      inputFieldSizedBox(),
+                      firstNameInputField(),
+                      inputFieldSizedBox(),
+                      lastNameInputField(),
+                      inputGroupLabel(
+                        'Address',
+                        tag: Field.Address,
+                      ),
+                      streetInputField(),
+                      inputFieldSizedBox(),
+                      cityInputField(),
+                      inputFieldSizedBox(),
+                      stateInputField(),
+                      inputFieldSizedBox(),
+                      zipInputField(),
+                      inputFieldSizedBox(),
+                      inputGroupLabel(
+                        'Phone Number',
+                        tag: Field.Phone,
+                      ),
+                      phoneNumberField(),
+                      verifyCodeField(),
+                      inputFieldSizedBox(),
+                      inputGroupLabel(
+                        'Change Password',
+                        tag: Field.Password,
+                      ),
+                      currentPasswordInputField(),
+                      inputFieldSizedBox(),
+                      newPasswordInputField(),
+                      inputFieldSizedBox(),
+                      confirmPasswordInputField(),
+                      inputFieldSizedBox(),
+                      saveButton(),
+                      SizedBox(height: screen.height * 0.05),
+                      deleteAccountLink(),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -540,7 +524,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               height: 2.0,
               thickness: 2.0,
             ),
-            SizedBox(height: screen.height * 0.02),
+            SizedBox(height: screen.height * 0.01),
           ],
         ),
       ),
@@ -550,11 +534,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget inputFieldSizedBox() {
     Size screen = MediaQuery.of(context).size;
     return SizedBox(height: screen.height * 0.01);
-  }
-
-  Widget inputGroupSizedBox() {
-    Size screen = MediaQuery.of(context).size;
-    return SizedBox(height: screen.height * 0.02);
   }
 
   Widget emailInputField() {
@@ -595,105 +574,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           );
         });
       },
-    );
-  }
-
-  Widget phoneNumberField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              flex: 3,
-              child: InputField(
-                label: 'Phone Number',
-                controller: _phoneNumber,
-                prefixText: _dialCode,
-                helperText: null,
-                onChanged: (value) async {
-                  String phoneNumber = _phoneNumber.text.trim();
-                  _phoneError = '';
-                  if (phoneNumber.isNotEmpty) {
-                    _phoneError = await Validate.phoneNumber(
-                      phoneNumber: phoneNumber,
-                      isoCode: _isoCode,
-                    );
-                  }
-                  _needVerifyPhone = false;
-                  _updatePhoneLabel = 'Remove';
-                  Map<String, String> phone = context.read<Account>().phone;
-                  bool insert = phone.isEmpty && (phoneNumber.isNotEmpty);
-                  bool update = phone.isNotEmpty &&
-                      (phoneNumber != phone[FireStoreService.kPhoneNumber] ||
-                          _isoCode != phone[FireStoreService.kPhoneCountry]);
-                  if (insert || update || phoneNumber.isEmpty) {
-                    _updatePhoneLabel = 'Add';
-                  }
-                  setState(() {});
-                },
-              ),
-            ),
-            SizedBox(width: 5.0),
-            Expanded(
-              flex: 2,
-              child: RoundedButton(
-                label: _updatePhoneLabel,
-                onPressed: () {
-                  _updatePhoneRequest();
-                },
-              ),
-            ),
-          ],
-        ),
-        Padding(
-          padding: EdgeInsets.symmetric(
-            vertical: 1.5,
-            horizontal: 20.0,
-          ),
-          child: Text(
-            _phoneError.trim(),
-            style: TextStyle(
-              color: kErrorColor,
-              fontSize: 16.0,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget verifyCodeField() {
-    return Visibility(
-      visible: _needVerifyPhone,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                flex: 3,
-                child: InputField(
-                  label: '6-Digit Code',
-                  controller: _confirmCode,
-                ),
-              ),
-              SizedBox(width: 5.0),
-              Expanded(
-                flex: 2,
-                child: RoundedButton(
-                  label: 'Verify',
-                  onPressed: () {
-                    _updatePhoneVerify();
-                  },
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 
@@ -746,10 +626,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
               sessionToken: sessionToken.getToken(),
             );
             if (address.isNotEmpty) {
-              _street.text = address[AddressService.kStreet];
-              _city.text = address[AddressService.kCity];
-              _state.text = address[AddressService.kState];
-              _zipCode.text = address[AddressService.kZipCode];
+              setState(() {
+                _street.text = address[AddressService.kStreet];
+                _city.text = address[AddressService.kCity];
+                _state.text = address[AddressService.kState];
+                _zipCode.text = address[AddressService.kZipCode];
+                _streetError = Validate.checkStreet(_street.text.trim());
+                _cityError = Validate.checkCity(_city.text.trim());
+                _stateError = Validate.checkState(_state.text.trim());
+                _zipError = Validate.zipCode(_zipCode.text.trim());
+              });
               sessionToken.clear();
             }
           },
@@ -813,6 +699,106 @@ class _ProfileScreenState extends State<ProfileScreen> {
           }
         });
       },
+    );
+  }
+
+  Widget phoneNumberField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 3,
+              child: InputField(
+                label: 'Phone Number',
+                controller: _phoneNumber,
+                prefixText: _dialCode,
+                helperText: null,
+                onChanged: (value) async {
+                  String phoneNumber = _phoneNumber.text.trim();
+                  _phoneError = '';
+                  if (phoneNumber.isNotEmpty) {
+                    _phoneError = await Validate.phoneNumber(
+                      phoneNumber: phoneNumber,
+                      isoCode: _isoCode,
+                    );
+                  }
+                  _showVerifyPhone = false;
+                  _phoneButtonLabel = 'Remove';
+                  Map<String, String> phone = context.read<Account>().phone;
+                  bool insert = phone.isEmpty && (phoneNumber.isNotEmpty);
+                  bool update = phone.isNotEmpty &&
+                      (phoneNumber != phone[FireStoreService.kPhoneNumber] ||
+                          _isoCode != phone[FireStoreService.kPhoneCountry]);
+                  if (insert || update || phoneNumber.isEmpty) {
+                    _phoneButtonLabel = 'Add';
+                  }
+                  setState(() {});
+                },
+              ),
+            ),
+            SizedBox(width: 5.0),
+            Expanded(
+              flex: 2,
+              child: RoundedButton(
+                label: _phoneButtonLabel,
+                onPressed: () {
+                  _updatePhoneRequest();
+                },
+              ),
+            ),
+          ],
+        ),
+        Padding(
+          padding: EdgeInsets.symmetric(
+            vertical: 1.5,
+            horizontal: 20.0,
+          ),
+          child: Text(
+            _phoneError.trim(),
+            style: TextStyle(
+              color: kErrorColor,
+              fontSize: 16.0,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget verifyCodeField() {
+    return Visibility(
+      visible: _showVerifyPhone,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: InputField(
+                  label: '6-Digit Code',
+                  controller: _confirmCode,
+                  helperText: null,
+                ),
+              ),
+              SizedBox(width: 5.0),
+              Expanded(
+                flex: 2,
+                child: RoundedButton(
+                  label: 'Verify',
+                  onPressed: () {
+                    _updatePhoneVerify();
+                  },
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 16.0),
+        ],
+      ),
     );
   }
 

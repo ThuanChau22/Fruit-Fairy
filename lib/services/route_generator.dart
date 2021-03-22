@@ -4,12 +4,14 @@ import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
 import 'package:fruitfairy/screens/authentication/signin_screen.dart';
 import 'package:fruitfairy/screens/authentication/signup_role_screen.dart';
 import 'package:fruitfairy/screens/authentication/signup_donor_screen.dart';
+import 'package:fruitfairy/screens/charity_selection_screen.dart';
 import 'package:fruitfairy/screens/donation_basket_screen.dart';
+import 'package:fruitfairy/screens/donation_contact_screen.dart';
+import 'package:fruitfairy/screens/donation_confirm_screen.dart';
 import 'package:fruitfairy/screens/donation_detail_screen.dart';
-import 'package:fruitfairy/screens/profile_screen.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
 import 'package:fruitfairy/screens/picking_fruit_screen.dart';
-import 'package:fruitfairy/screens/confirmation_donation_screen.dart';
+import 'package:fruitfairy/screens/profile_screen.dart';
 
 // A class that generate screen routes associate with screen names
 // including animation and passing arguments in transition
@@ -24,8 +26,10 @@ class RouteGenerator {
     ProfileScreen.id: ProfileScreen(),
     PickingFruitScreen.id: PickingFruitScreen(),
     DonationBasketScreen.id: DonationBasketScreen(),
-    ConfirmationDonationScreen.id: ConfirmationDonationScreen(),
+    DonationContactScreen.id: DonationContactScreen(),
     DonationDetailScreen.id: DonationDetailScreen(),
+    CharitySelectionScreen.id: CharitySelectionScreen(),
+    DonationConfirmScreen.id: DonationConfirmScreen(),
   };
 
   static Route<dynamic> generate(RouteSettings settings) {

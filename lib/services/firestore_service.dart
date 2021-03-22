@@ -8,6 +8,21 @@ import 'package:fruitfairy/models/fruit.dart';
 class FireStoreService {
   /// Database fields
 
+  /// donations
+  static const String kCharities = 'charities';
+  static const String kCharityId = 'charityId';
+  static const String kCharityName = 'charityName';
+  static const String kDonorId = 'donorId';
+  static const String kDonorName = 'donorName';
+  static const String kFruit = 'fruit';
+  static const String kAmount = 'amount';
+  static const String kStatus = 'status';
+
+  /// fruits
+  static const String kFruits = 'fruits';
+  static const String kFruitName = 'name';
+  static const String kFruitPath = 'path';
+
   /// users
   static const String kUsers = 'users';
   static const String kEmail = 'email';
@@ -22,11 +37,6 @@ class FireStoreService {
   static const String kAddressCity = 'city';
   static const String kAddressState = 'state';
   static const String kAddressZip = 'zip';
-
-  /// fruits
-  static const String kFruits = 'fruits';
-  static const String kFruitName = 'name';
-  static const String kFruitPath = 'path';
 
   ///////////////
 

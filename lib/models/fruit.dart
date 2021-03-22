@@ -1,11 +1,12 @@
 class Fruit {
   static const Max = 100;
-  static const Min = 50;
+  static const Min = 25;
   final String id;
   final String name;
   final String imagePath;
   final String imageURL;
   int _amount = Min;
+  bool _selectedOption = false;
 
   Fruit({
     this.id,
@@ -16,6 +17,15 @@ class Fruit {
 
   int get amount {
     return _amount;
+  }
+
+  bool get selectedOption {
+    return _selectedOption;
+  }
+
+  bool changeOption(bool option){
+    _selectedOption = option;
+    return _selectedOption;
   }
 
   void increase(int amount) {
