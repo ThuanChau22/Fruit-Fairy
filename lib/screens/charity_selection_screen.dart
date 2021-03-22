@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 
 import '../constant.dart';
+import 'donation_confirm_screen.dart';
 
 class CharitySelectionScreen extends StatefulWidget {
   static const String id = 'charity_selection_screen';
@@ -89,7 +90,9 @@ class _CharitySelectionScreenState extends State<CharitySelectionScreen> {
             ),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: screen.width * 0.2),
-              child: RoundedButton(label: 'Next', onPressed: () {}),
+              child: RoundedButton(label: 'Next', onPressed: () {
+                Navigator.of(context).pushNamed(DonationConfirmScreen.id);
+              }),
             )
           ],
         ),

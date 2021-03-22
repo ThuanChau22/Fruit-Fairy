@@ -7,6 +7,7 @@ import 'package:fruitfairy/screens/authentication/signup_donor_screen.dart';
 import 'package:fruitfairy/screens/charity_selection_screen.dart';
 import 'package:fruitfairy/screens/donation_basket_screen.dart';
 import 'package:fruitfairy/screens/donation_contact_screen.dart';
+import 'package:fruitfairy/screens/donation_confirm_screen.dart';
 import 'package:fruitfairy/screens/donation_detail_screen.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
 import 'package:fruitfairy/screens/picking_fruit_screen.dart';
@@ -28,6 +29,7 @@ class RouteGenerator {
     DonationContactScreen.id: DonationContactScreen(),
     DonationDetailScreen.id: DonationDetailScreen(),
     CharitySelectionScreen.id: CharitySelectionScreen(),
+    DonationConfirmScreen.id: DonationConfirmScreen(),
   };
 
   static Route<dynamic> generate(RouteSettings settings) {
