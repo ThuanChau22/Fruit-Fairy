@@ -31,11 +31,11 @@ class Basket extends ChangeNotifier {
     fruitsData.forEach((id, fruit) {
       _fruits[id] = fruit;
     });
-    for (String fruitId in List.from(selectedFruits)) {
+    List.from(selectedFruits).forEach((fruitId) {
       if (!fruitsData.containsKey(fruitId)) {
-        removeFruit(fruitId);
+        _selectedFruits.remove(fruitId);
       }
-    }
+    });
     notifyListeners();
   }
 

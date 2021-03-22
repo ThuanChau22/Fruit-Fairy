@@ -4,7 +4,10 @@ class ScrollableLayout extends StatelessWidget {
   final Widget child;
   final ScrollController controller;
 
-  ScrollableLayout({this.child, this.controller});
+  ScrollableLayout({
+    @required this.child,
+    this.controller,
+  });
 
   @override
   Widget build(BuildContext context) {
