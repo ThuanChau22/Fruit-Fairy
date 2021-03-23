@@ -8,8 +8,6 @@ import 'package:rflutter_alert/rflutter_alert.dart';
 //
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
-import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
-import 'package:fruitfairy/screens/authentication/signin_screen.dart';
 import 'package:fruitfairy/services/address_service.dart';
 import 'package:fruitfairy/services/fireauth_service.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
@@ -30,6 +28,7 @@ enum DeleteMode { Input, Loading, Success }
 
 class ProfileScreen extends StatefulWidget {
   static const String id = 'profile_screen';
+  static const String signOut = 'sign_out';
 
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
@@ -59,6 +58,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final TextEditingController _confirmPassword = TextEditingController();
   final TextEditingController _deleteConfirm = TextEditingController();
 
+  final Set<Field> _updated = {};
+
   final SessionToken sessionToken = SessionToken();
 
   String _isoCode = 'US';
@@ -77,48 +78,81 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _deleteError = '';
 
   bool _showSpinner = false;
+
+  String _phoneButtonLabel = 'Add';
+  bool _showVerifyPhone = false;
   bool _obscureOldPassword = true;
   bool _obscureNewPassword = true;
-  bool _updatedName = true;
-  bool _updatedPhone = true;
-  bool _updatedAddress = true;
-  bool _updatedPassword = false;
-  bool _showVerifyPhone = false;
-  String _phoneButtonLabel = 'Add';
   DeleteMode _deleteMode = DeleteMode.Input;
   bool _obscureDeletePassword = true;
 
-  StreamSubscription<DocumentSnapshot> _subscription;
+  StreamSubscription<DocumentSnapshot> _userStream;
 
   Future<String> Function(String smsCode) _verifyCode;
 
   StateSetter _setDialogState;
 
-  void _fillInputFields() {
+  Function _signOut;
+
+  void _updateInputFields() {
+    fillEmail();
+    if (_updated.isEmpty) {
+      fillName();
+      fillAddress();
+      fillPhone();
+    } else {
+      if (_updated.contains(Field.Name)) {
+        fillName();
+      }
+      if (_updated.contains(Field.Address)) {
+        fillAddress();
+      }
+      if (_updated.contains(Field.Phone)) {
+        fillPhone();
+      }
+      _updated.remove(Field.Password);
+    }
+    setState(() {});
+  }
+
+  void fillEmail() {
+    _email.text = context.read<Account>().email;
+  }
+
+  void fillName() {
     Account account = context.read<Account>();
-    _email.text = account.email;
-    if (_updatedName) {
-      _firstName.text = account.firstName;
-      _lastName.text = account.lastName;
-      _updatedName = false;
-    }
-    Map<String, String> phone = account.phone;
-    if (phone.isNotEmpty && _updatedPhone) {
-      _isoCode = phone[FireStoreService.kPhoneCountry];
-      _dialCode = phone[FireStoreService.kPhoneDialCode];
-      _phoneNumber.text = phone[FireStoreService.kPhoneNumber];
-      _phoneButtonLabel = 'Remove';
-      _updatedPhone = false;
-    }
-    Map<String, String> address = account.address;
-    if (address.isNotEmpty && _updatedAddress) {
+    _firstName.text = account.firstName;
+    _lastName.text = account.lastName;
+  }
+
+  void fillAddress() {
+    Map<String, String> address = context.read<Account>().address;
+    if (address.isNotEmpty) {
       _street.text = address[FireStoreService.kAddressStreet];
       _city.text = address[FireStoreService.kAddressCity];
       _state.text = address[FireStoreService.kAddressState];
       _zipCode.text = address[FireStoreService.kAddressZip];
-      _updatedAddress = false;
+    } else {
+      _street.clear();
+      _city.clear();
+      _state.clear();
+      _zipCode.clear();
     }
-    setState(() {});
+  }
+
+  void fillPhone() {
+    Map<String, String> phone = context.read<Account>().phone;
+    if (phone.isNotEmpty) {
+      _isoCode = phone[FireStoreService.kPhoneCountry];
+      _dialCode = phone[FireStoreService.kPhoneDialCode];
+      _phoneNumber.text = phone[FireStoreService.kPhoneNumber];
+      _phoneButtonLabel = 'Remove';
+    } else {
+      _isoCode = 'US';
+      _dialCode = '+1';
+      _phoneNumber.clear();
+      _phoneButtonLabel = 'Add';
+    }
   }
 
   void _updateProfile() async {
@@ -132,18 +166,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
     String updateMessage;
     if (errorMessage.isEmpty) {
-      if (_updatedName || _updatedAddress || _updatedPassword) {
-        _updatedPassword = false;
-        updateMessage = 'Profile updated';
-      } else {
-        updateMessage = 'Profile is up-to-date';
-      }
+      updateMessage = _updated.contains(Field.Name) ||
+              _updated.contains(Field.Address) ||
+              _updated.contains(Field.Password)
+          ? 'Profile updated'
+          : 'Profile is up-to-date';
+      _updated.removeAll([Field.Name, Field.Address, Field.Password]);
     } else {
       _scrollToError();
       updateMessage = errorMessage;
     }
-    _showVerifyPhone = false;
-    _verifyCode = null;
     setState(() => _showSpinner = false);
     MessageBar(context, message: updateMessage).show();
   }
@@ -163,12 +195,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
       if (error.isEmpty) {
         try {
+          _updated.add(Field.Name);
           await context.read<FireStoreService>().updateUserName(
                 firstName: firstName,
                 lastName: lastName,
               );
-          _updatedName = true;
         } catch (errorMessage) {
+          _updated.remove(Field.Name);
           return errorMessage;
         }
       } else {
@@ -183,11 +216,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     String city = _city.text.trim();
     String state = _state.text.trim();
     String zip = _zipCode.text.trim();
-    Map<String, String> address = context.read<Account>().address;
-    bool isFilled = street.isNotEmpty ||
-        city.isNotEmpty ||
-        state.isNotEmpty ||
-        zip.isNotEmpty;
+    Account account = context.read<Account>();
+    Map<String, String> address = account.address;
+    bool isFilled = _addressIsFilled();
     bool insert = address.isEmpty && isFilled;
     bool update = address.isNotEmpty &&
         (street != address[FireStoreService.kAddressStreet] ||
@@ -204,14 +235,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
       if (error.isEmpty) {
         try {
+          _updated.add(Field.Address);
           await context.read<FireStoreService>().updateUserAddress(
                 street: street,
                 city: city,
                 state: state,
                 zip: zip,
               );
-          _updatedAddress = true;
         } catch (errorMessage) {
+          _updated.remove(Field.Address);
           return errorMessage;
         }
       } else {
@@ -219,6 +251,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
     }
     return '';
+  }
+
+  bool _addressIsFilled() {
+    bool isFilled = _street.text.trim().isNotEmpty ||
+        _city.text.trim().isNotEmpty ||
+        _state.text.trim().isNotEmpty ||
+        _zipCode.text.trim().isNotEmpty;
+    if (!isFilled) {
+      _streetError = _cityError = _stateError = _zipError = '';
+    }
+    return isFilled;
   }
 
   Future<String> _updatePassword() async {
@@ -234,6 +277,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
       if (error.isEmpty) {
         try {
+          _updated.add(Field.Password);
           await context.read<FireAuthService>().updatePassword(
                 email: _email.text.trim(),
                 oldPassword: oldPassword,
@@ -242,8 +286,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _oldPassword.clear();
           _newPassword.clear();
           _confirmPassword.clear();
-          _updatedPassword = true;
         } catch (errorMessage) {
+          _updated.remove(Field.Password);
           return errorMessage;
         }
       } else {
@@ -264,48 +308,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
       FireAuthService auth = context.read<FireAuthService>();
       Account account = context.read<Account>();
       Map<String, String> phone = account.phone;
-      bool insert = phone.isEmpty && (phoneNumber.isNotEmpty);
+      bool insert = phone.isEmpty && phoneNumber.isNotEmpty;
       bool update = phone.isNotEmpty &&
           (phoneNumber != phone[FireStoreService.kPhoneNumber] ||
               _isoCode != phone[FireStoreService.kPhoneCountry]);
+      String notifyMessage = '';
       if (insert || update) {
-        String notifyMessage = await auth.registerPhone(
+        notifyMessage = await auth.registerPhone(
           phoneNumber: '$_dialCode$phoneNumber',
-          update: account.phone.isNotEmpty,
-          completed: (errorMessage) async {
+          codeSent: (verifyCode) async {
+            _verifyCode = verifyCode;
+          },
+          completed: (result) async {
             setState(() => _showSpinner = true);
+            String errorMessage = await result();
             if (errorMessage.isEmpty) {
-              await updatePhoneNumber();
-              errorMessage = 'Phone number updated';
+              errorMessage = await updatePhoneNumber();
             }
             MessageBar(context, message: errorMessage).show();
             setState(() => _showSpinner = false);
           },
-          codeSent: (verifyCode) async {
-            if (verifyCode != null) {
-              _verifyCode = verifyCode;
-            }
-          },
-          failed: (errorMessage) {
-            MessageBar(context, message: errorMessage).show();
+          failed: (errorMessage) async {
+            MessageBar(context, message: await errorMessage()).show();
           },
         );
         _confirmCode.clear();
         _showVerifyPhone = true;
         _phoneButtonLabel = 'Re-send';
-        MessageBar(context, message: notifyMessage).show();
       } else {
-        if (await auth.removePhone()) {
-          await context.read<FireStoreService>().updatePhoneNumber(
-                country: _isoCode,
-                dialCode: _dialCode,
-                phoneNumber: '',
-              );
-          _phoneNumber.clear();
-          _phoneButtonLabel = 'Add';
-          MessageBar(context, message: 'Phone number removed').show();
-        }
+        notifyMessage = await deletePhoneNumber();
       }
+      MessageBar(context, message: notifyMessage).show();
     }
     setState(() => _showSpinner = false);
   }
@@ -315,38 +348,53 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (_verifyCode != null) {
       String errorMessage = await _verifyCode(_confirmCode.text.trim());
       if (errorMessage.isEmpty) {
-        await updatePhoneNumber();
-        errorMessage = 'Phone number updated';
+        errorMessage = await updatePhoneNumber();
       }
       MessageBar(context, message: errorMessage).show();
     }
     setState(() => _showSpinner = false);
   }
 
-  Future<void> updatePhoneNumber() async {
-    String phoneNumber = _phoneNumber.text.trim();
-    await context.read<FireStoreService>().updatePhoneNumber(
-          country: _isoCode,
-          dialCode: _dialCode,
-          phoneNumber: phoneNumber,
-        );
-    _phoneNumber.text = phoneNumber;
-    _confirmCode.clear();
-    _showVerifyPhone = false;
-    _phoneButtonLabel = 'Remove';
-    _verifyCode = null;
-    _updatedPhone = true;
+  Future<String> updatePhoneNumber() async {
+    try {
+      _updated.add(Field.Phone);
+      String phoneNumber = _phoneNumber.text.trim();
+      await context.read<FireStoreService>().updatePhoneNumber(
+            country: _isoCode,
+            dialCode: _dialCode,
+            phoneNumber: phoneNumber,
+          );
+      _phoneNumber.text = phoneNumber;
+      _confirmCode.clear();
+      _showVerifyPhone = false;
+      _phoneButtonLabel = 'Remove';
+      _verifyCode = null;
+    } catch (errorMessage) {
+      return errorMessage;
+    } finally {
+      _updated.remove(Field.Phone);
+    }
+    return 'Phone number updated';
   }
 
-  bool _addressIsFilled() {
-    bool isFilled = _street.text.trim().isNotEmpty ||
-        _city.text.trim().isNotEmpty ||
-        _state.text.trim().isNotEmpty ||
-        _zipCode.text.trim().isNotEmpty;
-    if (!isFilled) {
-      _streetError = _cityError = _stateError = _zipError = '';
+  Future<String> deletePhoneNumber() async {
+    String notifyMessage = 'Phone number removed';
+    try {
+      _updated.add(Field.Phone);
+      await context.read<FireAuthService>().removePhone();
+      await context.read<FireStoreService>().updatePhoneNumber(
+            country: _isoCode,
+            dialCode: _dialCode,
+            phoneNumber: '',
+          );
+      _phoneNumber.clear();
+      _phoneButtonLabel = 'Add';
+    } catch (errorMessage) {
+      notifyMessage = errorMessage;
+    } finally {
+      _updated.remove(Field.Phone);
     }
-    return isFilled;
+    return notifyMessage;
   }
 
   void _scrollToError() async {
@@ -379,12 +427,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         context.read<Account>().clear();
         _setDialogState(() => _deleteMode = DeleteMode.Success);
         await Future.delayed(Duration(milliseconds: 1500));
-        Navigator.of(context).pop();
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          SignOptionScreen.id,
-          (route) => false,
-        );
-        Navigator.of(context).pushNamed(SignInScreen.id);
+        _signOut();
       } catch (errorMessage) {
         _deleteError = errorMessage;
         _setDialogState(() => _deleteMode = DeleteMode.Input);
@@ -396,9 +439,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    _fillInputFields();
-    _subscription = context.read<FireStoreService>().userStream((userData) {
-      _fillInputFields();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      Map<String, Object> args = ModalRoute.of(context).settings.arguments;
+      _signOut = args[ProfileScreen.signOut];
+    });
+    fillEmail();
+    fillName();
+    fillAddress();
+    fillPhone();
+    _userStream = context.read<FireStoreService>().userStream((userData) {
+      _updateInputFields();
     });
   }
 
@@ -418,7 +468,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _state.dispose();
     _zipCode.dispose();
     _deleteConfirm.dispose();
-    _subscription.cancel();
+    _userStream.cancel();
   }
 
   @override
@@ -728,7 +778,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _showVerifyPhone = false;
                   _phoneButtonLabel = 'Remove';
                   Map<String, String> phone = context.read<Account>().phone;
-                  bool insert = phone.isEmpty && (phoneNumber.isNotEmpty);
+                  bool insert = phone.isEmpty && phoneNumber.isNotEmpty;
                   bool update = phone.isNotEmpty &&
                       (phoneNumber != phone[FireStoreService.kPhoneNumber] ||
                           _isoCode != phone[FireStoreService.kPhoneCountry]);
@@ -808,6 +858,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         InputField(
           label: 'Current Password',
           controller: _oldPassword,
+          keyboardType: TextInputType.visiblePassword,
           errorMessage: _oldPasswordError,
           obscureText: _obscureOldPassword,
           onChanged: (value) {
@@ -841,6 +892,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         InputField(
           label: 'New Password',
           controller: _newPassword,
+          keyboardType: TextInputType.visiblePassword,
           errorMessage: _newPasswordError,
           obscureText: _obscureNewPassword,
           onChanged: (value) {
