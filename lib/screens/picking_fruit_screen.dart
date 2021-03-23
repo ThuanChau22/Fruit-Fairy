@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
 import 'package:provider/provider.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 //
 import 'package:fruitfairy/constant.dart';
-import 'package:fruitfairy/models/basket.dart';
+import 'package:fruitfairy/models/donation.dart';
 import 'package:fruitfairy/models/fruit.dart';
+import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/screens/donation_basket_screen.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
 import 'package:fruitfairy/widgets/gesture_wrapper.dart';
@@ -26,11 +26,6 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
   final TextEditingController _search = TextEditingController();
 
   bool _showSpinner = false;
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   void dispose() {
@@ -137,22 +132,23 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
 
   List<Widget> fruitTiles() {
     List<Widget> fruitList = [];
-    Basket basket = context.watch<Basket>();
-    basket.fruits.forEach((id, fruit) {
+    Produce produce = context.watch<Produce>();
+    produce.fruits.forEach((id, fruit) {
       if (RegExp(
         '^${_search.text.trim()}',
         caseSensitive: false,
       ).hasMatch(fruit.id)) {
-        bool selected = basket.selectedFruits.contains(fruit.id);
+        Donation donation = context.watch<Donation>();
+        bool selected = donation.produce.contains(fruit.id);
         fruitList.add(selectableFruitTile(
           fruit: fruit,
           selected: selected,
           onTap: () {
             setState(() {
               if (selected) {
-                basket.removeFruit(fruit.id);
+                donation.removeFruit(fruit.id);
               } else {
-                basket.pickFruit(fruit.id);
+                donation.pickFruit(fruit.id);
               }
             });
           },
@@ -228,7 +224,7 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
       child: RoundedButton(
         label: 'My Basket',
         onPressed: () {
-          if (context.read<Basket>().selectedFruits.isNotEmpty) {
+          if (context.read<Donation>().produce.isNotEmpty) {
             Navigator.of(context).pushNamed(DonationBasketScreen.id);
           } else {
             MessageBar(context, message: 'Your basket is empty!').show();

@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 //
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
+import 'package:fruitfairy/models/donation.dart';
 import 'package:fruitfairy/screens/charity_selection_screen.dart';
 import 'package:fruitfairy/services/address_service.dart';
 import 'package:fruitfairy/services/fireauth_service.dart';
@@ -120,6 +121,15 @@ class _ContactConfirmation extends State<DonationContactScreen> {
       isoCode: _isoCode,
     );
     if (addressError.isEmpty && _phoneError.isEmpty && _phoneVerified) {
+      context.read<Donation>().setContactInfo(
+            street: _street.text.trim(),
+            city: _city.text.trim(),
+            state: _state.text.trim(),
+            zip: _zipCode.text.trim(),
+            country: _isoCode,
+            dialCode: _dialCode,
+            phoneNumber: _phoneNumber.text.trim(),
+          );
       Navigator.of(context).pushNamed(CharitySelectionScreen.id);
     } else {
       _scrollToError();
