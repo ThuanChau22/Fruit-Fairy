@@ -6,8 +6,11 @@ import 'package:fruitfairy/widgets/fruit_tile.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:provider/provider.dart';
 import 'package:fruitfairy/models/fruit.dart';
+
 //
 import 'package:fruitfairy/constant.dart';
+
+import 'home_screen.dart';
 
 class DonationConfirmScreen extends StatefulWidget {
   static const String id = 'donation_confirm_screen';
@@ -21,21 +24,25 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
     return Scaffold(
-      //TODO: no style yet, need to do that after
-
-      appBar: AppBar(title: Text('DONATION')),
+      appBar: AppBar(title: Text('Donation')),
       body: SafeArea(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
+            SizedBox(
+              height: screen.height * 0.03,
+            ),
             Text(
               "Produce",
-              style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+            SizedBox(
+              height: screen.height * 0.01,
             ),
             Divider(
               color: kLabelColor,
               height: 5.0,
-              thickness: 5.0,
+              thickness: 3.0,
               indent: 20.0,
               endIndent: 20.0,
             ),
@@ -43,15 +50,20 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
             Container(
               child: fruitTileSection(),
             ),
-
+            SizedBox(
+              height: screen.height * 0.02,
+            ),
             Text(
               "Charity Selected",
-              style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+            SizedBox(
+              height: screen.height * 0.01,
             ),
             Divider(
               color: kLabelColor,
               height: 5.0,
-              thickness: 5.0,
+              thickness: 3.0,
               indent: 20.0,
               endIndent: 20.0,
             ),
@@ -63,38 +75,61 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
             ),
             Text(
               "Contact information",
-              style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold, color: Colors.white),
             ),
-
+            SizedBox(
+              height: screen.height * 0.01,
+            ),
             Divider(
               color: kLabelColor,
               height: 5.0,
-              thickness: 5.0,
+              thickness: 3.0,
               indent: 20.0,
               endIndent: 20.0,
             ),
-
+            SizedBox(
+              height: screen.height * 0.01,
+            ),
             contactInformation(),
             SizedBox(
               height: screen.height * 0.03,
             ),
             Text(
-              "Thank you",
-              style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
-            ),
-            Divider(
-              color: kLabelColor,
-              height: 5.0,
-              thickness: 5.0,
-              indent: 20.0,
-              endIndent: 20.0,
+              "Thank You!",
+              style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold, color: Colors.white),
             ),
             SizedBox(
               height: screen.height * 0.03,
             ),
-            RoundedButton(
-              label: "Confirm",
-              onPressed: () {},
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: screen.width * 0.05,
+              ),
+              child: Column(
+                children: [
+                  Column(
+                    children: [
+                      Divider(
+                        color: kLabelColor,
+                        height: 5.0,
+                        thickness: 3.0,
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                          vertical: screen.height * 0.03,
+                          horizontal: screen.width * 0.2,
+                        ),
+                        child: RoundedButton(
+                          label: 'Confirm',
+                          onPressed: () {
+                            Navigator.of(context).pushNamed(HomeScreen.id);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -108,7 +143,7 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
     return Expanded(
       flex: 2,
       child: GridView.count(
-        physics: NeverScrollableScrollPhysics(),
+        //physics: NeverScrollableScrollPhysics(),
         primary: false,
         padding: const EdgeInsets.all(20),
         crossAxisSpacing: 10,
@@ -146,17 +181,16 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
 
   Widget contactInformation() {
     Account account = context.watch<Account>();
-    print(account.phone);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          account.address['street'],
+          account.address['street'], style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20.0,),
         ),
         Text(
-          '${account.address['city']}, ${account.address['state']},${account.address['zip']}',
+          '${account.address['city']}, ${account.address['state']},${account.address['zip']}', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20.0,),
         ),
-        Text('Phone: ${account.phone['number']}'),
+        Text('Phone: ${account.phone['number']}', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20.0,),),
       ],
     );
   }

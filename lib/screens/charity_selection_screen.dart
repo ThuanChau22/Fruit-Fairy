@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:simple_tooltip/simple_tooltip.dart';
+
 //
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
@@ -50,7 +51,7 @@ class _CharitySelectionScreenState extends State<CharitySelectionScreen> {
             Divider(
               color: kLabelColor,
               height: 5.0,
-              thickness: 5.0,
+              thickness: 3.0,
               indent: 20.0,
               endIndent: 20.0,
             ),
@@ -72,31 +73,42 @@ class _CharitySelectionScreenState extends State<CharitySelectionScreen> {
             SizedBox(
               height: screen.height * 0.02,
             ),
-            //TODO: make a charity button
             Column(
               children: charities(),
             ),
             SizedBox(
-              height: screen.height * 0.1,
-            ),
-            Divider(
-              color: kLabelColor,
-              height: 5.0,
-              thickness: 5.0,
-              indent: 20.0,
-              endIndent: 20.0,
-            ),
-            SizedBox(
-              height: screen.height * 0.02,
+              height: screen.height * 0.175,
             ),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: screen.width * 0.2),
-              child: RoundedButton(
-                  label: 'Next',
-                  onPressed: () {
-                    Navigator.of(context).pushNamed(DonationConfirmScreen.id);
-                  }),
-            )
+              padding: EdgeInsets.symmetric(
+                horizontal: screen.width * 0.05,
+              ),
+              child: Column(
+                children: [
+                  Column(
+                    children: [
+                      Divider(
+                        color: kLabelColor,
+                        height: 5.0,
+                        thickness: 3.0,
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                          vertical: screen.height * 0.03,
+                          horizontal: screen.width * 0.2,
+                        ),
+                        child: RoundedButton(
+                          label: 'Next',
+                          onPressed: () {
+                            Navigator.of(context).pushNamed(DonationConfirmScreen.id);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
