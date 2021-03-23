@@ -195,6 +195,7 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
         InputField(
           label: 'Password',
           controller: _password,
+          keyboardType: TextInputType.visiblePassword,
           errorMessage: _passwordError,
           obscureText: _obscurePassword,
           onChanged: (value) {

@@ -7,8 +7,8 @@ class Account extends ChangeNotifier {
   String _email = '';
   String _firstName = '';
   String _lastName = '';
-  Map<String, String> _phone = {};
-  Map<String, String> _address = {};
+  final Map<String, String> _phone = {};
+  final Map<String, String> _address = {};
 
   String get email {
     return _email;
@@ -62,8 +62,8 @@ class Account extends ChangeNotifier {
     _email = '';
     _firstName = '';
     _lastName = '';
-    _phone = {};
-    _address = {};
+    _phone.clear();
+    _address.clear();
     notifyListeners();
   }
 }

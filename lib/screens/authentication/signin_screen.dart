@@ -121,13 +121,6 @@ class _SignInScreenState extends State<SignInScreen> {
           FireAuthService auth = context.read<FireAuthService>();
           String nofifyMessage = await auth.signInWithPhone(
             phoneNumber: '$_dialCode${_phoneNumber.text.trim()}',
-            completed: (String errorMessage) async {
-              if (errorMessage.isEmpty) {
-                await _signInSuccess();
-              } else {
-                MessageBar(context, message: errorMessage).show();
-              }
-            },
             codeSent: (verifyCode) {
               if (verifyCode != null) {
                 _verifyCode = verifyCode;
@@ -137,8 +130,16 @@ class _SignInScreenState extends State<SignInScreen> {
                 });
               }
             },
-            failed: (errorMessage) {
-              MessageBar(context, message: errorMessage).show();
+            completed: (result) async {
+              String errorMessage = await result();
+              if (errorMessage.isEmpty) {
+                await _signInSuccess();
+              } else {
+                MessageBar(context, message: errorMessage).show();
+              }
+            },
+            failed: (errorMessage) async {
+              MessageBar(context, message: await errorMessage()).show();
             },
           );
           MessageBar(context, message: nofifyMessage).show();
@@ -373,8 +374,9 @@ class _SignInScreenState extends State<SignInScreen> {
         InputField(
           label: 'Password',
           controller: _password,
-          obscureText: _obscurePassword,
+          keyboardType: TextInputType.visiblePassword,
           errorMessage: _passwordError,
+          obscureText: _obscurePassword,
           onChanged: (value) {
             setState(() {
               _passwordError = Validate.checkPassword(_password.text);

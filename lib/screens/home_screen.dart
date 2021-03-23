@@ -71,7 +71,9 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _userStream = context.read<FireStoreService>().userStream((data) {
-      context.read<Account>().fromDB(data);
+      if (data != null) {
+        context.read<Account>().fromDB(data);
+      }
     });
     _fruitsStream = context.read<FireStoreService>().fruitsStream((data) {
       context.read<Basket>().fromDB(data);
@@ -224,7 +226,10 @@ class _HomeScreenState extends State<HomeScreen> {
           switch (action) {
             case Profile.Edit:
               HapticFeedback.mediumImpact();
-              Navigator.of(context).pushNamed(ProfileScreen.id);
+              Navigator.of(context).pushNamed(
+                ProfileScreen.id,
+                arguments: {ProfileScreen.signOut: _signOut},
+              );
               break;
 
             case Profile.SignOut:
