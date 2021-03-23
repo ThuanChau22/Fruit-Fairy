@@ -18,8 +18,8 @@ class FireStoreService {
   static const String kAmount = 'amount';
   static const String kStatus = 'status';
 
-  /// fruits
-  static const String kFruits = 'fruits';
+  /// produce
+  static const String kProduce = 'produce';
   static const String kFruitName = 'name';
   static const String kFruitPath = 'path';
 
@@ -45,13 +45,13 @@ class FireStoreService {
   final String _storagePath = 'gs://fruit-fairy.appspot.com';
 
   CollectionReference _usersDB;
-  CollectionReference _fruitsDB;
+  CollectionReference _produceDB;
 
   String _uid;
 
   FireStoreService() {
     _usersDB = _firestore.collection(kUsers);
-    _fruitsDB = _firestore.collection(kFruits);
+    _produceDB = _firestore.collection(kProduce);
   }
 
   StreamSubscription<DocumentSnapshot> userStream(
@@ -67,10 +67,10 @@ class FireStoreService {
     );
   }
 
-  StreamSubscription<QuerySnapshot> fruitsStream(
+  StreamSubscription<QuerySnapshot> produceStream(
     Function(Map<String, Fruit>) onData,
   ) {
-    return _fruitsDB.snapshots().listen(
+    return _produceDB.snapshots().listen(
       (snapshot) async {
         Map<String, Fruit> fruits = {};
         for (QueryDocumentSnapshot doc in snapshot.docs) {

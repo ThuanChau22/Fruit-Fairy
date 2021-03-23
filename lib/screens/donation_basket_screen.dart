@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 //
 import 'package:fruitfairy/constant.dart';
-import 'package:fruitfairy/models/basket.dart';
 import 'package:fruitfairy/models/fruit.dart';
+import 'package:fruitfairy/models/donation.dart';
+import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/screens/donation_contact_screen.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
@@ -27,14 +28,14 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
   @override
   void initState() {
     super.initState();
-    Basket basket = context.read<Basket>();
+    Donation donation = context.read<Donation>();
     listener = () {
-      if (basket.selectedFruits.isEmpty) {
-        basket.removeListener(listener);
+      if (donation.produce.isEmpty) {
+        donation.removeListener(listener);
         Navigator.of(context).pop();
       }
     };
-    basket.addListener(listener);
+    donation.addListener(listener);
   }
 
   @override
@@ -42,8 +43,8 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
     Size screen = MediaQuery.of(context).size;
     return WillPopScope(
       onWillPop: () async {
-        Basket basket = context.read<Basket>();
-        basket.removeListener(listener);
+        Donation donation = context.read<Donation>();
+        donation.removeListener(listener);
         return true;
       },
       child: Scaffold(
@@ -139,7 +140,6 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
     Fruit fruit,
   }) {
     Size screen = MediaQuery.of(context).size;
-
     return Expanded(
       child: Padding(
         padding: EdgeInsets.symmetric(
@@ -167,6 +167,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
     }
     bool squeeze = screen.height < screen.width;
     bool needCollect = _collectOption == CollectOption.Yes;
+    context.read<Donation>().setNeedCollected(needCollect);
     return Expanded(
       child: GridView.count(
         primary: false,
@@ -179,15 +180,16 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
 
   List<Widget> fruitTiles() {
     List<Widget> list = [];
-    Basket basket = context.watch<Basket>();
-    Map<String, Fruit> fruits = basket.fruits;
-    basket.selectedFruits.forEach((fruitId) {
+    Map<String, Fruit> produce = context.watch<Produce>().fruits;
+    Donation donation = context.watch<Donation>();
+    donation.produce.forEach((fruitId) {
       list.add(
         removableFruitTile(
-          fruit: fruits[fruitId],
+          fruit: produce[fruitId],
           onPressed: () {
             setState(() {
-              basket.removeFruit(fruitId);
+              produce[fruitId].clear();
+              donation.removeFruit(fruitId);
             });
           },
         ),
@@ -203,7 +205,6 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
     Size screen = MediaQuery.of(context).size;
     bool squeeze = screen.height < screen.width;
     bool needCollect = _collectOption == CollectOption.Yes;
-    fruit.changeOption(false);
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: screen.width * (needCollect ? (squeeze ? 0.2 : 0.02) : 0.0),
@@ -255,7 +256,6 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
 
   Widget adjustableFruitTile(Fruit fruit) {
     Size screen = MediaQuery.of(context).size;
-    fruit.changeOption(true);
     return Container(
       decoration: BoxDecoration(
         color: kObjectColor,
@@ -350,7 +350,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
       child: RoundedButton(
         label: 'Next',
         onPressed: () {
-          if (context.read<Basket>().selectedFruits.isNotEmpty) {
+          if (context.read<Donation>().produce.isNotEmpty) {
             Navigator.of(context).pushNamed(DonationContactScreen.id);
           }
         },

@@ -8,7 +8,8 @@ import 'package:strings/strings.dart';
 //
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
-import 'package:fruitfairy/models/basket.dart';
+import 'package:fruitfairy/models/donation.dart';
+import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
 import 'package:fruitfairy/screens/authentication/signin_screen.dart';
 import 'package:fruitfairy/screens/profile_screen.dart';
@@ -35,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String _name = '';
 
   StreamSubscription<DocumentSnapshot> _userStream;
-  StreamSubscription<QuerySnapshot> _fruitsStream;
+  StreamSubscription<QuerySnapshot> _produceStream;
 
   void _fetchData() {
     setState(() => _showSpinner = true);
@@ -47,8 +48,8 @@ class _HomeScreenState extends State<HomeScreen> {
       _name = camelize(firstName);
       setState(() => _showSpinner = false);
     }
-    Basket basket = context.watch<Basket>();
-    setState(() => _showSpinner = basket.fruits.isEmpty);
+    Produce produce = context.watch<Produce>();
+    setState(() => _showSpinner = produce.fruits.isEmpty);
   }
 
   void _signOut() async {
@@ -56,9 +57,10 @@ class _HomeScreenState extends State<HomeScreen> {
     await context.read<FireAuthService>().signOut();
     context.read<FireStoreService>().clear();
     context.read<Account>().clear();
-    context.read<Basket>().clear();
+    context.read<Donation>().clear();
+    context.read<Produce>().clear();
     _userStream.cancel();
-    _fruitsStream.cancel();
+    _produceStream.cancel();
     Navigator.of(context).pushNamedAndRemoveUntil(
       SignOptionScreen.id,
       (route) => false,
@@ -75,8 +77,15 @@ class _HomeScreenState extends State<HomeScreen> {
         context.read<Account>().fromDB(data);
       }
     });
-    _fruitsStream = context.read<FireStoreService>().fruitsStream((data) {
-      context.read<Basket>().fromDB(data);
+    _produceStream = context.read<FireStoreService>().produceStream((data) {
+      Produce produce = context.read<Produce>();
+      produce.fromDB(data);
+      Donation donation = context.read<Donation>();
+      donation.produce.forEach((fruitId) {
+        if (!produce.fruits.containsKey(fruitId)) {
+          donation.removeFruit(fruitId);
+        }
+      });
     });
   }
 

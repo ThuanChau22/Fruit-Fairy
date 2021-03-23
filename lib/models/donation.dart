@@ -4,22 +4,22 @@ import 'package:flutter/foundation.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
 
 class Donation extends ChangeNotifier {
-  final List<String> _selectedFruits = [];
-  final List<String> _selectedCharities = [];
+  bool _needCollected = true;
+  final List<String> _produce = [];
+  final List<String> _charities = [];
   final Map<String, String> _address = {};
   final Map<String, String> _phone = {};
-  bool _needCollected = true;
 
   bool get needCollected {
     return _needCollected;
   }
 
-  UnmodifiableListView<String> get selectedFruits {
-    return UnmodifiableListView(_selectedFruits);
+  UnmodifiableListView<String> get produce {
+    return UnmodifiableListView(_produce);
   }
 
-  UnmodifiableListView<String> get selectedCharities {
-    return UnmodifiableListView(_selectedCharities);
+  UnmodifiableListView<String> get charities {
+    return UnmodifiableListView(_charities);
   }
 
   UnmodifiableMapView<String, String> get address {
@@ -30,50 +30,44 @@ class Donation extends ChangeNotifier {
     return UnmodifiableMapView(_phone);
   }
 
+  void setNeedCollected(bool option) {
+    _needCollected = option;
+  }
+
   void pickFruit(String fruitId) {
-    _selectedFruits.add(fruitId);
+    _produce.add(fruitId);
     notifyListeners();
   }
 
   void removeFruit(String fruitId) {
-    _selectedFruits.remove(fruitId);
+    _produce.remove(fruitId);
     notifyListeners();
   }
 
-  void setCollectOption(bool option) {
-    _needCollected = option;
-  }
-
-  void setAddress({
+  void setContactInfo({
     @required String street,
     @required String city,
     @required String state,
     @required String zip,
+    @required String country,
+    @required String dialCode,
+    @required String phoneNumber,
   }) {
     _address[FireStoreService.kAddressStreet] = street;
     _address[FireStoreService.kAddressCity] = city;
     _address[FireStoreService.kAddressState] = state;
     _address[FireStoreService.kAddressZip] = zip;
+    _phone[FireStoreService.kPhoneCountry] = country;
+    _phone[FireStoreService.kPhoneDialCode] = dialCode;
+    _phone[FireStoreService.kPhoneNumber] = phoneNumber;
   }
 
-  void setPhoneNumber({
-    @required String country,
-    @required String dialCode,
-    @required String phoneNumber,
-  }) {
-    if (phoneNumber.isEmpty) {
-      _phone.clear();
-    } else {
-      _phone[FireStoreService.kPhoneCountry] = country;
-      _phone[FireStoreService.kPhoneDialCode] = dialCode;
-      _phone[FireStoreService.kPhoneNumber] = phoneNumber;
-    }
-  }
+  void setCharities(List<String> charities) {}
 
   void clear() {
     _needCollected = true;
-    _selectedFruits.clear();
-    _selectedCharities.clear();
+    _produce.clear();
+    _charities.clear();
     _address.clear();
     _phone.clear();
   }

@@ -7,10 +7,12 @@ import 'package:fruitfairy/constant.dart';
 class FruitTile extends StatelessWidget {
   final String fruitName;
   final String fruitImage;
+  final String percentage;
 
   FruitTile({
     @required this.fruitName,
     @required this.fruitImage,
+    this.percentage = '',
   });
 
   @override
@@ -46,6 +48,19 @@ class FruitTile extends StatelessWidget {
                 ),
               );
             },
+          ),
+        ),
+        Visibility(
+          visible: percentage.isNotEmpty,
+          child: Align(
+            child: Text(
+              '$percentage%',
+              style: TextStyle(
+                color: kPrimaryColor,
+                fontWeight: FontWeight.bold,
+                fontSize: 18.0,
+              ),
+            ),
           ),
         ),
       ],
