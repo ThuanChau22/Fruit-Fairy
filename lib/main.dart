@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 //
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
-import 'package:fruitfairy/models/basket.dart';
+import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/models/donation.dart';
 import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
@@ -28,8 +28,8 @@ class FruitFairy extends StatelessWidget {
         Provider<FireAuthService>(create: (_) => FireAuthService()),
         Provider<FireStoreService>(create: (_) => FireStoreService()),
         ChangeNotifierProvider<Account>(create: (_) => Account()),
-        ChangeNotifierProvider<Basket>(create: (_) => Basket()),
         ChangeNotifierProvider<Donation>(create: (_) => Donation()),
+        ChangeNotifierProvider<Produce>(create: (_) => Produce()),
       ],
       child: Authentication(),
     );

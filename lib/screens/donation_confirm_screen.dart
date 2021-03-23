@@ -1,13 +1,13 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:fruitfairy/models/account.dart';
-import 'package:fruitfairy/models/basket.dart';
-import 'package:fruitfairy/widgets/fruit_tile.dart';
-import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:provider/provider.dart';
-import 'package:fruitfairy/models/fruit.dart';
 //
 import 'package:fruitfairy/constant.dart';
+import 'package:fruitfairy/models/donation.dart';
+import 'package:fruitfairy/models/fruit.dart';
+import 'package:fruitfairy/models/produce.dart';
+import 'package:fruitfairy/services/firestore_service.dart';
+import 'package:fruitfairy/widgets/fruit_tile.dart';
+import 'package:fruitfairy/widgets/rounded_button.dart';
 
 class DonationConfirmScreen extends StatefulWidget {
   static const String id = 'donation_confirm_screen';
@@ -103,8 +103,8 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
   }
 
   Widget fruitTileSection() {
-    Basket basket = context.watch<Basket>();
-    Map<String, Fruit> fruits = basket.fruits;
+    Donation donation = context.read<Donation>();
+    Map<String, Fruit> produce = context.watch<Produce>().fruits;
     return Expanded(
       flex: 2,
       child: GridView.count(
@@ -115,7 +115,7 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
         mainAxisSpacing: 10,
         crossAxisCount: 2,
         children: [
-          for (String fruitId in basket.selectedFruits)
+          for (String fruitId in donation.produce)
             Stack(
               children: [
                 Container(
@@ -124,17 +124,11 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
                     borderRadius: BorderRadius.circular(20.0),
                   ),
                   child: FruitTile(
-                    fruitName: fruits[fruitId].name,
-                    fruitImage: fruits[fruitId].imageURL,
-                  ),
-                ),
-                Visibility(
-                  visible: fruits[fruitId].selectedOption,
-                  child: Align(
-                    child: Text(
-                      '${fruits[fruitId].amount}%',
-                    ),
-                    alignment: Alignment.bottomCenter,
+                    fruitName: produce[fruitId].name,
+                    fruitImage: produce[fruitId].imageURL,
+                    percentage: context.read<Donation>().needCollected
+                        ? '${produce[fruitId].amount}'
+                        : '',
                   ),
                 ),
               ],
@@ -145,18 +139,20 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
   }
 
   Widget contactInformation() {
-    Account account = context.watch<Account>();
-    print(account.phone);
+    Donation donation = context.watch<Donation>();
+    Map<String, String> address = donation.address;
+    Map<String, String> phone = donation.phone;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          account.address['street'],
+          address[FireStoreService.kAddressStreet],
         ),
         Text(
-          '${account.address['city']}, ${account.address['state']},${account.address['zip']}',
+          '${address[FireStoreService.kAddressCity]}, ${address[FireStoreService.kAddressState]},${address[FireStoreService.kAddressZip]}',
         ),
-        Text('Phone: ${account.phone['number']}'),
+        Text(
+            'Phone: ${phone[FireStoreService.kPhoneDialCode]}${phone[FireStoreService.kPhoneNumber]}'),
       ],
     );
   }
