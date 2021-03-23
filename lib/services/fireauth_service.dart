@@ -8,6 +8,10 @@ class FireAuthService {
 
   FireAuthService();
 
+  FirebaseAuth get instance {
+    return _firebaseAuth;
+  }
+
   User get user {
     return _firebaseAuth.currentUser;
   }
@@ -42,12 +46,11 @@ class FireAuthService {
     @required String password,
   }) async {
     try {
-      UserCredential userCredential =
-          await _firebaseAuth.signInWithEmailAndPassword(
+      await _firebaseAuth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-      if (!userCredential.user.emailVerified) {
+      if (!user.emailVerified) {
         await user.sendEmailVerification();
         return 'Please check your email for a verification link!';
       }
@@ -68,28 +71,13 @@ class FireAuthService {
   // IOS: ???
   Future<String> signInWithPhone({
     @required String phoneNumber,
-    @required Function completed,
     @required
         Function(Future<String> Function(String smsCode) verifyCode) codeSent,
-    @required Function(String errorMessage) failed,
+    @required Function(Future<String> Function() result) completed,
+    @required Function(Future<String> Function() errorMessage) failed,
   }) async {
     await _firebaseAuth.verifyPhoneNumber(
-      timeout: Duration(seconds: 5),
       phoneNumber: phoneNumber,
-      verificationCompleted: (PhoneAuthCredential credential) async {
-        try {
-          if (await _firebaseAuth.signInWithCredential(credential) != null) {
-            if (user.email != null) {
-              completed('');
-            } else {
-              await user.delete();
-              completed('Phone number not linked with registered email');
-            }
-          }
-        } catch (e) {
-          print(e);
-        }
-      },
       codeSent: (String verificationId, int resendToken) {
         codeSent((smsCode) async {
           try {
@@ -97,9 +85,8 @@ class FireAuthService {
               verificationId: verificationId,
               smsCode: smsCode,
             );
-            UserCredential userCredential =
-                await _firebaseAuth.signInWithCredential(credential);
-            if (userCredential.user.email == null) {
+            await _firebaseAuth.signInWithCredential(credential);
+            if (user.email == null) {
               await user.delete();
               return 'Phone number not linked with registered email';
             }
@@ -116,12 +103,30 @@ class FireAuthService {
           }
         });
       },
+      verificationCompleted: (PhoneAuthCredential credential) async {
+        completed(() async {
+          try {
+            await _firebaseAuth.signInWithCredential(credential);
+            if (user.email != null) {
+              return '';
+            } else {
+              await user.delete();
+              return 'Phone number not linked with registered email';
+            }
+          } catch (e) {
+            print(e);
+            return 'Error';
+          }
+        });
+      },
       verificationFailed: (FirebaseAuthException e) {
-        if (e.code == 'too-many-requests') {
-          failed(
-              'We have blocked all requests from this phone number due to numerous attempts');
-        }
-        print(e);
+        failed(() async {
+          if (e.code == 'too-many-requests') {
+            return 'We have blocked all requests from this phone number due to numerous attempts';
+          }
+          print(e);
+          return 'Error';
+        });
       },
       codeAutoRetrievalTimeout: (String verificationId) {},
     );
@@ -130,31 +135,13 @@ class FireAuthService {
 
   Future<String> registerPhone({
     @required String phoneNumber,
-    @required Function completed,
     @required
         Function(Future<String> Function(String smsCode) verifyCode) codeSent,
-    @required Function(String errorMessage) failed,
-    bool update = false,
+    @required Function(Future<String> Function() result) completed,
+    @required Function(Future<String> Function() errorMessage) failed,
   }) async {
     await _firebaseAuth.verifyPhoneNumber(
-      timeout: Duration(seconds: 5),
       phoneNumber: phoneNumber,
-      verificationCompleted: (PhoneAuthCredential credential) async {
-        try {
-          if (update) {
-            await user.updatePhoneNumber(credential);
-          } else {
-            await user.linkWithCredential(credential);
-          }
-          completed('');
-        } catch (e) {
-          if (e.code == 'credential-already-in-use') {
-            completed('Phone number is being used by a different account');
-          }
-          print(e);
-          completed('Error');
-        }
-      },
       codeSent: (String verificationId, int resendToken) {
         codeSent((smsCode) async {
           try {
@@ -162,11 +149,13 @@ class FireAuthService {
               verificationId: verificationId,
               smsCode: smsCode,
             );
-            if (update) {
-              await user.updatePhoneNumber(credential);
-            } else {
-              await user.linkWithCredential(credential);
+            for (UserInfo userInfo in user.providerData) {
+              if (userInfo.providerId == PhoneAuthProvider.PROVIDER_ID) {
+                await user.updatePhoneNumber(credential);
+                return '';
+              }
             }
+            await user.linkWithCredential(credential);
             return '';
           } catch (e) {
             if (e.code == 'invalid-verification-code' ||
@@ -184,26 +173,46 @@ class FireAuthService {
           }
         });
       },
+      verificationCompleted: (PhoneAuthCredential credential) async {
+        completed(() async {
+          try {
+            for (UserInfo userInfo in user.providerData) {
+              if (userInfo.providerId == PhoneAuthProvider.PROVIDER_ID) {
+                await user.updatePhoneNumber(credential);
+                return '';
+              }
+            }
+            await user.linkWithCredential(credential);
+            return '';
+          } catch (e) {
+            if (e.code == 'credential-already-in-use') {
+              return 'Phone number is being used by a different account';
+            }
+            print(e);
+            return 'Error';
+          }
+        });
+      },
       verificationFailed: (FirebaseAuthException e) {
-        if (e.code == 'too-many-requests') {
-          failed(
-              'We have blocked all requests from this phone number due to numerous attempts');
-        }
-        print(e);
+        failed(() async {
+          if (e.code == 'too-many-requests') {
+            return 'We have blocked all requests from this phone number due to numerous attempts';
+          }
+          print(e);
+          return 'Error';
+        });
       },
       codeAutoRetrievalTimeout: (String verificationId) {},
     );
     return 'Sending verification code';
   }
 
-  Future<bool> removePhone() async {
-    for (UserInfo userInfo in user.providerData) {
-      if (userInfo.providerId == PhoneAuthProvider.PROVIDER_ID) {
-        await user.unlink(PhoneAuthProvider.PROVIDER_ID);
-        return true;
-      }
+  Future<void> removePhone() async {
+    try {
+      await user.unlink(PhoneAuthProvider.PROVIDER_ID);
+    } catch (e) {
+      throw 'Your phone number has been updated, please sign in again!';
     }
-    return false;
   }
 
   Future<void> updatePassword({

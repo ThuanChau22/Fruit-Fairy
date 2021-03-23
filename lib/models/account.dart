@@ -62,8 +62,8 @@ class Account extends ChangeNotifier {
     _email = '';
     _firstName = '';
     _lastName = '';
-    _phone = {};
-    _address = {};
+    _phone.clear();
+    _address.clear();
     notifyListeners();
   }
 }
