@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 //
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/donation.dart';
@@ -193,12 +194,22 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
       children: [
         Text(
           address[FireStoreService.kAddressStreet],
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20.0,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         Text(
           '${address[FireStoreService.kAddressCity]}, ${address[FireStoreService.kAddressState]},${address[FireStoreService.kAddressZip]}',
+          style: TextStyle(
+              color: Colors.white, fontSize: 20.0, fontWeight: FontWeight.bold),
         ),
         Text(
-            'Phone: ${phone[FireStoreService.kPhoneDialCode]}${phone[FireStoreService.kPhoneNumber]}'),
+          'Phone: ${phone[FireStoreService.kPhoneDialCode]}${phone[FireStoreService.kPhoneNumber]}',
+          style: TextStyle(
+              color: Colors.white, fontSize: 20.0, fontWeight: FontWeight.bold),
+        ),
       ],
     );
   }
