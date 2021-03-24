@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 //
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/donation.dart';
 import 'package:fruitfairy/models/fruit.dart';
 import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
+import 'package:fruitfairy/screens/home_screen.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
-
-import 'home_screen.dart';
 
 class DonationConfirmScreen extends StatefulWidget {
   static const String id = 'donation_confirm_screen';
@@ -20,197 +18,269 @@ class DonationConfirmScreen extends StatefulWidget {
 }
 
 class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
+  void confirm() {
+    Navigator.of(context).popUntil((route) {
+      return route.settings.name == HomeScreen.id;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(title: Text('Donation')),
       body: SafeArea(
-        child: Column(
-          //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            SizedBox(
-              height: screen.height * 0.03,
-            ),
-            Text(
-              "Produce",
-              style: TextStyle(
-                  fontSize: 25.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white),
-            ),
-            SizedBox(
-              height: screen.height * 0.01,
-            ),
-            Divider(
-              color: kLabelColor,
-              height: 5.0,
-              thickness: 3.0,
-              indent: 20.0,
-              endIndent: 20.0,
-            ),
-            //TODO: need to set the size for the gridview
-            Container(
-              child: fruitTileSection(),
-            ),
-            SizedBox(
-              height: screen.height * 0.02,
-            ),
-            Text(
-              "Charity Selected",
-              style: TextStyle(
-                  fontSize: 25.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white),
-            ),
-            SizedBox(
-              height: screen.height * 0.01,
-            ),
-            Divider(
-              color: kLabelColor,
-              height: 5.0,
-              thickness: 3.0,
-              indent: 20.0,
-              endIndent: 20.0,
-            ),
-            Container(
-              width: 100.0,
-              height: 100.0,
-              //TODO: need a charity class then watch the change
-              child: Text("charity selected list"),
-            ),
-            Text(
-              "Contact information",
-              style: TextStyle(
-                  fontSize: 25.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white),
-            ),
-            SizedBox(
-              height: screen.height * 0.01,
-            ),
-            Divider(
-              color: kLabelColor,
-              height: 5.0,
-              thickness: 3.0,
-              indent: 20.0,
-              endIndent: 20.0,
-            ),
-            SizedBox(
-              height: screen.height * 0.01,
-            ),
-            contactInformation(),
-            SizedBox(
-              height: screen.height * 0.03,
-            ),
-            Text(
-              "Thank You!",
-              style: TextStyle(
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white),
-            ),
-            SizedBox(
-              height: screen.height * 0.03,
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: screen.width * 0.05,
-              ),
-              child: Column(
-                children: [
-                  Column(
-                    children: [
-                      Divider(
-                        color: kLabelColor,
-                        height: 5.0,
-                        thickness: 3.0,
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                          vertical: screen.height * 0.03,
-                          horizontal: screen.width * 0.2,
-                        ),
-                        child: RoundedButton(
-                          label: 'Confirm',
-                          onPressed: () {
-                            Navigator.of(context).pushNamed(HomeScreen.id);
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: screen.width * 0.05,
+          ),
+          child: Column(
+            children: [
+              titleLabel(),
+              reviewDetails(),
+              divider(),
+              confirmButton(),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget fruitTileSection() {
-    Donation donation = context.read<Donation>();
-    Map<String, Fruit> produce = context.watch<Produce>().fruits;
+  Widget titleLabel() {
+    Size screen = MediaQuery.of(context).size;
+    return Padding(
+      padding: EdgeInsets.only(
+        top: screen.height * 0.03,
+        bottom: screen.height * 0.02,
+      ),
+      child: Text(
+        'Review',
+        style: TextStyle(
+          color: kLabelColor,
+          fontWeight: FontWeight.bold,
+          fontSize: 30.0,
+        ),
+      ),
+    );
+  }
+
+  Widget divider() {
+    return Divider(
+      color: kLabelColor,
+      height: 5.0,
+      thickness: 3.0,
+    );
+  }
+
+  Widget groupLabel(String label) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: kLabelColor,
+            fontSize: 25.0,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        divider(),
+      ],
+    );
+  }
+
+  Widget fieldLabel(String label) {
+    return Text(
+      label,
+      style: TextStyle(
+        color: kLabelColor,
+        fontSize: 20.0,
+        fontWeight: FontWeight.bold,
+        height: 1.5,
+      ),
+    );
+  }
+
+  Widget reviewDetails() {
+    Size screen = MediaQuery.of(context).size;
+    List<Widget> widgets = [
+      groupLabel('Produce'),
+      selectedFruits(),
+      groupLabel('Charity Selected'),
+      selectedCharities(),
+      groupLabel('Contact Information'),
+      contactInfo(),
+      appreciation(),
+    ];
     return Expanded(
-      flex: 2,
-      child: GridView.count(
-        //physics: NeverScrollableScrollPhysics(),
-        primary: false,
-        padding: const EdgeInsets.all(20),
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-        crossAxisCount: 2,
-        children: [
-          for (String fruitId in donation.produce)
-            Stack(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: kObjectColor,
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                  child: FruitTile(
-                    fruitName: produce[fruitId].name,
-                    fruitImage: produce[fruitId].imageURL,
-                    percentage: context.read<Donation>().needCollected
-                        ? '${produce[fruitId].amount}'
-                        : '',
-                  ),
-                ),
-              ],
+      child: ListView.builder(
+        itemCount: widgets.length,
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: screen.width * 0.1,
             ),
+            child: widgets[index],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget selectedFruits() {
+    Size screen = MediaQuery.of(context).size;
+    int axisCount = screen.width >= 600 ? 4 : 2;
+    return Padding(
+      padding: EdgeInsets.only(
+        top: screen.height * 0.01,
+        bottom: screen.height * 0.03,
+      ),
+      child: customLayout(
+        padding: 10.0,
+        crossAxisCount: axisCount,
+        children: fruitTiles(),
+      ),
+    );
+  }
+
+  Widget customLayout({
+    @required int crossAxisCount,
+    @required List<Widget> children,
+    double padding = 0,
+  }) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double widgetWidth = screenWidth - screenWidth * 0.15 * 2;
+    widgetWidth /= crossAxisCount;
+    List<List<Widget>> rowList = [];
+    children.asMap().forEach((index, widget) {
+      if (index % crossAxisCount == 0) {
+        rowList.add([]);
+      }
+      rowList.last.add(
+        ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: widgetWidth,
+            maxHeight: widgetWidth,
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(padding),
+            child: widget,
+          ),
+        ),
+      );
+    });
+    List<Widget> columnList = [];
+    rowList.forEach((row) {
+      columnList.add(Row(children: row));
+    });
+    return Column(children: columnList);
+  }
+
+  List<Widget> fruitTiles() {
+    List<Widget> fruitList = [];
+    Map<String, Fruit> produce = context.read<Produce>().fruits;
+    Donation donation = context.read<Donation>();
+    donation.produce.forEach((fruitId) {
+      int amount = produce[fruitId].amount;
+      fruitList.add(Container(
+        decoration: BoxDecoration(
+          color: kObjectColor,
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        child: FruitTile(
+          fruitName: produce[fruitId].name,
+          fruitImage: produce[fruitId].imageURL,
+          percentage: donation.needCollected ? '$amount' : '',
+        ),
+      ));
+    });
+    return fruitList;
+  }
+
+  Widget selectedCharities() {
+    Size screen = MediaQuery.of(context).size;
+    return Padding(
+      padding: EdgeInsets.only(
+        left: screen.width * 0.02,
+        right: screen.width * 0.02,
+        top: screen.height * 0.01,
+        bottom: screen.height * 0.03,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          fieldLabel('\u2022 Chariry #1'),
+          fieldLabel('\u2022 Chariry #2'),
+          fieldLabel('\u2022 Chariry #3'),
         ],
       ),
     );
   }
 
-  Widget contactInformation() {
-    Donation donation = context.watch<Donation>();
+  Widget contactInfo() {
+    Donation donation = context.read<Donation>();
     Map<String, String> address = donation.address;
+    String street = address[FireStoreService.kAddressStreet];
+    String city = address[FireStoreService.kAddressCity];
+    String state = address[FireStoreService.kAddressState];
+    String zip = address[FireStoreService.kAddressZip];
     Map<String, String> phone = donation.phone;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          address[FireStoreService.kAddressStreet],
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 20.0,
-            fontWeight: FontWeight.bold,
-          ),
+    String intlPhoneNumber = phone[FireStoreService.kPhoneDialCode];
+    String phoneNumber = phone[FireStoreService.kPhoneNumber];
+    intlPhoneNumber += ' (${phoneNumber.substring(0, 3)})';
+    intlPhoneNumber += ' ${phoneNumber.substring(3, 6)}';
+    intlPhoneNumber += ' ${phoneNumber.substring(6, 10)}';
+    Size screen = MediaQuery.of(context).size;
+    return Padding(
+      padding: EdgeInsets.only(
+        left: screen.width * 0.02,
+        right: screen.width * 0.02,
+        top: screen.height * 0.01,
+        bottom: screen.height * 0.03,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          fieldLabel('$street'),
+          fieldLabel('$city, $state, $zip'),
+          fieldLabel('Phone: $intlPhoneNumber'),
+        ],
+      ),
+    );
+  }
+
+  Widget appreciation() {
+    Size screen = MediaQuery.of(context).size;
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        vertical: screen.height * 0.01,
+      ),
+      child: Text(
+        'Thank You!',
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: kLabelColor,
+          fontSize: 30.0,
+          fontWeight: FontWeight.bold,
         ),
-        Text(
-          '${address[FireStoreService.kAddressCity]}, ${address[FireStoreService.kAddressState]},${address[FireStoreService.kAddressZip]}',
-          style: TextStyle(
-              color: Colors.white, fontSize: 20.0, fontWeight: FontWeight.bold),
-        ),
-        Text(
-          'Phone: ${phone[FireStoreService.kPhoneDialCode]}${phone[FireStoreService.kPhoneNumber]}',
-          style: TextStyle(
-              color: Colors.white, fontSize: 20.0, fontWeight: FontWeight.bold),
-        ),
-      ],
+      ),
+    );
+  }
+
+  Widget confirmButton() {
+    Size screen = MediaQuery.of(context).size;
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        vertical: screen.height * 0.03,
+        horizontal: screen.width * 0.2,
+      ),
+      child: RoundedButton(
+        label: 'Confirm',
+        onPressed: () {
+          confirm();
+        },
+      ),
     );
   }
 }
