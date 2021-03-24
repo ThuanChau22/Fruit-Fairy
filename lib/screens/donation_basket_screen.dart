@@ -17,11 +17,10 @@ class DonationBasketScreen extends StatefulWidget {
   _DonationBasketScreenState createState() => _DonationBasketScreenState();
 }
 
-enum CollectOption { Yes, No }
-
 class _DonationBasketScreenState extends State<DonationBasketScreen> {
   final Color _selectedColor = Colors.green.shade100;
-  CollectOption _collectOption = CollectOption.Yes;
+
+  bool _collectOption = true;
 
   VoidCallback listener;
 
@@ -36,14 +35,15 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
       }
     };
     donation.addListener(listener);
+    _collectOption = donation.needCollected;
   }
 
   @override
   Widget build(BuildContext context) {
+    Donation donation = context.read<Donation>();
     Size screen = MediaQuery.of(context).size;
     return WillPopScope(
       onWillPop: () async {
-        Donation donation = context.read<Donation>();
         donation.removeListener(listener);
         return true;
       },
@@ -61,7 +61,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
                 collectOptionTile(),
                 divider(),
                 Visibility(
-                  visible: _collectOption == CollectOption.Yes,
+                  visible: donation.needCollected,
                   child: Column(
                     children: [
                       Padding(
@@ -123,11 +123,11 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
         children: [
           collectOptionButton(
             label: 'Yes',
-            option: CollectOption.Yes,
+            needCollected: true,
           ),
           collectOptionButton(
             label: 'No',
-            option: CollectOption.No,
+            needCollected: false,
           ),
         ],
       ),
@@ -136,10 +136,10 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
 
   Widget collectOptionButton({
     @required String label,
-    @required CollectOption option,
-    Fruit fruit,
+    @required bool needCollected,
   }) {
     Size screen = MediaQuery.of(context).size;
+    bool selected = _collectOption == needCollected;
     return Expanded(
       child: Padding(
         padding: EdgeInsets.symmetric(
@@ -147,11 +147,11 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
         ),
         child: RoundedButton(
           label: label,
-          backgroundColor:
-              _collectOption == option ? _selectedColor : kObjectColor,
+          backgroundColor: selected ? _selectedColor : kObjectColor,
           onPressed: () {
             setState(() {
-              _collectOption = option;
+              _collectOption = needCollected;
+              context.read<Donation>().setNeedCollected(_collectOption);
             });
           },
         ),
@@ -166,8 +166,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
       axisCount = 4;
     }
     bool squeeze = screen.height < screen.width;
-    bool needCollect = _collectOption == CollectOption.Yes;
-    context.read<Donation>().setNeedCollected(needCollect);
+    bool needCollect = context.read<Donation>().needCollected;
     return Expanded(
       child: GridView.count(
         primary: false,
@@ -204,7 +203,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
   }) {
     Size screen = MediaQuery.of(context).size;
     bool squeeze = screen.height < screen.width;
-    bool needCollect = _collectOption == CollectOption.Yes;
+    bool needCollect = context.read<Donation>().needCollected;
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: screen.width * (needCollect ? (squeeze ? 0.2 : 0.02) : 0.0),
@@ -223,7 +222,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
                 color: kObjectColor,
                 borderRadius: BorderRadius.circular(20.0),
               ),
-              child: _collectOption == CollectOption.Yes
+              child: needCollect
                   ? adjustableFruitTile(fruit)
                   : FruitTile(
                       fruitName: fruit.name,
