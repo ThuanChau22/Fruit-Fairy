@@ -55,11 +55,12 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
         bottom: screen.height * 0.02,
       ),
       child: Text(
-        'Review',
+        'Review and confirm your donation',
+        textAlign: TextAlign.center,
         style: TextStyle(
           color: kLabelColor,
           fontWeight: FontWeight.bold,
-          fontSize: 30.0,
+          fontSize: 25.0,
         ),
       ),
     );
