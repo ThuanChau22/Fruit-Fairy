@@ -24,6 +24,9 @@ class _RoundedIconButtonState extends State<RoundedIconButton> {
 
   @override
   Widget build(BuildContext context) {
+    Color shadowColor = widget.buttonColor == Colors.transparent
+        ? Colors.transparent
+        : Colors.black;
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
@@ -45,6 +48,7 @@ class _RoundedIconButtonState extends State<RoundedIconButton> {
       child: Padding(
         padding: EdgeInsets.all(10.0),
         child: Material(
+          shadowColor: shadowColor,
           shape: CircleBorder(),
           color: widget.buttonColor,
           elevation: 2.0,

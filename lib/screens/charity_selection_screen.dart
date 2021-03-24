@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:simple_tooltip/simple_tooltip.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 //
 import 'package:fruitfairy/constant.dart';
+import 'package:fruitfairy/screens/donation_confirm_screen.dart';
+import 'package:fruitfairy/widgets/charity_tile.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
-import 'donation_confirm_screen.dart';
+import 'package:fruitfairy/widgets/rounded_icon_button.dart';
 
 class CharitySelectionScreen extends StatefulWidget {
   static const String id = 'charity_selection_screen';
@@ -18,7 +20,7 @@ class _CharitySelectionScreenState extends State<CharitySelectionScreen> {
     'charity2',
     'charity3',
     'charity4',
-    'charity5'
+    'charity5',
   ];
   List<String> numbers = [];
 
@@ -30,190 +32,170 @@ class _CharitySelectionScreenState extends State<CharitySelectionScreen> {
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Donation'),
-      ),
+      appBar: AppBar(title: Text('Donation')),
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SizedBox(
-              height: screen.height * 0.03,
-            ),
-            Text(
-              'Charity Selection',
-              style: TextStyle(
-                color: kLabelColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 30.0,
-              ),
-            ),
-            SizedBox(
-              height: screen.height * 0.03,
-            ),
-            Divider(
-              color: kLabelColor,
-              height: 5.0,
-              thickness: 3.0,
-              indent: 20.0,
-              endIndent: 20.0,
-            ),
-            SizedBox(
-              height: screen.height * 0.03,
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: screen.width * 0.05),
-              child: Text(
-                'Select 3 charities to donate to:',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: kLabelColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 25.0,
-                ),
-              ),
-            ),
-            SizedBox(
-              height: screen.height * 0.02,
-            ),
-            Column(
-              children: charities(),
-            ),
-            // SizedBox(
-            //   height: screen.height * 0.175,
-            // ),
-            Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: screen.width * 0.05,
-              ),
-              child: Column(
-                children: [
-                  Column(
-                    children: [
-                      Divider(
-                        color: kLabelColor,
-                        height: 5.0,
-                        thickness: 3.0,
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                          vertical: screen.height * 0.03,
-                          horizontal: screen.width * 0.2,
-                        ),
-                        child: RoundedButton(
-                          label: 'Next',
-                          onPressed: () {
-                            confirm();
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: screen.width * 0.05,
+          ),
+          child: Column(
+            children: [
+              titleLabel(),
+              divider(),
+              instructionLabel(),
+              charityOptions(),
+              divider(),
+              nextButton(),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  List<Widget> charities() {
-    List<Widget> list = [];
-    for (String name in selectedCharity) {
-      list.add(charityButton(
-          charityName: name,
-          onTap: () {
-            setState(() {
-              if (numbers.contains(name)) {
-                numbers.remove(name);
-              } else {
-                if (numbers.length < 3) {
-                  numbers.add(name);
-                }
-              }
-            });
-          }));
-    }
-    return list;
-  }
-
-  Widget charityButton({
-    @required String charityName,
-    @required VoidCallback onTap,
-  }) {
+  Widget titleLabel() {
     Size screen = MediaQuery.of(context).size;
-    return Column(
-      children: [
-        SizedBox(
-          height: screen.height * 0.02,
-        ),
-        GestureDetector(
-          onTap: onTap,
-          child: Container(
-            height: 50.0,
-            width: 300.0,
-            decoration: BoxDecoration(
-              color: kObjectColor,
-              borderRadius: BorderRadius.all(Radius.circular(20)),
-            ),
-            child: Row(
-              children: [
-                Expanded(flex: 2, child: circleWithNumber(charityName)),
-                Expanded(
-                  flex: 1,
-                  child: SizedBox(
-                    width: screen.width * 0.1,
-                  ),
-                ),
-                Expanded(
-                  flex: 6,
-                  child: Container(
-                    alignment: Alignment.centerLeft,
-                    height: 50.0,
-                    width: 200.0,
-                    child: Text(
-                      charityName,
-                      style: TextStyle(
-                        color: kPrimaryColor,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget circleWithNumber(String charityName) {
-    return Visibility(
-      visible: numbers.contains(charityName),
-      child: Container(
-        alignment: Alignment.centerLeft,
-        width: 40.0,
-        height: 40.0,
-        decoration: new BoxDecoration(
-          border: Border.all(
-            color: kPrimaryColor,
-            width: 3,
-          ),
-          shape: BoxShape.circle,
-        ),
-        child: Center(
-          child: Text(
-            '${numbers.indexOf(charityName) + 1}',
-            style: TextStyle(
-              color: kPrimaryColor,
-              fontSize: 30,
-            ),
-          ),
+    return Padding(
+      padding: EdgeInsets.only(
+        top: screen.height * 0.03,
+        bottom: screen.height * 0.02,
+      ),
+      child: Text(
+        'Charity Selection',
+        style: TextStyle(
+          color: kLabelColor,
+          fontWeight: FontWeight.bold,
+          fontSize: 30.0,
         ),
       ),
     );
+  }
+
+  Widget divider() {
+    return Divider(
+      color: kLabelColor,
+      height: 5.0,
+      thickness: 3.0,
+    );
+  }
+
+  Widget instructionLabel() {
+    Size screen = MediaQuery.of(context).size;
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: screen.height * 0.05,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'Select 3 charities:',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: kLabelColor,
+              fontWeight: FontWeight.bold,
+              fontSize: 25.0,
+            ),
+          ),
+          helpButton(),
+        ],
+      ),
+    );
+  }
+
+  Widget charityOptions() {
+    List<Widget> charityList = charityTiles();
+    Size screen = MediaQuery.of(context).size;
+    return Expanded(
+      child: ListView.builder(
+        itemCount: charityList.length,
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: EdgeInsets.symmetric(
+              vertical: screen.height * 0.01,
+              horizontal: screen.width * 0.1,
+            ),
+            child: charityList[index],
+          );
+        },
+      ),
+    );
+  }
+
+  List<Widget> charityTiles() {
+    List<Widget> charityList = [];
+    selectedCharity.forEach((charityName) {
+      bool selected = numbers.contains(charityName);
+      charityList.add(CharityTile(
+        charityName: charityName,
+        selectedOrder: selected ? '${numbers.indexOf(charityName) + 1}' : '',
+        onTap: () {
+          setState(() {
+            if (selected) {
+              numbers.remove(charityName);
+            } else if (numbers.length < 3) {
+              numbers.add(charityName);
+            }
+          });
+        },
+      ));
+    });
+    return charityList;
+  }
+
+  Widget nextButton() {
+    Size screen = MediaQuery.of(context).size;
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        vertical: screen.height * 0.03,
+        horizontal: screen.width * 0.2,
+      ),
+      child: RoundedButton(
+        label: 'Next',
+        onPressed: () {
+          confirm();
+        },
+      ),
+    );
+  }
+
+  Widget helpButton() {
+    return RoundedIconButton(
+      radius: 25.0,
+      icon: Icon(
+        Icons.help_outline,
+        color: kLabelColor,
+        size: 25.0,
+      ),
+      buttonColor: Colors.transparent,
+      onPressed: () {
+        showHelpDialog();
+      },
+    );
+  }
+
+  void showHelpDialog() {
+    Alert(
+      context: context,
+      title: '',
+      style: AlertStyle(
+        alertBorder: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        backgroundColor: kLabelColor,
+        titleStyle: TextStyle(fontSize: 0.0),
+        overlayColor: Colors.black.withOpacity(0.25),
+        isCloseButton: false,
+      ),
+      content: Text(
+        'Please select the top three charities to donate to. If your first prioritized charity does not accept your donation, it will be offered to the second prioritized charity and so on.',
+        style: TextStyle(
+          color: kPrimaryColor,
+          fontSize: 20.0,
+          decoration: TextDecoration.none,
+        ),
+      ),
+      buttons: [],
+    ).show();
   }
 }

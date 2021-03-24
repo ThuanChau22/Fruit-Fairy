@@ -978,7 +978,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Future<void> showDeleteDialog() async {
+  void showDeleteDialog() {
     Alert(
       context: context,
       title: 'Delete Account',
