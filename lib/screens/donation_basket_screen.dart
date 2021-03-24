@@ -6,6 +6,7 @@ import 'package:fruitfairy/models/fruit.dart';
 import 'package:fruitfairy/models/donation.dart';
 import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/screens/donation_contact_screen.dart';
+import 'package:fruitfairy/screens/picking_fruit_screen.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/rounded_icon_button.dart';
@@ -31,7 +32,9 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
     listener = () {
       if (donation.produce.isEmpty) {
         donation.removeListener(listener);
-        Navigator.of(context).pop();
+        Navigator.of(context).popUntil((route) {
+          return route.settings.name == PickingFruitScreen.id;
+        });
       }
     };
     donation.addListener(listener);
@@ -179,20 +182,18 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
 
   List<Widget> fruitTiles() {
     List<Widget> list = [];
-    Map<String, Fruit> produce = context.watch<Produce>().fruits;
+    Map<String, Fruit> produce = context.read<Produce>().fruits;
     Donation donation = context.watch<Donation>();
     donation.produce.forEach((fruitId) {
-      list.add(
-        removableFruitTile(
-          fruit: produce[fruitId],
-          onPressed: () {
-            setState(() {
-              produce[fruitId].clear();
-              donation.removeFruit(fruitId);
-            });
-          },
-        ),
-      );
+      list.add(removableFruitTile(
+        fruit: produce[fruitId],
+        onPressed: () {
+          setState(() {
+            produce[fruitId].clear();
+            donation.removeFruit(fruitId);
+          });
+        },
+      ));
     });
     return list;
   }
