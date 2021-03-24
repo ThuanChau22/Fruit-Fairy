@@ -164,16 +164,13 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
 
   Widget selectedFruits() {
     Size screen = MediaQuery.of(context).size;
-    int axisCount = 2;
-    if (screen.width >= 600) {
-      axisCount = 4;
-    }
+    int axisCount = screen.width >= 600 ? 4 : 2;
     bool squeeze = screen.height < screen.width;
     bool needCollect = context.read<Donation>().needCollected;
     return Expanded(
       child: GridView.count(
         primary: false,
-        childAspectRatio: needCollect ? (squeeze ? 5 : 2.5) : 1.0,
+        childAspectRatio: needCollect ? (squeeze ? 5.0 : 2.5) : 1.0,
         crossAxisCount: needCollect ? 1 : axisCount,
         children: fruitTiles(),
       ),

@@ -351,7 +351,7 @@ class _ContactConfirmation extends State<DonationContactScreen> {
       child: Text(
         'Contact Infomation',
         style: TextStyle(
-          color: Colors.white,
+          color: kLabelColor,
           fontWeight: FontWeight.bold,
           fontSize: 30.0,
         ),
