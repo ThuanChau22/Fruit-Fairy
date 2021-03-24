@@ -81,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
       Produce produce = context.read<Produce>();
       produce.fromDB(data);
       Donation donation = context.read<Donation>();
-      donation.produce.forEach((fruitId) {
+      List.from(donation.produce).forEach((fruitId) {
         if (!produce.fruits.containsKey(fruitId)) {
           donation.removeFruit(fruitId);
         }

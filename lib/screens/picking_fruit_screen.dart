@@ -79,7 +79,7 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
       child: Text(
         'Choose fruit to donate:',
         style: TextStyle(
-          color: Colors.white,
+          color: kLabelColor,
           fontWeight: FontWeight.bold,
           fontSize: 30.0,
         ),

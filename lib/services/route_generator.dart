@@ -32,14 +32,18 @@ class RouteGenerator {
     DonationConfirmScreen.id: DonationConfirmScreen(),
   };
 
+  static List<String> defaultScreens = [
+    SignOptionScreen.id,
+    SignInScreen.id,
+    SignUpRoleScreen.id,
+  ];
+
   static Route<dynamic> generate(RouteSettings settings) {
     String screenName = settings.name;
     Object arguments = settings.arguments;
 
     // Screens with default transition animation
-    if (screenName == SignOptionScreen.id ||
-        screenName == SignInScreen.id ||
-        screenName == SignUpRoleScreen.id) {
+    if (defaultScreens.contains(screenName)) {
       return MaterialPageRoute(
         settings: RouteSettings(name: screenName, arguments: arguments),
         builder: (context) => _routes[screenName],

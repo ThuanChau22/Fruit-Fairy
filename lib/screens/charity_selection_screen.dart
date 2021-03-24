@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:simple_tooltip/simple_tooltip.dart';
-
 //
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
@@ -23,6 +22,10 @@ class _CharitySelectionScreenState extends State<CharitySelectionScreen> {
   ];
   List<String> numbers = [];
 
+  void confirm() {
+    Navigator.of(context).pushNamed(DonationConfirmScreen.id);
+  }
+
   @override
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
@@ -40,7 +43,7 @@ class _CharitySelectionScreenState extends State<CharitySelectionScreen> {
             Text(
               'Charity Selection',
               style: TextStyle(
-                color: Colors.white,
+                color: kLabelColor,
                 fontWeight: FontWeight.bold,
                 fontSize: 30.0,
               ),
@@ -64,7 +67,7 @@ class _CharitySelectionScreenState extends State<CharitySelectionScreen> {
                 'Select 3 charities to donate to:',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.white,
+                  color: kLabelColor,
                   fontWeight: FontWeight.bold,
                   fontSize: 25.0,
                 ),
@@ -76,9 +79,9 @@ class _CharitySelectionScreenState extends State<CharitySelectionScreen> {
             Column(
               children: charities(),
             ),
-            SizedBox(
-              height: screen.height * 0.175,
-            ),
+            // SizedBox(
+            //   height: screen.height * 0.175,
+            // ),
             Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: screen.width * 0.05,
@@ -100,7 +103,7 @@ class _CharitySelectionScreenState extends State<CharitySelectionScreen> {
                         child: RoundedButton(
                           label: 'Next',
                           onPressed: () {
-                            Navigator.of(context).pushNamed(DonationConfirmScreen.id);
+                            confirm();
                           },
                         ),
                       ),
