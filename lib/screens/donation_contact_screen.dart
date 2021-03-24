@@ -346,7 +346,7 @@ class _ContactConfirmation extends State<DonationContactScreen> {
     return Padding(
       padding: EdgeInsets.only(
         top: screen.height * 0.03,
-        bottom: screen.height * 0.03,
+        bottom: screen.height * 0.02,
       ),
       child: Text(
         'Contact Infomation',
