@@ -5,7 +5,7 @@ class CustomGrid extends StatelessWidget {
   final int crossAxisCount;
   final double childAspectRatio;
   final double assistPadding;
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry padding;
 
   CustomGrid({
     @required this.children,
