@@ -52,7 +52,8 @@ class FruitTile extends StatelessWidget {
         ),
         Visibility(
           visible: percentage.isNotEmpty,
-          child: Align(
+          child: Padding(
+            padding: EdgeInsets.only(left: 12.0),
             child: Text(
               '$percentage%',
               style: TextStyle(
