@@ -42,7 +42,6 @@ class _CharitySelectionScreenState extends State<CharitySelectionScreen> {
             children: [
               titleLabel(),
               divider(),
-              instructionLabel(),
               charityOptions(),
               divider(),
               nextButton(),
@@ -79,16 +78,33 @@ class _CharitySelectionScreenState extends State<CharitySelectionScreen> {
     );
   }
 
-  Widget instructionLabel() {
+  Widget charityOptions() {
+    List<Widget> widgets = [instructionSection()];
+    widgets.addAll(charityTiles());
     Size screen = MediaQuery.of(context).size;
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: screen.height * 0.05,
+    return Expanded(
+      child: ListView.builder(
+        itemCount: widgets.length,
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: EdgeInsets.symmetric(
+              vertical: screen.height * 0.01,
+              horizontal: screen.width * 0.1,
+            ),
+            child: widgets[index],
+          );
+        },
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
+    );
+  }
+
+  Widget instructionSection() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Padding(
+          padding: EdgeInsets.all(10.0),
+          child: Text(
             'Select 3 charities:',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -97,65 +113,9 @@ class _CharitySelectionScreenState extends State<CharitySelectionScreen> {
               fontSize: 25.0,
             ),
           ),
-          helpButton(),
-        ],
-      ),
-    );
-  }
-
-  Widget charityOptions() {
-    List<Widget> charityList = charityTiles();
-    Size screen = MediaQuery.of(context).size;
-    return Expanded(
-      child: ListView.builder(
-        itemCount: charityList.length,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: EdgeInsets.symmetric(
-              vertical: screen.height * 0.01,
-              horizontal: screen.width * 0.1,
-            ),
-            child: charityList[index],
-          );
-        },
-      ),
-    );
-  }
-
-  List<Widget> charityTiles() {
-    List<Widget> charityList = [];
-    selectedCharity.forEach((charityName) {
-      bool selected = numbers.contains(charityName);
-      charityList.add(CharityTile(
-        charityName: charityName,
-        selectedOrder: selected ? '${numbers.indexOf(charityName) + 1}' : '',
-        onTap: () {
-          setState(() {
-            if (selected) {
-              numbers.remove(charityName);
-            } else if (numbers.length < 3) {
-              numbers.add(charityName);
-            }
-          });
-        },
-      ));
-    });
-    return charityList;
-  }
-
-  Widget nextButton() {
-    Size screen = MediaQuery.of(context).size;
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        vertical: screen.height * 0.03,
-        horizontal: screen.width * 0.2,
-      ),
-      child: RoundedButton(
-        label: 'Next',
-        onPressed: () {
-          confirm();
-        },
-      ),
+        ),
+        helpButton(),
+      ],
     );
   }
 
@@ -197,5 +157,42 @@ class _CharitySelectionScreenState extends State<CharitySelectionScreen> {
       ),
       buttons: [],
     ).show();
+  }
+
+  List<Widget> charityTiles() {
+    List<Widget> charityList = [];
+    selectedCharity.forEach((charityName) {
+      bool selected = numbers.contains(charityName);
+      charityList.add(CharityTile(
+        charityName: charityName,
+        selectedOrder: selected ? '${numbers.indexOf(charityName) + 1}' : '',
+        onTap: () {
+          setState(() {
+            if (selected) {
+              numbers.remove(charityName);
+            } else if (numbers.length < 3) {
+              numbers.add(charityName);
+            }
+          });
+        },
+      ));
+    });
+    return charityList;
+  }
+
+  Widget nextButton() {
+    Size screen = MediaQuery.of(context).size;
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        vertical: screen.height * 0.03,
+        horizontal: screen.width * 0.2,
+      ),
+      child: RoundedButton(
+        label: 'Next',
+        onPressed: () {
+          confirm();
+        },
+      ),
+    );
   }
 }

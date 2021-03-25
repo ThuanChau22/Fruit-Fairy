@@ -37,6 +37,7 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
           child: Column(
             children: [
               titleLabel(),
+              divider(),
               reviewDetails(),
               divider(),
               confirmButton(),
@@ -55,12 +56,12 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
         bottom: screen.height * 0.02,
       ),
       child: Text(
-        'Review and confirm your donation',
+        'Review and Confirm',
         textAlign: TextAlign.center,
         style: TextStyle(
           color: kLabelColor,
           fontWeight: FontWeight.bold,
-          fontSize: 25.0,
+          fontSize: 30.0,
         ),
       ),
     );
@@ -74,39 +75,10 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
     );
   }
 
-  Widget groupLabel(String label) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: kLabelColor,
-            fontSize: 25.0,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        divider(),
-      ],
-    );
-  }
-
-  Widget fieldLabel(String label) {
-    return Text(
-      label,
-      style: TextStyle(
-        color: kLabelColor,
-        fontSize: 20.0,
-        fontWeight: FontWeight.bold,
-        height: 1.5,
-      ),
-    );
-  }
-
   Widget reviewDetails() {
     Size screen = MediaQuery.of(context).size;
     List<Widget> widgets = [
-      groupLabel('Produce'),
+      groupLabel('Produce Selected'),
       selectedFruits(),
       groupLabel('Charity Selected'),
       selectedCharities(),
@@ -129,13 +101,51 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
     );
   }
 
+  Widget groupLabel(String label) {
+    Size screen = MediaQuery.of(context).size;
+    return Padding(
+      padding: EdgeInsets.only(
+        top: screen.height * 0.02,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: kLabelColor,
+              fontSize: 25.0,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Divider(
+            color: kLabelColor,
+            height: 2.0,
+            thickness: 2.0,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget fieldLabel(String label) {
+    return Text(
+      label,
+      style: TextStyle(
+        color: kLabelColor,
+        fontSize: 20.0,
+        fontWeight: FontWeight.bold,
+        height: 1.5,
+      ),
+    );
+  }
+
   Widget selectedFruits() {
     Size screen = MediaQuery.of(context).size;
     int axisCount = screen.width >= 600 ? 4 : 2;
     return Padding(
-      padding: EdgeInsets.only(
-        top: screen.height * 0.01,
-        bottom: screen.height * 0.03,
+      padding: EdgeInsets.symmetric(
+        vertical: screen.height * 0.01,
       ),
       child: customLayout(
         padding: 10.0,
@@ -202,11 +212,9 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
   Widget selectedCharities() {
     Size screen = MediaQuery.of(context).size;
     return Padding(
-      padding: EdgeInsets.only(
-        left: screen.width * 0.02,
-        right: screen.width * 0.02,
-        top: screen.height * 0.01,
-        bottom: screen.height * 0.03,
+      padding: EdgeInsets.symmetric(
+        vertical: screen.height * 0.01,
+        horizontal: screen.width * 0.02,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -234,11 +242,9 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
     intlPhoneNumber += ' ${phoneNumber.substring(6, 10)}';
     Size screen = MediaQuery.of(context).size;
     return Padding(
-      padding: EdgeInsets.only(
-        left: screen.width * 0.02,
-        right: screen.width * 0.02,
-        top: screen.height * 0.01,
-        bottom: screen.height * 0.03,
+      padding: EdgeInsets.symmetric(
+        vertical: screen.height * 0.01,
+        horizontal: screen.width * 0.02,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -255,7 +261,7 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
     Size screen = MediaQuery.of(context).size;
     return Padding(
       padding: EdgeInsets.symmetric(
-        vertical: screen.height * 0.01,
+        vertical: screen.height * 0.03,
       ),
       child: Text(
         'Thank You!',

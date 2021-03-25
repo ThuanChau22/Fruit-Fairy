@@ -36,7 +36,7 @@ class CharityTile extends StatelessWidget {
               child: selectedIcon(),
             ),
             Expanded(
-              flex: 6,
+              flex: 7,
               child: Text(
                 charityName,
                 textAlign: TextAlign.center,
@@ -61,7 +61,7 @@ class CharityTile extends StatelessWidget {
     return Visibility(
       visible: selectedOrder.isNotEmpty,
       child: Container(
-        height: 45.0,
+        height: 35.0,
         decoration: new BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(
@@ -74,7 +74,7 @@ class CharityTile extends StatelessWidget {
             selectedOrder,
             style: TextStyle(
               color: kPrimaryColor,
-              fontSize: 30.0,
+              fontSize: 25.0,
             ),
           ),
         ),

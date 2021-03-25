@@ -329,6 +329,7 @@ class _ContactConfirmation extends State<DonationContactScreen> {
                 child: Column(
                   children: [
                     titleLabel(),
+                    divider(),
                     contactInfo(),
                     buttonSection(),
                   ],
@@ -359,8 +360,18 @@ class _ContactConfirmation extends State<DonationContactScreen> {
     );
   }
 
+  Widget divider() {
+    return Divider(
+      color: kLabelColor,
+      height: 5.0,
+      thickness: 3.0,
+    );
+  }
+
   Widget contactInfo() {
     List<Widget> widgets = [
+      inputFieldSizedBox(),
+      inputFieldSizedBox(),
       inputGroupLabel(
         'Address',
         tag: Field.Address,
@@ -676,14 +687,6 @@ class _ContactConfirmation extends State<DonationContactScreen> {
           nextButton(),
         ],
       ),
-    );
-  }
-
-  Widget divider() {
-    return Divider(
-      color: kLabelColor,
-      height: 5.0,
-      thickness: 3.0,
     );
   }
 
