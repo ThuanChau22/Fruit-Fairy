@@ -415,6 +415,7 @@ class _ContactConfirmation extends State<DonationContactScreen> {
         padding: EdgeInsets.only(
           left: screen.width * 0.05,
           right: screen.width * 0.05,
+          bottom: screen.height * 0.01,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -432,7 +433,6 @@ class _ContactConfirmation extends State<DonationContactScreen> {
               height: 2.0,
               thickness: 2.0,
             ),
-            SizedBox(height: screen.height * 0.01),
           ],
         ),
       ),
