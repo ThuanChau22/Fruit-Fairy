@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 //
 import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
+import 'package:fruitfairy/screens/authentication/sign_up_charity_screen.dart';
 import 'package:fruitfairy/screens/authentication/signin_screen.dart';
 import 'package:fruitfairy/screens/authentication/signup_role_screen.dart';
 import 'package:fruitfairy/screens/authentication/signup_donor_screen.dart';
@@ -30,6 +31,7 @@ class RouteGenerator {
     DonationDetailScreen.id: DonationDetailScreen(),
     CharitySelectionScreen.id: CharitySelectionScreen(),
     DonationConfirmScreen.id: DonationConfirmScreen(),
+    SignUpCharityScreen.id: SignUpCharityScreen(),
   };
 
   static List<String> defaultScreens = [

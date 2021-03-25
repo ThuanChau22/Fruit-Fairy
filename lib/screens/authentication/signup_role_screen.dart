@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 //
 import 'package:fruitfairy/constant.dart';
+import 'package:fruitfairy/screens/authentication/sign_up_charity_screen.dart';
 import 'package:fruitfairy/screens/authentication/signup_donor_screen.dart';
 import 'package:fruitfairy/widgets/fruit_fairy_logo.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
@@ -104,7 +105,9 @@ class SignUpRoleScreen extends StatelessWidget {
         ),
         trailing: SizedBox(width: 35.0),
         //ToDo: redirect to sign up charity screen
-        onPressed: () {},
+        onPressed: () {
+          Navigator.of(context).pushNamed(SignUpCharityScreen.id);
+        },
       ),
     );
   }
