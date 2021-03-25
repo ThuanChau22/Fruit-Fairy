@@ -1,18 +1,22 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+//
+import 'package:fruitfairy/constant.dart';
 
 class RoundedIconButton extends StatefulWidget {
   final double radius;
   final Icon icon;
   final Color buttonColor;
+  final double hitBoxPadding;
   final VoidCallback onPressed;
 
   RoundedIconButton({
     @required this.radius,
     @required this.icon,
     @required this.onPressed,
-    this.buttonColor,
+    this.buttonColor = kObjectColor,
+    this.hitBoxPadding = 0.0,
   });
 
   @override
@@ -46,7 +50,7 @@ class _RoundedIconButtonState extends State<RoundedIconButton> {
         timer.cancel();
       },
       child: Padding(
-        padding: EdgeInsets.all(10.0),
+        padding: EdgeInsets.all(widget.hitBoxPadding),
         child: Material(
           shadowColor: shadowColor,
           shape: CircleBorder(),

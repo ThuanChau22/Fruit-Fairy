@@ -7,6 +7,7 @@ import 'package:fruitfairy/models/fruit.dart';
 import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
+import 'package:fruitfairy/widgets/custom_grid.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 
@@ -19,6 +20,12 @@ class DonationConfirmScreen extends StatefulWidget {
 
 class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
   void confirm() {
+    // Do not call setState on clear
+    Donation donation = context.read<Donation>();
+    donation.produce.forEach((fruitId) {
+      context.read<Produce>().fruits[fruitId].clear();
+    });
+    donation.clear();
     Navigator.of(context).popUntil((route) {
       return route.settings.name == HomeScreen.id;
     });
@@ -147,45 +154,13 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
       padding: EdgeInsets.symmetric(
         vertical: screen.height * 0.01,
       ),
-      child: customLayout(
-        padding: 10.0,
+      child: CustomGrid(
+        padding: EdgeInsets.all(10.0),
+        assistPadding: screen.width * 0.15,
         crossAxisCount: axisCount,
         children: fruitTiles(),
       ),
     );
-  }
-
-  Widget customLayout({
-    @required int crossAxisCount,
-    @required List<Widget> children,
-    double padding = 0,
-  }) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double widgetWidth = screenWidth - screenWidth * 0.15 * 2;
-    widgetWidth /= crossAxisCount;
-    List<List<Widget>> rowList = [];
-    children.asMap().forEach((index, widget) {
-      if (index % crossAxisCount == 0) {
-        rowList.add([]);
-      }
-      rowList.last.add(
-        ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: widgetWidth,
-            maxHeight: widgetWidth,
-          ),
-          child: Padding(
-            padding: EdgeInsets.all(padding),
-            child: widget,
-          ),
-        ),
-      );
-    });
-    List<Widget> columnList = [];
-    rowList.forEach((row) {
-      columnList.add(Row(children: row));
-    });
-    return Column(children: columnList);
   }
 
   List<Widget> fruitTiles() {

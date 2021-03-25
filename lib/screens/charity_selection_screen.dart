@@ -99,12 +99,15 @@ class _CharitySelectionScreenState extends State<CharitySelectionScreen> {
   }
 
   Widget instructionSection() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Padding(
-          padding: EdgeInsets.all(10.0),
-          child: Text(
+    Size screen = MediaQuery.of(context).size;
+    return Padding(
+      padding: EdgeInsets.only(
+        top: screen.height * 0.01,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
             'Select 3 charities:',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -113,19 +116,19 @@ class _CharitySelectionScreenState extends State<CharitySelectionScreen> {
               fontSize: 25.0,
             ),
           ),
-        ),
-        helpButton(),
-      ],
+          helpButton(),
+        ],
+      ),
     );
   }
 
   Widget helpButton() {
     return RoundedIconButton(
-      radius: 25.0,
+      radius: 30.0,
       icon: Icon(
         Icons.help_outline,
         color: kLabelColor,
-        size: 25.0,
+        size: 30.0,
       ),
       buttonColor: Colors.transparent,
       onPressed: () {

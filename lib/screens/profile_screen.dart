@@ -557,6 +557,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         padding: EdgeInsets.only(
           left: screen.width * 0.05,
           right: screen.width * 0.05,
+          bottom: screen.height * 0.01,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -574,7 +575,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               height: 2.0,
               thickness: 2.0,
             ),
-            SizedBox(height: screen.height * 0.01),
           ],
         ),
       ),
