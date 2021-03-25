@@ -12,14 +12,13 @@ import 'package:fruitfairy/models/donation.dart';
 import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
 import 'package:fruitfairy/screens/authentication/signin_screen.dart';
-import 'package:fruitfairy/screens/profile_screen.dart';
+import 'package:fruitfairy/screens/donation_detail_screen.dart';
 import 'package:fruitfairy/screens/picking_fruit_screen.dart';
+import 'package:fruitfairy/screens/profile_screen.dart';
 import 'package:fruitfairy/services/fireauth_service.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
-
-import 'donation_detail_screen.dart';
 
 enum Profile { Edit, SignOut }
 
@@ -37,6 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   StreamSubscription<DocumentSnapshot> _userStream;
   StreamSubscription<QuerySnapshot> _produceStream;
+  VoidCallback _onEmptyBasket;
 
   void _fetchData() {
     setState(() => _showSpinner = true);
@@ -57,8 +57,9 @@ class _HomeScreenState extends State<HomeScreen> {
     await context.read<FireAuthService>().signOut();
     context.read<FireStoreService>().clear();
     context.read<Account>().clear();
-    context.read<Donation>().clear();
     context.read<Produce>().clear();
+    context.read<Donation>().clear();
+    context.read<Donation>().removeListener(_onEmptyBasket);
     _userStream.cancel();
     _produceStream.cancel();
     Navigator.of(context).pushNamedAndRemoveUntil(
@@ -77,16 +78,24 @@ class _HomeScreenState extends State<HomeScreen> {
         context.read<Account>().fromDB(data);
       }
     });
+    Donation donation = context.read<Donation>();
     _produceStream = context.read<FireStoreService>().produceStream((data) {
       Produce produce = context.read<Produce>();
       produce.fromDB(data);
-      Donation donation = context.read<Donation>();
       List.from(donation.produce).forEach((fruitId) {
         if (!produce.fruits.containsKey(fruitId)) {
           donation.removeFruit(fruitId);
         }
       });
     });
+    _onEmptyBasket = () {
+      if (donation.produce.isEmpty) {
+        Navigator.of(context).popUntil((route) {
+          return route.settings.name == PickingFruitScreen.id;
+        });
+      }
+    };
+    donation.addListener(_onEmptyBasket);
   }
 
   @override
@@ -107,7 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: ScrollableLayout(
             child: Padding(
               padding: EdgeInsets.symmetric(
-                vertical: screen.height * 0.05,
+                vertical: screen.height * 0.03,
               ),
               child: Column(
                 children: [
