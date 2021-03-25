@@ -107,14 +107,15 @@ class _SignInScreenState extends State<SignInScreen> {
       setState(() => _showSpinner = true);
       switch (_mode) {
         case AuthMode.Reset:
+          String notifyMessage = '';
           try {
             FireAuthService auth = context.read<FireAuthService>();
-            String notifyMessage = await auth.resetPassword(_email.text.trim());
+            notifyMessage = await auth.resetPassword(_email.text.trim());
             _buttonLabel = 'Re-send';
-            MessageBar(context, message: notifyMessage).show();
-          } catch (e) {
-            print(e);
+          } catch (errorMessage) {
+            notifyMessage = errorMessage;
           }
+          MessageBar(context, message: notifyMessage).show();
           break;
 
         case AuthMode.Phone:

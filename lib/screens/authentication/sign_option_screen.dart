@@ -19,7 +19,10 @@ class _SignOptionScreenState extends State<SignOptionScreen> {
     return Scaffold(
       body: SafeArea(
         child: ScrollableLayout(
-          child: Center(
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              vertical: screen.height * 0.03,
+            ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
