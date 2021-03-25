@@ -144,7 +144,7 @@ class _SignUpCharityScreenState extends State<SignUpCharityScreen> {
       onChanged: (value) {
         setState(() {
           _einError = Validate.name(
-            label: 'first name',
+            label: 'EIN',
             name: _ein.text.trim(),
           );
         });
