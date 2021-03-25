@@ -1,11 +1,12 @@
 class Fruit {
   static const Min = 25;
   static const Max = 100;
+  static const int AdjustAmount = 5;
   final String id;
   final String name;
   final String imagePath;
   final String imageURL;
-  int _amount = Min;
+  int _currentAmount = Min;
 
   Fruit({
     this.id,
@@ -15,20 +16,20 @@ class Fruit {
   });
 
   int get amount {
-    return _amount;
+    return _currentAmount;
   }
 
-  void increase(int amount) {
-    int result = _amount + amount;
-    _amount = result < Max ? result : Max;
+  void increase() {
+    int result = _currentAmount + AdjustAmount;
+    _currentAmount = result < Max ? result : Max;
   }
 
-  void decrease(int amount) {
-    int result = _amount - amount;
-    _amount = result > Min ? result : Min;
+  void decrease() {
+    int result = _currentAmount - AdjustAmount;
+    _currentAmount = result > Min ? result : Min;
   }
 
   void clear() {
-    _amount = Min;
+    _currentAmount = Min;
   }
 }
