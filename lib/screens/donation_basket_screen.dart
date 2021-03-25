@@ -31,58 +31,25 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Size screen = MediaQuery.of(context).size;
     return Scaffold(
-      appBar: AppBar(title: Text('Donation')),
+      appBar: AppBar(title: Text('My Basket')),
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: screen.width * 0.05,
-          ),
-          child: Column(
-            children: [
-              titleLabel(),
-              divider(),
-              basketSection(),
-              divider(),
-              nextButton(),
-            ],
-          ),
+        child: Column(
+          children: [
+            basketSection(),
+            divider(),
+            nextButton(),
+          ],
         ),
       ),
-    );
-  }
-
-  Widget titleLabel() {
-    Size screen = MediaQuery.of(context).size;
-    return Padding(
-      padding: EdgeInsets.only(
-        top: screen.height * 0.03,
-        bottom: screen.height * 0.02,
-      ),
-      child: Text(
-        'My Basket',
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          color: kLabelColor,
-          fontWeight: FontWeight.bold,
-          fontSize: 30.0,
-        ),
-      ),
-    );
-  }
-
-  Widget divider() {
-    return Divider(
-      color: kLabelColor,
-      height: 5.0,
-      thickness: 3.0,
     );
   }
 
   Widget basketSection() {
+    Size screen = MediaQuery.of(context).size;
     Donation donation = context.read<Donation>();
     List<Widget> widgets = [
+      SizedBox(height: screen.height * 0.03),
       instructionLabel('Do you need help collecting?'),
       collectOptionTile(),
       Divider(
@@ -98,14 +65,13 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
       ),
       selectedFruits(),
     ];
-    Size screen = MediaQuery.of(context).size;
     return Expanded(
       child: ListView.builder(
         itemCount: widgets.length,
         itemBuilder: (context, index) {
           return Padding(
             padding: EdgeInsets.symmetric(
-              horizontal: screen.width * 0.05,
+              horizontal: screen.width * 0.1,
             ),
             child: widgets[index],
           );
@@ -354,12 +320,20 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
     );
   }
 
+  Widget divider() {
+    return Divider(
+      color: kLabelColor,
+      height: 5.0,
+      thickness: 3.0,
+    );
+  }
+
   Widget nextButton() {
     Size screen = MediaQuery.of(context).size;
     return Padding(
       padding: EdgeInsets.symmetric(
         vertical: screen.height * 0.03,
-        horizontal: screen.width * 0.2,
+        horizontal: screen.width * 0.25,
       ),
       child: RoundedButton(
         label: 'Next',

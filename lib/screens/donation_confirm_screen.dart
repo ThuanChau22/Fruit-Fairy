@@ -33,52 +33,17 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Size screen = MediaQuery.of(context).size;
     return Scaffold(
-      appBar: AppBar(title: Text('Donation')),
+      appBar: AppBar(title: Text('Review and Confirm')),
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: screen.width * 0.05,
-          ),
-          child: Column(
-            children: [
-              titleLabel(),
-              divider(),
-              reviewDetails(),
-              divider(),
-              confirmButton(),
-            ],
-          ),
+        child: Column(
+          children: [
+            reviewDetails(),
+            divider(),
+            confirmButton(),
+          ],
         ),
       ),
-    );
-  }
-
-  Widget titleLabel() {
-    Size screen = MediaQuery.of(context).size;
-    return Padding(
-      padding: EdgeInsets.only(
-        top: screen.height * 0.03,
-        bottom: screen.height * 0.02,
-      ),
-      child: Text(
-        'Review and Confirm',
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          color: kLabelColor,
-          fontWeight: FontWeight.bold,
-          fontSize: 30.0,
-        ),
-      ),
-    );
-  }
-
-  Widget divider() {
-    return Divider(
-      color: kLabelColor,
-      height: 5.0,
-      thickness: 3.0,
     );
   }
 
@@ -112,7 +77,7 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
     Size screen = MediaQuery.of(context).size;
     return Padding(
       padding: EdgeInsets.only(
-        top: screen.height * 0.02,
+        top: screen.height * 0.03,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -156,7 +121,7 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
       ),
       child: CustomGrid(
         padding: EdgeInsets.all(10.0),
-        assistPadding: screen.width * 0.15,
+        assistPadding: screen.width * 0.1,
         crossAxisCount: axisCount,
         children: fruitTiles(),
       ),
@@ -250,12 +215,20 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
     );
   }
 
+  Widget divider() {
+    return Divider(
+      color: kLabelColor,
+      height: 5.0,
+      thickness: 3.0,
+    );
+  }
+
   Widget confirmButton() {
     Size screen = MediaQuery.of(context).size;
     return Padding(
       padding: EdgeInsets.symmetric(
         vertical: screen.height * 0.03,
-        horizontal: screen.width * 0.2,
+        horizontal: screen.width * 0.25,
       ),
       child: RoundedButton(
         label: 'Confirm',
