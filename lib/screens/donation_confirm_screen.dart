@@ -20,6 +20,8 @@ class DonationConfirmScreen extends StatefulWidget {
 
 class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
   void confirm() {
+    // Do not call setState on clear
+    context.read<Donation>().clear();
     Navigator.of(context).popUntil((route) {
       return route.settings.name == HomeScreen.id;
     });
