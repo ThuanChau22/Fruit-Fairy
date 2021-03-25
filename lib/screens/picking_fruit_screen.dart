@@ -43,25 +43,20 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
       },
       child: GestureWrapper(
         child: Scaffold(
-          appBar: AppBar(title: Text('Donation')),
+          appBar: AppBar(title: Text('Produce Selection')),
           body: SafeArea(
             child: ModalProgressHUD(
               inAsyncCall: _showSpinner,
               progressIndicator: CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
               ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: screen.width * 0.05,
-                ),
-                child: Column(
-                  children: [
-                    instructionLabel(),
-                    searchInputField(),
-                    fruitOptions(),
-                    buttonSection(),
-                  ],
-                ),
+              child: Column(
+                children: [
+                  instructionLabel(),
+                  searchInputField(),
+                  fruitOptions(),
+                  buttonSection(),
+                ],
               ),
             ),
           ),
@@ -75,6 +70,8 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
     return Padding(
       padding: EdgeInsets.only(
         top: screen.height * 0.03,
+        left: screen.width * 0.05,
+        right: screen.width * 0.05,
       ),
       child: Text(
         'Choose produce to donate:',
@@ -93,6 +90,8 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
       padding: EdgeInsets.only(
         top: screen.height * 0.01,
         bottom: screen.height * 0.02,
+        left: screen.width * 0.05,
+        right: screen.width * 0.05,
       ),
       child: InputField(
         label: 'Enter Fruit Name',
@@ -122,6 +121,9 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
     return Expanded(
       child: GridView.count(
         primary: false,
+        padding: EdgeInsets.symmetric(
+          horizontal: screen.width * 0.05,
+        ),
         mainAxisSpacing: 20,
         crossAxisSpacing: 20,
         crossAxisCount: axisCount,
@@ -219,7 +221,7 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
     return Padding(
       padding: EdgeInsets.symmetric(
         vertical: screen.height * 0.03,
-        horizontal: screen.width * 0.2,
+        horizontal: screen.width * 0.25,
       ),
       child: RoundedButton(
         label: 'My Basket',
