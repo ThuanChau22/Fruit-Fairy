@@ -77,11 +77,11 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
         top: screen.height * 0.03,
       ),
       child: Text(
-        'Choose fruit to donate:',
+        'Choose produce to donate:',
         style: TextStyle(
           color: kLabelColor,
           fontWeight: FontWeight.bold,
-          fontSize: 30.0,
+          fontSize: 25.0,
         ),
       ),
     );
@@ -90,9 +90,9 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
   Widget searchInputField() {
     Size screen = MediaQuery.of(context).size;
     return Padding(
-      padding: EdgeInsets.symmetric(
-        vertical: screen.height * 0.02,
-        horizontal: screen.width * 0.05,
+      padding: EdgeInsets.only(
+        top: screen.height * 0.01,
+        bottom: screen.height * 0.02,
       ),
       child: InputField(
         label: 'Enter Fruit Name',
