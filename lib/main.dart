@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fruitfairy/models/wish_list.dart';
 import 'package:provider/provider.dart';
 //
 import 'package:fruitfairy/constant.dart';
@@ -30,6 +31,7 @@ class FruitFairy extends StatelessWidget {
         ChangeNotifierProvider<Account>(create: (_) => Account()),
         ChangeNotifierProvider<Donation>(create: (_) => Donation()),
         ChangeNotifierProvider<Produce>(create: (_) => Produce()),
+        ChangeNotifierProvider<WishList>(create: (_) => WishList()),
       ],
       child: Authentication(),
     );
