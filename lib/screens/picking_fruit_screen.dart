@@ -35,7 +35,6 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Size screen = MediaQuery.of(context).size;
     return WillPopScope(
       onWillPop: () async {
         MessageBar(context).hide();
