@@ -4,11 +4,12 @@ import 'package:flutter/foundation.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
 
 class Donation extends ChangeNotifier {
-  bool _needCollected = true;
   final List<String> _produce = [];
   final List<String> _charities = [];
   final Map<String, String> _address = {};
   final Map<String, String> _phone = {};
+  bool _needCollected = true;
+  VoidCallback _onEmptyBasket;
 
   bool get needCollected {
     return _needCollected;
@@ -28,6 +29,13 @@ class Donation extends ChangeNotifier {
 
   UnmodifiableMapView<String, String> get phone {
     return UnmodifiableMapView(_phone);
+  }
+
+  void onEmptyBasket(VoidCallback action) {
+    _onEmptyBasket = () {
+      if (_produce.isEmpty) action();
+    };
+    addListener(_onEmptyBasket);
   }
 
   void setNeedCollected(bool option) {
@@ -64,11 +72,16 @@ class Donation extends ChangeNotifier {
 
   void setCharities(List<String> charities) {}
 
-  void clear() {
+  void reset() {
     _needCollected = true;
     _produce.clear();
     _charities.clear();
     _address.clear();
     _phone.clear();
+  }
+
+  void clear() {
+    reset();
+    removeListener(_onEmptyBasket);
   }
 }

@@ -36,20 +36,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
   StreamSubscription<DocumentSnapshot> _userStream;
   StreamSubscription<QuerySnapshot> _produceStream;
-  VoidCallback _onEmptyBasket;
 
   void _fetchData() {
-    setState(() => _showSpinner = true);
+    _showSpinner = true;
     Account account = context.watch<Account>();
     String firstName = account.firstName;
     String lastName = account.lastName;
     if (firstName.isNotEmpty && lastName.isNotEmpty) {
       _initialName = '${firstName[0] + lastName[0]}'.toUpperCase();
       _name = camelize(firstName);
-      setState(() => _showSpinner = false);
+      _showSpinner = false;
     }
     Produce produce = context.watch<Produce>();
-    setState(() => _showSpinner = produce.fruits.isEmpty);
+    _showSpinner = produce.fruits.isEmpty;
   }
 
   void _signOut() async {
@@ -59,7 +58,6 @@ class _HomeScreenState extends State<HomeScreen> {
     context.read<Account>().clear();
     context.read<Produce>().clear();
     context.read<Donation>().clear();
-    context.read<Donation>().removeListener(_onEmptyBasket);
     _userStream.cancel();
     _produceStream.cancel();
     Navigator.of(context).pushNamedAndRemoveUntil(
@@ -73,13 +71,14 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _userStream = context.read<FireStoreService>().userStream((data) {
+    FireStoreService fireStoreService = context.read<FireStoreService>();
+    _userStream = fireStoreService.userStream((data) {
       if (data != null) {
         context.read<Account>().fromDB(data);
       }
     });
     Donation donation = context.read<Donation>();
-    _produceStream = context.read<FireStoreService>().produceStream((data) {
+    _produceStream = fireStoreService.produceStream((data) {
       Produce produce = context.read<Produce>();
       produce.fromDB(data);
       List.from(donation.produce).forEach((fruitId) {
@@ -88,14 +87,11 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       });
     });
-    _onEmptyBasket = () {
-      if (donation.produce.isEmpty) {
-        Navigator.of(context).popUntil((route) {
-          return route.settings.name == PickingFruitScreen.id;
-        });
-      }
-    };
-    donation.addListener(_onEmptyBasket);
+    donation.onEmptyBasket(() {
+      Navigator.of(context).popUntil((route) {
+        return route.settings.name == PickingFruitScreen.id;
+      });
+    });
   }
 
   @override
