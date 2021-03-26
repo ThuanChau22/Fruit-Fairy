@@ -5,6 +5,8 @@ import 'package:fruitfairy/screens/authentication/signin_screen.dart';
 import 'package:fruitfairy/screens/authentication/signup_role_screen.dart';
 import 'package:fruitfairy/screens/authentication/signup_donor_screen.dart';
 import 'package:fruitfairy/screens/authentication/signup_charity_screen.dart';
+import 'package:fruitfairy/screens/charity_picking_fruit_screen.dart';
+import 'package:fruitfairy/screens/charity_wishlist_screen.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
 import 'package:fruitfairy/screens/charity_home_screen.dart';
 import 'package:fruitfairy/screens/profile_screen.dart';
@@ -36,6 +38,8 @@ class RouteGenerator {
     CharitySelectionScreen.id: CharitySelectionScreen(),
     DonationConfirmScreen.id: DonationConfirmScreen(),
     DonationDetailScreen.id: DonationDetailScreen(),
+    CharityPickingFruitScreen.id: CharityPickingFruitScreen(),
+    CharityWishListScreen.id: CharityWishListScreen(),
   };
 
   static List<String> defaultScreens = [
