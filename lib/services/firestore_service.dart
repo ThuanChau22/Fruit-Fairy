@@ -2,8 +2,6 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-//
-import 'package:fruitfairy/models/fruit.dart';
 
 class FireStoreService {
   /// Database fields
@@ -22,6 +20,7 @@ class FireStoreService {
   static const String kProduce = 'produce';
   static const String kFruitName = 'name';
   static const String kFruitPath = 'path';
+  static const String kFruitURL = 'url';
 
   /// users
   static const String kUsers = 'users';
@@ -42,7 +41,6 @@ class FireStoreService {
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
-  final String _storagePath = 'gs://fruit-fairy.appspot.com';
 
   CollectionReference _usersDB;
   CollectionReference _produceDB;
@@ -68,24 +66,20 @@ class FireStoreService {
   }
 
   StreamSubscription<QuerySnapshot> produceStream(
-    Function(Map<String, Fruit>) onData,
+    Function(Map<String, dynamic>) onData,
   ) {
     return _produceDB.snapshots().listen(
       (snapshot) async {
-        Map<String, Fruit> fruits = {};
+        Map<String, dynamic> snapshotData = {};
         for (QueryDocumentSnapshot doc in snapshot.docs) {
-          String id = doc.id;
           Map<String, dynamic> data = doc.data();
-          String fruitName = data[FireStoreService.kFruitName];
-          String imagePath = data[FireStoreService.kFruitPath];
-          fruits[id] = Fruit(
-            id: id,
-            name: fruitName,
-            imagePath: imagePath,
-            imageURL: await imageURL(imagePath),
-          );
+          snapshotData[doc.id] = {
+            kFruitName: data[FireStoreService.kFruitName],
+            kFruitPath: data[FireStoreService.kFruitPath],
+            kFruitURL: await imageURL(data[FireStoreService.kFruitPath]),
+          };
         }
-        onData(fruits);
+        onData(snapshotData);
       },
       onError: (e) {
         print(e);
@@ -93,12 +87,13 @@ class FireStoreService {
     );
   }
 
-  Future<String> imageURL(String fullPath) async {
-    if (fullPath.indexOf(_storagePath) >= 0) {
-      String directory = fullPath.substring(_storagePath.length);
-      return await _storage.ref(directory).getDownloadURL();
+  Future<String> imageURL(String path) async {
+    try {
+      return await _storage.refFromURL(path).getDownloadURL();
+    } catch (e) {
+      print(e);
+      return '';
     }
-    return '';
   }
 
   Future<void> addAccount({
