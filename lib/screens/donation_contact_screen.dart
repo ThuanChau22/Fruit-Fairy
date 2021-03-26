@@ -358,6 +358,7 @@ class _ContactConfirmation extends State<DonationContactScreen> {
       stateInputField(),
       inputFieldSizedBox(),
       zipInputField(),
+      inputFieldSizedBox(),
       inputGroupLabel(
         'Phone Number',
         tag: Field.Phone,

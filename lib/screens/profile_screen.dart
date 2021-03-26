@@ -506,6 +506,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       firstNameInputField(),
                       inputFieldSizedBox(),
                       lastNameInputField(),
+                      inputFieldSizedBox(),
                       inputGroupLabel(
                         'Address',
                         tag: Field.Address,
