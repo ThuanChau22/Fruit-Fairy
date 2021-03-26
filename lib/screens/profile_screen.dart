@@ -8,7 +8,7 @@ import 'package:rflutter_alert/rflutter_alert.dart';
 //
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
-import 'package:fruitfairy/services/address_service.dart';
+import 'package:fruitfairy/services/map_service.dart';
 import 'package:fruitfairy/services/fireauth_service.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
 import 'package:fruitfairy/services/session_token.dart';
@@ -637,7 +637,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           controller: _street,
           suggestionsCallback: (pattern) async {
             if (pattern.isNotEmpty) {
-              return await AddressService.getSuggestions(
+              return await MapService.getAddressSuggestions(
                 pattern,
                 sessionToken: sessionToken.getToken(),
               );
@@ -654,7 +654,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           itemBuilder: (context, suggestion) {
             return ListTile(
               title: Text(
-                suggestion[AddressService.kDescription],
+                suggestion[MapService.kDescription],
                 style: TextStyle(
                   color: kPrimaryColor,
                 ),
@@ -672,16 +672,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
             );
           },
           onSuggestionSelected: (suggestion) async {
-            Map<String, String> address = await AddressService.getDetails(
-              suggestion[AddressService.kPlaceId],
+            Map<String, String> address = await MapService.getAddressDetails(
+              suggestion[MapService.kPlaceId],
               sessionToken: sessionToken.getToken(),
             );
             if (address.isNotEmpty) {
               setState(() {
-                _street.text = address[AddressService.kStreet];
-                _city.text = address[AddressService.kCity];
-                _state.text = address[AddressService.kState];
-                _zipCode.text = address[AddressService.kZipCode];
+                _street.text = address[MapService.kStreet];
+                _city.text = address[MapService.kCity];
+                _state.text = address[MapService.kState];
+                _zipCode.text = address[MapService.kZipCode];
                 _streetError = Validate.checkStreet(_street.text.trim());
                 _cityError = Validate.checkCity(_city.text.trim());
                 _stateError = Validate.checkState(_state.text.trim());
