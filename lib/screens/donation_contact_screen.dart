@@ -8,7 +8,7 @@ import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
 import 'package:fruitfairy/models/donation.dart';
 import 'package:fruitfairy/screens/charity_selection_screen.dart';
-import 'package:fruitfairy/services/address_service.dart';
+import 'package:fruitfairy/services/map_service.dart';
 import 'package:fruitfairy/services/fireauth_service.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
 import 'package:fruitfairy/services/session_token.dart';
@@ -428,7 +428,7 @@ class _ContactConfirmation extends State<DonationContactScreen> {
           controller: _street,
           suggestionsCallback: (pattern) async {
             if (pattern.isNotEmpty) {
-              return await AddressService.getSuggestions(
+              return await MapService.addressSuggestions(
                 pattern,
                 sessionToken: sessionToken.getToken(),
               );
@@ -443,7 +443,7 @@ class _ContactConfirmation extends State<DonationContactScreen> {
           itemBuilder: (context, suggestion) {
             return ListTile(
               title: Text(
-                suggestion[AddressService.kDescription],
+                suggestion[MapService.kDescription],
                 style: TextStyle(
                   color: kPrimaryColor,
                 ),
@@ -461,16 +461,16 @@ class _ContactConfirmation extends State<DonationContactScreen> {
             );
           },
           onSuggestionSelected: (suggestion) async {
-            Map<String, String> address = await AddressService.getDetails(
-              suggestion[AddressService.kPlaceId],
+            Map<String, String> address = await MapService.addressDetails(
+              suggestion[MapService.kPlaceId],
               sessionToken: sessionToken.getToken(),
             );
             if (address.isNotEmpty) {
               setState(() {
-                _street.text = address[AddressService.kStreet];
-                _city.text = address[AddressService.kCity];
-                _state.text = address[AddressService.kState];
-                _zipCode.text = address[AddressService.kZipCode];
+                _street.text = address[MapService.kStreet];
+                _city.text = address[MapService.kCity];
+                _state.text = address[MapService.kState];
+                _zipCode.text = address[MapService.kZipCode];
                 String street = _street.text.trim();
                 String city = _city.text.trim();
                 String state = _state.text.trim();

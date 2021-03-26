@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fruitfairy/screens/profile_screen.dart';
-import 'package:fruitfairy/services/address_service.dart';
+import 'package:fruitfairy/services/map_service.dart';
 import 'package:fruitfairy/services/session_token.dart';
 import 'package:fruitfairy/services/validation.dart';
 import 'package:fruitfairy/widgets/auto_scroll.dart';
@@ -27,7 +27,6 @@ class CharityProfileScreen extends StatefulWidget {
 
 class _CharityProfileScreenState extends State<CharityProfileScreen> {
   bool _showSpinner = false;
-
 
   final TextEditingController _email = TextEditingController();
   final TextEditingController _firstName = TextEditingController();
@@ -69,7 +68,6 @@ class _CharityProfileScreenState extends State<CharityProfileScreen> {
   DeleteMode _deleteMode = DeleteMode.Input;
   bool _obscureDeletePassword = true;
 
-
   @override
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
@@ -104,8 +102,8 @@ class _CharityProfileScreenState extends State<CharityProfileScreen> {
                       einInputField(),
                       inputFieldSizedBox(),
                       inputGroupLabel(
-                      'Address',
-                      // tag: Field.Address,
+                        'Address',
+                        // tag: Field.Address,
                       ),
                       streetInputField(),
                       inputFieldSizedBox(),
@@ -116,15 +114,15 @@ class _CharityProfileScreenState extends State<CharityProfileScreen> {
                       zipInputField(),
                       inputFieldSizedBox(),
                       inputGroupLabel(
-                      'Phone Number',
-                      //   tag: Field.Phone,
+                        'Phone Number',
+                        //   tag: Field.Phone,
                       ),
                       phoneNumberField(),
                       verifyCodeField(),
                       inputFieldSizedBox(),
                       inputGroupLabel(
-                      'Change Password',
-                      //   tag: Field.Password,
+                        'Change Password',
+                        //   tag: Field.Password,
                       ),
                       currentPasswordInputField(),
                       inputFieldSizedBox(),
@@ -174,6 +172,7 @@ class _CharityProfileScreenState extends State<CharityProfileScreen> {
       ),
     );
   }
+
   Widget emailInputField() {
     return InputField(
       label: 'Email',
@@ -182,10 +181,12 @@ class _CharityProfileScreenState extends State<CharityProfileScreen> {
       readOnly: true,
     );
   }
+
   Widget inputFieldSizedBox() {
     Size screen = MediaQuery.of(context).size;
     return SizedBox(height: screen.height * 0.01);
   }
+
   Widget einInputField() {
     return InputField(
       label: 'EIN',
@@ -194,12 +195,13 @@ class _CharityProfileScreenState extends State<CharityProfileScreen> {
       onChanged: (value) {
         setState(() {
           //_firstNameError = Validate.name(
-            //label: 'first name',
-            //name: _firstName.text.trim(),
+          //label: 'first name',
+          //name: _firstName.text.trim(),
         });
       },
     );
   }
+
   Widget streetInputField() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -209,7 +211,7 @@ class _CharityProfileScreenState extends State<CharityProfileScreen> {
           //controller: _street,
           suggestionsCallback: (pattern) async {
             if (pattern.isNotEmpty) {
-              return await AddressService.getSuggestions(
+              return await MapService.addressSuggestions(
                 pattern,
                 //sessionToken: sessionToken.getToken(),
               );
@@ -226,7 +228,7 @@ class _CharityProfileScreenState extends State<CharityProfileScreen> {
           itemBuilder: (context, suggestion) {
             return ListTile(
               title: Text(
-                suggestion[AddressService.kDescription],
+                suggestion[MapService.kDescription],
                 style: TextStyle(
                   color: kPrimaryColor,
                 ),
@@ -244,8 +246,8 @@ class _CharityProfileScreenState extends State<CharityProfileScreen> {
             );
           },
           onSuggestionSelected: (suggestion) async {
-            Map<String, String> address = await AddressService.getDetails(
-              suggestion[AddressService.kPlaceId],
+            Map<String, String> address = await MapService.addressDetails(
+              suggestion[MapService.kPlaceId],
               //sessionToken: sessionToken.getToken(),
             );
             // if (address.isNotEmpty) {
@@ -324,6 +326,7 @@ class _CharityProfileScreenState extends State<CharityProfileScreen> {
       },
     );
   }
+
   Widget phoneNumberField() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -423,6 +426,7 @@ class _CharityProfileScreenState extends State<CharityProfileScreen> {
       ),
     );
   }
+
   Widget currentPasswordInputField() {
     return Stack(
       children: [
@@ -456,6 +460,7 @@ class _CharityProfileScreenState extends State<CharityProfileScreen> {
       ],
     );
   }
+
   Widget newPasswordInputField() {
     return Stack(
       children: [
@@ -522,6 +527,7 @@ class _CharityProfileScreenState extends State<CharityProfileScreen> {
       },
     );
   }
+
   Widget saveButton() {
     Size screen = MediaQuery.of(context).size;
     return Padding(
@@ -536,6 +542,7 @@ class _CharityProfileScreenState extends State<CharityProfileScreen> {
       ),
     );
   }
+
   Widget deleteAccountLink() {
     return LabelLink(
       label: 'Delete this account',
@@ -667,5 +674,4 @@ class _CharityProfileScreenState extends State<CharityProfileScreen> {
         );
     }
   }
-
 }
