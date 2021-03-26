@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:fruitfairy/models/wish_list.dart';
 import 'package:fruitfairy/screens/charity_picking_fruit_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/fruit.dart';
-import 'package:fruitfairy/models/donation.dart';
 import 'package:fruitfairy/models/produce.dart';
-import 'package:fruitfairy/screens/donation_contact_screen.dart';
-import 'package:fruitfairy/widgets/custom_grid.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/rounded_icon_button.dart';
@@ -32,7 +30,7 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    bool notEmpty = context.read<Donation>().produce.isNotEmpty;
+    bool notEmpty = context.read<WishList>().produce.isNotEmpty;
     return Scaffold(
       appBar: AppBar(title: Text('My Wish List')),
       body: SafeArea(
@@ -91,14 +89,14 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
   List<Widget> fruitTiles() {
     List<Widget> fruitList = [];
     Map<String, Fruit> produce = context.read<Produce>().fruits;
-    Donation donation = context.watch<Donation>();
-    donation.produce.forEach((fruitId) {
+    WishList wishList = context.watch<WishList>();
+    wishList.produce.forEach((fruitId) {
       fruitList.add(removableFruitTile(
         fruit: produce[fruitId],
         onPressed: () {
           setState(() {
             produce[fruitId].clear();
-            donation.removeFruit(fruitId);
+            wishList.removeFruit(fruitId);
           });
         },
       ));

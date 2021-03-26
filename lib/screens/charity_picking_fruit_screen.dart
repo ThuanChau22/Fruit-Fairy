@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fruitfairy/screens/charity_wishlist_screen.dart';
+import 'package:fruitfairy/models/wish_list.dart';
 import 'package:provider/provider.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:fruitfairy/constant.dart';
-import 'package:fruitfairy/models/donation.dart';
 import 'package:fruitfairy/models/fruit.dart';
 import 'package:fruitfairy/models/produce.dart';
-import 'package:fruitfairy/screens/donation_basket_screen.dart';
+import 'package:fruitfairy/models/wish_list.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
 import 'package:fruitfairy/widgets/gesture_wrapper.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
@@ -137,23 +136,22 @@ class _CharityPickingFruitScreenState extends State<CharityPickingFruitScreen> {
   List<Widget> fruitTiles() {
     List<Widget> fruitList = [];
     Produce produce = context.watch<Produce>();
-
     produce.fruits.forEach((id, fruit) {
       if (RegExp(
         '^${_search.text.trim()}',
         caseSensitive: false,
       ).hasMatch(fruit.id)) {
-        Donation donation = context.watch<Donation>();
-        bool selected = donation.produce.contains(fruit.id);
+        WishList wishList = context.watch<WishList>();
+        bool selected = wishList.produce.contains(fruit.id);
         fruitList.add(selectableFruitTile(
           fruit: fruit,
           selected: selected,
           onTap: () {
             setState(() {
               if (selected) {
-                donation.removeFruit(fruit.id);
+                wishList.removeFruit(fruit.id);
               } else {
-                donation.pickFruit(fruit.id);
+                wishList.pickFruit(fruit.id);
               }
             });
           },
