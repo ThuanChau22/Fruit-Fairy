@@ -115,6 +115,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 vertical: screen.height * 0.03,
               ),
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   greeting(),
                   donateButton(),
@@ -128,7 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 36.0),
+                    padding: EdgeInsets.only(left: 50.0),
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
@@ -141,43 +143,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ),
-                  Container(
-                    child: Column(
-                      children: [
-                        GestureDetector(
-                            onTap: () {
-                              Navigator.of(context)
-                                  .pushNamed(DonationDetailScreen.id);
-                            },
-                            child: HistoryTile()),
-                        HistoryTile(),
-                        HistoryTile(),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 36.0),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Yesterday',
-                        style: TextStyle(
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Container(
-                    child: Column(
-                      children: [
-                        HistoryTile(),
-                        HistoryTile(),
-                        HistoryTile(),
-                      ],
-                    ),
-                  ),
+                  SizedBox(height: screen.height * 0.02),
+                  HistoryTile(),
+                  SizedBox(height: screen.height * 0.02),
+                  HistoryTile(),
+                  SizedBox(height: screen.height * 0.02),
+                  HistoryTile(),
                 ],
               ),
             ),
@@ -296,76 +267,67 @@ class _HistoryTileState extends State<HistoryTile> {
   @override
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 5.0),
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context)
+            .pushNamed(DonationDetailScreen.id);
+      },
       child: Container(
         height: screen.height * 0.15,
         width: screen.width * 0.8,
-        color: kPrimaryColor,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(15.0),
+        ),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             //TODO future for loop to see how many donations were done on either today or yesterday or 2 days ago
-            Expanded(
-              child: SizedBox(
-                child: ListView(
-                  physics: NeverScrollableScrollPhysics(),
-                  children: [
-                    SizedBox(height: screen.height * 0.02),
-                    Container(
-                      height: screen.height * 0.13,
-                      width: screen.width * 0.15,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(15.0),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.all(8.0),
-                            //TODO: get real donation number from db
-                            child: Text(
-                              'Donation #23',
-                              style: TextStyle(
-                                color: kPrimaryColor,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 25.0,
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: screen.height * 0.02),
-                          Row(
-                            children: [
-                              Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 8.0),
-                                //TODO: get donation date from db
-                                child: Text(
-                                  'Date: 02/30/2021',
-                                  style: TextStyle(
-                                    color: kPrimaryColor,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 25.0,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: screen.width * 0.05),
-                              //TODO get status from db
-                              Text(
-                                'Completed',
-                                style: TextStyle(
-                                  color: Colors.green,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20.0,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+            //SizedBox(height: screen.height * 0.02),
+            Padding(
+              padding: EdgeInsets.only(left: 8.0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Donation #23',
+                  style: TextStyle(
+                    color: kPrimaryColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 25.0,
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: screen.height * 0.02),
+            Padding(
+              padding: EdgeInsets.only(left: 8.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      'Date: 02/30/2021',
+                      style: TextStyle(
+                        color: kPrimaryColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 25.0,
                       ),
                     ),
-                    SizedBox(height: screen.height * 0.02),
-                  ],
-                ),
+                  ),
+
+                  //TODO get status from db
+                  Expanded(
+                    flex: 1,
+                    child: Text(
+                      'In Progress',
+                      style: TextStyle(
+                        color: Colors.green,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20.0,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

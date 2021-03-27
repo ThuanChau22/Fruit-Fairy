@@ -168,7 +168,7 @@ class _CharityProfileScreenState extends State<CharityProfileScreen> {
           Divider(
             color: kLabelColor,
             height: 2.0,
-            thickness: 2.0,
+            thickness: 4.0,
           ),
         ],
       ),

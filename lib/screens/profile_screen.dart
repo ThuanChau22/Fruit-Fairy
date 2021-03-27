@@ -574,7 +574,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Divider(
               color: kLabelColor,
               height: 2.0,
-              thickness: 2.0,
+              thickness: 4.0,
             ),
           ],
         ),

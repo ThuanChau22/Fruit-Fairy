@@ -406,7 +406,8 @@ class _ContactConfirmation extends State<DonationContactScreen> {
             Divider(
               color: kLabelColor,
               height: 2.0,
-              thickness: 2.0,
+              thickness: 4.0,
+
             ),
           ],
         ),
@@ -656,7 +657,10 @@ class _ContactConfirmation extends State<DonationContactScreen> {
     return Divider(
       color: kLabelColor,
       height: 5.0,
-      thickness: 3.0,
+      thickness: 4.0,
+      indent: 70.0,
+      endIndent: 70.0,
+
     );
   }
 

@@ -211,7 +211,9 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
     return Divider(
       color: kLabelColor,
       height: 5.0,
-      thickness: 3.0,
+      thickness: 4.0,
+      indent: 25.0,
+      endIndent: 25.0,
     );
   }
 
