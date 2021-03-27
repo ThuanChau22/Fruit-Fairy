@@ -15,6 +15,8 @@ import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
 import 'package:provider/provider.dart';
 
+import 'charity_donation_detail_screen.dart';
+
 enum Options { Edit, SignOut, WishList }
 
 class CharityHomeScreen extends StatefulWidget {
@@ -86,8 +88,8 @@ class _CharityHomeScreenState extends State<CharityHomeScreen> {
                       children: [
                         GestureDetector(
                             onTap: () {
-                              // Navigator.of(context)
-                              //     .pushNamed(DonationDetailScreen.id);
+                               Navigator.of(context)
+                                   .pushNamed(CharityDonationDetailScreen.id);
                             },
                             child: HistoryTile()),
                         HistoryTile(),

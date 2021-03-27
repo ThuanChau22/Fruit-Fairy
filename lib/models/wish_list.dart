@@ -1,7 +1,6 @@
 import 'dart:collection';
 import 'package:flutter/foundation.dart';
 
-
 class WishList extends ChangeNotifier{
   final List<String> _produce = [];
 
