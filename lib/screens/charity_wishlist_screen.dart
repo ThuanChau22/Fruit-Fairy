@@ -9,9 +9,6 @@ import 'package:fruitfairy/widgets/fruit_tile.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/rounded_icon_button.dart';
 
-import 'package:fruitfairy/constant.dart';
-import 'donation_contact_screen.dart';
-
 class CharityWishListScreen extends StatefulWidget {
 
   static const String id = 'charity_wishlist_screen';
@@ -23,14 +20,17 @@ class CharityWishListScreen extends StatefulWidget {
 class _CharityWishListScreenState extends State<CharityWishListScreen> {
   final Color _selectedColor = Colors.green.shade100;
 
+
   @override
   void initState() {
+
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    bool notEmpty = context.read<WishList>().produce.isNotEmpty;
+    WishList wishList = context.watch<WishList>();
+    bool notEmpty = wishList.produce.isNotEmpty;
     return Scaffold(
       appBar: AppBar(title: Text('My Wish List')),
       body: SafeArea(
@@ -39,7 +39,7 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
             selectedFruits(),
             divider(),
             nextButton(),
-          ],
+         ],
         ) :
         Center(child: nextButton()),
       ),
