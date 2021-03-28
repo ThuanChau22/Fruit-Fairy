@@ -85,6 +85,5 @@ class Donation extends ChangeNotifier {
   void clear() {
     reset();
     removeListener(_onEmptyBasket);
-    notifyListeners();
   }
 }
