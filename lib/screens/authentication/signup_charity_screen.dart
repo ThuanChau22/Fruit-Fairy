@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
 //
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
 import 'package:fruitfairy/screens/authentication/signin_screen.dart';
+import 'package:fruitfairy/services/charity_search.dart';
 import 'package:fruitfairy/services/fireauth_service.dart';
 import 'package:fruitfairy/services/validation.dart';
 import 'package:fruitfairy/widgets/gesture_wrapper.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
+import 'package:fruitfairy/widgets/label_link.dart';
 import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/obscure_icon.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
@@ -28,7 +31,6 @@ class _SignUpCharityScreenState extends State<SignUpCharityScreen> {
   final TextEditingController _password = TextEditingController();
   final TextEditingController _confirmPassword = TextEditingController();
 
-
   String _einError = '';
   String _emailError = '';
   String _passwordError = '';
@@ -39,11 +41,7 @@ class _SignUpCharityScreenState extends State<SignUpCharityScreen> {
 
   bool _validate() {
     String errors = '';
-    errors += _einError = Validate.name(
-      label: 'EIN',
-      name: _ein.text.trim(),
-    );
-
+    errors += _einError = Validate.ein(_ein.text.trim());
     errors += _emailError = Validate.email(_email.text.trim());
     errors += _passwordError = Validate.password(_password.text);
     errors += _confirmPasswordError = Validate.confirmPassword(
@@ -57,18 +55,29 @@ class _SignUpCharityScreenState extends State<SignUpCharityScreen> {
     if (_validate()) {
       setState(() => _showSpinner = true);
       try {
+        String ein = _ein.text.trim().replaceAll('-', '');
         String email = _email.text.trim();
         String password = _password.text;
+        Map<String, String> charity = await CharitySearch.info(ein);
+        if (charity.isEmpty) {
+          throw 'Charity not found. Please check your EIN and try again!';
+        }
+        String emailDomain = email.substring(email.lastIndexOf('@') + 1);
+        String website = charity[CharitySearch.kWebsite];
+        String webDomain = website.substring(website.indexOf('.') + 1);
+        if (emailDomain != webDomain) {
+          throw 'Sorry, we\'re unable to verify the given email to this charity';
+        }
         FireAuthService auth = context.read<FireAuthService>();
         String notifyMessage = await auth.signUp(
           email: email,
           password: password,
-          //TODO: make ein a parameter inside the the signUP method
-          //EIN: _EIN.text.trim(),
+          ein: ein,
+          charityName: charity[CharitySearch.kName],
         );
         Navigator.of(context).pushNamedAndRemoveUntil(
           SignInScreen.id,
-              (route) {
+          (route) {
             return route.settings.name == SignOptionScreen.id;
           },
           arguments: {
@@ -95,7 +104,7 @@ class _SignUpCharityScreenState extends State<SignUpCharityScreen> {
       },
       child: GestureWrapper(
         child: Scaffold(
-          appBar: AppBar(title: Text('Sign Up')),
+          appBar: AppBar(title: Text('Charity')),
           body: SafeArea(
             child: ModalProgressHUD(
               inAsyncCall: _showSpinner,
@@ -110,7 +119,7 @@ class _SignUpCharityScreenState extends State<SignUpCharityScreen> {
                   ),
                   child: Column(
                     children: [
-                      einNameInputField(),
+                      einInputField(),
                       inputFieldSizeBox(),
                       emailInputField(),
                       inputFieldSizeBox(),
@@ -119,6 +128,8 @@ class _SignUpCharityScreenState extends State<SignUpCharityScreen> {
                       confirmPasswordInputField(),
                       SizedBox(height: screen.height * 0.05),
                       signUpButton(context),
+                      SizedBox(height: screen.height * 0.1),
+                      explanationLink(),
                     ],
                   ),
                 ),
@@ -135,22 +146,20 @@ class _SignUpCharityScreenState extends State<SignUpCharityScreen> {
     return SizedBox(height: screen.height * 0.01);
   }
 
-  Widget einNameInputField() {
+  Widget einInputField() {
     return InputField(
       label: 'EIN',
       controller: _ein,
       errorMessage: _einError,
-      keyboardType: TextInputType.name,
+      keyboardType: TextInputType.number,
       onChanged: (value) {
         setState(() {
-          _einError = Validate.name(
-            label: 'EIN',
-            name: _ein.text.trim(),
-          );
+          _einError = Validate.ein(_ein.text.trim());
         });
       },
     );
   }
+
   Widget emailInputField() {
     return InputField(
       label: 'Email',
@@ -236,5 +245,41 @@ class _SignUpCharityScreenState extends State<SignUpCharityScreen> {
         },
       ),
     );
+  }
+
+  Widget explanationLink() {
+    return LabelLink(
+      label: 'How do we verify your charity?',
+      onTap: () {
+        MessageBar(context).hide();
+        showExplanationDialog();
+      },
+    );
+  }
+
+  void showExplanationDialog() {
+    Alert(
+      context: context,
+      title: '',
+      style: AlertStyle(
+        alertBorder: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        backgroundColor: kLabelColor,
+        titleStyle: TextStyle(fontSize: 0.0),
+        overlayColor: Colors.black.withOpacity(0.25),
+        isCloseButton: false,
+      ),
+      content: Text(
+        //TODO: Briefly explain how we verify a charity
+        '',
+        style: TextStyle(
+          color: kPrimaryColor,
+          fontSize: 20.0,
+          decoration: TextDecoration.none,
+        ),
+      ),
+      buttons: [],
+    ).show();
   }
 }

@@ -19,8 +19,10 @@ class FireAuthService {
   Future<String> signUp({
     @required String email,
     @required String password,
-    @required String firstName,
-    @required String lastName,
+    String firstName,
+    String lastName,
+    String ein,
+    String charityName,
   }) async {
     try {
       await _firebaseAuth.createUserWithEmailAndPassword(
@@ -33,6 +35,8 @@ class FireAuthService {
         email: email,
         firstName: firstName,
         lastName: lastName,
+        ein: ein,
+        charityName: charityName,
       );
       await user.sendEmailVerification();
       return 'Please check your email for a verification link!';

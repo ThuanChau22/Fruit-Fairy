@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 //
 import 'package:fruitfairy/api_keys.dart';
 
-class AddressService {
+class MapService {
   static const String kPlaceId = 'placeId';
   static const String kDescription = 'description';
   static const String kStreet = 'street';
@@ -11,15 +11,15 @@ class AddressService {
   static const String kState = 'state';
   static const String kZipCode = 'zipCode';
 
-  AddressService._();
+  MapService._();
 
-  static Future<List<Map<String, String>>> getSuggestions(
+  static Future<List<Map<String, String>>> addressSuggestions(
     String input, {
     String sessionToken,
   }) async {
     String requestURL =
-        'https://maps.googleapis.com/maps/api/place/autocomplete/json';
-    requestURL += '?input=$input';
+        'https://maps.googleapis.com/maps/api/place/autocomplete/json?';
+    requestURL += 'input=$input';
     requestURL += '&types=address';
     requestURL += '&components=country:us';
     requestURL += '&key=$PLACES_API_KEY';
@@ -44,7 +44,7 @@ class AddressService {
     return results;
   }
 
-  static Future<Map<String, String>> getDetails(
+  static Future<Map<String, String>> addressDetails(
     String placeId, {
     String sessionToken,
   }) async {

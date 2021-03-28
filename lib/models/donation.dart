@@ -70,7 +70,9 @@ class Donation extends ChangeNotifier {
     _phone[FireStoreService.kPhoneNumber] = phoneNumber;
   }
 
-  void setCharities(List<String> charities) {}
+  void setCharities(List<String> charities) {
+    notifyListeners();
+  }
 
   void reset() {
     _needCollected = true;

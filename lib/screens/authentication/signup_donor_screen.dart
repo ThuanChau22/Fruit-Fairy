@@ -99,7 +99,7 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
       },
       child: GestureWrapper(
         child: Scaffold(
-          appBar: AppBar(title: Text('Sign Up')),
+          appBar: AppBar(title: Text('Donor')),
           body: SafeArea(
             child: ModalProgressHUD(
               inAsyncCall: _showSpinner,
