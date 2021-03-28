@@ -1,7 +1,6 @@
 import 'package:meta/meta.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 //
-import 'package:fruitfairy/services/charity_search.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
 
 class FireAuthService {
@@ -17,11 +16,13 @@ class FireAuthService {
     return _firebaseAuth.currentUser;
   }
 
-  Future<String> signUpDonor({
+  Future<String> signUp({
     @required String email,
     @required String password,
-    @required String firstName,
-    @required String lastName,
+    String firstName,
+    String lastName,
+    String ein,
+    String charityName,
   }) async {
     try {
       await _firebaseAuth.createUserWithEmailAndPassword(
@@ -34,42 +35,10 @@ class FireAuthService {
         email: email,
         firstName: firstName,
         lastName: lastName,
+        ein: ein,
+        charityName: charityName,
       );
       await user.sendEmailVerification();
-      return 'Please check your email for a verification link!';
-    } catch (e) {
-      throw e.message;
-    }
-  }
-
-  Future<String> signUpCharity({
-    @required String email,
-    @required String password,
-    @required String ein,
-  }) async {
-    Map<String, String> charity = await CharitySearch.info(ein);
-    if (charity.isEmpty) {
-      throw 'Charity not found. Please check your EIN and try again!';
-    }
-    String emailDomain = email.substring(email.lastIndexOf('@') + 1);
-    String website = charity[CharitySearch.kWebsite];
-    String webDomain = website.substring(website.indexOf('.') + 1);
-    if (emailDomain != webDomain) {
-      throw 'Sorry, we\'re unable to verify the given email to the charity';
-    }
-    try {
-      // await _firebaseAuth.createUserWithEmailAndPassword(
-      //   email: email,
-      //   password: password,
-      // );
-      // FireStoreService fireStoreService = FireStoreService();
-      // fireStoreService.uid(user.uid);
-      // await fireStoreService.addAccount(
-      //   email: email,
-      //   ein: charity[CharitySearch.kEIN],
-      //   charityName: charity[CharitySearch.kName],
-      // );
-      // await user.sendEmailVerification();
       return 'Please check your email for a verification link!';
     } catch (e) {
       throw e.message;

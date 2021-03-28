@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
 //
@@ -11,6 +12,7 @@ import 'package:fruitfairy/services/fireauth_service.dart';
 import 'package:fruitfairy/services/validation.dart';
 import 'package:fruitfairy/widgets/gesture_wrapper.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
+import 'package:fruitfairy/widgets/label_link.dart';
 import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/obscure_icon.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
@@ -35,7 +37,6 @@ class _SignUpCharityScreenState extends State<SignUpCharityScreen> {
   String _confirmPasswordError = '';
 
   bool _showSpinner = false;
-  String _charityFound = '';
   bool _obscurePassword = true;
 
   bool _validate() {
@@ -54,27 +55,37 @@ class _SignUpCharityScreenState extends State<SignUpCharityScreen> {
     if (_validate()) {
       setState(() => _showSpinner = true);
       try {
+        String ein = _ein.text.trim().replaceAll('-', '');
         String email = _email.text.trim();
         String password = _password.text;
-        String ein = _ein.text.trim().replaceAll('-', '');
+        Map<String, String> charity = await CharitySearch.info(ein);
+        if (charity.isEmpty) {
+          throw 'Charity not found. Please check your EIN and try again!';
+        }
+        String emailDomain = email.substring(email.lastIndexOf('@') + 1);
+        String website = charity[CharitySearch.kWebsite];
+        String webDomain = website.substring(website.indexOf('.') + 1);
+        if (emailDomain != webDomain) {
+          throw 'Sorry, we\'re unable to verify the given email to this charity';
+        }
         FireAuthService auth = context.read<FireAuthService>();
-        String notifyMessage = await auth.signUpCharity(
+        String notifyMessage = await auth.signUp(
           email: email,
           password: password,
           ein: ein,
+          charityName: charity[CharitySearch.kName],
         );
-        // Navigator.of(context).pushNamedAndRemoveUntil(
-        //   SignInScreen.id,
-        //   (route) {
-        //     return route.settings.name == SignOptionScreen.id;
-        //   },
-        //   arguments: {
-        //     SignInScreen.email: email,
-        //     SignInScreen.password: password,
-        //     SignInScreen.message: notifyMessage,
-        //   },
-        // );
-        print(notifyMessage);
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          SignInScreen.id,
+          (route) {
+            return route.settings.name == SignOptionScreen.id;
+          },
+          arguments: {
+            SignInScreen.email: email,
+            SignInScreen.password: password,
+            SignInScreen.message: notifyMessage,
+          },
+        );
       } catch (errorMessage) {
         MessageBar(context, message: errorMessage).show();
       } finally {
@@ -111,13 +122,14 @@ class _SignUpCharityScreenState extends State<SignUpCharityScreen> {
                       einInputField(),
                       inputFieldSizeBox(),
                       emailInputField(),
-                      charityFound(),
                       inputFieldSizeBox(),
                       passwordInputField(),
                       inputFieldSizeBox(),
                       confirmPasswordInputField(),
                       SizedBox(height: screen.height * 0.05),
                       signUpButton(context),
+                      SizedBox(height: screen.height * 0.1),
+                      explanationLink(),
                     ],
                   ),
                 ),
@@ -143,16 +155,8 @@ class _SignUpCharityScreenState extends State<SignUpCharityScreen> {
       onChanged: (value) {
         setState(() {
           _einError = Validate.ein(_ein.text.trim());
-          if (_einError.isEmpty) {}
         });
       },
-    );
-  }
-
-  Widget charityFound() {
-    return Visibility(
-      visible: _charityFound.isNotEmpty,
-      child: Text(_charityFound),
     );
   }
 
@@ -241,5 +245,41 @@ class _SignUpCharityScreenState extends State<SignUpCharityScreen> {
         },
       ),
     );
+  }
+
+  Widget explanationLink() {
+    return LabelLink(
+      label: 'How do we verify your charity?',
+      onTap: () {
+        MessageBar(context).hide();
+        showExplanationDialog();
+      },
+    );
+  }
+
+  void showExplanationDialog() {
+    Alert(
+      context: context,
+      title: '',
+      style: AlertStyle(
+        alertBorder: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        backgroundColor: kLabelColor,
+        titleStyle: TextStyle(fontSize: 0.0),
+        overlayColor: Colors.black.withOpacity(0.25),
+        isCloseButton: false,
+      ),
+      content: Text(
+        //TODO: Briefly explain how we verify a charity
+        '',
+        style: TextStyle(
+          color: kPrimaryColor,
+          fontSize: 20.0,
+          decoration: TextDecoration.none,
+        ),
+      ),
+      buttons: [],
+    ).show();
   }
 }

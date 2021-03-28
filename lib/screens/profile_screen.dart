@@ -973,8 +973,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return LabelLink(
       label: 'Delete this account',
       onTap: () {
-        showDeleteDialog();
         MessageBar(context).hide();
+        showDeleteDialog();
       },
     );
   }
