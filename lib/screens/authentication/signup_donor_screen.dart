@@ -64,7 +64,7 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
         String email = _email.text.trim();
         String password = _password.text;
         FireAuthService auth = context.read<FireAuthService>();
-        String notifyMessage = await auth.signUp(
+        String notifyMessage = await auth.signUpDonor(
           email: email,
           password: password,
           firstName: _firstName.text.trim(),
@@ -99,7 +99,7 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
       },
       child: GestureWrapper(
         child: Scaffold(
-          appBar: AppBar(title: Text('Sign Up')),
+          appBar: AppBar(title: Text('Donor')),
           body: SafeArea(
             child: ModalProgressHUD(
               inAsyncCall: _showSpinner,

@@ -9,7 +9,6 @@ class FireStoreService {
   /// donations
   static const String kCharities = 'charities';
   static const String kCharityId = 'charityId';
-  static const String kCharityName = 'charityName';
   static const String kDonorId = 'donorId';
   static const String kDonorName = 'donorName';
   static const String kFruit = 'fruit';
@@ -27,6 +26,8 @@ class FireStoreService {
   static const String kEmail = 'email';
   static const String kFirstName = 'firstname';
   static const String kLastName = 'lastname';
+  static const String kEIN = 'ein';
+  static const String kCharityName = 'charityName';
   static const String kPhone = 'phone';
   static const String kPhoneNumber = 'number';
   static const String kPhoneCountry = 'country';
@@ -98,19 +99,27 @@ class FireStoreService {
 
   Future<void> addAccount({
     @required String email,
-    @required String firstName,
-    @required String lastName,
+    String firstName,
+    String lastName,
+    String ein,
+    String charityName,
   }) async {
     if (_uid == null) {
       print('UID Unset');
       return;
     }
     try {
-      await _usersDB.doc(_uid).set({
-        kEmail: email,
-        kFirstName: firstName,
-        kLastName: lastName,
-      });
+      Map<String, dynamic> data = {};
+      data[kEmail] = email;
+      if (firstName != null && lastName != null) {
+        data[kFirstName] = firstName;
+        data[kLastName] = lastName;
+      }
+      if (ein != null && charityName != null) {
+        data[kEIN] = ein;
+        data[kCharityName] = charityName;
+      }
+      await _usersDB.doc(_uid).set(data);
     } catch (e) {
       throw e.message;
     }

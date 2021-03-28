@@ -100,6 +100,18 @@ class Validate {
     return '';
   }
 
+  /// Validate EIN
+  /// Return empty String on correct [ein]
+  static String ein(String ein) {
+    if (ein.isEmpty) {
+      return 'Please enter EIN\n';
+    }
+    if (!RegExp(r'^\d{2}-?\d{7}$').hasMatch(ein)) {
+      return 'Invalid EIN\n';
+    }
+    return '';
+  }
+
   /// Simple check email on signin
   /// Return empty String on correct [email]
   static String checkEmail(String email) {

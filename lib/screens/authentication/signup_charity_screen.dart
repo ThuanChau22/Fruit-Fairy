@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
 import 'package:fruitfairy/screens/authentication/signin_screen.dart';
+import 'package:fruitfairy/services/charity_search.dart';
 import 'package:fruitfairy/services/fireauth_service.dart';
 import 'package:fruitfairy/services/validation.dart';
 import 'package:fruitfairy/widgets/gesture_wrapper.dart';
@@ -28,22 +29,18 @@ class _SignUpCharityScreenState extends State<SignUpCharityScreen> {
   final TextEditingController _password = TextEditingController();
   final TextEditingController _confirmPassword = TextEditingController();
 
-
   String _einError = '';
   String _emailError = '';
   String _passwordError = '';
   String _confirmPasswordError = '';
 
   bool _showSpinner = false;
+  String _charityFound = '';
   bool _obscurePassword = true;
 
   bool _validate() {
     String errors = '';
-    errors += _einError = Validate.name(
-      label: 'EIN',
-      name: _ein.text.trim(),
-    );
-
+    errors += _einError = Validate.ein(_ein.text.trim());
     errors += _emailError = Validate.email(_email.text.trim());
     errors += _passwordError = Validate.password(_password.text);
     errors += _confirmPasswordError = Validate.confirmPassword(
@@ -59,24 +56,25 @@ class _SignUpCharityScreenState extends State<SignUpCharityScreen> {
       try {
         String email = _email.text.trim();
         String password = _password.text;
+        String ein = _ein.text.trim().replaceAll('-', '');
         FireAuthService auth = context.read<FireAuthService>();
-        String notifyMessage = await auth.signUp(
+        String notifyMessage = await auth.signUpCharity(
           email: email,
           password: password,
-          //TODO: make ein a parameter inside the the signUP method
-          //EIN: _EIN.text.trim(),
+          ein: ein,
         );
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          SignInScreen.id,
-              (route) {
-            return route.settings.name == SignOptionScreen.id;
-          },
-          arguments: {
-            SignInScreen.email: email,
-            SignInScreen.password: password,
-            SignInScreen.message: notifyMessage,
-          },
-        );
+        // Navigator.of(context).pushNamedAndRemoveUntil(
+        //   SignInScreen.id,
+        //   (route) {
+        //     return route.settings.name == SignOptionScreen.id;
+        //   },
+        //   arguments: {
+        //     SignInScreen.email: email,
+        //     SignInScreen.password: password,
+        //     SignInScreen.message: notifyMessage,
+        //   },
+        // );
+        print(notifyMessage);
       } catch (errorMessage) {
         MessageBar(context, message: errorMessage).show();
       } finally {
@@ -95,7 +93,7 @@ class _SignUpCharityScreenState extends State<SignUpCharityScreen> {
       },
       child: GestureWrapper(
         child: Scaffold(
-          appBar: AppBar(title: Text('Sign Up')),
+          appBar: AppBar(title: Text('Charity')),
           body: SafeArea(
             child: ModalProgressHUD(
               inAsyncCall: _showSpinner,
@@ -110,9 +108,10 @@ class _SignUpCharityScreenState extends State<SignUpCharityScreen> {
                   ),
                   child: Column(
                     children: [
-                      einNameInputField(),
+                      einInputField(),
                       inputFieldSizeBox(),
                       emailInputField(),
+                      charityFound(),
                       inputFieldSizeBox(),
                       passwordInputField(),
                       inputFieldSizeBox(),
@@ -135,22 +134,28 @@ class _SignUpCharityScreenState extends State<SignUpCharityScreen> {
     return SizedBox(height: screen.height * 0.01);
   }
 
-  Widget einNameInputField() {
+  Widget einInputField() {
     return InputField(
       label: 'EIN',
       controller: _ein,
       errorMessage: _einError,
-      keyboardType: TextInputType.name,
+      keyboardType: TextInputType.number,
       onChanged: (value) {
         setState(() {
-          _einError = Validate.name(
-            label: 'EIN',
-            name: _ein.text.trim(),
-          );
+          _einError = Validate.ein(_ein.text.trim());
+          if (_einError.isEmpty) {}
         });
       },
     );
   }
+
+  Widget charityFound() {
+    return Visibility(
+      visible: _charityFound.isNotEmpty,
+      child: Text(_charityFound),
+    );
+  }
+
   Widget emailInputField() {
     return InputField(
       label: 'Email',
