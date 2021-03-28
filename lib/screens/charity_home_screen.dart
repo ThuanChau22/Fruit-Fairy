@@ -1,10 +1,21 @@
+import 'dart:async';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fruitfairy/constant.dart';
+import 'package:fruitfairy/models/donation.dart';
+import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/screens/charity_profile_screen.dart';
+import 'package:fruitfairy/screens/charity_picking_fruit_screen.dart';
+import 'package:fruitfairy/screens/charity_wishlist_screen.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:fruitfairy/services/firestore_service.dart';
+import 'package:provider/provider.dart';
+
+import 'charity_donation_detail_screen.dart';
 
 enum Options { Edit, SignOut, WishList }
 
@@ -17,6 +28,22 @@ class CharityHomeScreen extends StatefulWidget {
 
 class _CharityHomeScreenState extends State<CharityHomeScreen> {
   bool _showSpinner = false;
+  StreamSubscription<QuerySnapshot> _produceStream;
+
+  @override
+  void initState() {
+    super.initState();
+    Donation donation = context.read<Donation>();
+    _produceStream = context.read<FireStoreService>().produceStream((data) {
+      Produce produce = context.read<Produce>();
+      produce.fromDB(data);
+      List.from(donation.produce).forEach((fruitId) {
+        if (!produce.fruits.containsKey(fruitId)) {
+          donation.removeFruit(fruitId);
+        }
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,8 +88,8 @@ class _CharityHomeScreenState extends State<CharityHomeScreen> {
                       children: [
                         GestureDetector(
                             onTap: () {
-                              // Navigator.of(context)
-                              //     .pushNamed(DonationDetailScreen.id);
+                               Navigator.of(context)
+                                   .pushNamed(CharityDonationDetailScreen.id);
                             },
                             child: HistoryTile()),
                         HistoryTile(),
@@ -214,10 +241,10 @@ class _CharityHomeScreenState extends State<CharityHomeScreen> {
         horizontal: size.width * 0.25,
       ),
       child: RoundedButton(
-        label: 'Make Wish List',
-        // onPressed: () {
-        //   Navigator.of(context).pushNamed(PickingFruitScreen.id);
-        // },
+        label: 'Wish List',
+        onPressed: () {
+           Navigator.of(context).pushNamed(CharityWishListScreen.id);
+         },
       ),
     );
   }

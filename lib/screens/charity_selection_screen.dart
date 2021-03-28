@@ -153,7 +153,10 @@ class _CharitySelectionScreenState extends State<CharitySelectionScreen> {
     return Divider(
       color: kLabelColor,
       height: 5.0,
-      thickness: 3.0,
+      thickness: 4.0,
+      indent: 70.0,
+      endIndent: 70.0,
+
     );
   }
 

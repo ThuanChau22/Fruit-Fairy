@@ -1,15 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-//
-import 'package:fruitfairy/constant.dart';
+import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
+import '../constant.dart';
 
-import 'home_screen.dart';
 
-//TODO This screen needs to get the corresponding data from the database of a chosen donation. It needs the donation number,data,status,charity name, and the picture of fruit and percentage donated
-
-class DonationDetailScreen extends StatelessWidget {
-  static const String id = 'donation_detail_screen';
+class CharityDonationDetailScreen extends StatelessWidget {
+  static const String id = "charity_donation_detail_screen";
 
   @override
   Widget build(BuildContext context) {
@@ -19,34 +16,34 @@ class DonationDetailScreen extends StatelessWidget {
       appBar: AppBar(),
       body: SafeArea(
         child: ScrollableLayout(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
-                'Donation Details',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 35.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: screen.height * 0.02),
+              SizedBox(height: screen.height * 0.05),
+              subtitle(screen, "Donation Details"),
               divider(),
-              SizedBox(height: screen.height * 0.02),
-              HistoryTile(),
-              SizedBox(height: screen.height * 0.04),
-              subtitle("Selected Charity:"),
-              SizedBox(height: screen.height * 0.02),
-              //TODO get charity name from DB
-              subtitle("charity Name"),
-              SizedBox(height: screen.height * 0.04),
-              subtitle("Status: From Database"),
-              SizedBox(height: screen.height * 0.04),
-             subtitle("Produce"),
-              SizedBox(height: screen.height * 0.04),
+              donationDetail(screen, "Donation# & Date"),
+              subtitle(screen, "Donor Information"),
+              divider(),
+              donationDetail(screen, "Donor name, address& phone"),
+              donationDetail(screen, "need assistance or not"),
+              subtitle(screen, "Produce"),
               fruitTile(screen),
+              divider(),
+              SizedBox(height: screen.height * 0.04),
+              Padding(
+                padding: EdgeInsets.fromLTRB(50.0, 0, 50.0, 0),
+                child: RoundedButton(label: "Marked as Completed", onPressed: null),
+              ),
+              SizedBox(height: screen.height * 0.1,),
+              Container(
+                width: screen.height * 0.2,
+                height: screen.height * 0.08,
+                child: RoundedButton(label: "Decline", onPressed: null,),
+              ),
+              SizedBox(height: screen.height * 0.1),
             ],
+
           ),
         ),
       ),
@@ -63,22 +60,37 @@ class DonationDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget subtitle(String label){
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 50.0),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Text(
-          label,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 25.0,
-            fontWeight: FontWeight.bold,
-          ),
+  Widget subtitle(Size screen,String label){
+    return Container(
+      height: screen.height * 0.05,
+      width: screen.width * 0.8,
+      child: Text(
+        label,
+        style: TextStyle(
+        color: Colors.white,
+        fontSize: 25.0,
+        fontWeight: FontWeight.bold,
+    ),
+      ),
+    );
+  }
+
+  //TODO: should pass the object from donor's donation also, not string
+  Widget donationDetail(Size screen, String label){
+    return Container(
+      height: screen.height * 0.1,
+      width: screen.width * 0.8,
+      child:  Text(
+        label,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 20.0,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );
   }
+
 
   Widget fruitTile(Size screen){
     return Container(
@@ -130,3 +142,4 @@ class DonationDetailScreen extends StatelessWidget {
     );
   }
 }
+

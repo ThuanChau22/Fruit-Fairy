@@ -93,7 +93,7 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
           Divider(
             color: kLabelColor,
             height: 2.0,
-            thickness: 2.0,
+            thickness: 4.0,
           ),
         ],
       ),
@@ -219,7 +219,9 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
     return Divider(
       color: kLabelColor,
       height: 5.0,
-      thickness: 3.0,
+      thickness: 4.0,
+      indent: 40.0,
+      endIndent: 40.0,
     );
   }
 
