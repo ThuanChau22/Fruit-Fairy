@@ -47,6 +47,7 @@ class Authentication extends StatelessWidget {
       initialRoute: signedIn ? HomeScreen.id : SignOptionScreen.id,
       onGenerateRoute: RouteGenerator.generate,
       theme: Theme.of(context).copyWith(
+        accentColor: kDarkPrimaryColor,
         scaffoldBackgroundColor: kPrimaryColor,
         appBarTheme: AppBarTheme(
           brightness: Brightness.dark,
