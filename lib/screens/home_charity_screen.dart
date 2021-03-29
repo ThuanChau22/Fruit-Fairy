@@ -1,19 +1,19 @@
 import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:provider/provider.dart';
+//
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/donation.dart';
 import 'package:fruitfairy/models/produce.dart';
-import 'package:fruitfairy/screens/profile_charity_screen.dart';
+import 'package:fruitfairy/screens/charity_donation_detail_screen.dart';
 import 'package:fruitfairy/screens/charity_wishlist_screen.dart';
+import 'package:fruitfairy/screens/profile_charity_screen.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
-import 'package:provider/provider.dart';
-
-import 'charity_donation_detail_screen.dart';
 
 enum Options { Edit, SignOut, WishList }
 
@@ -76,7 +76,7 @@ class _HomeCharityScreenState extends State<HomeCharityScreen> {
                         style: TextStyle(
                           fontSize: 25.0,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: kLabelColor,
                         ),
                       ),
                     ),
@@ -107,7 +107,7 @@ class _HomeCharityScreenState extends State<HomeCharityScreen> {
                         style: TextStyle(
                           fontSize: 25.0,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: kLabelColor,
                         ),
                       ),
                     ),
@@ -133,7 +133,7 @@ class _HomeCharityScreenState extends State<HomeCharityScreen> {
                         style: TextStyle(
                           fontSize: 25.0,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: kLabelColor,
                         ),
                       ),
                     ),
@@ -163,12 +163,9 @@ class _HomeCharityScreenState extends State<HomeCharityScreen> {
         offset: Offset(0.0, 25.0),
         icon: Container(
           decoration: ShapeDecoration(
-            color: Colors.white,
+            color: kObjectColor,
             shape: CircleBorder(
-              side: BorderSide(
-                color: Colors.white,
-                width: 0.0,
-              ),
+              side: BorderSide.none,
             ),
           ),
           child: Center(
@@ -228,8 +225,7 @@ class _HomeCharityScreenState extends State<HomeCharityScreen> {
       textAlign: TextAlign.center,
       style: TextStyle(
         fontSize: 40.0,
-        color: Colors.white,
-        // fontWeight: FontWeight.bold,
+        color: kLabelColor,
         fontFamily: 'Pacifico',
       ),
     );
@@ -280,7 +276,7 @@ class _HistoryTileState extends State<HistoryTile> {
                       height: screen.height * 0.13,
                       width: screen.width * 0.15,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: kObjectColor,
                         borderRadius: BorderRadius.circular(15.0),
                       ),
                       child: Column(

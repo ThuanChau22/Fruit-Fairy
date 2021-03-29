@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
 //
@@ -14,6 +13,7 @@ import 'package:fruitfairy/widgets/gesture_wrapper.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
 import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/obscure_icon.dart';
+import 'package:fruitfairy/widgets/popup_diaglog.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/rounded_icon_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
@@ -153,36 +153,14 @@ class _SignUpCharityScreenState extends State<SignUpCharityScreen> {
       hitBoxPadding: 5.0,
       buttonColor: Colors.transparent,
       onPressed: () {
+        //TODO: Briefly explain how we verify a charity
         MessageBar(context).hide();
-        showExplanationDialog();
+        PopUpDialog(
+          context,
+          message: 'We want your data',
+        ).show();
       },
     );
-  }
-
-  void showExplanationDialog() {
-    Alert(
-      context: context,
-      title: '',
-      style: AlertStyle(
-        alertBorder: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.0),
-        ),
-        backgroundColor: kLabelColor,
-        titleStyle: TextStyle(fontSize: 0.0),
-        overlayColor: Colors.black.withOpacity(0.25),
-        isCloseButton: false,
-      ),
-      content: Text(
-        //TODO: Briefly explain how we verify a charity
-        'We want your data',
-        style: TextStyle(
-          color: kPrimaryColor,
-          fontSize: 20.0,
-          decoration: TextDecoration.none,
-        ),
-      ),
-      buttons: [],
-    ).show();
   }
 
   Widget inputFieldSizeBox() {

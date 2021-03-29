@@ -126,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: TextStyle(
                       fontSize: 30.0,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: kLabelColor,
                     ),
                   ),
                   Padding(
@@ -138,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: TextStyle(
                           fontSize: 20.0,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: kLabelColor,
                         ),
                       ),
                     ),
@@ -165,12 +165,9 @@ class _HomeScreenState extends State<HomeScreen> {
         offset: Offset(0.0, 25.0),
         icon: Container(
           decoration: ShapeDecoration(
-            color: Colors.white,
+            color: kObjectColor,
             shape: CircleBorder(
-              side: BorderSide(
-                color: Colors.white,
-                width: 0.0,
-              ),
+              side: BorderSide.none,
             ),
           ),
           child: Center(
@@ -234,8 +231,7 @@ class _HomeScreenState extends State<HomeScreen> {
       textAlign: TextAlign.center,
       style: TextStyle(
         fontSize: 40.0,
-        color: Colors.white,
-        // fontWeight: FontWeight.bold,
+        color: kLabelColor,
         fontFamily: 'Pacifico',
       ),
     );
@@ -275,7 +271,7 @@ class _HistoryTileState extends State<HistoryTile> {
         height: screen.height * 0.15,
         width: screen.width * 0.8,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: kObjectColor,
           borderRadius: BorderRadius.circular(15.0),
         ),
         child: Column(

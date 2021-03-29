@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:rflutter_alert/rflutter_alert.dart';
 //
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/screens/donation_confirm_screen.dart';
 import 'package:fruitfairy/widgets/charity_tile.dart';
+import 'package:fruitfairy/widgets/popup_diaglog.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/rounded_icon_button.dart';
 
@@ -98,34 +98,13 @@ class _DonationCharitySelectionScreenState
       hitBoxPadding: 5.0,
       buttonColor: Colors.transparent,
       onPressed: () {
-        showHelpDialog();
+        PopUpDialog(
+          context,
+          message:
+              'Please select the top three charities to donate to. If your first prioritized charity does not accept your donation, it will be offered to the second prioritized charity and so on.',
+        ).show();
       },
     );
-  }
-
-  void showHelpDialog() {
-    Alert(
-      context: context,
-      title: '',
-      style: AlertStyle(
-        alertBorder: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.0),
-        ),
-        backgroundColor: kLabelColor,
-        titleStyle: TextStyle(fontSize: 0.0),
-        overlayColor: Colors.black.withOpacity(0.25),
-        isCloseButton: false,
-      ),
-      content: Text(
-        'Please select the top three charities to donate to. If your first prioritized charity does not accept your donation, it will be offered to the second prioritized charity and so on.',
-        style: TextStyle(
-          color: kPrimaryColor,
-          fontSize: 20.0,
-          decoration: TextDecoration.none,
-        ),
-      ),
-      buttons: [],
-    ).show();
   }
 
   List<Widget> charityTiles() {

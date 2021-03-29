@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:provider/provider.dart';
 //
 import 'package:fruitfairy/constant.dart';
@@ -8,6 +7,7 @@ import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/models/wish_list.dart';
 import 'package:fruitfairy/screens/charity_produce_selection_screen.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
+import 'package:fruitfairy/widgets/popup_diaglog.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/rounded_icon_button.dart';
 
@@ -51,35 +51,13 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
       hitBoxPadding: 5.0,
       buttonColor: Colors.transparent,
       onPressed: () {
-        showExplanationDialog();
+        //TODO: Briefly explain why we need wish list
+        PopUpDialog(
+          context,
+          message: 'We want your data',
+        ).show();
       },
     );
-  }
-
-  void showExplanationDialog() {
-    Alert(
-      context: context,
-      title: '',
-      style: AlertStyle(
-        alertBorder: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.0),
-        ),
-        backgroundColor: kLabelColor,
-        titleStyle: TextStyle(fontSize: 0.0),
-        overlayColor: Colors.black.withOpacity(0.25),
-        isCloseButton: false,
-      ),
-      content: Text(
-        //TODO: Briefly explain why we need wish list
-        'We want your data',
-        style: TextStyle(
-          color: kPrimaryColor,
-          fontSize: 20.0,
-          decoration: TextDecoration.none,
-        ),
-      ),
-      buttons: [],
-    ).show();
   }
 
   Widget layoutMode() {
