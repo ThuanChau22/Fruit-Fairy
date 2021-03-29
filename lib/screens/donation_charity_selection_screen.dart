@@ -33,7 +33,10 @@ class _DonationCharitySelectionScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Charity Selection')),
+      appBar: AppBar(
+        title: Text('Charity Selection'),
+        actions: [helpButton()],
+      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -72,20 +75,14 @@ class _DonationCharitySelectionScreenState
       padding: EdgeInsets.only(
         top: screen.height * 0.02,
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            'Select 3 charities:',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: kLabelColor,
-              fontWeight: FontWeight.bold,
-              fontSize: 25.0,
-            ),
-          ),
-          helpButton(),
-        ],
+      child: Text(
+        'Select 3 charities:',
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: kLabelColor,
+          fontWeight: FontWeight.bold,
+          fontSize: 25.0,
+        ),
       ),
     );
   }
@@ -98,6 +95,7 @@ class _DonationCharitySelectionScreenState
         color: kLabelColor,
         size: 30.0,
       ),
+      hitBoxPadding: 5.0,
       buttonColor: Colors.transparent,
       onPressed: () {
         showHelpDialog();
