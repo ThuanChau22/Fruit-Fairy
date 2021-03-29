@@ -12,10 +12,10 @@ import 'package:fruitfairy/services/fireauth_service.dart';
 import 'package:fruitfairy/services/validation.dart';
 import 'package:fruitfairy/widgets/gesture_wrapper.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
-import 'package:fruitfairy/widgets/label_link.dart';
 import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/obscure_icon.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
+import 'package:fruitfairy/widgets/rounded_icon_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
 
 class SignUpCharityScreen extends StatefulWidget {
@@ -104,7 +104,10 @@ class _SignUpCharityScreenState extends State<SignUpCharityScreen> {
       },
       child: GestureWrapper(
         child: Scaffold(
-          appBar: AppBar(title: Text('Charity')),
+          appBar: AppBar(
+            title: Text('Charity'),
+            actions: [helpButton()],
+          ),
           body: SafeArea(
             child: ModalProgressHUD(
               inAsyncCall: _showSpinner,
@@ -128,8 +131,6 @@ class _SignUpCharityScreenState extends State<SignUpCharityScreen> {
                       confirmPasswordInputField(),
                       SizedBox(height: screen.height * 0.05),
                       signUpButton(context),
-                      SizedBox(height: screen.height * 0.1),
-                      explanationLink(),
                     ],
                   ),
                 ),
@@ -139,6 +140,49 @@ class _SignUpCharityScreenState extends State<SignUpCharityScreen> {
         ),
       ),
     );
+  }
+
+  Widget helpButton() {
+    return RoundedIconButton(
+      radius: 30.0,
+      icon: Icon(
+        Icons.help_outline,
+        color: kLabelColor,
+        size: 30.0,
+      ),
+      hitBoxPadding: 5.0,
+      buttonColor: Colors.transparent,
+      onPressed: () {
+        MessageBar(context).hide();
+        showExplanationDialog();
+      },
+    );
+  }
+
+  void showExplanationDialog() {
+    Alert(
+      context: context,
+      title: '',
+      style: AlertStyle(
+        alertBorder: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        backgroundColor: kLabelColor,
+        titleStyle: TextStyle(fontSize: 0.0),
+        overlayColor: Colors.black.withOpacity(0.25),
+        isCloseButton: false,
+      ),
+      content: Text(
+        //TODO: Briefly explain how we verify a charity
+        'We want your data',
+        style: TextStyle(
+          color: kPrimaryColor,
+          fontSize: 20.0,
+          decoration: TextDecoration.none,
+        ),
+      ),
+      buttons: [],
+    ).show();
   }
 
   Widget inputFieldSizeBox() {
@@ -245,41 +289,5 @@ class _SignUpCharityScreenState extends State<SignUpCharityScreen> {
         },
       ),
     );
-  }
-
-  Widget explanationLink() {
-    return LabelLink(
-      label: 'How do we verify your charity?',
-      onTap: () {
-        MessageBar(context).hide();
-        showExplanationDialog();
-      },
-    );
-  }
-
-  void showExplanationDialog() {
-    Alert(
-      context: context,
-      title: '',
-      style: AlertStyle(
-        alertBorder: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.0),
-        ),
-        backgroundColor: kLabelColor,
-        titleStyle: TextStyle(fontSize: 0.0),
-        overlayColor: Colors.black.withOpacity(0.25),
-        isCloseButton: false,
-      ),
-      content: Text(
-        //TODO: Briefly explain how we verify a charity
-        '',
-        style: TextStyle(
-          color: kPrimaryColor,
-          fontSize: 20.0,
-          decoration: TextDecoration.none,
-        ),
-      ),
-      buttons: [],
-    ).show();
   }
 }

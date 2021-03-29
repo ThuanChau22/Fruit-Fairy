@@ -86,5 +86,6 @@ class Account extends ChangeNotifier {
     _charityName = '';
     _phone.clear();
     _address.clear();
+    notifyListeners();
   }
 }

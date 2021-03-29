@@ -39,7 +39,6 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
             basketSection(),
             divider(),
             nextButton(),
-
           ],
         ),
       ),
@@ -50,14 +49,13 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
     Size screen = MediaQuery.of(context).size;
     Donation donation = context.read<Donation>();
     List<Widget> widgets = [
-      SizedBox(height: screen.height * 0.03),
+      SizedBox(height: screen.height * 0.02),
       instructionLabel('Do you need help collecting?'),
       collectOptionTile(),
       Divider(
         color: kLabelColor,
         height: 2.0,
-        thickness: 4.0,
-
+        thickness: 2.0,
       ),
       Visibility(
         visible: donation.needCollected,
@@ -326,9 +324,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
     return Divider(
       color: kLabelColor,
       height: 5.0,
-      thickness: 4.0,
-      indent: 25.0,
-      endIndent: 25.0,
+      thickness: 2.0,
     );
   }
 

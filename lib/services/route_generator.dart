@@ -6,18 +6,18 @@ import 'package:fruitfairy/screens/authentication/signup_role_screen.dart';
 import 'package:fruitfairy/screens/authentication/signup_donor_screen.dart';
 import 'package:fruitfairy/screens/authentication/signup_charity_screen.dart';
 import 'package:fruitfairy/screens/charity_donation_detail_screen.dart';
-import 'package:fruitfairy/screens/charity_picking_fruit_screen.dart';
+import 'package:fruitfairy/screens/charity_produce_selection_screen.dart';
 import 'package:fruitfairy/screens/charity_wishlist_screen.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
-import 'package:fruitfairy/screens/charity_home_screen.dart';
-import 'package:fruitfairy/screens/profile_screen.dart';
-import 'package:fruitfairy/screens/charity_profile_screen.dart';
-import 'package:fruitfairy/screens/picking_fruit_screen.dart';
+import 'package:fruitfairy/screens/home_charity_screen.dart';
+import 'package:fruitfairy/screens/profile_donor_screen.dart';
+import 'package:fruitfairy/screens/profile_charity_screen.dart';
 import 'package:fruitfairy/screens/donation_basket_screen.dart';
-import 'package:fruitfairy/screens/donation_contact_screen.dart';
-import 'package:fruitfairy/screens/charity_selection_screen.dart';
+import 'package:fruitfairy/screens/donation_charity_selection_screen.dart';
 import 'package:fruitfairy/screens/donation_confirm_screen.dart';
+import 'package:fruitfairy/screens/donation_contact_screen.dart';
 import 'package:fruitfairy/screens/donation_detail_screen.dart';
+import 'package:fruitfairy/screens/donation_produce_selection_screen.dart';
 
 // A class that generate screen routes associate with screen names
 // including animation and passing arguments in transition
@@ -30,16 +30,16 @@ class RouteGenerator {
     SignUpDonorScreen.id: SignUpDonorScreen(),
     SignUpCharityScreen.id: SignUpCharityScreen(),
     HomeScreen.id: HomeScreen(),
-    CharityHomeScreen.id: CharityHomeScreen(),
-    ProfileScreen.id: ProfileScreen(),
-    CharityProfileScreen.id: CharityProfileScreen(),
-    PickingFruitScreen.id: PickingFruitScreen(),
+    HomeCharityScreen.id: HomeCharityScreen(),
+    ProfileDonorScreen.id: ProfileDonorScreen(),
+    ProfileCharityScreen.id: ProfileCharityScreen(),
+    DonationProduceSelectionScreen.id: DonationProduceSelectionScreen(),
     DonationBasketScreen.id: DonationBasketScreen(),
     DonationContactScreen.id: DonationContactScreen(),
-    CharitySelectionScreen.id: CharitySelectionScreen(),
+    DonationCharitySelectionScreen.id: DonationCharitySelectionScreen(),
     DonationConfirmScreen.id: DonationConfirmScreen(),
     DonationDetailScreen.id: DonationDetailScreen(),
-    CharityPickingFruitScreen.id: CharityPickingFruitScreen(),
+    CharityProduceSelectionScreen.id: CharityProduceSelectionScreen(),
     CharityWishListScreen.id: CharityWishListScreen(),
     CharityDonationDetailScreen.id: CharityDonationDetailScreen(),
   };

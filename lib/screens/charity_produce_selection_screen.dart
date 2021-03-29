@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fruitfairy/models/wish_list.dart';
-import 'package:provider/provider.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:provider/provider.dart';
+//
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/fruit.dart';
 import 'package:fruitfairy/models/produce.dart';
@@ -12,17 +12,18 @@ import 'package:fruitfairy/widgets/gesture_wrapper.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
 import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
+import 'package:fruitfairy/widgets/rounded_icon_button.dart';
 
-
-class CharityPickingFruitScreen extends StatefulWidget {
-
-  static const String id = 'charity_picking_fruit_screen';
+class CharityProduceSelectionScreen extends StatefulWidget {
+  static const String id = 'charity_produce_selection_screen';
 
   @override
-  _CharityPickingFruitScreenState createState() => _CharityPickingFruitScreenState();
+  _CharityProduceSelectionScreenState createState() =>
+      _CharityProduceSelectionScreenState();
 }
 
-class _CharityPickingFruitScreenState extends State<CharityPickingFruitScreen> {
+class _CharityProduceSelectionScreenState
+    extends State<CharityProduceSelectionScreen> {
   final Color _selectedColor = Colors.grey.shade700.withOpacity(0.5);
   final TextEditingController _search = TextEditingController();
 
@@ -43,7 +44,10 @@ class _CharityPickingFruitScreenState extends State<CharityPickingFruitScreen> {
       },
       child: GestureWrapper(
         child: Scaffold(
-          appBar: AppBar(title: Text('Wish List')),
+          appBar: AppBar(
+            title: Text('Produce Selection'),
+            actions: [actionButton()],
+          ),
           body: SafeArea(
             child: ModalProgressHUD(
               inAsyncCall: _showSpinner,
@@ -65,6 +69,32 @@ class _CharityPickingFruitScreenState extends State<CharityPickingFruitScreen> {
     );
   }
 
+  Widget actionButton() {
+    Produce produce = context.read<Produce>();
+    WishList wishList = context.read<WishList>();
+    bool isAllSelected = produce.fruits.length == wishList.produce.length;
+    return RoundedIconButton(
+      radius: 30.0,
+      icon: Icon(
+        !isAllSelected ? Icons.select_all : Icons.close,
+        color: kLabelColor,
+        size: 30.0,
+      ),
+      hitBoxPadding: 5.0,
+      buttonColor: Colors.transparent,
+      onPressed: () {
+        setState(() {
+          wishList.clear();
+          if (!isAllSelected) {
+            produce.fruits.forEach((fruitId, fruit) {
+              wishList.pickFruit(fruitId);
+            });
+          }
+        });
+      },
+    );
+  }
+
   Widget instructionLabel() {
     Size screen = MediaQuery.of(context).size;
     return Padding(
@@ -74,7 +104,8 @@ class _CharityPickingFruitScreenState extends State<CharityPickingFruitScreen> {
         right: screen.width * 0.05,
       ),
       child: Text(
-        'Make your Wish List',
+        'Add produce to wish list:',
+        textAlign: TextAlign.center,
         style: TextStyle(
           color: kLabelColor,
           fontWeight: FontWeight.bold,
@@ -111,7 +142,6 @@ class _CharityPickingFruitScreenState extends State<CharityPickingFruitScreen> {
   }
 
   Widget fruitOptions() {
-
     Size screen = MediaQuery.of(context).size;
     int axisCount = 2;
     if (screen.width >= 600) {
@@ -141,7 +171,7 @@ class _CharityPickingFruitScreenState extends State<CharityPickingFruitScreen> {
         '^${_search.text.trim()}',
         caseSensitive: false,
       ).hasMatch(fruit.id)) {
-        WishList wishList = context.watch<WishList>();
+        WishList wishList = context.read<WishList>();
         bool selected = wishList.produce.contains(fruit.id);
         fruitList.add(selectableFruitTile(
           fruit: fruit,
@@ -165,7 +195,6 @@ class _CharityPickingFruitScreenState extends State<CharityPickingFruitScreen> {
     @required Fruit fruit,
     @required bool selected,
     @required GestureTapCallback onTap,
-
   }) {
     return GestureDetector(
       onTap: () {
@@ -173,7 +202,6 @@ class _CharityPickingFruitScreenState extends State<CharityPickingFruitScreen> {
         FocusScope.of(context).unfocus();
         MessageBar(context).hide();
         onTap();
-
       },
       child: Container(
         decoration: BoxDecoration(
@@ -185,7 +213,6 @@ class _CharityPickingFruitScreenState extends State<CharityPickingFruitScreen> {
             FruitTile(
               fruitName: fruit.name,
               fruitImage: fruit.imageURL,
-
             ),
             Container(
               decoration: BoxDecoration(
@@ -206,7 +233,7 @@ class _CharityPickingFruitScreenState extends State<CharityPickingFruitScreen> {
       child: Column(
         children: [
           divider(),
-          basketButton(),
+          backButton(),
         ],
       ),
     );
@@ -216,13 +243,11 @@ class _CharityPickingFruitScreenState extends State<CharityPickingFruitScreen> {
     return Divider(
       color: kLabelColor,
       height: 5.0,
-      thickness: 4.0,
-      indent: 25.0,
-      endIndent: 25.0,
+      thickness: 2.0,
     );
   }
 
-  Widget basketButton() {
+  Widget backButton() {
     Size screen = MediaQuery.of(context).size;
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -238,4 +263,3 @@ class _CharityPickingFruitScreenState extends State<CharityPickingFruitScreen> {
     );
   }
 }
-

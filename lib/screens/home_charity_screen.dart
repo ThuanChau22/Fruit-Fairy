@@ -1,13 +1,11 @@
 import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/donation.dart';
 import 'package:fruitfairy/models/produce.dart';
-import 'package:fruitfairy/screens/charity_profile_screen.dart';
-import 'package:fruitfairy/screens/charity_picking_fruit_screen.dart';
+import 'package:fruitfairy/screens/profile_charity_screen.dart';
 import 'package:fruitfairy/screens/charity_wishlist_screen.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
@@ -19,14 +17,14 @@ import 'charity_donation_detail_screen.dart';
 
 enum Options { Edit, SignOut, WishList }
 
-class CharityHomeScreen extends StatefulWidget {
-  static const String id = 'charity_home_screen';
+class HomeCharityScreen extends StatefulWidget {
+  static const String id = 'home_charity_screen';
 
   @override
-  _CharityHomeScreenState createState() => _CharityHomeScreenState();
+  _HomeCharityScreenState createState() => _HomeCharityScreenState();
 }
 
-class _CharityHomeScreenState extends State<CharityHomeScreen> {
+class _HomeCharityScreenState extends State<HomeCharityScreen> {
   bool _showSpinner = false;
   StreamSubscription<QuerySnapshot> _produceStream;
 
@@ -51,7 +49,7 @@ class _CharityHomeScreenState extends State<CharityHomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Home'),
-        actions: [initialIcon()],
+        actions: [settingsIcon()],
       ),
       body: SafeArea(
         child: ModalProgressHUD(
@@ -88,8 +86,8 @@ class _CharityHomeScreenState extends State<CharityHomeScreen> {
                       children: [
                         GestureDetector(
                             onTap: () {
-                               Navigator.of(context)
-                                   .pushNamed(CharityDonationDetailScreen.id);
+                              Navigator.of(context)
+                                  .pushNamed(CharityDonationDetailScreen.id);
                             },
                             child: HistoryTile()),
                         HistoryTile(),
@@ -97,7 +95,9 @@ class _CharityHomeScreenState extends State<CharityHomeScreen> {
                       ],
                     ),
                   ),
-                  SizedBox(height: screen.height * 0.01,),
+                  SizedBox(
+                    height: screen.height * 0.01,
+                  ),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 36.0),
                     child: Align(
@@ -121,7 +121,9 @@ class _CharityHomeScreenState extends State<CharityHomeScreen> {
                       ],
                     ),
                   ),
-                  SizedBox(height: screen.height * 0.01,),
+                  SizedBox(
+                    height: screen.height * 0.01,
+                  ),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 36.0),
                     child: Align(
@@ -154,7 +156,7 @@ class _CharityHomeScreenState extends State<CharityHomeScreen> {
     );
   }
 
-  Widget initialIcon() {
+  Widget settingsIcon() {
     return Container(
       width: 50.0,
       child: PopupMenuButton<Options>(
@@ -172,7 +174,7 @@ class _CharityHomeScreenState extends State<CharityHomeScreen> {
           child: Center(
             child: Icon(
               Icons.settings,
-              size: 30.0,
+              size: 25.0,
               color: kPrimaryColor,
             ),
           ),
@@ -204,7 +206,7 @@ class _CharityHomeScreenState extends State<CharityHomeScreen> {
           switch (action) {
             case Options.Edit:
               HapticFeedback.mediumImpact();
-              Navigator.of(context).pushNamed(CharityProfileScreen.id);
+              Navigator.of(context).pushNamed(ProfileCharityScreen.id);
               //arguments: {ProfileScreen.signOut: _signOut},
               break;
 
@@ -243,8 +245,8 @@ class _CharityHomeScreenState extends State<CharityHomeScreen> {
       child: RoundedButton(
         label: 'Wish List',
         onPressed: () {
-           Navigator.of(context).pushNamed(CharityWishListScreen.id);
-         },
+          Navigator.of(context).pushNamed(CharityWishListScreen.id);
+        },
       ),
     );
   }
@@ -332,7 +334,6 @@ class _HistoryTileState extends State<HistoryTile> {
                                   ),
                                 ),
                               ),
-
                             ],
                           ),
                         ],

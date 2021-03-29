@@ -1,9 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+//
+import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
-import '../constant.dart';
-
 
 class CharityDonationDetailScreen extends StatelessWidget {
   static const String id = "charity_donation_detail_screen";
@@ -16,7 +15,7 @@ class CharityDonationDetailScreen extends StatelessWidget {
       appBar: AppBar(),
       body: SafeArea(
         child: ScrollableLayout(
-            child: Column(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(height: screen.height * 0.05),
@@ -33,17 +32,20 @@ class CharityDonationDetailScreen extends StatelessWidget {
               SizedBox(height: screen.height * 0.04),
               Padding(
                 padding: EdgeInsets.fromLTRB(50.0, 0, 50.0, 0),
-                child: RoundedButton(label: "Marked as Completed", onPressed: null),
+                child: RoundedButton(
+                    label: "Marked as Completed", onPressed: null),
               ),
-              SizedBox(height: screen.height * 0.1,),
+              SizedBox(height: screen.height * 0.1),
               Container(
                 width: screen.height * 0.2,
                 height: screen.height * 0.08,
-                child: RoundedButton(label: "Decline", onPressed: null,),
+                child: RoundedButton(
+                  label: "Decline",
+                  onPressed: null,
+                ),
               ),
               SizedBox(height: screen.height * 0.1),
             ],
-
           ),
         ),
       ),
@@ -53,34 +55,34 @@ class CharityDonationDetailScreen extends StatelessWidget {
   Widget divider() {
     return Divider(
       color: kLabelColor,
-      height: 1.0,
-      thickness: 4.0,
+      height: 2.0,
+      thickness: 2.0,
       indent: 35.0,
       endIndent: 35.0,
     );
   }
 
-  Widget subtitle(Size screen,String label){
+  Widget subtitle(Size screen, String label) {
     return Container(
       height: screen.height * 0.05,
       width: screen.width * 0.8,
       child: Text(
         label,
         style: TextStyle(
-        color: Colors.white,
-        fontSize: 25.0,
-        fontWeight: FontWeight.bold,
-    ),
+          color: Colors.white,
+          fontSize: 25.0,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
 
   //TODO: should pass the object from donor's donation also, not string
-  Widget donationDetail(Size screen, String label){
+  Widget donationDetail(Size screen, String label) {
     return Container(
       height: screen.height * 0.1,
       width: screen.width * 0.8,
-      child:  Text(
+      child: Text(
         label,
         style: TextStyle(
           color: Colors.white,
@@ -91,8 +93,7 @@ class CharityDonationDetailScreen extends StatelessWidget {
     );
   }
 
-
-  Widget fruitTile(Size screen){
+  Widget fruitTile(Size screen) {
     return Container(
       height: screen.height * 0.3,
       width: screen.width * 0.8,
@@ -136,10 +137,8 @@ class CharityDonationDetailScreen extends StatelessWidget {
               ),
             ),
           ],
-
         ),
       ),
     );
   }
 }
-

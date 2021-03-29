@@ -14,14 +14,16 @@ import 'package:fruitfairy/widgets/input_field.dart';
 import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 
-class PickingFruitScreen extends StatefulWidget {
-  static const String id = 'picking_fruit_screen';
+class DonationProduceSelectionScreen extends StatefulWidget {
+  static const String id = 'donation_produce_selection_screen';
 
   @override
-  _PickingFruitScreenState createState() => _PickingFruitScreenState();
+  _DonationProduceSelectionScreenState createState() =>
+      _DonationProduceSelectionScreenState();
 }
 
-class _PickingFruitScreenState extends State<PickingFruitScreen> {
+class _DonationProduceSelectionScreenState
+    extends State<DonationProduceSelectionScreen> {
   final Color _selectedColor = Colors.grey.shade700.withOpacity(0.5);
   final TextEditingController _search = TextEditingController();
 
@@ -74,6 +76,7 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
       ),
       child: Text(
         'Choose produce to donate:',
+        textAlign: TextAlign.center,
         style: TextStyle(
           color: kLabelColor,
           fontWeight: FontWeight.bold,
@@ -211,9 +214,7 @@ class _PickingFruitScreenState extends State<PickingFruitScreen> {
     return Divider(
       color: kLabelColor,
       height: 5.0,
-      thickness: 4.0,
-      indent: 25.0,
-      endIndent: 25.0,
+      thickness: 2.0,
     );
   }
 
