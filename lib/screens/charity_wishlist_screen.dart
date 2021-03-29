@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:fruitfairy/models/wish_list.dart';
-import 'package:fruitfairy/screens/charity_produce_selection_screen.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:provider/provider.dart';
+//
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/fruit.dart';
 import 'package:fruitfairy/models/produce.dart';
+import 'package:fruitfairy/models/wish_list.dart';
+import 'package:fruitfairy/screens/charity_produce_selection_screen.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/rounded_icon_button.dart';
@@ -17,43 +19,86 @@ class CharityWishListScreen extends StatefulWidget {
 }
 
 class _CharityWishListScreenState extends State<CharityWishListScreen> {
+  String _buttonLabel = '';
+
   @override
   Widget build(BuildContext context) {
-    WishList wishList = context.watch<WishList>();
-    bool notEmpty = wishList.produce.isNotEmpty;
     return Scaffold(
-      appBar: AppBar(title: Text('My Wish List')),
+      appBar: AppBar(
+        title: Text('Wish List'),
+        actions: [helpButton()],
+      ),
       body: SafeArea(
-        child: notEmpty
-            ? Column(
-                children: [
-                  selectedFruits(),
-                  divider(),
-                  nextButton(),
-                ],
-              )
-            : Center(child: nextButton()),
+        child: Column(
+          children: [
+            layoutMode(),
+            divider(),
+            nextButton(),
+          ],
+        ),
       ),
     );
   }
 
-  Widget basketSection() {
-    Size screen = MediaQuery.of(context).size;
-    List<Widget> widgets = [
-      SizedBox(height: screen.height * 0.03),
-      selectedFruits(),
-    ];
+  Widget helpButton() {
+    return RoundedIconButton(
+      radius: 30.0,
+      icon: Icon(
+        Icons.help_outline,
+        color: kLabelColor,
+        size: 30.0,
+      ),
+      hitBoxPadding: 5.0,
+      buttonColor: Colors.transparent,
+      onPressed: () {
+        showExplanationDialog();
+      },
+    );
+  }
+
+  void showExplanationDialog() {
+    Alert(
+      context: context,
+      title: '',
+      style: AlertStyle(
+        alertBorder: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        backgroundColor: kLabelColor,
+        titleStyle: TextStyle(fontSize: 0.0),
+        overlayColor: Colors.black.withOpacity(0.25),
+        isCloseButton: false,
+      ),
+      content: Text(
+        //TODO: Briefly explain why we need wish list
+        'We want your data',
+        style: TextStyle(
+          color: kPrimaryColor,
+          fontSize: 20.0,
+          decoration: TextDecoration.none,
+        ),
+      ),
+      buttons: [],
+    ).show();
+  }
+
+  Widget layoutMode() {
+    WishList wishList = context.watch<WishList>();
+    bool isEmpty = wishList.produce.isEmpty;
+    _buttonLabel = isEmpty ? 'Create' : 'Edit';
+    return isEmpty ? emptyWishList() : selectedFruits();
+  }
+
+  Widget emptyWishList() {
     return Expanded(
-      child: ListView.builder(
-        itemCount: widgets.length,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: screen.width * 0.1,
-            ),
-            child: widgets[index],
-          );
-        },
+      child: Center(
+        child: Text(
+          '(Empty)',
+          style: TextStyle(
+            color: kLabelColor.withOpacity(0.5),
+            fontSize: 20.0,
+          ),
+        ),
       ),
     );
   }
@@ -62,17 +107,15 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
     Size screen = MediaQuery.of(context).size;
     int axisCount = screen.width >= 600 ? 5 : 3;
     return Expanded(
-      child: Padding(
+      child: GridView.count(
+        primary: false,
         padding: EdgeInsets.only(
           top: screen.height * 0.03,
           left: screen.width * 0.02,
           right: screen.width * 0.02,
         ),
-        child: GridView.count(
-          primary: false,
-          crossAxisCount: axisCount,
-          children: fruitTiles(),
-        ),
+        crossAxisCount: axisCount,
+        children: fruitTiles(),
       ),
     );
   }
@@ -99,7 +142,6 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
     @required Fruit fruit,
     @required VoidCallback onPressed,
   }) {
-    Size screen = MediaQuery.of(context).size;
     return Stack(
       children: [
         Padding(
@@ -158,7 +200,7 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
         horizontal: screen.width * 0.25,
       ),
       child: RoundedButton(
-        label: 'Create Wish List',
+        label: _buttonLabel,
         onPressed: () {
           Navigator.of(context).pushNamed(CharityProduceSelectionScreen.id);
         },
