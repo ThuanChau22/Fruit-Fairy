@@ -49,7 +49,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
     Size screen = MediaQuery.of(context).size;
     Donation donation = context.read<Donation>();
     List<Widget> widgets = [
-      SizedBox(height: screen.height * 0.03),
+      SizedBox(height: screen.height * 0.02),
       instructionLabel('Do you need help collecting?'),
       collectOptionTile(),
       Divider(

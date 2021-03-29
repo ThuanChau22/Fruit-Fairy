@@ -6,7 +6,6 @@ import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/donation.dart';
 import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/screens/profile_charity_screen.dart';
-import 'package:fruitfairy/screens/charity_produce_selection_screen.dart';
 import 'package:fruitfairy/screens/charity_wishlist_screen.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
@@ -50,7 +49,7 @@ class _HomeCharityScreenState extends State<HomeCharityScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Home'),
-        actions: [initialIcon()],
+        actions: [settingsIcon()],
       ),
       body: SafeArea(
         child: ModalProgressHUD(
@@ -157,7 +156,7 @@ class _HomeCharityScreenState extends State<HomeCharityScreen> {
     );
   }
 
-  Widget initialIcon() {
+  Widget settingsIcon() {
     return Container(
       width: 50.0,
       child: PopupMenuButton<Options>(
@@ -175,7 +174,7 @@ class _HomeCharityScreenState extends State<HomeCharityScreen> {
           child: Center(
             child: Icon(
               Icons.settings,
-              size: 30.0,
+              size: 25.0,
               color: kPrimaryColor,
             ),
           ),
