@@ -26,5 +26,6 @@ class Produce extends ChangeNotifier {
 
   void clear() {
     _fruits.clear();
+    notifyListeners();
   }
 }

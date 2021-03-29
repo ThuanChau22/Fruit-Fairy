@@ -80,10 +80,12 @@ class Donation extends ChangeNotifier {
     _charities.clear();
     _address.clear();
     _phone.clear();
+    notifyListeners();
   }
 
   void clear() {
     reset();
     removeListener(_onEmptyBasket);
+    notifyListeners();
   }
 }
