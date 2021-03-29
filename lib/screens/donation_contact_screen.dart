@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
 import 'package:fruitfairy/models/donation.dart';
-import 'package:fruitfairy/screens/charity_selection_screen.dart';
+import 'package:fruitfairy/screens/donation_charity_selection_screen.dart';
 import 'package:fruitfairy/services/map_service.dart';
 import 'package:fruitfairy/services/fireauth_service.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
@@ -130,7 +130,7 @@ class _ContactConfirmation extends State<DonationContactScreen> {
             dialCode: _dialCode,
             phoneNumber: _phoneNumber.text.trim(),
           );
-      Navigator.of(context).pushNamed(CharitySelectionScreen.id);
+      Navigator.of(context).pushNamed(DonationCharitySelectionScreen.id);
     } else {
       _scrollToError();
       String errorMessage = '';
@@ -406,8 +406,7 @@ class _ContactConfirmation extends State<DonationContactScreen> {
             Divider(
               color: kLabelColor,
               height: 2.0,
-              thickness: 4.0,
-
+              thickness: 2.0,
             ),
           ],
         ),
@@ -657,10 +656,7 @@ class _ContactConfirmation extends State<DonationContactScreen> {
     return Divider(
       color: kLabelColor,
       height: 5.0,
-      thickness: 4.0,
-      indent: 70.0,
-      endIndent: 70.0,
-
+      thickness: 2.0,
     );
   }
 

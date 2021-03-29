@@ -13,8 +13,8 @@ import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
 import 'package:fruitfairy/screens/authentication/signin_screen.dart';
 import 'package:fruitfairy/screens/donation_detail_screen.dart';
-import 'package:fruitfairy/screens/picking_fruit_screen.dart';
-import 'package:fruitfairy/screens/profile_screen.dart';
+import 'package:fruitfairy/screens/donation_produce_selection_screen.dart';
+import 'package:fruitfairy/screens/profile_donor_screen.dart';
 import 'package:fruitfairy/services/fireauth_service.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
@@ -89,7 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
     donation.onEmptyBasket(() {
       Navigator.of(context).popUntil((route) {
-        return route.settings.name == PickingFruitScreen.id;
+        return route.settings.name == DonationProduceSelectionScreen.id;
       });
     });
   }
@@ -212,8 +212,8 @@ class _HomeScreenState extends State<HomeScreen> {
             case Profile.Edit:
               HapticFeedback.mediumImpact();
               Navigator.of(context).pushNamed(
-                ProfileScreen.id,
-                arguments: {ProfileScreen.signOut: _signOut},
+                ProfileDonorScreen.id,
+                arguments: {ProfileDonorScreen.signOut: _signOut},
               );
               break;
 
@@ -251,7 +251,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: RoundedButton(
         label: 'Donate',
         onPressed: () {
-          Navigator.of(context).pushNamed(PickingFruitScreen.id);
+          Navigator.of(context).pushNamed(DonationProduceSelectionScreen.id);
         },
       ),
     );
@@ -269,8 +269,7 @@ class _HistoryTileState extends State<HistoryTile> {
     Size screen = MediaQuery.of(context).size;
     return GestureDetector(
       onTap: () {
-        Navigator.of(context)
-            .pushNamed(DonationDetailScreen.id);
+        Navigator.of(context).pushNamed(DonationDetailScreen.id);
       },
       child: Container(
         height: screen.height * 0.15,

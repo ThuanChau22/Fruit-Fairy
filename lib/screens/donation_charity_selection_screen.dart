@@ -7,14 +7,16 @@ import 'package:fruitfairy/widgets/charity_tile.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/rounded_icon_button.dart';
 
-class CharitySelectionScreen extends StatefulWidget {
-  static const String id = 'charity_selection_screen';
+class DonationCharitySelectionScreen extends StatefulWidget {
+  static const String id = 'donation_charity_selection_screen';
 
   @override
-  _CharitySelectionScreenState createState() => _CharitySelectionScreenState();
+  _DonationCharitySelectionScreenState createState() =>
+      _DonationCharitySelectionScreenState();
 }
 
-class _CharitySelectionScreenState extends State<CharitySelectionScreen> {
+class _DonationCharitySelectionScreenState
+    extends State<DonationCharitySelectionScreen> {
   List<String> selectedCharity = [
     'charity1',
     'charity2',
@@ -153,10 +155,7 @@ class _CharitySelectionScreenState extends State<CharitySelectionScreen> {
     return Divider(
       color: kLabelColor,
       height: 5.0,
-      thickness: 4.0,
-      indent: 70.0,
-      endIndent: 70.0,
-
+      thickness: 2.0,
     );
   }
 

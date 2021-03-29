@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fruitfairy/screens/profile_screen.dart';
+import 'package:fruitfairy/screens/profile_donor_screen.dart';
 import 'package:fruitfairy/services/map_service.dart';
 import 'package:fruitfairy/services/session_token.dart';
 import 'package:fruitfairy/services/validation.dart';
@@ -18,14 +18,14 @@ import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:fruitfairy/constant.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
-class CharityProfileScreen extends StatefulWidget {
-  static const String id = 'charity_profile_screen';
+class ProfileCharityScreen extends StatefulWidget {
+  static const String id = 'profile_charity_screen';
 
   @override
-  _CharityProfileScreenState createState() => _CharityProfileScreenState();
+  _ProfileCharityScreenState createState() => _ProfileCharityScreenState();
 }
 
-class _CharityProfileScreenState extends State<CharityProfileScreen> {
+class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
   bool _showSpinner = false;
 
   final TextEditingController _email = TextEditingController();
@@ -166,7 +166,7 @@ class _CharityProfileScreenState extends State<CharityProfileScreen> {
           Divider(
             color: kLabelColor,
             height: 2.0,
-            thickness: 4.0,
+            thickness: 2.0,
           ),
         ],
       ),

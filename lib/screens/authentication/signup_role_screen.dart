@@ -8,6 +8,8 @@ import 'package:fruitfairy/widgets/fruit_fairy_logo.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
 
+import 'package:fruitfairy/screens/home_charity_screen.dart';
+
 class SignUpRoleScreen extends StatelessWidget {
   static const String id = 'signup_role_screen';
 
@@ -105,7 +107,8 @@ class SignUpRoleScreen extends StatelessWidget {
         ),
         trailing: SizedBox(width: 35.0),
         onPressed: () {
-          Navigator.of(context).pushNamed(SignUpCharityScreen.id);
+          // Navigator.of(context).pushNamed(SignUpCharityScreen.id);
+          Navigator.of(context).pushNamed(HomeCharityScreen.id);
         },
       ),
     );

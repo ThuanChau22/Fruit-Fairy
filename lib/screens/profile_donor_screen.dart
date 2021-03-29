@@ -26,15 +26,15 @@ import 'package:fruitfairy/widgets/scrollable_layout.dart';
 enum Field { Name, Phone, Address, Password }
 enum DeleteMode { Input, Loading, Success }
 
-class ProfileScreen extends StatefulWidget {
-  static const String id = 'profile_screen';
+class ProfileDonorScreen extends StatefulWidget {
+  static const String id = 'profile_donor_screen';
   static const String signOut = 'sign_out';
 
   @override
-  _ProfileScreenState createState() => _ProfileScreenState();
+  _ProfileDonorScreenState createState() => _ProfileDonorScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileDonorScreenState extends State<ProfileDonorScreen> {
   final AutoScroll<Field> _scroller = AutoScroll(
     elements: {
       Field.Name: 0,
@@ -441,7 +441,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       Map<String, Object> args = ModalRoute.of(context).settings.arguments;
-      _signOut = args[ProfileScreen.signOut];
+      _signOut = args[ProfileDonorScreen.signOut];
     });
     fillEmail();
     fillName();
@@ -574,7 +574,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Divider(
               color: kLabelColor,
               height: 2.0,
-              thickness: 4.0,
+              thickness: 2.0,
             ),
           ],
         ),

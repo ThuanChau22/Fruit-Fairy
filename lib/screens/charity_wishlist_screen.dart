@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fruitfairy/models/wish_list.dart';
-import 'package:fruitfairy/screens/charity_picking_fruit_screen.dart';
+import 'package:fruitfairy/screens/charity_produce_selection_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/fruit.dart';
@@ -10,7 +10,6 @@ import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/rounded_icon_button.dart';
 
 class CharityWishListScreen extends StatefulWidget {
-
   static const String id = 'charity_wishlist_screen';
 
   @override
@@ -18,15 +17,6 @@ class CharityWishListScreen extends StatefulWidget {
 }
 
 class _CharityWishListScreenState extends State<CharityWishListScreen> {
-  final Color _selectedColor = Colors.green.shade100;
-
-
-  @override
-  void initState() {
-
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
     WishList wishList = context.watch<WishList>();
@@ -34,14 +24,15 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
     return Scaffold(
       appBar: AppBar(title: Text('My Wish List')),
       body: SafeArea(
-        child: notEmpty ? Column(
-          children: [
-            selectedFruits(),
-            divider(),
-            nextButton(),
-         ],
-        ) :
-        Center(child: nextButton()),
+        child: notEmpty
+            ? Column(
+                children: [
+                  selectedFruits(),
+                  divider(),
+                  nextButton(),
+                ],
+              )
+            : Center(child: nextButton()),
       ),
     );
   }
@@ -72,10 +63,10 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
     int axisCount = screen.width >= 600 ? 5 : 3;
     return Expanded(
       child: Padding(
-        padding:EdgeInsets.only(
-          top: screen.height*0.03,
-          left: screen.width*0.02,
-          right:  screen.width*0.02,
+        padding: EdgeInsets.only(
+          top: screen.height * 0.03,
+          left: screen.width * 0.02,
+          right: screen.width * 0.02,
         ),
         child: GridView.count(
           primary: false,
@@ -123,7 +114,7 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
               color: kObjectColor,
               borderRadius: BorderRadius.circular(20.0),
             ),
-            child:  FruitTile(
+            child: FruitTile(
               fruitName: fruit.name,
               fruitImage: fruit.imageURL,
             ),
@@ -155,9 +146,7 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
     return Divider(
       color: kLabelColor,
       height: 5.0,
-      thickness: 4.0,
-      indent: 25.0,
-      endIndent: 25.0,
+      thickness: 2.0,
     );
   }
 
@@ -171,7 +160,7 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
       child: RoundedButton(
         label: 'Create Wish List',
         onPressed: () {
-          Navigator.of(context).pushNamed(CharityPickingFruitScreen.id);
+          Navigator.of(context).pushNamed(CharityProduceSelectionScreen.id);
         },
       ),
     );
