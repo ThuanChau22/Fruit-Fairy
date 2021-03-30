@@ -8,21 +8,15 @@ class FireAuthService {
 
   FireAuthService();
 
-  FirebaseAuth get instance {
-    return _firebaseAuth;
-  }
-
   User get user {
     return _firebaseAuth.currentUser;
   }
 
-  Future<String> signUp({
+  Future<String> signUpDonor({
     @required String email,
     @required String password,
-    String firstName,
-    String lastName,
-    String ein,
-    String charityName,
+    @required String firstName,
+    @required String lastName,
   }) async {
     try {
       await _firebaseAuth.createUserWithEmailAndPassword(
@@ -31,12 +25,43 @@ class FireAuthService {
       );
       FireStoreService fireStoreService = FireStoreService();
       fireStoreService.uid(user.uid);
-      await fireStoreService.addAccount(
+      await fireStoreService.addDonorAccount(
         email: email,
         firstName: firstName,
         lastName: lastName,
+      );
+      await user.sendEmailVerification();
+      return 'Please check your email for a verification link!';
+    } catch (e) {
+      throw e.message;
+    }
+  }
+
+  Future<String> signUpCharity({
+    @required String email,
+    @required String password,
+    @required String ein,
+    @required String charityName,
+    @required String street,
+    @required String city,
+    @required String state,
+    @required String zip,
+  }) async {
+    try {
+      await _firebaseAuth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      FireStoreService fireStoreService = FireStoreService();
+      fireStoreService.uid(user.uid);
+      await fireStoreService.addCharityAccount(
+        email: email,
         ein: ein,
         charityName: charityName,
+        street: street,
+        city: city,
+        state: state,
+        zip: zip,
       );
       await user.sendEmailVerification();
       return 'Please check your email for a verification link!';

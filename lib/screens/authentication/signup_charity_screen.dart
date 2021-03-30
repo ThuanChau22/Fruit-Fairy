@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
 import 'package:fruitfairy/screens/authentication/signin_screen.dart';
-import 'package:fruitfairy/services/charity_search.dart';
+import 'package:fruitfairy/services/charity_api_service.dart';
 import 'package:fruitfairy/services/fireauth_service.dart';
 import 'package:fruitfairy/services/validation.dart';
 import 'package:fruitfairy/widgets/gesture_wrapper.dart';
@@ -58,22 +58,22 @@ class _SignUpCharityScreenState extends State<SignUpCharityScreen> {
         String ein = _ein.text.trim().replaceAll('-', '');
         String email = _email.text.trim();
         String password = _password.text;
-        Map<String, String> charity = await CharitySearch.info(ein);
-        if (charity.isEmpty) {
-          throw 'Charity not found. Please check your EIN and try again!';
-        }
+        String webDomain = await CharityAPI.webDomain(ein);
         String emailDomain = email.substring(email.lastIndexOf('@') + 1);
-        String website = charity[CharitySearch.kWebsite];
-        String webDomain = website.substring(website.indexOf('.') + 1);
         if (emailDomain != webDomain) {
           throw 'Sorry, we\'re unable to verify the given email to this charity';
         }
+        Map<String, String> charity = await CharityAPI.details(ein);
         FireAuthService auth = context.read<FireAuthService>();
-        String notifyMessage = await auth.signUp(
+        String notifyMessage = await auth.signUpCharity(
           email: email,
           password: password,
-          ein: ein,
-          charityName: charity[CharitySearch.kName],
+          ein: charity[CharityAPI.kEIN],
+          charityName: charity[CharityAPI.kName],
+          street: charity[CharityAPI.kStreet],
+          city: charity[CharityAPI.kCity],
+          state: charity[CharityAPI.kState],
+          zip: charity[CharityAPI.kZip],
         );
         Navigator.of(context).pushNamedAndRemoveUntil(
           SignInScreen.id,

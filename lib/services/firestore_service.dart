@@ -97,29 +97,51 @@ class FireStoreService {
     }
   }
 
-  Future<void> addAccount({
+  Future<void> addDonorAccount({
     @required String email,
-    String firstName,
-    String lastName,
-    String ein,
-    String charityName,
+    @required String firstName,
+    @required String lastName,
   }) async {
     if (_uid == null) {
       print('UID Unset');
       return;
     }
     try {
-      Map<String, dynamic> data = {};
-      data[kEmail] = email;
-      if (firstName != null && lastName != null) {
-        data[kFirstName] = firstName;
-        data[kLastName] = lastName;
-      }
-      if (ein != null && charityName != null) {
-        data[kEIN] = ein;
-        data[kCharityName] = charityName;
-      }
-      await _usersDB.doc(_uid).set(data);
+      await _usersDB.doc(_uid).set({
+        kEmail: email,
+        kFirstName: firstName,
+        kLastName: lastName,
+      });
+    } catch (e) {
+      throw e.message;
+    }
+  }
+
+  Future<void> addCharityAccount({
+    @required String email,
+    @required String ein,
+    @required String charityName,
+    @required String street,
+    @required String city,
+    @required String state,
+    @required String zip,
+  }) async {
+    if (_uid == null) {
+      print('UID Unset');
+      return;
+    }
+    try {
+      await _usersDB.doc(_uid).set({
+        kEmail: email,
+        kEIN: ein,
+        kCharityName: charityName,
+      });
+      await updateUserAddress(
+        street: street,
+        city: city,
+        state: state,
+        zip: zip,
+      );
     } catch (e) {
       throw e.message;
     }
