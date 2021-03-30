@@ -2,13 +2,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 //
 import 'package:fruitfairy/constant.dart';
-import 'package:fruitfairy/screens/home_screen.dart';
+import 'package:fruitfairy/screens/home_donor_screen.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
 
 //TODO This screen needs to get the corresponding data from the database of a chosen donation. It needs the donation number,data,status,charity name, and the picture of fruit and percentage donated
 
-class DonationDetailScreen extends StatelessWidget {
-  static const String id = 'donation_detail_screen';
+class DonorDonationDetailScreen extends StatelessWidget {
+  static const String id = 'donor_donation_detail_screen';
 
   @override
   Widget build(BuildContext context) {

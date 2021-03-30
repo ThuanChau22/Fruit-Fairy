@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fruitfairy/screens/profile_donor_screen.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
+//
+import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/services/map_service.dart';
 import 'package:fruitfairy/services/session_token.dart';
 import 'package:fruitfairy/services/validation.dart';
 import 'package:fruitfairy/widgets/auto_scroll.dart';
 import 'package:fruitfairy/widgets/gesture_wrapper.dart';
-import 'package:fruitfairy/widgets/input_field.dart';
 import 'package:fruitfairy/widgets/input_field_suggestion.dart';
+import 'package:fruitfairy/widgets/input_field.dart';
 import 'package:fruitfairy/widgets/label_link.dart';
 import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/obscure_icon.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
 
-import 'package:fruitfairy/constant.dart';
-import 'package:rflutter_alert/rflutter_alert.dart';
+enum DeleteMode { Input, Loading, Success }
 
 class ProfileCharityScreen extends StatefulWidget {
   static const String id = 'profile_charity_screen';
