@@ -64,7 +64,7 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
         String email = _email.text.trim();
         String password = _password.text;
         FireAuthService auth = context.read<FireAuthService>();
-        String notifyMessage = await auth.signUp(
+        String notifyMessage = await auth.signUpDonor(
           email: email,
           password: password,
           firstName: _firstName.text.trim(),

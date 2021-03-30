@@ -49,8 +49,8 @@ class MapService {
     String sessionToken,
   }) async {
     String requestURL =
-        'https://maps.googleapis.com/maps/api/place/details/json';
-    requestURL += '?place_id=$placeId';
+        'https://maps.googleapis.com/maps/api/place/details/json?';
+    requestURL += 'place_id=$placeId';
     requestURL += '&fields=address_component';
     requestURL += '&key=$PLACES_API_KEY';
     requestURL += sessionToken != null ? '&sessiontoken=$sessionToken' : '';
@@ -78,7 +78,7 @@ class MapService {
                 break;
 
               case 'administrative_area_level_1':
-                results[kState] = details['long_name'];
+                results[kState] = details['short_name'];
                 break;
 
               case 'postal_code':

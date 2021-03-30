@@ -8,16 +8,15 @@ import 'package:fruitfairy/screens/authentication/signup_charity_screen.dart';
 import 'package:fruitfairy/screens/charity_donation_detail_screen.dart';
 import 'package:fruitfairy/screens/charity_produce_selection_screen.dart';
 import 'package:fruitfairy/screens/charity_wishlist_screen.dart';
-import 'package:fruitfairy/screens/home_screen.dart';
-import 'package:fruitfairy/screens/home_charity_screen.dart';
-import 'package:fruitfairy/screens/profile_donor_screen.dart';
-import 'package:fruitfairy/screens/profile_charity_screen.dart';
 import 'package:fruitfairy/screens/donation_basket_screen.dart';
 import 'package:fruitfairy/screens/donation_charity_selection_screen.dart';
 import 'package:fruitfairy/screens/donation_confirm_screen.dart';
 import 'package:fruitfairy/screens/donation_contact_screen.dart';
-import 'package:fruitfairy/screens/donation_detail_screen.dart';
 import 'package:fruitfairy/screens/donation_produce_selection_screen.dart';
+import 'package:fruitfairy/screens/donor_donation_detail_screen.dart';
+import 'package:fruitfairy/screens/profile_charity_screen.dart';
+import 'package:fruitfairy/screens/profile_donor_screen.dart';
+import 'package:fruitfairy/screens/home_screen.dart';
 
 // A class that generate screen routes associate with screen names
 // including animation and passing arguments in transition
@@ -29,19 +28,18 @@ class RouteGenerator {
     SignUpRoleScreen.id: SignUpRoleScreen(),
     SignUpDonorScreen.id: SignUpDonorScreen(),
     SignUpCharityScreen.id: SignUpCharityScreen(),
-    HomeScreen.id: HomeScreen(),
-    HomeCharityScreen.id: HomeCharityScreen(),
-    ProfileDonorScreen.id: ProfileDonorScreen(),
-    ProfileCharityScreen.id: ProfileCharityScreen(),
-    DonationProduceSelectionScreen.id: DonationProduceSelectionScreen(),
-    DonationBasketScreen.id: DonationBasketScreen(),
-    DonationContactScreen.id: DonationContactScreen(),
-    DonationCharitySelectionScreen.id: DonationCharitySelectionScreen(),
-    DonationConfirmScreen.id: DonationConfirmScreen(),
-    DonationDetailScreen.id: DonationDetailScreen(),
+    CharityDonationDetailScreen.id: CharityDonationDetailScreen(),
     CharityProduceSelectionScreen.id: CharityProduceSelectionScreen(),
     CharityWishListScreen.id: CharityWishListScreen(),
-    CharityDonationDetailScreen.id: CharityDonationDetailScreen(),
+    DonationBasketScreen.id: DonationBasketScreen(),
+    DonationCharitySelectionScreen.id: DonationCharitySelectionScreen(),
+    DonationConfirmScreen.id: DonationConfirmScreen(),
+    DonationContactScreen.id: DonationContactScreen(),
+    DonationProduceSelectionScreen.id: DonationProduceSelectionScreen(),
+    DonorDonationDetailScreen.id: DonorDonationDetailScreen(),
+    ProfileCharityScreen.id: ProfileCharityScreen(),
+    ProfileDonorScreen.id: ProfileDonorScreen(),
+    HomeScreen.id: HomeScreen(),
   };
 
   static List<String> defaultScreens = [
