@@ -6,19 +6,22 @@ import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
 //
 import 'package:fruitfairy/constant.dart';
-import 'package:fruitfairy/models/donation.dart';
 import 'package:fruitfairy/models/produce.dart';
+import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
+import 'package:fruitfairy/screens/authentication/signin_screen.dart';
 import 'package:fruitfairy/screens/charity_donation_detail_screen.dart';
 import 'package:fruitfairy/screens/charity_wishlist_screen.dart';
 import 'package:fruitfairy/screens/profile_charity_screen.dart';
+import 'package:fruitfairy/services/firestore_service.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
-import 'package:fruitfairy/services/firestore_service.dart';
 
 enum Options { Edit, SignOut, WishList }
 
 class HomeCharityScreen extends StatefulWidget {
-  static const String id = 'home_charity_screen';
+  final Future<void> Function() signOut;
+
+  HomeCharityScreen(this.signOut);
 
   @override
   _HomeCharityScreenState createState() => _HomeCharityScreenState();
@@ -28,18 +31,25 @@ class _HomeCharityScreenState extends State<HomeCharityScreen> {
   bool _showSpinner = false;
   StreamSubscription<QuerySnapshot> _produceStream;
 
+  void _signOut() async {
+    setState(() => _showSpinner = true);
+    await widget.signOut();
+    _produceStream.cancel();
+    context.read<Produce>().clear();
+    Navigator.of(context).pushNamedAndRemoveUntil(
+      SignOptionScreen.id,
+      (route) => false,
+    );
+    Navigator.of(context).pushNamed(SignInScreen.id);
+    setState(() => _showSpinner = false);
+  }
+
   @override
   void initState() {
     super.initState();
-    Donation donation = context.read<Donation>();
     _produceStream = context.read<FireStoreService>().produceStream((data) {
       Produce produce = context.read<Produce>();
       produce.fromDB(data);
-      List.from(donation.produce).forEach((fruitId) {
-        if (!produce.fruits.containsKey(fruitId)) {
-          donation.removeFruit(fruitId);
-        }
-      });
     });
   }
 
@@ -209,8 +219,7 @@ class _HomeCharityScreenState extends State<HomeCharityScreen> {
 
             case Options.SignOut:
               HapticFeedback.mediumImpact();
-              //TODO signout method and lead to charity sign in
-              // _signOut();
+              _signOut();
               break;
             default:
           }
