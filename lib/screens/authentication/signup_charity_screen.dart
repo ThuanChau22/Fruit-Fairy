@@ -153,11 +153,11 @@ class _SignUpCharityScreenState extends State<SignUpCharityScreen> {
       hitBoxPadding: 5.0,
       buttonColor: Colors.transparent,
       onPressed: () {
-        //TODO: Briefly explain how we verify a charity
         MessageBar(context).hide();
         PopUpDialog(
           context,
-          message: 'We want your data',
+          message:
+              'Your charity is verified using the domain name of your charity’s email. For example, if your charity’s website is charity.org then please use an email from the same domain such as john@charity.org.\nIf your charity does not have a website, please contact us at fruitfairyhelp@gmail.com.',
         ).show();
       },
     );

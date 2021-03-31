@@ -51,10 +51,10 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
       hitBoxPadding: 5.0,
       buttonColor: Colors.transparent,
       onPressed: () {
-        //TODO: Briefly explain why we need wish list
         PopUpDialog(
           context,
-          message: 'We want your data',
+          message:
+              'The purpose of a wish list is to match donors to charities based on a charity\'s needs. If your needs change, you can manage your wish list accordingly.',
         ).show();
       },
     );
@@ -63,7 +63,7 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
   Widget layoutMode() {
     WishList wishList = context.watch<WishList>();
     bool isEmpty = wishList.produce.isEmpty;
-    _buttonLabel = isEmpty ? 'Create' : 'Edit';
+    _buttonLabel = isEmpty ? 'Create Wish List' : 'Edit';
     return isEmpty ? emptyWishList() : selectedFruits();
   }
 
