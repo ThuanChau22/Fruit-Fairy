@@ -4,8 +4,10 @@ import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
+import 'package:strings/strings.dart';
 //
 import 'package:fruitfairy/constant.dart';
+import 'package:fruitfairy/models/account.dart';
 import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/models/wish_list.dart';
 import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
@@ -30,7 +32,21 @@ class HomeCharityScreen extends StatefulWidget {
 
 class _HomeCharityScreenState extends State<HomeCharityScreen> {
   bool _showSpinner = false;
+  String _charityName = '';
+
   StreamSubscription<QuerySnapshot> _produceStream;
+
+  void _fetchData() {
+    _showSpinner = true;
+    Account account = context.read<Account>();
+    String charityName = account.charityName;
+    if (charityName.isNotEmpty) {
+      _charityName = camelize(charityName);
+      _showSpinner = false;
+    }
+    Produce produce = context.watch<Produce>();
+    _showSpinner = produce.fruits.isEmpty;
+  }
 
   void _signOut() async {
     setState(() => _showSpinner = true);
@@ -57,6 +73,7 @@ class _HomeCharityScreenState extends State<HomeCharityScreen> {
 
   @override
   Widget build(BuildContext context) {
+    _fetchData();
     Size screen = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
@@ -232,10 +249,11 @@ class _HomeCharityScreenState extends State<HomeCharityScreen> {
 
   Widget greeting() {
     return Text(
-      'Welcome Charity',
+      _charityName,
       textAlign: TextAlign.center,
       style: TextStyle(
         fontSize: 40.0,
+        height: 1.2,
         color: kLabelColor,
         fontFamily: 'Pacifico',
       ),

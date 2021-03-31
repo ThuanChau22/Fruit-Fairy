@@ -209,7 +209,6 @@ class _HomeDonorScreenState extends State<HomeDonorScreen> {
               HapticFeedback.mediumImpact();
               _signOut();
               break;
-            default:
           }
         },
       ),
@@ -222,6 +221,7 @@ class _HomeDonorScreenState extends State<HomeDonorScreen> {
       textAlign: TextAlign.center,
       style: TextStyle(
         fontSize: 40.0,
+        height: 1.2,
         color: kLabelColor,
         fontFamily: 'Pacifico',
       ),
