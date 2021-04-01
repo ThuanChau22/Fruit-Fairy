@@ -19,10 +19,8 @@ class FireStoreService {
 
   /// produce
   static const String kProduce = 'produce';
-  static const String kFruitId = 'id';
   static const String kFruitName = 'name';
   static const String kFruitPath = 'path';
-  static const String kFruitURL = 'url';
 
   /// users
   static const String kUsers = 'users';
