@@ -69,7 +69,7 @@ class _CharityProduceSelectionScreenState
     return RoundedIconButton(
       radius: 30.0,
       icon: Icon(
-        !isAllSelected ? Icons.fact_check : Icons.close,
+        !isAllSelected ? Icons.done_all : Icons.close,
         color: kLabelColor,
         size: 30.0,
       ),
