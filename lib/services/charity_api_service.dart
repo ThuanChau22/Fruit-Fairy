@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 //
 import 'package:fruitfairy/api_keys.dart';
 
-/// A class that provides method calls to data.orghunter.com api
+/// A class that provides method calls to data.orghunter.com API
 class CharityAPI {
   static const String kEIN = 'ein';
   static const String kName = 'name';

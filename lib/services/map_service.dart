@@ -3,6 +3,8 @@ import 'package:http/http.dart' as http;
 //
 import 'package:fruitfairy/api_keys.dart';
 
+/// A class that performs map related operations such as look up addresses
+/// or calulate distances by utilizing Google Map API
 class MapService {
   static const String kPlaceId = 'placeId';
   static const String kDescription = 'description';
@@ -11,8 +13,11 @@ class MapService {
   static const String kState = 'state';
   static const String kZipCode = 'zipCode';
 
+  /// Private constructor to prevent instantiation
   MapService._();
 
+  /// Return a list of suggested address based on [input]
+  /// [sessionToken] is used to keep API call within a session
   static Future<List<Map<String, String>>> addressSuggestions(
     String input, {
     String sessionToken,
@@ -44,6 +49,10 @@ class MapService {
     return results;
   }
 
+  /// Return details information of an address from [placeId]
+  /// retrieved from one of [addressSuggestions] result
+  /// [sessionToken] is used to keep API call within a session
+  /// Countd as one call if used with [addressSuggestions]
   static Future<Map<String, String>> addressDetails(
     String placeId, {
     String sessionToken,
