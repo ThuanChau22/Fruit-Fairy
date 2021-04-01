@@ -87,8 +87,6 @@ class _HomeDonorScreenState extends State<HomeDonorScreen> {
                 vertical: screen.height * 0.03,
               ),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   greeting(),
                   donateButton(),
