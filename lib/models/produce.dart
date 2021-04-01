@@ -14,10 +14,12 @@ class Produce extends ChangeNotifier {
     if (produceData is Fruit) {
       _fruits[produceData.id] = produceData;
     }
-    if (produceData is Map<String, Fruit>) {
-      _fruits.clear();
-      produceData.forEach((id, fruit) {
-        _fruits[id] = fruit;
+    if (produceData is Map<String, Fruit> &&
+        produceData.length != _fruits.length) {
+      List.of(_fruits.keys).forEach((id) {
+        if (!produceData.containsKey(id)) {
+          _fruits.remove(id);
+        }
       });
     }
     notifyListeners();

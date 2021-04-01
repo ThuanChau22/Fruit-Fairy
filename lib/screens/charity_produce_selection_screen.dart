@@ -10,7 +10,6 @@ import 'package:fruitfairy/models/wish_list.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
 import 'package:fruitfairy/widgets/gesture_wrapper.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
-import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/rounded_icon_button.dart';
 
@@ -37,31 +36,25 @@ class _CharityProduceSelectionScreenState
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        MessageBar(context).hide();
-        return true;
-      },
-      child: GestureWrapper(
-        child: Scaffold(
-          appBar: AppBar(
-            title: Text('Produce Selection'),
-            actions: [actionButton()],
-          ),
-          body: SafeArea(
-            child: ModalProgressHUD(
-              inAsyncCall: _showSpinner,
-              progressIndicator: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
-              ),
-              child: Column(
-                children: [
-                  instructionLabel(),
-                  searchInputField(),
-                  fruitOptions(),
-                  buttonSection(),
-                ],
-              ),
+    return GestureWrapper(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Produce Selection'),
+          actions: [actionButton()],
+        ),
+        body: SafeArea(
+          child: ModalProgressHUD(
+            inAsyncCall: _showSpinner,
+            progressIndicator: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
+            ),
+            child: Column(
+              children: [
+                instructionLabel(),
+                searchInputField(),
+                fruitOptions(),
+                buttonSection(),
+              ],
             ),
           ),
         ),
@@ -164,16 +157,18 @@ class _CharityProduceSelectionScreenState
   }
 
   List<Widget> fruitTiles() {
-    List<Widget> fruitList = [];
+    List<Widget> fruitTiles = [];
     Produce produce = context.watch<Produce>();
-    produce.fruits.forEach((id, fruit) {
+    List<Fruit> fruitList = produce.fruits.values.toList();
+    fruitList.sort((f1, f2) => f1.id.compareTo(f2.id));
+    fruitList.forEach((fruit) {
       if (RegExp(
         '^${_search.text.trim()}',
         caseSensitive: false,
       ).hasMatch(fruit.id)) {
         WishList wishList = context.read<WishList>();
         bool selected = wishList.produce.contains(fruit.id);
-        fruitList.add(selectableFruitTile(
+        fruitTiles.add(selectableFruitTile(
           fruit: fruit,
           selected: selected,
           onTap: () {
@@ -188,7 +183,7 @@ class _CharityProduceSelectionScreenState
         ));
       }
     });
-    return fruitList;
+    return fruitTiles;
   }
 
   Widget selectableFruitTile({
@@ -200,7 +195,6 @@ class _CharityProduceSelectionScreenState
       onTap: () {
         HapticFeedback.mediumImpact();
         FocusScope.of(context).unfocus();
-        MessageBar(context).hide();
         onTap();
       },
       child: Container(

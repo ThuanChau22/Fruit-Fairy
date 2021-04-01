@@ -10,8 +10,6 @@ import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
 import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/models/wish_list.dart';
-import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
-import 'package:fruitfairy/screens/authentication/signin_screen.dart';
 import 'package:fruitfairy/screens/charity_donation_detail_screen.dart';
 import 'package:fruitfairy/screens/charity_wishlist_screen.dart';
 import 'package:fruitfairy/screens/profile_charity_screen.dart';
@@ -36,17 +34,11 @@ class _HomeCharityScreenState extends State<HomeCharityScreen> {
   StreamSubscription<QuerySnapshot> _produceStream;
 
   void _signOut() async {
-    setState(() => _showSpinner = true);
-    await widget.signOut();
     _produceStream.cancel();
     context.read<Produce>().clear();
     context.read<WishList>().clear();
-    Navigator.of(context).pushNamedAndRemoveUntil(
-      SignOptionScreen.id,
-      (route) => false,
-    );
-    Navigator.of(context).pushNamed(SignInScreen.id);
-    setState(() => _showSpinner = false);
+    // Must be called last
+    await widget.signOut();
   }
 
   @override

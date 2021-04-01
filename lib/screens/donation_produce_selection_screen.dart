@@ -135,16 +135,18 @@ class _DonationProduceSelectionScreenState
   }
 
   List<Widget> fruitTiles() {
-    List<Widget> fruitList = [];
+    List<Widget> fruitTiles = [];
     Produce produce = context.watch<Produce>();
-    produce.fruits.forEach((id, fruit) {
+    List<Fruit> fruitList = produce.fruits.values.toList();
+    fruitList.sort((f1, f2) => f1.id.compareTo(f2.id));
+    fruitList.forEach((fruit) {
       if (RegExp(
         '^${_search.text.trim()}',
         caseSensitive: false,
       ).hasMatch(fruit.id)) {
         Donation donation = context.watch<Donation>();
         bool selected = donation.produce.contains(fruit.id);
-        fruitList.add(selectableFruitTile(
+        fruitTiles.add(selectableFruitTile(
           fruit: fruit,
           selected: selected,
           onTap: () {
@@ -160,7 +162,7 @@ class _DonationProduceSelectionScreenState
       }
     });
     _showSpinner = produce.fruits.isEmpty;
-    return fruitList;
+    return fruitTiles;
   }
 
   Widget selectableFruitTile({

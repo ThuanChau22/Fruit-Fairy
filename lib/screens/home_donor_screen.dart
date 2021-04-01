@@ -10,8 +10,6 @@ import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
 import 'package:fruitfairy/models/donation.dart';
 import 'package:fruitfairy/models/produce.dart';
-import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
-import 'package:fruitfairy/screens/authentication/signin_screen.dart';
 import 'package:fruitfairy/screens/donation_produce_selection_screen.dart';
 import 'package:fruitfairy/screens/donor_donation_detail_screen.dart';
 import 'package:fruitfairy/screens/profile_donor_screen.dart';
@@ -35,26 +33,20 @@ class _HomeDonorScreenState extends State<HomeDonorScreen> {
 
   StreamSubscription<QuerySnapshot> _produceStream;
 
-  void _signOut() async {
-    setState(() => _showSpinner = true);
-    await widget.signOut();
+  Future<void> _signOut() async {
     _produceStream.cancel();
     context.read<Produce>().clear();
     context.read<Donation>().clear();
-    Navigator.of(context).pushNamedAndRemoveUntil(
-      SignOptionScreen.id,
-      (route) => false,
-    );
-    Navigator.of(context).pushNamed(SignInScreen.id);
-    setState(() => _showSpinner = false);
+    // Must be called last
+    await widget.signOut();
   }
 
   @override
   void initState() {
     super.initState();
     Donation donation = context.read<Donation>();
+    Produce produce = context.read<Produce>();
     _produceStream = context.read<FireStoreService>().produceStream((data) {
-      Produce produce = context.read<Produce>();
       produce.fromDB(data);
       List.from(donation.produce).forEach((fruitId) {
         if (!produce.fruits.containsKey(fruitId)) {

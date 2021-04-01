@@ -63,7 +63,7 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
   Widget layoutMode() {
     WishList wishList = context.watch<WishList>();
     bool isEmpty = wishList.produce.isEmpty;
-    _buttonLabel = isEmpty ? 'Create Wish List' : 'Edit';
+    _buttonLabel = '${isEmpty ? 'Create' : 'Edit'} Wish List';
     return isEmpty ? emptyWishList() : selectedFruits();
   }
 
