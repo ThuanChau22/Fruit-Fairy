@@ -8,6 +8,7 @@ import 'package:strings/strings.dart';
 //
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
+import 'package:fruitfairy/models/fruit.dart';
 import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/models/wish_list.dart';
 import 'package:fruitfairy/screens/charity_donation_detail_screen.dart';
@@ -33,8 +34,11 @@ class _HomeCharityScreenState extends State<HomeCharityScreen> {
 
   StreamSubscription<QuerySnapshot> _produceStream;
 
+  StreamSubscription<DocumentSnapshot> _wishlistStream;
+
   void _signOut() async {
     _produceStream.cancel();
+    _wishlistStream.cancel();
     context.read<Produce>().clear();
     context.read<WishList>().clear();
     // Must be called last
@@ -44,9 +48,23 @@ class _HomeCharityScreenState extends State<HomeCharityScreen> {
   @override
   void initState() {
     super.initState();
+    WishList wishlist = context.read<WishList>();
     Produce produce = context.read<Produce>();
     _produceStream = context.read<FireStoreService>().produceStream((data) {
-      produce.fromDB(data);
+      if (data is Fruit) {
+        produce.fromDBLoading(data);
+      }
+      if (data is Map<String, Fruit>) {
+        produce.fromDBComplete(data);
+        List.from(wishlist.produce).forEach((fruitId) {
+          if (!produce.fruits.containsKey(fruitId)) {
+            wishlist.removeFruit(fruitId);
+          }
+        });
+      }
+    });
+    _wishlistStream = context.read<FireStoreService>().wishlistStream((data) {
+      wishlist.fromDB(data);
     });
   }
 

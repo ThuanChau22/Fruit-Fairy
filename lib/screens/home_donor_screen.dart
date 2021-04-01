@@ -9,6 +9,7 @@ import 'package:strings/strings.dart';
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
 import 'package:fruitfairy/models/donation.dart';
+import 'package:fruitfairy/models/fruit.dart';
 import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/screens/donation_produce_selection_screen.dart';
 import 'package:fruitfairy/screens/donor_donation_detail_screen.dart';
@@ -47,12 +48,17 @@ class _HomeDonorScreenState extends State<HomeDonorScreen> {
     Donation donation = context.read<Donation>();
     Produce produce = context.read<Produce>();
     _produceStream = context.read<FireStoreService>().produceStream((data) {
-      produce.fromDB(data);
-      List.from(donation.produce).forEach((fruitId) {
-        if (!produce.fruits.containsKey(fruitId)) {
-          donation.removeFruit(fruitId);
-        }
-      });
+      if (data is Fruit) {
+        produce.fromDBLoading(data);
+      }
+      if (data is Map<String, Fruit>) {
+        produce.fromDBComplete(data);
+        List.from(donation.produce).forEach((fruitId) {
+          if (!produce.fruits.containsKey(fruitId)) {
+            donation.removeFruit(fruitId);
+          }
+        });
+      }
     });
     donation.onEmptyBasket(() {
       Navigator.of(context).popUntil((route) {

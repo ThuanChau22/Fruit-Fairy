@@ -7,6 +7,7 @@ import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/fruit.dart';
 import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/models/wish_list.dart';
+import 'package:fruitfairy/services/firestore_service.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
 import 'package:fruitfairy/widgets/gesture_wrapper.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
@@ -63,9 +64,11 @@ class _CharityProduceSelectionScreenState
   }
 
   Widget actionButton() {
+    FireStoreService fireStoreService = context.read<FireStoreService>();
     Produce produce = context.read<Produce>();
     WishList wishList = context.read<WishList>();
-    bool isAllSelected = produce.fruits.length == wishList.produce.length;
+    List<String> produceIds = wishList.produce;
+    bool isAllSelected = produce.fruits.length == produceIds.length;
     return RoundedIconButton(
       radius: 30.0,
       icon: Icon(
@@ -83,6 +86,7 @@ class _CharityProduceSelectionScreenState
               wishList.pickFruit(fruitId);
             });
           }
+          fireStoreService.updateWishList(produceIds);
         });
       },
     );
@@ -158,6 +162,8 @@ class _CharityProduceSelectionScreenState
 
   List<Widget> fruitTiles() {
     List<Widget> fruitTiles = [];
+    FireStoreService fireStoreService = context.read<FireStoreService>();
+    WishList wishList = context.watch<WishList>();
     Produce produce = context.watch<Produce>();
     List<Fruit> fruitList = produce.fruits.values.toList();
     fruitList.sort((f1, f2) => f1.id.compareTo(f2.id));
@@ -166,8 +172,8 @@ class _CharityProduceSelectionScreenState
         '^${_search.text.trim()}',
         caseSensitive: false,
       ).hasMatch(fruit.id)) {
-        WishList wishList = context.read<WishList>();
-        bool selected = wishList.produce.contains(fruit.id);
+        List<String> produceIds = wishList.produce;
+        bool selected = produceIds.contains(fruit.id);
         fruitTiles.add(selectableFruitTile(
           fruit: fruit,
           selected: selected,
@@ -178,6 +184,7 @@ class _CharityProduceSelectionScreenState
               } else {
                 wishList.pickFruit(fruit.id);
               }
+              fireStoreService.updateWishList(produceIds);
             });
           },
         ));

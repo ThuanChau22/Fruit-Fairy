@@ -10,12 +10,13 @@ class Produce extends ChangeNotifier {
     return UnmodifiableMapView(_fruits);
   }
 
-  void fromDB(dynamic produceData) {
-    if (produceData is Fruit) {
-      _fruits[produceData.id] = produceData;
-    }
-    if (produceData is Map<String, Fruit> &&
-        produceData.length != _fruits.length) {
+  void fromDBLoading(Fruit produceData) {
+    _fruits[produceData.id] = produceData;
+    notifyListeners();
+  }
+
+  void fromDBComplete(Map<String, Fruit> produceData) {
+    if (produceData.length != _fruits.length) {
       List.of(_fruits.keys).forEach((id) {
         if (!produceData.containsKey(id)) {
           _fruits.remove(id);

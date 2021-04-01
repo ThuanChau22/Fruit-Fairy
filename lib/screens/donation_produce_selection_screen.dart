@@ -136,15 +136,15 @@ class _DonationProduceSelectionScreenState
 
   List<Widget> fruitTiles() {
     List<Widget> fruitTiles = [];
-    Produce produce = context.watch<Produce>();
-    List<Fruit> fruitList = produce.fruits.values.toList();
+    Donation donation = context.watch<Donation>();
+    Map<String, Fruit> produce = context.watch<Produce>().fruits;
+    List<Fruit> fruitList = produce.values.toList();
     fruitList.sort((f1, f2) => f1.id.compareTo(f2.id));
     fruitList.forEach((fruit) {
       if (RegExp(
         '^${_search.text.trim()}',
         caseSensitive: false,
       ).hasMatch(fruit.id)) {
-        Donation donation = context.watch<Donation>();
         bool selected = donation.produce.contains(fruit.id);
         fruitTiles.add(selectableFruitTile(
           fruit: fruit,
@@ -161,7 +161,7 @@ class _DonationProduceSelectionScreenState
         ));
       }
     });
-    _showSpinner = produce.fruits.isEmpty;
+    _showSpinner = produce.isEmpty;
     return fruitTiles;
   }
 

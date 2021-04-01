@@ -41,6 +41,10 @@ class FireStoreService {
   static const String kAddressState = 'state';
   static const String kAddressZip = 'zip';
 
+  /// wishlists
+  static const String kWishLists = 'wishlists';
+  static const String kProduceIds = 'produceIds';
+
   ///////////////
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -48,12 +52,14 @@ class FireStoreService {
 
   CollectionReference _usersDB;
   CollectionReference _produceDB;
+  CollectionReference _wishlistsDB;
 
   String _uid;
 
   FireStoreService() {
     _usersDB = _firestore.collection(kUsers);
     _produceDB = _firestore.collection(kProduce);
+    _wishlistsDB = _firestore.collection(kWishLists);
   }
 
   StreamSubscription<DocumentSnapshot> userStream(
@@ -102,6 +108,19 @@ class FireStoreService {
     }
   }
 
+  StreamSubscription<DocumentSnapshot> wishlistStream(
+    Function(Map<String, dynamic>) onData,
+  ) {
+    return _wishlistsDB.doc(_uid).snapshots().listen(
+      (snapshot) async {
+        onData(snapshot.data());
+      },
+      onError: (e) {
+        print(e);
+      },
+    );
+  }
+
   Future<void> addDonorAccount({
     @required String email,
     @required String firstName,
@@ -147,6 +166,9 @@ class FireStoreService {
         state: state,
         zip: zip,
       );
+      await _wishlistsDB.doc(_uid).set({
+        kProduceIds: [],
+      });
     } catch (e) {
       throw e.message;
     }
@@ -225,6 +247,32 @@ class FireStoreService {
           },
         });
       }
+    } catch (e) {
+      throw e.message;
+    }
+  }
+
+  Future<void> updateWishList(List<String> produceIds) async {
+    if (_uid == null) {
+      print('UID Unset');
+      return;
+    }
+    try {
+      await _wishlistsDB.doc(_uid).update({
+        kProduceIds: produceIds,
+      });
+    } catch (e) {
+      throw e.message;
+    }
+  }
+
+  Future<void> deleteWishList() async {
+    if (_uid == null) {
+      print('UID Unset');
+      return;
+    }
+    try {
+      await _wishlistsDB.doc(_uid).delete();
     } catch (e) {
       throw e.message;
     }
