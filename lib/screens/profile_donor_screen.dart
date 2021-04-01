@@ -424,7 +424,6 @@ class _ProfileDonorScreenState extends State<ProfileDonorScreen> {
               email: _email.text.trim(),
               password: password,
             );
-        context.read<Account>().clear();
         _setDialogState(() => _deleteMode = DeleteMode.Success);
         await Future.delayed(Duration(milliseconds: 1500));
         _signOut();

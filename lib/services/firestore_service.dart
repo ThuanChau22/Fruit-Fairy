@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+//
+import 'package:fruitfairy/models/fruit.dart';
 
 class FireStoreService {
   /// Database fields
@@ -17,6 +19,7 @@ class FireStoreService {
 
   /// produce
   static const String kProduce = 'produce';
+  static const String kFruitId = 'id';
   static const String kFruitName = 'name';
   static const String kFruitPath = 'path';
   static const String kFruitURL = 'url';
@@ -38,6 +41,10 @@ class FireStoreService {
   static const String kAddressState = 'state';
   static const String kAddressZip = 'zip';
 
+  /// wishlists
+  static const String kWishLists = 'wishlists';
+  static const String kProduceIds = 'produceIds';
+
   ///////////////
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -45,12 +52,14 @@ class FireStoreService {
 
   CollectionReference _usersDB;
   CollectionReference _produceDB;
+  CollectionReference _wishlistsDB;
 
   String _uid;
 
   FireStoreService() {
     _usersDB = _firestore.collection(kUsers);
     _produceDB = _firestore.collection(kProduce);
+    _wishlistsDB = _firestore.collection(kWishLists);
   }
 
   StreamSubscription<DocumentSnapshot> userStream(
@@ -67,18 +76,20 @@ class FireStoreService {
   }
 
   StreamSubscription<QuerySnapshot> produceStream(
-    Function(Map<String, dynamic>) onData,
+    Function(dynamic) onData,
   ) {
     return _produceDB.snapshots().listen(
       (snapshot) async {
-        Map<String, dynamic> snapshotData = {};
+        Map<String, Fruit> snapshotData = {};
         for (QueryDocumentSnapshot doc in snapshot.docs) {
           Map<String, dynamic> data = doc.data();
-          snapshotData[doc.id] = {
-            kFruitName: data[FireStoreService.kFruitName],
-            kFruitPath: data[FireStoreService.kFruitPath],
-            kFruitURL: await imageURL(data[FireStoreService.kFruitPath]),
-          };
+          snapshotData[doc.id] = Fruit(
+            id: doc.id,
+            name: data[FireStoreService.kFruitName],
+            imagePath: data[FireStoreService.kFruitPath],
+            imageURL: await imageURL(data[FireStoreService.kFruitPath]),
+          );
+          onData(snapshotData[doc.id]);
         }
         onData(snapshotData);
       },
@@ -95,6 +106,19 @@ class FireStoreService {
       print(e);
       return '';
     }
+  }
+
+  StreamSubscription<DocumentSnapshot> wishlistStream(
+    Function(Map<String, dynamic>) onData,
+  ) {
+    return _wishlistsDB.doc(_uid).snapshots().listen(
+      (snapshot) async {
+        onData(snapshot.data());
+      },
+      onError: (e) {
+        print(e);
+      },
+    );
   }
 
   Future<void> addDonorAccount({
@@ -142,6 +166,9 @@ class FireStoreService {
         state: state,
         zip: zip,
       );
+      await _wishlistsDB.doc(_uid).set({
+        kProduceIds: [],
+      });
     } catch (e) {
       throw e.message;
     }
@@ -220,6 +247,32 @@ class FireStoreService {
           },
         });
       }
+    } catch (e) {
+      throw e.message;
+    }
+  }
+
+  Future<void> updateWishList(List<String> produceIds) async {
+    if (_uid == null) {
+      print('UID Unset');
+      return;
+    }
+    try {
+      await _wishlistsDB.doc(_uid).update({
+        kProduceIds: produceIds,
+      });
+    } catch (e) {
+      throw e.message;
+    }
+  }
+
+  Future<void> deleteWishList() async {
+    if (_uid == null) {
+      print('UID Unset');
+      return;
+    }
+    try {
+      await _wishlistsDB.doc(_uid).delete();
     } catch (e) {
       throw e.message;
     }

@@ -32,8 +32,8 @@ class CharityDonationDetailScreen extends StatelessWidget {
               SizedBox(height: screen.height * 0.04),
               Padding(
                 padding: EdgeInsets.fromLTRB(50.0, 0, 50.0, 0),
-                child: RoundedButton(
-                    label: "Marked as Completed", onPressed: null),
+                child:
+                    RoundedButton(label: "Mark as Completed", onPressed: null),
               ),
               SizedBox(height: screen.height * 0.1),
               Container(

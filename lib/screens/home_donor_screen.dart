@@ -9,9 +9,8 @@ import 'package:strings/strings.dart';
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
 import 'package:fruitfairy/models/donation.dart';
+import 'package:fruitfairy/models/fruit.dart';
 import 'package:fruitfairy/models/produce.dart';
-import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
-import 'package:fruitfairy/screens/authentication/signin_screen.dart';
 import 'package:fruitfairy/screens/donation_produce_selection_screen.dart';
 import 'package:fruitfairy/screens/donor_donation_detail_screen.dart';
 import 'package:fruitfairy/screens/profile_donor_screen.dart';
@@ -32,51 +31,34 @@ class HomeDonorScreen extends StatefulWidget {
 
 class _HomeDonorScreenState extends State<HomeDonorScreen> {
   bool _showSpinner = false;
-  String _initialName = '';
-  String _name = '';
 
   StreamSubscription<QuerySnapshot> _produceStream;
 
-  void _fetchData() {
-    _showSpinner = true;
-    Account account = context.read<Account>();
-    String firstName = account.firstName;
-    String lastName = account.lastName;
-    if (firstName.isNotEmpty && lastName.isNotEmpty) {
-      _initialName = '${firstName[0] + lastName[0]}'.toUpperCase();
-      _name = camelize(firstName);
-      _showSpinner = false;
-    }
-    Produce produce = context.watch<Produce>();
-    _showSpinner = produce.fruits.isEmpty;
-  }
-
-  void _signOut() async {
-    setState(() => _showSpinner = true);
-    await widget.signOut();
+  Future<void> _signOut() async {
     _produceStream.cancel();
     context.read<Produce>().clear();
     context.read<Donation>().clear();
-    Navigator.of(context).pushNamedAndRemoveUntil(
-      SignOptionScreen.id,
-      (route) => false,
-    );
-    Navigator.of(context).pushNamed(SignInScreen.id);
-    setState(() => _showSpinner = false);
+    // Must be called last
+    await widget.signOut();
   }
 
   @override
   void initState() {
     super.initState();
     Donation donation = context.read<Donation>();
+    Produce produce = context.read<Produce>();
     _produceStream = context.read<FireStoreService>().produceStream((data) {
-      Produce produce = context.read<Produce>();
-      produce.fromDB(data);
-      List.from(donation.produce).forEach((fruitId) {
-        if (!produce.fruits.containsKey(fruitId)) {
-          donation.removeFruit(fruitId);
-        }
-      });
+      if (data is Fruit) {
+        produce.fromDBLoading(data);
+      }
+      if (data is Map<String, Fruit>) {
+        produce.fromDBComplete(data);
+        List.from(donation.produce).forEach((fruitId) {
+          if (!produce.fruits.containsKey(fruitId)) {
+            donation.removeFruit(fruitId);
+          }
+        });
+      }
     });
     donation.onEmptyBasket(() {
       Navigator.of(context).popUntil((route) {
@@ -87,7 +69,6 @@ class _HomeDonorScreenState extends State<HomeDonorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    _fetchData();
     Size screen = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
@@ -150,6 +131,10 @@ class _HomeDonorScreenState extends State<HomeDonorScreen> {
   }
 
   Widget initialIcon() {
+    Account account = context.read<Account>();
+    String firstName = account.firstName;
+    String lastName = account.lastName;
+    String initialName = '${firstName[0] + lastName[0]}'.toUpperCase();
     return Container(
       width: 50.0,
       child: PopupMenuButton<Profile>(
@@ -163,7 +148,7 @@ class _HomeDonorScreenState extends State<HomeDonorScreen> {
           ),
           child: Center(
             child: Text(
-              _initialName,
+              initialName,
               style: TextStyle(
                 color: kPrimaryColor,
                 fontSize: 18.0,
@@ -209,7 +194,6 @@ class _HomeDonorScreenState extends State<HomeDonorScreen> {
               HapticFeedback.mediumImpact();
               _signOut();
               break;
-            default:
           }
         },
       ),
@@ -217,11 +201,14 @@ class _HomeDonorScreenState extends State<HomeDonorScreen> {
   }
 
   Widget greeting() {
+    Account account = context.read<Account>();
+    String firstName = camelize(account.firstName);
     return Text(
-      'Welcome $_name',
+      'Welcome $firstName',
       textAlign: TextAlign.center,
       style: TextStyle(
         fontSize: 40.0,
+        height: 1.2,
         color: kLabelColor,
         fontFamily: 'Pacifico',
       ),

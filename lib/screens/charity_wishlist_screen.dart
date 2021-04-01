@@ -6,6 +6,7 @@ import 'package:fruitfairy/models/fruit.dart';
 import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/models/wish_list.dart';
 import 'package:fruitfairy/screens/charity_produce_selection_screen.dart';
+import 'package:fruitfairy/services/firestore_service.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
 import 'package:fruitfairy/widgets/popup_diaglog.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
@@ -51,10 +52,10 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
       hitBoxPadding: 5.0,
       buttonColor: Colors.transparent,
       onPressed: () {
-        //TODO: Briefly explain why we need wish list
         PopUpDialog(
           context,
-          message: 'We want your data',
+          message:
+              'The purpose of a wish list is to match donors to charities based on a charity\'s needs. If your needs change, you can manage your wish list accordingly.',
         ).show();
       },
     );
@@ -63,7 +64,7 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
   Widget layoutMode() {
     WishList wishList = context.watch<WishList>();
     bool isEmpty = wishList.produce.isEmpty;
-    _buttonLabel = isEmpty ? 'Create' : 'Edit';
+    _buttonLabel = '${isEmpty ? 'Create' : 'Edit'} Wish List';
     return isEmpty ? emptyWishList() : selectedFruits();
   }
 
@@ -99,21 +100,26 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
   }
 
   List<Widget> fruitTiles() {
-    List<Widget> fruitList = [];
-    Map<String, Fruit> produce = context.read<Produce>().fruits;
-    WishList wishList = context.watch<WishList>();
-    wishList.produce.forEach((fruitId) {
-      fruitList.add(removableFruitTile(
-        fruit: produce[fruitId],
-        onPressed: () {
-          setState(() {
-            produce[fruitId].clear();
-            wishList.removeFruit(fruitId);
-          });
-        },
-      ));
+    List<Widget> fruitTiles = [];
+    FireStoreService fireStoreService = context.read<FireStoreService>();
+    Map<String, Fruit> produce = context.watch<Produce>().fruits;
+    WishList wishList = context.read<WishList>();
+    List<String> produceIds = wishList.produce;
+    produceIds.forEach((fruitId) {
+      if (produce.containsKey(fruitId)) {
+        fruitTiles.add(removableFruitTile(
+          fruit: produce[fruitId],
+          onPressed: () {
+            setState(() {
+              produce[fruitId].clear();
+              wishList.removeFruit(fruitId);
+              fireStoreService.updateWishList(produceIds);
+            });
+          },
+        ));
+      }
     });
-    return fruitList;
+    return fruitTiles;
   }
 
   Widget removableFruitTile({

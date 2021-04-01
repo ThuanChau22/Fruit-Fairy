@@ -6,10 +6,14 @@ import 'package:modal_progress_hud/modal_progress_hud.dart';
 //
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
+import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
+import 'package:fruitfairy/screens/authentication/signin_screen.dart';
 import 'package:fruitfairy/screens/home_charity_screen.dart';
 import 'package:fruitfairy/screens/home_donor_screen.dart';
 import 'package:fruitfairy/services/fireauth_service.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
+
+enum Role { Donor, Charity }
 
 class HomeScreen extends StatefulWidget {
   static const String id = 'home_screen';
@@ -24,10 +28,17 @@ class _HomeScreenState extends State<HomeScreen> {
   StreamSubscription<DocumentSnapshot> _userStream;
 
   Future<void> _signOut() async {
-    await context.read<FireAuthService>().signOut();
+    setState(() => _showSpinner = true);
     _userStream.cancel();
-    context.read<FireStoreService>().clear();
     context.read<Account>().clear();
+    context.read<FireStoreService>().clear();
+    await context.read<FireAuthService>().signOut();
+    Navigator.of(context).pushNamedAndRemoveUntil(
+      SignOptionScreen.id,
+      (route) => false,
+    );
+    Navigator.of(context).pushNamed(SignInScreen.id);
+    setState(() => _showSpinner = false);
   }
 
   @override
@@ -43,23 +54,39 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     _showSpinner = true;
+    Role role;
     Account account = context.watch<Account>();
     if (account.firstName.isNotEmpty && account.lastName.isNotEmpty) {
       _showSpinner = false;
-      return HomeDonorScreen(_signOut);
+      role = Role.Donor;
     }
     if (account.ein.isNotEmpty && account.charityName.isNotEmpty) {
       _showSpinner = false;
-      return HomeCharityScreen(_signOut);
+      role = Role.Charity;
     }
     return ModalProgressHUD(
       inAsyncCall: _showSpinner,
       progressIndicator: CircularProgressIndicator(
         valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
       ),
-      child: Scaffold(
-        appBar: AppBar(title: Text('Home')),
-      ),
+      child: roleLayout(role),
     );
+  }
+
+  Widget roleLayout(Role role) {
+    switch (role) {
+      case Role.Donor:
+        return HomeDonorScreen(_signOut);
+        break;
+
+      case Role.Charity:
+        return HomeCharityScreen(_signOut);
+        break;
+
+      default:
+        return Scaffold(
+          appBar: AppBar(title: Text('Home')),
+        );
+    }
   }
 }

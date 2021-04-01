@@ -4,12 +4,13 @@ import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
+import 'package:strings/strings.dart';
 //
 import 'package:fruitfairy/constant.dart';
+import 'package:fruitfairy/models/account.dart';
+import 'package:fruitfairy/models/fruit.dart';
 import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/models/wish_list.dart';
-import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
-import 'package:fruitfairy/screens/authentication/signin_screen.dart';
 import 'package:fruitfairy/screens/charity_donation_detail_screen.dart';
 import 'package:fruitfairy/screens/charity_wishlist_screen.dart';
 import 'package:fruitfairy/screens/profile_charity_screen.dart';
@@ -30,28 +31,40 @@ class HomeCharityScreen extends StatefulWidget {
 
 class _HomeCharityScreenState extends State<HomeCharityScreen> {
   bool _showSpinner = false;
+
   StreamSubscription<QuerySnapshot> _produceStream;
 
+  StreamSubscription<DocumentSnapshot> _wishlistStream;
+
   void _signOut() async {
-    setState(() => _showSpinner = true);
-    await widget.signOut();
     _produceStream.cancel();
+    _wishlistStream.cancel();
     context.read<Produce>().clear();
     context.read<WishList>().clear();
-    Navigator.of(context).pushNamedAndRemoveUntil(
-      SignOptionScreen.id,
-      (route) => false,
-    );
-    Navigator.of(context).pushNamed(SignInScreen.id);
-    setState(() => _showSpinner = false);
+    // Must be called last
+    await widget.signOut();
   }
 
   @override
   void initState() {
     super.initState();
+    WishList wishlist = context.read<WishList>();
+    Produce produce = context.read<Produce>();
     _produceStream = context.read<FireStoreService>().produceStream((data) {
-      Produce produce = context.read<Produce>();
-      produce.fromDB(data);
+      if (data is Fruit) {
+        produce.fromDBLoading(data);
+      }
+      if (data is Map<String, Fruit>) {
+        produce.fromDBComplete(data);
+        List.from(wishlist.produce).forEach((fruitId) {
+          if (!produce.fruits.containsKey(fruitId)) {
+            wishlist.removeFruit(fruitId);
+          }
+        });
+      }
+    });
+    _wishlistStream = context.read<FireStoreService>().wishlistStream((data) {
+      wishlist.fromDB(data);
     });
   }
 
@@ -231,11 +244,14 @@ class _HomeCharityScreenState extends State<HomeCharityScreen> {
   }
 
   Widget greeting() {
+    Account account = context.read<Account>();
+    String charityName = camelize(account.charityName);
     return Text(
-      'Welcome Charity',
+      charityName,
       textAlign: TextAlign.center,
       style: TextStyle(
         fontSize: 40.0,
+        height: 1.2,
         color: kLabelColor,
         fontFamily: 'Pacifico',
       ),
