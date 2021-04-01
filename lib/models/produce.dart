@@ -17,10 +17,9 @@ class Produce extends ChangeNotifier {
 
   void fromDBComplete(Map<String, Fruit> produceData) {
     if (produceData.length != _fruits.length) {
-      List.of(_fruits.keys).forEach((id) {
-        if (!produceData.containsKey(id)) {
-          _fruits.remove(id);
-        }
+      clear();
+      produceData.forEach((id, fruit) {
+        _fruits[id] = fruit;
       });
     }
     notifyListeners();
