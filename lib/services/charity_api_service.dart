@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 //
 import 'package:fruitfairy/api_keys.dart';
 
+/// A class that provides method calls to data.orghunter.com api
 class CharityAPI {
   static const String kEIN = 'ein';
   static const String kName = 'name';
@@ -11,8 +12,12 @@ class CharityAPI {
   static const String kState = 'state';
   static const String kZip = 'zip';
 
+  /// Private constructor to prevent instantiation
   CharityAPI._();
 
+  /// Return web domain of a charity from given EIN
+  /// Return empty String if charity does not have website
+  /// throw charity not found if EIN is not registered on the api
   static Future<String> webDomain(String ein) async {
     String requestURL = 'http://data.orghunter.com/v1/charitysearch?';
     requestURL += 'user_key=$CHARITY_API_KEY';
@@ -31,6 +36,8 @@ class CharityAPI {
     throw 'Charity not found. Please check your EIN and try again!';
   }
 
+  /// Return details information about a charity from given EIN
+  /// Return an empty Map if EIN is not registered on the api
   static Future<Map<String, String>> details(String ein) async {
     String requestURL = 'http://data.orghunter.com/v1/charitybasic?';
     requestURL += 'user_key=$CHARITY_API_KEY';
