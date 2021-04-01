@@ -159,6 +159,7 @@ class _DonationProduceSelectionScreenState
         ));
       }
     });
+    _showSpinner = produce.fruits.isEmpty;
     return fruitList;
   }
 

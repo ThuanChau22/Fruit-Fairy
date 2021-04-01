@@ -1,3 +1,5 @@
+import 'package:meta/meta.dart';
+
 class Fruit {
   static const Min = 25;
   static const Max = 100;
@@ -9,10 +11,10 @@ class Fruit {
   int _currentAmount = Min;
 
   Fruit({
-    this.id,
-    this.name,
-    this.imagePath,
-    this.imageURL,
+    @required this.id,
+    @required this.name,
+    @required this.imagePath,
+    @required this.imageURL,
   });
 
   int get amount {

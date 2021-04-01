@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+//
+import 'package:fruitfairy/models/fruit.dart';
 
 class FireStoreService {
   /// Database fields
@@ -17,6 +19,7 @@ class FireStoreService {
 
   /// produce
   static const String kProduce = 'produce';
+  static const String kFruitId = 'id';
   static const String kFruitName = 'name';
   static const String kFruitPath = 'path';
   static const String kFruitURL = 'url';
@@ -67,18 +70,20 @@ class FireStoreService {
   }
 
   StreamSubscription<QuerySnapshot> produceStream(
-    Function(Map<String, dynamic>) onData,
+    Function(dynamic) onData,
   ) {
     return _produceDB.snapshots().listen(
       (snapshot) async {
-        Map<String, dynamic> snapshotData = {};
+        Map<String, Fruit> snapshotData = {};
         for (QueryDocumentSnapshot doc in snapshot.docs) {
           Map<String, dynamic> data = doc.data();
-          snapshotData[doc.id] = {
-            kFruitName: data[FireStoreService.kFruitName],
-            kFruitPath: data[FireStoreService.kFruitPath],
-            kFruitURL: await imageURL(data[FireStoreService.kFruitPath]),
-          };
+          snapshotData[doc.id] = Fruit(
+            id: doc.id,
+            name: data[FireStoreService.kFruitName],
+            imagePath: data[FireStoreService.kFruitPath],
+            imageURL: await imageURL(data[FireStoreService.kFruitPath]),
+          );
+          onData(snapshotData[doc.id]);
         }
         onData(snapshotData);
       },

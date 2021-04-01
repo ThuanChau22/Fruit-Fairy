@@ -32,24 +32,8 @@ class HomeDonorScreen extends StatefulWidget {
 
 class _HomeDonorScreenState extends State<HomeDonorScreen> {
   bool _showSpinner = false;
-  String _initialName = '';
-  String _name = '';
 
   StreamSubscription<QuerySnapshot> _produceStream;
-
-  void _fetchData() {
-    _showSpinner = true;
-    Account account = context.read<Account>();
-    String firstName = account.firstName;
-    String lastName = account.lastName;
-    if (firstName.isNotEmpty && lastName.isNotEmpty) {
-      _initialName = '${firstName[0] + lastName[0]}'.toUpperCase();
-      _name = camelize(firstName);
-      _showSpinner = false;
-    }
-    Produce produce = context.watch<Produce>();
-    _showSpinner = produce.fruits.isEmpty;
-  }
 
   void _signOut() async {
     setState(() => _showSpinner = true);
@@ -87,7 +71,6 @@ class _HomeDonorScreenState extends State<HomeDonorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    _fetchData();
     Size screen = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
@@ -150,6 +133,10 @@ class _HomeDonorScreenState extends State<HomeDonorScreen> {
   }
 
   Widget initialIcon() {
+    Account account = context.read<Account>();
+    String firstName = account.firstName;
+    String lastName = account.lastName;
+    String initialName = '${firstName[0] + lastName[0]}'.toUpperCase();
     return Container(
       width: 50.0,
       child: PopupMenuButton<Profile>(
@@ -163,7 +150,7 @@ class _HomeDonorScreenState extends State<HomeDonorScreen> {
           ),
           child: Center(
             child: Text(
-              _initialName,
+              initialName,
               style: TextStyle(
                 color: kPrimaryColor,
                 fontSize: 18.0,
@@ -216,8 +203,10 @@ class _HomeDonorScreenState extends State<HomeDonorScreen> {
   }
 
   Widget greeting() {
+    Account account = context.read<Account>();
+    String firstName = camelize(account.firstName);
     return Text(
-      'Welcome $_name',
+      'Welcome $firstName',
       textAlign: TextAlign.center,
       style: TextStyle(
         fontSize: 40.0,

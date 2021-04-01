@@ -32,21 +32,8 @@ class HomeCharityScreen extends StatefulWidget {
 
 class _HomeCharityScreenState extends State<HomeCharityScreen> {
   bool _showSpinner = false;
-  String _charityName = '';
 
   StreamSubscription<QuerySnapshot> _produceStream;
-
-  void _fetchData() {
-    _showSpinner = true;
-    Account account = context.read<Account>();
-    String charityName = account.charityName;
-    if (charityName.isNotEmpty) {
-      _charityName = camelize(charityName);
-      _showSpinner = false;
-    }
-    Produce produce = context.watch<Produce>();
-    _showSpinner = produce.fruits.isEmpty;
-  }
 
   void _signOut() async {
     setState(() => _showSpinner = true);
@@ -65,15 +52,14 @@ class _HomeCharityScreenState extends State<HomeCharityScreen> {
   @override
   void initState() {
     super.initState();
+    Produce produce = context.read<Produce>();
     _produceStream = context.read<FireStoreService>().produceStream((data) {
-      Produce produce = context.read<Produce>();
       produce.fromDB(data);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    _fetchData();
     Size screen = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
@@ -248,8 +234,10 @@ class _HomeCharityScreenState extends State<HomeCharityScreen> {
   }
 
   Widget greeting() {
+    Account account = context.read<Account>();
+    String charityName = camelize(account.charityName);
     return Text(
-      _charityName,
+      charityName,
       textAlign: TextAlign.center,
       style: TextStyle(
         fontSize: 40.0,
