@@ -6,31 +6,32 @@ import 'package:provider/provider.dart';
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
 import 'package:fruitfairy/screens/authentication/signin_screen.dart';
+import 'package:fruitfairy/services/charity_api_service.dart';
 import 'package:fruitfairy/services/fireauth_service.dart';
 import 'package:fruitfairy/services/validation.dart';
 import 'package:fruitfairy/widgets/gesture_wrapper.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
 import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/obscure_icon.dart';
+import 'package:fruitfairy/widgets/popup_diaglog.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
+import 'package:fruitfairy/widgets/rounded_icon_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
 
-class SignUpDonorScreen extends StatefulWidget {
-  static const String id = 'signup_donor_screen';
+class SignUpCharityScreen extends StatefulWidget {
+  static const String id = 'signup_charity_screen';
 
   @override
-  _SignUpDonorScreenState createState() => _SignUpDonorScreenState();
+  _SignUpCharityScreenState createState() => _SignUpCharityScreenState();
 }
 
-class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
-  final TextEditingController _firstName = TextEditingController();
-  final TextEditingController _lastName = TextEditingController();
+class _SignUpCharityScreenState extends State<SignUpCharityScreen> {
+  final TextEditingController _ein = TextEditingController();
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
   final TextEditingController _confirmPassword = TextEditingController();
 
-  String _firstNameError = '';
-  String _lastNameError = '';
+  String _einError = '';
   String _emailError = '';
   String _passwordError = '';
   String _confirmPasswordError = '';
@@ -40,14 +41,7 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
 
   bool _validate() {
     String errors = '';
-    errors += _firstNameError = Validate.name(
-      label: 'first name',
-      name: _firstName.text.trim(),
-    );
-    errors += _lastNameError = Validate.name(
-      label: 'last name',
-      name: _lastName.text.trim(),
-    );
+    errors += _einError = Validate.ein(_ein.text.trim());
     errors += _emailError = Validate.email(_email.text.trim());
     errors += _passwordError = Validate.password(_password.text);
     errors += _confirmPasswordError = Validate.confirmPassword(
@@ -61,14 +55,25 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
     if (_validate()) {
       setState(() => _showSpinner = true);
       try {
+        String ein = _ein.text.trim().replaceAll('-', '');
         String email = _email.text.trim();
         String password = _password.text;
+        String webDomain = await CharityAPI.webDomain(ein);
+        String emailDomain = email.substring(email.lastIndexOf('@') + 1);
+        if (emailDomain != webDomain) {
+          throw 'Sorry, we\'re unable to verify the given email to this charity';
+        }
+        Map<String, String> charity = await CharityAPI.details(ein);
         FireAuthService auth = context.read<FireAuthService>();
-        String notifyMessage = await auth.signUpDonor(
+        String notifyMessage = await auth.signUpCharity(
           email: email,
           password: password,
-          firstName: _firstName.text.trim(),
-          lastName: _lastName.text.trim(),
+          ein: charity[CharityAPI.kEIN],
+          charityName: charity[CharityAPI.kName],
+          street: charity[CharityAPI.kStreet],
+          city: charity[CharityAPI.kCity],
+          state: charity[CharityAPI.kState],
+          zip: charity[CharityAPI.kZip],
         );
         Navigator.of(context).pushNamedAndRemoveUntil(
           SignInScreen.id,
@@ -99,7 +104,10 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
       },
       child: GestureWrapper(
         child: Scaffold(
-          appBar: AppBar(title: Text('Donor')),
+          appBar: AppBar(
+            title: Text('Charity'),
+            actions: [helpButton()],
+          ),
           body: SafeArea(
             child: ModalProgressHUD(
               inAsyncCall: _showSpinner,
@@ -114,9 +122,7 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
                   ),
                   child: Column(
                     children: [
-                      firstNameInputField(),
-                      inputFieldSizeBox(),
-                      lastNameInputField(),
+                      einInputField(),
                       inputFieldSizeBox(),
                       emailInputField(),
                       inputFieldSizeBox(),
@@ -136,40 +142,41 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
     );
   }
 
+  Widget helpButton() {
+    return RoundedIconButton(
+      radius: 30.0,
+      icon: Icon(
+        Icons.help_outline,
+        color: kLabelColor,
+        size: 30.0,
+      ),
+      hitBoxPadding: 5.0,
+      buttonColor: Colors.transparent,
+      onPressed: () {
+        MessageBar(context).hide();
+        PopUpDialog(
+          context,
+          message:
+              'Your charity is verified using the domain name of your charity’s email. For example, if your charity’s website is charity.org then please use an email from the same domain such as john@charity.org.\nIf your charity does not have a website, please contact us at fruitfairyhelp@gmail.com.',
+        ).show();
+      },
+    );
+  }
+
   Widget inputFieldSizeBox() {
     Size screen = MediaQuery.of(context).size;
     return SizedBox(height: screen.height * 0.01);
   }
 
-  Widget firstNameInputField() {
+  Widget einInputField() {
     return InputField(
-      label: 'First Name',
-      controller: _firstName,
-      errorMessage: _firstNameError,
-      keyboardType: TextInputType.name,
+      label: 'EIN',
+      controller: _ein,
+      errorMessage: _einError,
+      keyboardType: TextInputType.number,
       onChanged: (value) {
         setState(() {
-          _firstNameError = Validate.name(
-            label: 'first name',
-            name: _firstName.text.trim(),
-          );
-        });
-      },
-    );
-  }
-
-  Widget lastNameInputField() {
-    return InputField(
-      label: 'Last Name',
-      controller: _lastName,
-      errorMessage: _lastNameError,
-      keyboardType: TextInputType.name,
-      onChanged: (value) {
-        setState(() {
-          _lastNameError = Validate.name(
-            label: 'last name',
-            name: _lastName.text.trim(),
-          );
+          _einError = Validate.ein(_ein.text.trim());
         });
       },
     );

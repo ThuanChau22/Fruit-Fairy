@@ -1,5 +1,4 @@
 import 'package:meta/meta.dart';
-
 import 'package:phone_number/phone_number.dart';
 
 /// A class that provides methods for client validations
@@ -101,6 +100,18 @@ class Validate {
     return '';
   }
 
+  /// Validate EIN
+  /// Return empty String on correct [ein]
+  static String ein(String ein) {
+    if (ein.isEmpty) {
+      return 'Please enter EIN\n';
+    }
+    if (!RegExp(r'^\d{2}-?\d{7}$').hasMatch(ein)) {
+      return 'Invalid EIN\n';
+    }
+    return '';
+  }
+
   /// Simple check email on signin
   /// Return empty String on correct [email]
   static String checkEmail(String email) {
@@ -111,6 +122,12 @@ class Validate {
   /// Return empty String on correct [password]
   static String checkPassword(String password) {
     return password.isEmpty ? 'Please enter password\n' : '';
+  }
+
+  /// Simple check password on signin
+  /// Return empty String on correct [charityName]
+  static String checkCharityName(String charityName) {
+    return charityName.isEmpty ? 'Please enter your charity name\n' : '';
   }
 
   /// Simple check confirmation code on verifying

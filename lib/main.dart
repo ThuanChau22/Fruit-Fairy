@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
-
+//
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
-import 'package:fruitfairy/models/basket.dart';
+import 'package:fruitfairy/models/donation.dart';
+import 'package:fruitfairy/models/produce.dart';
+import 'package:fruitfairy/models/wish_list.dart';
 import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
 import 'package:fruitfairy/services/fireauth_service.dart';
@@ -22,24 +24,16 @@ void main() async {
 class FruitFairy extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        // Dismiss on screen keyboard
-        FocusScopeNode currentFocus = FocusScope.of(context);
-        if (!currentFocus.hasPrimaryFocus &&
-            currentFocus.focusedChild != null) {
-          currentFocus.focusedChild?.unfocus();
-        }
-      },
-      child: MultiProvider(
-        providers: [
-          Provider<FireAuthService>(create: (_) => FireAuthService()),
-          Provider<FireStoreService>(create: (_) => FireStoreService()),
-          ChangeNotifierProvider<Account>(create: (_) => Account()),
-          ChangeNotifierProvider<Basket>(create: (_) => Basket()),
-        ],
-        child: Authentication(),
-      ),
+    return MultiProvider(
+      providers: [
+        Provider<FireAuthService>(create: (_) => FireAuthService()),
+        Provider<FireStoreService>(create: (_) => FireStoreService()),
+        ChangeNotifierProvider<Account>(create: (_) => Account()),
+        ChangeNotifierProvider<Produce>(create: (_) => Produce()),
+        ChangeNotifierProvider<Donation>(create: (_) => Donation()),
+        ChangeNotifierProvider<WishList>(create: (_) => WishList()),
+      ],
+      child: Authentication(),
     );
   }
 }
@@ -55,14 +49,15 @@ class Authentication extends StatelessWidget {
       initialRoute: signedIn ? HomeScreen.id : SignOptionScreen.id,
       onGenerateRoute: RouteGenerator.generate,
       theme: Theme.of(context).copyWith(
+        accentColor: kDarkPrimaryColor,
         scaffoldBackgroundColor: kPrimaryColor,
         appBarTheme: AppBarTheme(
           brightness: Brightness.dark,
-          backgroundColor: kAppBarColor,
+          backgroundColor: kDarkPrimaryColor,
           centerTitle: true,
         ),
         snackBarTheme: SnackBarThemeData(
-          backgroundColor: kAppBarColor,
+          backgroundColor: kDarkPrimaryColor,
           actionTextColor: kLabelColor,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(

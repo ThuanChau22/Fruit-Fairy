@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-
+//
 import 'package:fruitfairy/api_keys.dart';
 
-class AddressService {
+/// A class that performs map related operations such as look up addresses
+/// or calulate distances by utilizing Google Map API
+class MapService {
   static const String kPlaceId = 'placeId';
   static const String kDescription = 'description';
   static const String kStreet = 'street';
@@ -11,15 +13,18 @@ class AddressService {
   static const String kState = 'state';
   static const String kZipCode = 'zipCode';
 
-  AddressService._();
+  /// Private constructor to prevent instantiation
+  MapService._();
 
-  static Future<List<Map<String, String>>> getSuggestions(
+  /// Return a list of suggested address based on [input]
+  /// [sessionToken] is used to keep API call within a session
+  static Future<List<Map<String, String>>> addressSuggestions(
     String input, {
     String sessionToken,
   }) async {
     String requestURL =
-        'https://maps.googleapis.com/maps/api/place/autocomplete/json';
-    requestURL += '?input=$input';
+        'https://maps.googleapis.com/maps/api/place/autocomplete/json?';
+    requestURL += 'input=$input';
     requestURL += '&types=address';
     requestURL += '&components=country:us';
     requestURL += '&key=$PLACES_API_KEY';
@@ -44,13 +49,17 @@ class AddressService {
     return results;
   }
 
-  static Future<Map<String, String>> getDetails(
+  /// Return details information of an address from [placeId]
+  /// retrieved from one of [addressSuggestions] result
+  /// [sessionToken] is used to keep API call within a session
+  /// Countd as one call if used with [addressSuggestions]
+  static Future<Map<String, String>> addressDetails(
     String placeId, {
     String sessionToken,
   }) async {
     String requestURL =
-        'https://maps.googleapis.com/maps/api/place/details/json';
-    requestURL += '?place_id=$placeId';
+        'https://maps.googleapis.com/maps/api/place/details/json?';
+    requestURL += 'place_id=$placeId';
     requestURL += '&fields=address_component';
     requestURL += '&key=$PLACES_API_KEY';
     requestURL += sessionToken != null ? '&sessiontoken=$sessionToken' : '';

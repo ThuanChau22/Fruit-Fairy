@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
-
+//
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
 import 'package:fruitfairy/services/fireauth_service.dart';
@@ -10,6 +10,7 @@ import 'package:fruitfairy/services/firestore_service.dart';
 import 'package:fruitfairy/services/credential_service.dart';
 import 'package:fruitfairy/services/validation.dart';
 import 'package:fruitfairy/widgets/fruit_fairy_logo.dart';
+import 'package:fruitfairy/widgets/gesture_wrapper.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
 import 'package:fruitfairy/widgets/label_link.dart';
 import 'package:fruitfairy/widgets/message_bar.dart';
@@ -106,27 +107,21 @@ class _SignInScreenState extends State<SignInScreen> {
       setState(() => _showSpinner = true);
       switch (_mode) {
         case AuthMode.Reset:
+          String notifyMessage = '';
           try {
             FireAuthService auth = context.read<FireAuthService>();
-            String notifyMessage = await auth.resetPassword(_email.text.trim());
+            notifyMessage = await auth.resetPassword(_email.text.trim());
             _buttonLabel = 'Re-send';
-            MessageBar(context, message: notifyMessage).show();
-          } catch (e) {
-            print(e);
+          } catch (errorMessage) {
+            notifyMessage = errorMessage;
           }
+          MessageBar(context, message: notifyMessage).show();
           break;
 
         case AuthMode.Phone:
           FireAuthService auth = context.read<FireAuthService>();
           String nofifyMessage = await auth.signInWithPhone(
             phoneNumber: '$_dialCode${_phoneNumber.text.trim()}',
-            completed: (String errorMessage) async {
-              if (errorMessage.isEmpty) {
-                await _signInSuccess();
-              } else {
-                MessageBar(context, message: errorMessage).show();
-              }
-            },
             codeSent: (verifyCode) {
               if (verifyCode != null) {
                 _verifyCode = verifyCode;
@@ -136,8 +131,16 @@ class _SignInScreenState extends State<SignInScreen> {
                 });
               }
             },
-            failed: (errorMessage) {
-              MessageBar(context, message: errorMessage).show();
+            completed: (result) async {
+              String errorMessage = await result();
+              if (errorMessage.isEmpty) {
+                await _signInSuccess();
+              } else {
+                MessageBar(context, message: errorMessage).show();
+              }
+            },
+            failed: (errorMessage) async {
+              MessageBar(context, message: await errorMessage()).show();
             },
           );
           MessageBar(context, message: nofifyMessage).show();
@@ -226,27 +229,35 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
-    return Scaffold(
-      appBar: AppBar(title: Text(_appBarLabel)),
-      body: SafeArea(
-        child: ModalProgressHUD(
-          inAsyncCall: _showSpinner,
-          progressIndicator: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation(kAppBarColor),
-          ),
-          child: ScrollableLayout(
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                vertical: screen.height * 0.03,
-                horizontal: screen.width * 0.15,
+    return WillPopScope(
+      onWillPop: () async {
+        MessageBar(context).hide();
+        return true;
+      },
+      child: GestureWrapper(
+        child: Scaffold(
+          appBar: AppBar(title: Text(_appBarLabel)),
+          body: SafeArea(
+            child: ModalProgressHUD(
+              inAsyncCall: _showSpinner,
+              progressIndicator: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  fairyLogo(),
-                  SizedBox(height: screen.height * 0.03),
-                  layoutMode(),
-                ],
+              child: ScrollableLayout(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    vertical: screen.height * 0.03,
+                    horizontal: screen.width * 0.15,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      fairyLogo(),
+                      SizedBox(height: screen.height * 0.03),
+                      layoutMode(),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
@@ -364,8 +375,9 @@ class _SignInScreenState extends State<SignInScreen> {
         InputField(
           label: 'Password',
           controller: _password,
-          obscureText: _obscurePassword,
+          keyboardType: TextInputType.visiblePassword,
           errorMessage: _passwordError,
+          obscureText: _obscurePassword,
           onChanged: (value) {
             setState(() {
               _passwordError = Validate.checkPassword(_password.text);
@@ -453,8 +465,6 @@ class _SignInScreenState extends State<SignInScreen> {
       ),
       child: RoundedButton(
         label: _buttonLabel,
-        labelColor: kPrimaryColor,
-        backgroundColor: kObjectBackgroundColor,
         onPressed: () {
           submit();
         },

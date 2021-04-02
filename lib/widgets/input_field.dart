@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+//
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/widgets/message_bar.dart';
 
@@ -13,6 +13,7 @@ class InputField extends StatelessWidget {
   final bool obscureText;
   final bool readOnly;
   final String prefixText;
+  final Icon prefixIcon;
   final ValueChanged<String> onChanged;
 
   InputField({
@@ -25,6 +26,7 @@ class InputField extends StatelessWidget {
     this.readOnly = false,
     this.keyboardType,
     this.prefixText,
+    this.prefixIcon,
     this.onChanged,
   });
 
@@ -44,7 +46,8 @@ class InputField extends StatelessWidget {
         errorText: errorMessage.isNotEmpty ? errorMessage : null,
         helperText: helperText,
         prefixText: prefixText,
-        fillColor: kObjectBackgroundColor.withOpacity(0.2),
+        prefixIcon: prefixIcon,
+        fillColor: kObjectColor.withOpacity(0.2),
         enabled: !readOnly,
       ),
     );

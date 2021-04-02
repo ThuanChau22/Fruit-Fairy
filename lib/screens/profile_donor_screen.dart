@@ -5,17 +5,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
-
+//
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
-import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
-import 'package:fruitfairy/screens/authentication/signin_screen.dart';
-import 'package:fruitfairy/services/address_service.dart';
+import 'package:fruitfairy/services/map_service.dart';
 import 'package:fruitfairy/services/fireauth_service.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
 import 'package:fruitfairy/services/session_token.dart';
 import 'package:fruitfairy/services/validation.dart';
 import 'package:fruitfairy/widgets/auto_scroll.dart';
+import 'package:fruitfairy/widgets/gesture_wrapper.dart';
 import 'package:fruitfairy/widgets/input_field_suggestion.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
 import 'package:fruitfairy/widgets/label_link.dart';
@@ -27,19 +26,20 @@ import 'package:fruitfairy/widgets/scrollable_layout.dart';
 enum Field { Name, Phone, Address, Password }
 enum DeleteMode { Input, Loading, Success }
 
-class EditProfileScreen extends StatefulWidget {
-  static const String id = 'edit_profile_screen';
+class ProfileDonorScreen extends StatefulWidget {
+  static const String id = 'profile_donor_screen';
+  static const String signOut = 'sign_out';
 
   @override
-  _EditProfileScreenState createState() => _EditProfileScreenState();
+  _ProfileDonorScreenState createState() => _ProfileDonorScreenState();
 }
 
-class _EditProfileScreenState extends State<EditProfileScreen> {
+class _ProfileDonorScreenState extends State<ProfileDonorScreen> {
   final AutoScroll<Field> _scroller = AutoScroll(
     elements: {
       Field.Name: 0,
-      Field.Phone: 1,
-      Field.Address: 2,
+      Field.Address: 1,
+      Field.Phone: 2,
       Field.Password: 3,
     },
   );
@@ -47,16 +47,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final TextEditingController _email = TextEditingController();
   final TextEditingController _firstName = TextEditingController();
   final TextEditingController _lastName = TextEditingController();
-  final TextEditingController _phoneNumber = TextEditingController();
-  final TextEditingController _confirmCode = TextEditingController();
   final TextEditingController _street = TextEditingController();
   final TextEditingController _city = TextEditingController();
   final TextEditingController _state = TextEditingController();
   final TextEditingController _zipCode = TextEditingController();
+  final TextEditingController _phoneNumber = TextEditingController();
+  final TextEditingController _confirmCode = TextEditingController();
   final TextEditingController _oldPassword = TextEditingController();
   final TextEditingController _newPassword = TextEditingController();
   final TextEditingController _confirmPassword = TextEditingController();
   final TextEditingController _deleteConfirm = TextEditingController();
+
+  final Set<Field> _updated = {};
 
   final SessionToken sessionToken = SessionToken();
 
@@ -65,51 +67,66 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   String _firstNameError = '';
   String _lastNameError = '';
-  String _phoneError = '';
   String _streetError = '';
   String _cityError = '';
   String _stateError = '';
   String _zipError = '';
+  String _phoneError = '';
   String _oldPasswordError = '';
   String _newPasswordError = '';
   String _confirmPasswordError = '';
   String _deleteError = '';
 
   bool _showSpinner = false;
+
+  String _phoneButtonLabel = 'Add';
+  bool _showVerifyPhone = false;
   bool _obscureOldPassword = true;
   bool _obscureNewPassword = true;
-  bool _updatedName = false;
-  bool _updatedAddress = false;
-  bool _updatedPassword = false;
-  bool _needVerifyPhone = false;
-  String _updatePhoneLabel = 'Add';
   DeleteMode _deleteMode = DeleteMode.Input;
   bool _obscureDeletePassword = true;
 
-  StreamSubscription<DocumentSnapshot> subscription;
+  StreamSubscription<DocumentSnapshot> _userStream;
 
   Future<String> Function(String smsCode) _verifyCode;
 
-  StateSetter setDialogState;
+  StateSetter _setDialogState;
 
-  void _fillInputFields() {
+  Function _signOut;
+
+  void _updateInputFields() {
+    fillEmail();
+    if (_updated.isEmpty) {
+      fillName();
+      fillAddress();
+      fillPhone();
+    } else {
+      if (_updated.contains(Field.Name)) {
+        fillName();
+      }
+      if (_updated.contains(Field.Address)) {
+        fillAddress();
+      }
+      if (_updated.contains(Field.Phone)) {
+        fillPhone();
+      }
+      _updated.remove(Field.Password);
+    }
+    setState(() {});
+  }
+
+  void fillEmail() {
+    _email.text = context.read<Account>().email;
+  }
+
+  void fillName() {
     Account account = context.read<Account>();
-    _email.text = account.email;
     _firstName.text = account.firstName;
     _lastName.text = account.lastName;
-    Map<String, String> phone = account.phone;
-    if (phone.isNotEmpty) {
-      _isoCode = phone[FireStoreService.kPhoneCountry];
-      _dialCode = phone[FireStoreService.kPhoneDialCode];
-      _phoneNumber.text = phone[FireStoreService.kPhoneNumber];
-      _updatePhoneLabel = 'Remove';
-    } else {
-      _isoCode = 'US';
-      _dialCode = '+1';
-      _phoneNumber.clear();
-      _updatePhoneLabel = 'Add';
-    }
-    Map<String, String> address = account.address;
+  }
+
+  void fillAddress() {
+    Map<String, String> address = context.read<Account>().address;
     if (address.isNotEmpty) {
       _street.text = address[FireStoreService.kAddressStreet];
       _city.text = address[FireStoreService.kAddressCity];
@@ -121,64 +138,51 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       _state.clear();
       _zipCode.clear();
     }
-    setState(() {});
+  }
+
+  void fillPhone() {
+    Map<String, String> phone = context.read<Account>().phone;
+    if (phone.isNotEmpty) {
+      _isoCode = phone[FireStoreService.kPhoneCountry];
+      _dialCode = phone[FireStoreService.kPhoneDialCode];
+      _phoneNumber.text = phone[FireStoreService.kPhoneNumber];
+      _phoneButtonLabel = 'Remove';
+    } else {
+      _isoCode = 'US';
+      _dialCode = '+1';
+      _phoneNumber.clear();
+      _phoneButtonLabel = 'Add';
+    }
   }
 
   void _updateProfile() async {
     setState(() => _showSpinner = true);
-
-    // Holding user inputs while updating
-    String firstName = _firstName.text.trim();
-    String lastName = _lastName.text.trim();
-    String street = _street.text.trim();
-    String city = _city.text.trim();
-    String state = _state.text.trim();
-    String zip = _zipCode.text.trim();
-    String oldPassword = _oldPassword.text;
-    String newPassword = _newPassword.text;
-    String confirmPassword = _confirmPassword.text;
-
-    String errorMessage = await _updateName(
-      firstName: firstName,
-      lastName: lastName,
-    );
+    String errorMessage = await _updateName();
     if (errorMessage.isEmpty) {
-      errorMessage = await _updateAddress(
-        street: street,
-        city: city,
-        state: state,
-        zip: zip,
-      );
+      errorMessage = await _updateAddress();
     }
     if (errorMessage.isEmpty) {
-      errorMessage = await _updatePassword(
-        oldPassword: oldPassword,
-        newPassword: newPassword,
-        confirmPassword: confirmPassword,
-      );
+      errorMessage = await _updatePassword();
     }
     String updateMessage;
     if (errorMessage.isEmpty) {
-      if (_updatedName || _updatedAddress || _updatedPassword) {
-        _updatedName = _updatedAddress = _updatedPassword = false;
-        updateMessage = 'Profile updated';
-      } else {
-        updateMessage = 'Profile is up-to-date';
-      }
+      updateMessage = _updated.contains(Field.Name) ||
+              _updated.contains(Field.Address) ||
+              _updated.contains(Field.Password)
+          ? 'Profile updated'
+          : 'Profile is up-to-date';
+      _updated.removeAll([Field.Name, Field.Address, Field.Password]);
     } else {
       _scrollToError();
       updateMessage = errorMessage;
     }
-    _needVerifyPhone = false;
-    _verifyCode = null;
     setState(() => _showSpinner = false);
     MessageBar(context, message: updateMessage).show();
   }
 
-  Future<String> _updateName({
-    @required firstName,
-    @required lastName,
-  }) async {
+  Future<String> _updateName() async {
+    String firstName = _firstName.text.trim();
+    String lastName = _lastName.text.trim();
     Account account = context.read<Account>();
     if (firstName != account.firstName || lastName != account.lastName) {
       String error = _firstNameError = Validate.name(
@@ -191,12 +195,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       );
       if (error.isEmpty) {
         try {
-          await context.read<FireStoreService>().updateUserName(
+          _updated.add(Field.Name);
+          await context.read<FireStoreService>().updateDonorName(
                 firstName: firstName,
                 lastName: lastName,
               );
-          _updatedName = true;
         } catch (errorMessage) {
+          _updated.remove(Field.Name);
           return errorMessage;
         }
       } else {
@@ -206,17 +211,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return '';
   }
 
-  Future<String> _updateAddress({
-    @required String street,
-    @required String city,
-    @required String state,
-    @required String zip,
-  }) async {
-    Map<String, String> address = context.read<Account>().address;
-    bool isFilled = street.isNotEmpty ||
-        city.isNotEmpty ||
-        state.isNotEmpty ||
-        zip.isNotEmpty;
+  Future<String> _updateAddress() async {
+    String street = _street.text.trim();
+    String city = _city.text.trim();
+    String state = _state.text.trim();
+    String zip = _zipCode.text.trim();
+    Account account = context.read<Account>();
+    Map<String, String> address = account.address;
+    bool isFilled = _addressIsFilled();
     bool insert = address.isEmpty && isFilled;
     bool update = address.isNotEmpty &&
         (street != address[FireStoreService.kAddressStreet] ||
@@ -233,14 +235,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       }
       if (error.isEmpty) {
         try {
+          _updated.add(Field.Address);
           await context.read<FireStoreService>().updateUserAddress(
                 street: street,
                 city: city,
                 state: state,
                 zip: zip,
               );
-          _updatedAddress = true;
         } catch (errorMessage) {
+          _updated.remove(Field.Address);
           return errorMessage;
         }
       } else {
@@ -250,11 +253,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return '';
   }
 
-  Future<String> _updatePassword({
-    @required String oldPassword,
-    @required String newPassword,
-    @required String confirmPassword,
-  }) async {
+  bool _addressIsFilled() {
+    bool isFilled = _street.text.trim().isNotEmpty ||
+        _city.text.trim().isNotEmpty ||
+        _state.text.trim().isNotEmpty ||
+        _zipCode.text.trim().isNotEmpty;
+    if (!isFilled) {
+      _streetError = _cityError = _stateError = _zipError = '';
+    }
+    return isFilled;
+  }
+
+  Future<String> _updatePassword() async {
+    String oldPassword = _oldPassword.text;
+    String newPassword = _newPassword.text;
+    String confirmPassword = _confirmPassword.text;
     if (newPassword.isNotEmpty) {
       String error = _oldPasswordError = Validate.checkPassword(oldPassword);
       error += _newPasswordError = Validate.password(newPassword);
@@ -264,6 +277,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       );
       if (error.isEmpty) {
         try {
+          _updated.add(Field.Password);
           await context.read<FireAuthService>().updatePassword(
                 email: _email.text.trim(),
                 oldPassword: oldPassword,
@@ -272,8 +286,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           _oldPassword.clear();
           _newPassword.clear();
           _confirmPassword.clear();
-          _updatedPassword = true;
         } catch (errorMessage) {
+          _updated.remove(Field.Password);
           return errorMessage;
         }
       } else {
@@ -294,39 +308,37 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       FireAuthService auth = context.read<FireAuthService>();
       Account account = context.read<Account>();
       Map<String, String> phone = account.phone;
-      bool insert = phone.isEmpty && (phoneNumber.isNotEmpty);
+      bool insert = phone.isEmpty && phoneNumber.isNotEmpty;
       bool update = phone.isNotEmpty &&
           (phoneNumber != phone[FireStoreService.kPhoneNumber] ||
               _isoCode != phone[FireStoreService.kPhoneCountry]);
+      String notifyMessage = '';
       if (insert || update) {
-        String notifyMessage = await auth.registerPhone(
+        notifyMessage = await auth.registerPhone(
           phoneNumber: '$_dialCode$phoneNumber',
-          update: account.phone.isNotEmpty,
           codeSent: (verifyCode) async {
-            if (verifyCode != null) {
-              _verifyCode = verifyCode;
-            }
+            _verifyCode = verifyCode;
           },
-          failed: (errorMessage) {
+          completed: (result) async {
+            setState(() => _showSpinner = true);
+            String errorMessage = await result();
+            if (errorMessage.isEmpty) {
+              errorMessage = await updatePhoneNumber();
+            }
             MessageBar(context, message: errorMessage).show();
+            setState(() => _showSpinner = false);
+          },
+          failed: (errorMessage) async {
+            MessageBar(context, message: await errorMessage()).show();
           },
         );
         _confirmCode.clear();
-        _needVerifyPhone = true;
-        _updatePhoneLabel = 'Re-send';
-        MessageBar(context, message: notifyMessage).show();
+        _showVerifyPhone = true;
+        _phoneButtonLabel = 'Re-send';
       } else {
-        if (await auth.removePhone()) {
-          await context.read<FireStoreService>().updatePhoneNumber(
-                country: _isoCode,
-                dialCode: _dialCode,
-                phoneNumber: '',
-              );
-          _phoneNumber.clear();
-          _updatePhoneLabel = 'Add';
-          MessageBar(context, message: 'Phone number removed').show();
-        }
+        notifyMessage = await deletePhoneNumber();
       }
+      MessageBar(context, message: notifyMessage).show();
     }
     setState(() => _showSpinner = false);
   }
@@ -336,33 +348,53 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (_verifyCode != null) {
       String errorMessage = await _verifyCode(_confirmCode.text.trim());
       if (errorMessage.isEmpty) {
-        String phoneNumber = _phoneNumber.text.trim();
-        await context.read<FireStoreService>().updatePhoneNumber(
-              country: _isoCode,
-              dialCode: _dialCode,
-              phoneNumber: phoneNumber,
-            );
-        _phoneNumber.text = phoneNumber;
-        _confirmCode.clear();
-        _needVerifyPhone = false;
-        _updatePhoneLabel = 'Remove';
-        _verifyCode = null;
-        errorMessage = 'Phone number updated';
+        errorMessage = await updatePhoneNumber();
       }
       MessageBar(context, message: errorMessage).show();
     }
     setState(() => _showSpinner = false);
   }
 
-  bool _addressIsFilled() {
-    bool isFilled = _street.text.trim().isNotEmpty ||
-        _city.text.trim().isNotEmpty ||
-        _state.text.trim().isNotEmpty ||
-        _zipCode.text.trim().isNotEmpty;
-    if (!isFilled) {
-      _streetError = _cityError = _stateError = _zipError = '';
+  Future<String> updatePhoneNumber() async {
+    try {
+      _updated.add(Field.Phone);
+      String phoneNumber = _phoneNumber.text.trim();
+      await context.read<FireStoreService>().updatePhoneNumber(
+            country: _isoCode,
+            dialCode: _dialCode,
+            phoneNumber: phoneNumber,
+          );
+      _phoneNumber.text = phoneNumber;
+      _confirmCode.clear();
+      _showVerifyPhone = false;
+      _phoneButtonLabel = 'Remove';
+      _verifyCode = null;
+    } catch (errorMessage) {
+      return errorMessage;
+    } finally {
+      _updated.remove(Field.Phone);
     }
-    return isFilled;
+    return 'Phone number updated';
+  }
+
+  Future<String> deletePhoneNumber() async {
+    String notifyMessage = 'Phone number removed';
+    try {
+      _updated.add(Field.Phone);
+      await context.read<FireAuthService>().removePhone();
+      await context.read<FireStoreService>().updatePhoneNumber(
+            country: _isoCode,
+            dialCode: _dialCode,
+            phoneNumber: '',
+          );
+      _phoneNumber.clear();
+      _phoneButtonLabel = 'Add';
+    } catch (errorMessage) {
+      notifyMessage = errorMessage;
+    } finally {
+      _updated.remove(Field.Phone);
+    }
+    return notifyMessage;
   }
 
   void _scrollToError() async {
@@ -386,35 +418,36 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     String password = _deleteConfirm.text;
     _deleteError = Validate.checkPassword(password);
     if (_deleteError.isEmpty) {
-      setDialogState(() => _deleteMode = DeleteMode.Loading);
+      _setDialogState(() => _deleteMode = DeleteMode.Loading);
       try {
         await context.read<FireAuthService>().deleteAccount(
               email: _email.text.trim(),
               password: password,
             );
-        context.read<Account>().clear();
-        setDialogState(() => _deleteMode = DeleteMode.Success);
+        _setDialogState(() => _deleteMode = DeleteMode.Success);
         await Future.delayed(Duration(milliseconds: 1500));
-        Navigator.of(context).pop();
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          SignOptionScreen.id,
-          (route) => false,
-        );
-        Navigator.of(context).pushNamed(SignInScreen.id);
+        _signOut();
       } catch (errorMessage) {
         _deleteError = errorMessage;
-        setDialogState(() => _deleteMode = DeleteMode.Input);
+        _setDialogState(() => _deleteMode = DeleteMode.Input);
       }
     }
-    setDialogState(() {});
+    _setDialogState(() {});
   }
 
   @override
   void initState() {
     super.initState();
-    _fillInputFields();
-    subscription = context.read<FireStoreService>().userStream((userData) {
-      _fillInputFields();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      Map<String, Object> args = ModalRoute.of(context).settings.arguments;
+      _signOut = args[ProfileDonorScreen.signOut];
+    });
+    fillEmail();
+    fillName();
+    fillAddress();
+    fillPhone();
+    _userStream = context.read<FireStoreService>().userStream((userData) {
+      _updateInputFields();
     });
   }
 
@@ -434,6 +467,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _state.dispose();
     _zipCode.dispose();
     _deleteConfirm.dispose();
+    _userStream.cancel();
   }
 
   @override
@@ -441,73 +475,71 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     Size screen = MediaQuery.of(context).size;
     return WillPopScope(
       onWillPop: () async {
-        subscription.cancel();
+        MessageBar(context).hide();
         return true;
       },
-      child: Scaffold(
-        appBar: AppBar(title: Text('Profile')),
-        body: SafeArea(
-          child: ModalProgressHUD(
-            inAsyncCall: _showSpinner,
-            progressIndicator: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(kAppBarColor),
-            ),
-            child: ScrollableLayout(
-              controller: _scroller.controller,
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  vertical: screen.height * 0.03,
-                  horizontal: screen.width * 0.15,
-                ),
-                child: Column(
-                  children: [
-                    inputGroupLabel(
-                      'Account',
-                      tag: Field.Name,
-                    ),
-                    emailInputField(),
-                    inputFieldSizedBox(),
-                    firstNameInputField(),
-                    inputFieldSizedBox(),
-                    lastNameInputField(),
-                    inputFieldSizedBox(),
-                    inputGroupSizedBox(),
-                    inputGroupLabel(
-                      'Mobile Contact',
-                      tag: Field.Phone,
-                    ),
-                    phoneNumberField(),
-                    verifyCodeField(),
-                    inputFieldSizedBox(),
-                    inputGroupSizedBox(),
-                    inputGroupLabel(
-                      'Address',
-                      tag: Field.Address,
-                    ),
-                    streetInputField(),
-                    inputFieldSizedBox(),
-                    cityInputField(),
-                    inputFieldSizedBox(),
-                    stateInputField(),
-                    inputFieldSizedBox(),
-                    zipInputField(),
-                    inputFieldSizedBox(),
-                    inputGroupSizedBox(),
-                    inputGroupLabel(
-                      'Change Password',
-                      tag: Field.Password,
-                    ),
-                    currentPasswordInputField(),
-                    inputFieldSizedBox(),
-                    newPasswordInputField(),
-                    inputFieldSizedBox(),
-                    confirmPasswordInputField(),
-                    inputFieldSizedBox(),
-                    inputGroupSizedBox(),
-                    saveButton(),
-                    SizedBox(height: screen.height * 0.05),
-                    deleteAccountLink(),
-                  ],
+      child: GestureWrapper(
+        child: Scaffold(
+          appBar: AppBar(title: Text('Profile')),
+          body: SafeArea(
+            child: ModalProgressHUD(
+              inAsyncCall: _showSpinner,
+              progressIndicator: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
+              ),
+              child: ScrollableLayout(
+                controller: _scroller.controller,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    vertical: screen.height * 0.03,
+                    horizontal: screen.width * 0.15,
+                  ),
+                  child: Column(
+                    children: [
+                      inputGroupLabel(
+                        'Account',
+                        tag: Field.Name,
+                      ),
+                      emailInputField(),
+                      inputFieldSizedBox(),
+                      firstNameInputField(),
+                      inputFieldSizedBox(),
+                      lastNameInputField(),
+                      inputFieldSizedBox(),
+                      inputGroupLabel(
+                        'Address',
+                        tag: Field.Address,
+                      ),
+                      streetInputField(),
+                      inputFieldSizedBox(),
+                      cityInputField(),
+                      inputFieldSizedBox(),
+                      stateInputField(),
+                      inputFieldSizedBox(),
+                      zipInputField(),
+                      inputFieldSizedBox(),
+                      inputGroupLabel(
+                        'Phone Number',
+                        tag: Field.Phone,
+                      ),
+                      phoneNumberField(),
+                      verifyCodeField(),
+                      inputFieldSizedBox(),
+                      inputGroupLabel(
+                        'Change Password',
+                        tag: Field.Password,
+                      ),
+                      currentPasswordInputField(),
+                      inputFieldSizedBox(),
+                      newPasswordInputField(),
+                      inputFieldSizedBox(),
+                      confirmPasswordInputField(),
+                      inputFieldSizedBox(),
+                      saveButton(),
+                      SizedBox(height: screen.height * 0.05),
+                      deleteAccountLink(),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -525,6 +557,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         padding: EdgeInsets.only(
           left: screen.width * 0.05,
           right: screen.width * 0.05,
+          bottom: screen.height * 0.01,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -542,7 +575,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               height: 2.0,
               thickness: 2.0,
             ),
-            SizedBox(height: screen.height * 0.02),
           ],
         ),
       ),
@@ -552,11 +584,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget inputFieldSizedBox() {
     Size screen = MediaQuery.of(context).size;
     return SizedBox(height: screen.height * 0.01);
-  }
-
-  Widget inputGroupSizedBox() {
-    Size screen = MediaQuery.of(context).size;
-    return SizedBox(height: screen.height * 0.02);
   }
 
   Widget emailInputField() {
@@ -600,107 +627,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  Widget phoneNumberField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              flex: 3,
-              child: InputField(
-                label: 'Phone Number',
-                controller: _phoneNumber,
-                prefixText: _dialCode,
-                helperText: null,
-                onChanged: (value) async {
-                  String phoneNumber = _phoneNumber.text.trim();
-                  _phoneError = '';
-                  if (phoneNumber.isNotEmpty) {
-                    _phoneError = await Validate.phoneNumber(
-                      phoneNumber: phoneNumber,
-                      isoCode: _isoCode,
-                    );
-                  }
-                  _needVerifyPhone = false;
-                  _updatePhoneLabel = 'Remove';
-                  Map<String, String> phone = context.read<Account>().phone;
-                  bool insert = phone.isEmpty && (phoneNumber.isNotEmpty);
-                  bool update = phone.isNotEmpty &&
-                      (phoneNumber != phone[FireStoreService.kPhoneNumber] ||
-                          _isoCode != phone[FireStoreService.kPhoneCountry]);
-                  if (insert || update || phoneNumber.isEmpty) {
-                    _updatePhoneLabel = 'Add';
-                  }
-                  setState(() {});
-                },
-              ),
-            ),
-            SizedBox(width: 5.0),
-            Expanded(
-              flex: 2,
-              child: RoundedButton(
-                label: _updatePhoneLabel,
-                labelColor: kPrimaryColor,
-                onPressed: () {
-                  _updatePhoneRequest();
-                },
-              ),
-            ),
-          ],
-        ),
-        Padding(
-          padding: EdgeInsets.symmetric(
-            vertical: 1.5,
-            horizontal: 20.0,
-          ),
-          child: Text(
-            _phoneError.trim(),
-            style: TextStyle(
-              color: kErrorColor,
-              fontSize: 16.0,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget verifyCodeField() {
-    return Visibility(
-      visible: _needVerifyPhone,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                flex: 3,
-                child: InputField(
-                  label: '6-Digit Code',
-                  controller: _confirmCode,
-                ),
-              ),
-              SizedBox(width: 5.0),
-              Expanded(
-                flex: 2,
-                child: RoundedButton(
-                  label: 'Verify',
-                  labelColor: kPrimaryColor,
-                  onPressed: () {
-                    _updatePhoneVerify();
-                  },
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget streetInputField() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -710,7 +636,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           controller: _street,
           suggestionsCallback: (pattern) async {
             if (pattern.isNotEmpty) {
-              return await AddressService.getSuggestions(
+              return await MapService.addressSuggestions(
                 pattern,
                 sessionToken: sessionToken.getToken(),
               );
@@ -727,7 +653,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           itemBuilder: (context, suggestion) {
             return ListTile(
               title: Text(
-                suggestion[AddressService.kDescription],
+                suggestion[MapService.kDescription],
                 style: TextStyle(
                   color: kPrimaryColor,
                 ),
@@ -745,15 +671,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             );
           },
           onSuggestionSelected: (suggestion) async {
-            Map<String, String> address = await AddressService.getDetails(
-              suggestion[AddressService.kPlaceId],
+            Map<String, String> address = await MapService.addressDetails(
+              suggestion[MapService.kPlaceId],
               sessionToken: sessionToken.getToken(),
             );
             if (address.isNotEmpty) {
-              _street.text = address[AddressService.kStreet];
-              _city.text = address[AddressService.kCity];
-              _state.text = address[AddressService.kState];
-              _zipCode.text = address[AddressService.kZipCode];
+              setState(() {
+                _street.text = address[MapService.kStreet];
+                _city.text = address[MapService.kCity];
+                _state.text = address[MapService.kState];
+                _zipCode.text = address[MapService.kZipCode];
+                _streetError = Validate.checkStreet(_street.text.trim());
+                _cityError = Validate.checkCity(_city.text.trim());
+                _stateError = Validate.checkState(_state.text.trim());
+                _zipError = Validate.zipCode(_zipCode.text.trim());
+              });
               sessionToken.clear();
             }
           },
@@ -820,12 +752,113 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
+  Widget phoneNumberField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 3,
+              child: InputField(
+                label: 'Phone Number',
+                controller: _phoneNumber,
+                prefixText: _dialCode,
+                helperText: null,
+                onChanged: (value) async {
+                  String phoneNumber = _phoneNumber.text.trim();
+                  _phoneError = '';
+                  if (phoneNumber.isNotEmpty) {
+                    _phoneError = await Validate.phoneNumber(
+                      phoneNumber: phoneNumber,
+                      isoCode: _isoCode,
+                    );
+                  }
+                  _showVerifyPhone = false;
+                  _phoneButtonLabel = 'Remove';
+                  Map<String, String> phone = context.read<Account>().phone;
+                  bool insert = phone.isEmpty && phoneNumber.isNotEmpty;
+                  bool update = phone.isNotEmpty &&
+                      (phoneNumber != phone[FireStoreService.kPhoneNumber] ||
+                          _isoCode != phone[FireStoreService.kPhoneCountry]);
+                  if (insert || update || phoneNumber.isEmpty) {
+                    _phoneButtonLabel = 'Add';
+                  }
+                  setState(() {});
+                },
+              ),
+            ),
+            SizedBox(width: 5.0),
+            Expanded(
+              flex: 2,
+              child: RoundedButton(
+                label: _phoneButtonLabel,
+                onPressed: () {
+                  _updatePhoneRequest();
+                },
+              ),
+            ),
+          ],
+        ),
+        Padding(
+          padding: EdgeInsets.symmetric(
+            vertical: 1.5,
+            horizontal: 20.0,
+          ),
+          child: Text(
+            _phoneError.trim(),
+            style: TextStyle(
+              color: kErrorColor,
+              fontSize: 16.0,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget verifyCodeField() {
+    return Visibility(
+      visible: _showVerifyPhone,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: InputField(
+                  label: '6-Digit Code',
+                  controller: _confirmCode,
+                  helperText: null,
+                ),
+              ),
+              SizedBox(width: 5.0),
+              Expanded(
+                flex: 2,
+                child: RoundedButton(
+                  label: 'Verify',
+                  onPressed: () {
+                    _updatePhoneVerify();
+                  },
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 16.0),
+        ],
+      ),
+    );
+  }
+
   Widget currentPasswordInputField() {
     return Stack(
       children: [
         InputField(
           label: 'Current Password',
           controller: _oldPassword,
+          keyboardType: TextInputType.visiblePassword,
           errorMessage: _oldPasswordError,
           obscureText: _obscureOldPassword,
           onChanged: (value) {
@@ -859,6 +892,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         InputField(
           label: 'New Password',
           controller: _newPassword,
+          keyboardType: TextInputType.visiblePassword,
           errorMessage: _newPasswordError,
           obscureText: _obscureNewPassword,
           onChanged: (value) {
@@ -927,8 +961,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       ),
       child: RoundedButton(
         label: 'Save',
-        labelColor: kPrimaryColor,
-        backgroundColor: kObjectBackgroundColor,
         onPressed: () {
           _updateProfile();
         },
@@ -940,13 +972,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return LabelLink(
       label: 'Delete this account',
       onTap: () {
-        showDeleteDialog();
         MessageBar(context).hide();
+        showDeleteDialog();
       },
     );
   }
 
-  Future<void> showDeleteDialog() async {
+  void showDeleteDialog() {
     Alert(
       context: context,
       title: 'Delete Account',
@@ -976,7 +1008,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       },
       content: StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
-          setDialogState = setState;
+          _setDialogState = setState;
           return Padding(
             padding: EdgeInsets.only(top: 10.0),
             child: deleteLayout(),
@@ -994,7 +1026,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           height: 50.0,
           child: Center(
             child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(kAppBarColor),
+              valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
             ),
           ),
         );
@@ -1033,7 +1065,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   errorMessage: _deleteError,
                   obscureText: _obscureDeletePassword,
                   onChanged: (value) {
-                    setDialogState(() {
+                    _setDialogState(() {
                       _deleteError =
                           Validate.checkPassword(_deleteConfirm.text);
                     });
@@ -1045,7 +1077,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   child: ObscureIcon(
                     obscure: _obscureDeletePassword,
                     onTap: () {
-                      setDialogState(() {
+                      _setDialogState(() {
                         _obscureDeletePassword = !_obscureDeletePassword;
                       });
                     },
@@ -1058,8 +1090,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               padding: EdgeInsets.symmetric(horizontal: 50.0),
               child: RoundedButton(
                 label: 'Delete',
-                labelColor: kPrimaryColor,
-                backgroundColor: kObjectBackgroundColor,
                 onPressed: () {
                   _deleteAccount();
                 },

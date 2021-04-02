@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import 'package:fruitfairy/constant.dart';
+//
 import 'package:fruitfairy/screens/authentication/signin_screen.dart';
 import 'package:fruitfairy/screens/authentication/signup_role_screen.dart';
 import 'package:fruitfairy/widgets/fruit_fairy_logo.dart';
@@ -20,7 +19,10 @@ class _SignOptionScreenState extends State<SignOptionScreen> {
     return Scaffold(
       body: SafeArea(
         child: ScrollableLayout(
-          child: Center(
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              vertical: screen.height * 0.03,
+            ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -61,8 +63,6 @@ class _SignOptionScreenState extends State<SignOptionScreen> {
       padding: EdgeInsets.symmetric(vertical: screen.height * 0.02),
       child: RoundedButton(
         label: 'Sign In',
-        labelColor: kPrimaryColor,
-        backgroundColor: kObjectBackgroundColor,
         onPressed: () {
           Navigator.of(context).pushNamed(SignInScreen.id);
         },
@@ -76,8 +76,6 @@ class _SignOptionScreenState extends State<SignOptionScreen> {
       padding: EdgeInsets.symmetric(vertical: screen.height * 0.02),
       child: RoundedButton(
         label: 'Sign Up',
-        labelColor: kPrimaryColor,
-        backgroundColor: kObjectBackgroundColor,
         onPressed: () {
           Navigator.of(context).pushNamed(SignUpRoleScreen.id);
         },
