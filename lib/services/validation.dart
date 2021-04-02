@@ -94,7 +94,7 @@ class Validate {
     if (zipCode.isEmpty) {
       return 'Please enter zip code\n';
     }
-    if (!RegExp(r'^\d{5}(-\d{4})?$').hasMatch(zipCode)) {
+    if (!RegExp(r'^\d{5}$').hasMatch(zipCode)) {
       return 'Invalid zip code\n';
     }
     return '';
@@ -122,6 +122,12 @@ class Validate {
   /// Return empty String on correct [password]
   static String checkPassword(String password) {
     return password.isEmpty ? 'Please enter password\n' : '';
+  }
+
+  /// Simple check password on signin
+  /// Return empty String on correct [charityName]
+  static String checkCharityName(String charityName) {
+    return charityName.isEmpty ? 'Please enter your charity name\n' : '';
   }
 
   /// Simple check confirmation code on verifying

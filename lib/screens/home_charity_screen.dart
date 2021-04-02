@@ -230,8 +230,10 @@ class _HomeCharityScreenState extends State<HomeCharityScreen> {
           switch (action) {
             case Options.Edit:
               HapticFeedback.mediumImpact();
-              Navigator.of(context).pushNamed(ProfileCharityScreen.id);
-              //arguments: {ProfileScreen.signOut: _signOut},
+              Navigator.of(context).pushNamed(
+                ProfileCharityScreen.id,
+                arguments: {ProfileCharityScreen.signOut: _signOut},
+              );
               break;
 
             case Options.SignOut:
@@ -253,7 +255,7 @@ class _HomeCharityScreenState extends State<HomeCharityScreen> {
       textAlign: TextAlign.center,
       style: TextStyle(
         fontSize: 40.0,
-        height: 1.2,
+        height: 1.5,
         color: kLabelColor,
         fontFamily: 'Pacifico',
       ),

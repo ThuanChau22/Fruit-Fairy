@@ -87,7 +87,7 @@ class MapService {
                 break;
 
               case 'administrative_area_level_1':
-                results[kState] = details['short_name'];
+                results[kState] = details['long_name'];
                 break;
 
               case 'postal_code':

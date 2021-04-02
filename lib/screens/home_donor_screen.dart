@@ -207,7 +207,7 @@ class _HomeDonorScreenState extends State<HomeDonorScreen> {
       textAlign: TextAlign.center,
       style: TextStyle(
         fontSize: 40.0,
-        height: 1.2,
+        height: 1.5,
         color: kLabelColor,
         fontFamily: 'Pacifico',
       ),

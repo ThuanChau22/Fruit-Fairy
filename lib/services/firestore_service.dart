@@ -2,8 +2,11 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:strings/strings.dart';
 //
 import 'package:fruitfairy/models/fruit.dart';
+import 'package:fruitfairy/services/map_service.dart';
+import 'package:fruitfairy/services/session_token.dart';
 
 class FireStoreService {
   /// Database fields
@@ -131,9 +134,11 @@ class FireStoreService {
     try {
       await _usersDB.doc(_uid).set({
         kEmail: email,
-        kFirstName: firstName,
-        kLastName: lastName,
       });
+      await updateDonorName(
+        firstName: firstName,
+        lastName: lastName,
+      );
     } catch (e) {
       throw e.message;
     }
@@ -156,14 +161,27 @@ class FireStoreService {
       await _usersDB.doc(_uid).set({
         kEmail: email,
         kEIN: ein,
-        kCharityName: charityName,
       });
-      await updateUserAddress(
-        street: street,
-        city: city,
-        state: state,
-        zip: zip,
+      await updateCharityName(
+        camelize(charityName),
       );
+      String sessionToken = SessionToken().getToken();
+      List<Map<String, String>> results = await MapService.addressSuggestions(
+        '$street, $city, $state $zip',
+        sessionToken: sessionToken,
+      );
+      if (results.isNotEmpty) {
+        Map<String, String> charityAddress = await MapService.addressDetails(
+          results.first[MapService.kPlaceId],
+          sessionToken: sessionToken,
+        );
+        await updateUserAddress(
+          street: charityAddress[MapService.kStreet],
+          city: charityAddress[MapService.kCity],
+          state: charityAddress[MapService.kState],
+          zip: charityAddress[MapService.kZipCode],
+        );
+      }
       await _wishlistsDB.doc(_uid).set({
         kProduceIds: [],
       });
@@ -172,7 +190,7 @@ class FireStoreService {
     }
   }
 
-  Future<void> updateUserName({
+  Future<void> updateDonorName({
     @required String firstName,
     @required String lastName,
   }) async {
@@ -184,6 +202,22 @@ class FireStoreService {
       await _usersDB.doc(_uid).update({
         kFirstName: firstName,
         kLastName: lastName,
+      });
+    } catch (e) {
+      throw e.message;
+    }
+  }
+
+  Future<void> updateCharityName(
+    String charityName,
+  ) async {
+    if (_uid == null) {
+      print('UID Unset');
+      return;
+    }
+    try {
+      await _usersDB.doc(_uid).update({
+        kCharityName: charityName,
       });
     } catch (e) {
       throw e.message;
@@ -250,7 +284,9 @@ class FireStoreService {
     }
   }
 
-  Future<void> updateWishList(List<String> produceIds) async {
+  Future<void> updateWishList(
+    List<String> produceIds,
+  ) async {
     if (_uid == null) {
       print('UID Unset');
       return;
