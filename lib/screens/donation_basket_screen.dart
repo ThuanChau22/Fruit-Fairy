@@ -37,8 +37,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
         child: Column(
           children: [
             basketSection(),
-            divider(),
-            nextButton(),
+            buttonSection(),
           ],
         ),
       ),
@@ -320,11 +319,20 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
     );
   }
 
-  Widget divider() {
-    return Divider(
-      color: kLabelColor,
-      height: 5.0,
-      thickness: 2.0,
+  Widget buttonSection() {
+    EdgeInsets view = MediaQuery.of(context).viewInsets;
+    return Visibility(
+      visible: view.bottom == 0.0,
+      child: Column(
+        children: [
+          Divider(
+            color: kLabelColor,
+            height: 5.0,
+            thickness: 2.0,
+          ),
+          nextButton(),
+        ],
+      ),
     );
   }
 

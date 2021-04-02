@@ -41,8 +41,7 @@ class _DonationCharitySelectionScreenState
         child: Column(
           children: [
             charityOptions(),
-            divider(),
-            nextButton(),
+            buttonSection(),
           ],
         ),
       ),
@@ -128,11 +127,20 @@ class _DonationCharitySelectionScreenState
     return charityList;
   }
 
-  Widget divider() {
-    return Divider(
-      color: kLabelColor,
-      height: 5.0,
-      thickness: 2.0,
+  Widget buttonSection() {
+    EdgeInsets view = MediaQuery.of(context).viewInsets;
+    return Visibility(
+      visible: view.bottom == 0.0,
+      child: Column(
+        children: [
+          Divider(
+            color: kLabelColor,
+            height: 5.0,
+            thickness: 2.0,
+          ),
+          nextButton(),
+        ],
+      ),
     );
   }
 

@@ -39,8 +39,7 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
         child: Column(
           children: [
             reviewDetails(),
-            divider(),
-            confirmButton(),
+            buttonSection(),
           ],
         ),
       ),
@@ -216,11 +215,20 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
     );
   }
 
-  Widget divider() {
-    return Divider(
-      color: kLabelColor,
-      height: 5.0,
-      thickness: 2.0,
+  Widget buttonSection() {
+    EdgeInsets view = MediaQuery.of(context).viewInsets;
+    return Visibility(
+      visible: view.bottom == 0.0,
+      child: Column(
+        children: [
+          Divider(
+            color: kLabelColor,
+            height: 5.0,
+            thickness: 2.0,
+          ),
+          confirmButton(),
+        ],
+      ),
     );
   }
 

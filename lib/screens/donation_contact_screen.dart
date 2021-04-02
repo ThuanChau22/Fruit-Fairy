@@ -307,7 +307,6 @@ class _ContactConfirmation extends State<DonationContactScreen> {
 
   @override
   Widget build(BuildContext context) {
-    EdgeInsets view = MediaQuery.of(context).viewInsets;
     return WillPopScope(
       onWillPop: () async {
         MessageBar(context).hide();
@@ -325,15 +324,7 @@ class _ContactConfirmation extends State<DonationContactScreen> {
               child: Column(
                 children: [
                   contactInfo(),
-                  Visibility(
-                    visible: view.bottom == 0.0,
-                    child: Column(
-                      children: [
-                        divider(),
-                        nextButton(),
-                      ],
-                    ),
-                  ),
+                  buttonSection(),
                 ],
               ),
             ),
@@ -652,11 +643,20 @@ class _ContactConfirmation extends State<DonationContactScreen> {
     );
   }
 
-  Widget divider() {
-    return Divider(
-      color: kLabelColor,
-      height: 5.0,
-      thickness: 2.0,
+  Widget buttonSection() {
+    EdgeInsets view = MediaQuery.of(context).viewInsets;
+    return Visibility(
+      visible: view.bottom == 0.0,
+      child: Column(
+        children: [
+          Divider(
+            color: kLabelColor,
+            height: 5.0,
+            thickness: 2.0,
+          ),
+          nextButton(),
+        ],
+      ),
     );
   }
 

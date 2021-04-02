@@ -204,18 +204,14 @@ class _DonationProduceSelectionScreenState
       visible: view.bottom == 0.0,
       child: Column(
         children: [
-          divider(),
+          Divider(
+            color: kLabelColor,
+            height: 5.0,
+            thickness: 2.0,
+          ),
           basketButton(),
         ],
       ),
-    );
-  }
-
-  Widget divider() {
-    return Divider(
-      color: kLabelColor,
-      height: 5.0,
-      thickness: 2.0,
     );
   }
 

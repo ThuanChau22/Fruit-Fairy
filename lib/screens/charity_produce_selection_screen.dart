@@ -232,18 +232,14 @@ class _CharityProduceSelectionScreenState
       visible: view.bottom == 0.0,
       child: Column(
         children: [
-          divider(),
+          Divider(
+            color: kLabelColor,
+            height: 5.0,
+            thickness: 2.0,
+          ),
           backButton(),
         ],
       ),
-    );
-  }
-
-  Widget divider() {
-    return Divider(
-      color: kLabelColor,
-      height: 5.0,
-      thickness: 2.0,
     );
   }
 

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fruitfairy/models/wish_list.dart';
 import 'package:provider/provider.dart';
 //
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
-import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/models/donation.dart';
+import 'package:fruitfairy/models/produce.dart';
+import 'package:fruitfairy/models/wish_list.dart';
 import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
 import 'package:fruitfairy/services/fireauth_service.dart';
@@ -29,8 +29,8 @@ class FruitFairy extends StatelessWidget {
         Provider<FireAuthService>(create: (_) => FireAuthService()),
         Provider<FireStoreService>(create: (_) => FireStoreService()),
         ChangeNotifierProvider<Account>(create: (_) => Account()),
-        ChangeNotifierProvider<Donation>(create: (_) => Donation()),
         ChangeNotifierProvider<Produce>(create: (_) => Produce()),
+        ChangeNotifierProvider<Donation>(create: (_) => Donation()),
         ChangeNotifierProvider<WishList>(create: (_) => WishList()),
       ],
       child: Authentication(),
