@@ -94,7 +94,7 @@ class Validate {
     if (zipCode.isEmpty) {
       return 'Please enter zip code\n';
     }
-    if (!RegExp(r'^\d{5}$').hasMatch(zipCode)) {
+    if (!RegExp(r'^\d{5}(-\d{4})?$').hasMatch(zipCode)) {
       return 'Invalid zip code\n';
     }
     return '';
