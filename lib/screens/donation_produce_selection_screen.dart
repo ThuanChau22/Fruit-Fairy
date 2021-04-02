@@ -27,8 +27,6 @@ class _DonationProduceSelectionScreenState
   final Color _selectedColor = Colors.grey.shade700.withOpacity(0.5);
   final TextEditingController _search = TextEditingController();
 
-  bool _showSpinner = false;
-
   @override
   void dispose() {
     super.dispose();
@@ -37,6 +35,7 @@ class _DonationProduceSelectionScreenState
 
   @override
   Widget build(BuildContext context) {
+    Produce produce = context.watch<Produce>();
     return WillPopScope(
       onWillPop: () async {
         MessageBar(context).hide();
@@ -47,7 +46,7 @@ class _DonationProduceSelectionScreenState
           appBar: AppBar(title: Text('Produce Selection')),
           body: SafeArea(
             child: ModalProgressHUD(
-              inAsyncCall: _showSpinner,
+              inAsyncCall: produce.fruits.isEmpty,
               progressIndicator: CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
               ),
@@ -137,8 +136,8 @@ class _DonationProduceSelectionScreenState
   List<Widget> fruitTiles() {
     List<Widget> fruitTiles = [];
     Donation donation = context.watch<Donation>();
-    Map<String, Fruit> produce = context.watch<Produce>().fruits;
-    List<Fruit> fruitList = produce.values.toList();
+    Produce produce = context.read<Produce>();
+    List<Fruit> fruitList = produce.fruits.values.toList();
     fruitList.sort((f1, f2) => f1.id.compareTo(f2.id));
     fruitList.forEach((fruit) {
       if (RegExp(
@@ -161,7 +160,6 @@ class _DonationProduceSelectionScreenState
         ));
       }
     });
-    _showSpinner = produce.isEmpty;
     return fruitTiles;
   }
 
@@ -206,18 +204,14 @@ class _DonationProduceSelectionScreenState
       visible: view.bottom == 0.0,
       child: Column(
         children: [
-          divider(),
+          Divider(
+            color: kLabelColor,
+            height: 5.0,
+            thickness: 2.0,
+          ),
           basketButton(),
         ],
       ),
-    );
-  }
-
-  Widget divider() {
-    return Divider(
-      color: kLabelColor,
-      height: 5.0,
-      thickness: 2.0,
     );
   }
 

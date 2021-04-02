@@ -27,8 +27,6 @@ class _CharityProduceSelectionScreenState
   final Color _selectedColor = Colors.grey.shade700.withOpacity(0.5);
   final TextEditingController _search = TextEditingController();
 
-  bool _showSpinner = false;
-
   @override
   void dispose() {
     super.dispose();
@@ -37,6 +35,7 @@ class _CharityProduceSelectionScreenState
 
   @override
   Widget build(BuildContext context) {
+    Produce produce = context.watch<Produce>();
     return GestureWrapper(
       child: Scaffold(
         appBar: AppBar(
@@ -45,7 +44,7 @@ class _CharityProduceSelectionScreenState
         ),
         body: SafeArea(
           child: ModalProgressHUD(
-            inAsyncCall: _showSpinner,
+            inAsyncCall: produce.fruits.isEmpty,
             progressIndicator: CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
             ),
@@ -164,7 +163,7 @@ class _CharityProduceSelectionScreenState
     List<Widget> fruitTiles = [];
     FireStoreService fireStoreService = context.read<FireStoreService>();
     WishList wishList = context.watch<WishList>();
-    Produce produce = context.watch<Produce>();
+    Produce produce = context.read<Produce>();
     List<Fruit> fruitList = produce.fruits.values.toList();
     fruitList.sort((f1, f2) => f1.id.compareTo(f2.id));
     fruitList.forEach((fruit) {
@@ -233,18 +232,14 @@ class _CharityProduceSelectionScreenState
       visible: view.bottom == 0.0,
       child: Column(
         children: [
-          divider(),
+          Divider(
+            color: kLabelColor,
+            height: 5.0,
+            thickness: 2.0,
+          ),
           backButton(),
         ],
       ),
-    );
-  }
-
-  Widget divider() {
-    return Divider(
-      color: kLabelColor,
-      height: 5.0,
-      thickness: 2.0,
     );
   }
 

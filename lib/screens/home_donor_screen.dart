@@ -45,9 +45,10 @@ class _HomeDonorScreenState extends State<HomeDonorScreen> {
   @override
   void initState() {
     super.initState();
+    FireStoreService fireStoreService = context.read<FireStoreService>();
     Donation donation = context.read<Donation>();
     Produce produce = context.read<Produce>();
-    _produceStream = context.read<FireStoreService>().produceStream((data) {
+    _produceStream = fireStoreService.produceStream((data) {
       if (data is Fruit) {
         produce.fromDBLoading(data);
       }
@@ -206,7 +207,7 @@ class _HomeDonorScreenState extends State<HomeDonorScreen> {
       textAlign: TextAlign.center,
       style: TextStyle(
         fontSize: 40.0,
-        height: 1.2,
+        height: 1.5,
         color: kLabelColor,
         fontFamily: 'Pacifico',
       ),

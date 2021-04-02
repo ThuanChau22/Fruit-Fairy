@@ -37,8 +37,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
         child: Column(
           children: [
             basketSection(),
-            divider(),
-            nextButton(),
+            buttonSection(),
           ],
         ),
       ),
@@ -47,7 +46,6 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
 
   Widget basketSection() {
     Size screen = MediaQuery.of(context).size;
-    Donation donation = context.read<Donation>();
     List<Widget> widgets = [
       SizedBox(height: screen.height * 0.02),
       instructionLabel('Do you need help collecting?'),
@@ -58,7 +56,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
         thickness: 2.0,
       ),
       Visibility(
-        visible: donation.needCollected,
+        visible: context.read<Donation>().needCollected,
         child: instructionLabel(
           'Adjust percentage of produce you want to donate:',
         ),
@@ -160,14 +158,15 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
 
   List<Widget> fruitTiles() {
     List<Widget> fruitTiles = [];
-    Map<String, Fruit> produce = context.read<Produce>().fruits;
+    Produce produce = context.read<Produce>();
+    Map<String, Fruit> fruits = produce.fruits;
     Donation donation = context.read<Donation>();
     donation.produce.forEach((fruitId) {
       fruitTiles.add(removableFruitTile(
-        fruit: produce[fruitId],
+        fruit: fruits[fruitId],
         onPressed: () {
           setState(() {
-            produce[fruitId].clear();
+            fruits[fruitId].clear();
             donation.removeFruit(fruitId);
           });
         },
@@ -320,11 +319,20 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
     );
   }
 
-  Widget divider() {
-    return Divider(
-      color: kLabelColor,
-      height: 5.0,
-      thickness: 2.0,
+  Widget buttonSection() {
+    EdgeInsets view = MediaQuery.of(context).viewInsets;
+    return Visibility(
+      visible: view.bottom == 0.0,
+      child: Column(
+        children: [
+          Divider(
+            color: kLabelColor,
+            height: 5.0,
+            thickness: 2.0,
+          ),
+          nextButton(),
+        ],
+      ),
     );
   }
 

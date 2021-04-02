@@ -39,8 +39,7 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
         child: Column(
           children: [
             reviewDetails(),
-            divider(),
-            confirmButton(),
+            buttonSection(),
           ],
         ),
       ),
@@ -130,18 +129,19 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
 
   List<Widget> fruitTiles() {
     List<Widget> fruitList = [];
-    Map<String, Fruit> produce = context.read<Produce>().fruits;
     Donation donation = context.read<Donation>();
+    Produce produce = context.read<Produce>();
+    Map<String, Fruit> fruits = produce.fruits;
     donation.produce.forEach((fruitId) {
-      int amount = produce[fruitId].amount;
+      int amount = fruits[fruitId].amount;
       fruitList.add(Container(
         decoration: BoxDecoration(
           color: kObjectColor,
           borderRadius: BorderRadius.circular(20.0),
         ),
         child: FruitTile(
-          fruitName: produce[fruitId].name,
-          fruitImage: produce[fruitId].imageURL,
+          fruitName: fruits[fruitId].name,
+          fruitImage: fruits[fruitId].imageURL,
           percentage: donation.needCollected ? '$amount' : '',
         ),
       ));
@@ -215,11 +215,20 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
     );
   }
 
-  Widget divider() {
-    return Divider(
-      color: kLabelColor,
-      height: 5.0,
-      thickness: 2.0,
+  Widget buttonSection() {
+    EdgeInsets view = MediaQuery.of(context).viewInsets;
+    return Visibility(
+      visible: view.bottom == 0.0,
+      child: Column(
+        children: [
+          Divider(
+            color: kLabelColor,
+            height: 5.0,
+            thickness: 2.0,
+          ),
+          confirmButton(),
+        ],
+      ),
     );
   }
 

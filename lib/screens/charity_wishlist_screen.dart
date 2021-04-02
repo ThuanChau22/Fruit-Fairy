@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 //
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/fruit.dart';
@@ -24,18 +25,24 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Produce produce = context.watch<Produce>();
     return Scaffold(
       appBar: AppBar(
         title: Text('Wish List'),
         actions: [helpButton()],
       ),
       body: SafeArea(
-        child: Column(
-          children: [
-            layoutMode(),
-            divider(),
-            nextButton(),
-          ],
+        child: ModalProgressHUD(
+          inAsyncCall: produce.fruits.isEmpty,
+          progressIndicator: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
+          ),
+          child: Column(
+            children: [
+              layoutMode(),
+              buttonSection(),
+            ],
+          ),
         ),
       ),
     );
@@ -102,16 +109,17 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
   List<Widget> fruitTiles() {
     List<Widget> fruitTiles = [];
     FireStoreService fireStoreService = context.read<FireStoreService>();
-    Map<String, Fruit> produce = context.watch<Produce>().fruits;
+    Produce produce = context.read<Produce>();
+    Map<String, Fruit> fruits = produce.fruits;
     WishList wishList = context.read<WishList>();
     List<String> produceIds = wishList.produce;
     produceIds.forEach((fruitId) {
-      if (produce.containsKey(fruitId)) {
+      if (fruits.containsKey(fruitId)) {
         fruitTiles.add(removableFruitTile(
-          fruit: produce[fruitId],
+          fruit: fruits[fruitId],
           onPressed: () {
             setState(() {
-              produce[fruitId].clear();
+              fruits[fruitId].clear();
               wishList.removeFruit(fruitId);
               fireStoreService.updateWishList(produceIds);
             });
@@ -168,11 +176,20 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
     );
   }
 
-  Widget divider() {
-    return Divider(
-      color: kLabelColor,
-      height: 5.0,
-      thickness: 2.0,
+  Widget buttonSection() {
+    EdgeInsets view = MediaQuery.of(context).viewInsets;
+    return Visibility(
+      visible: view.bottom == 0.0,
+      child: Column(
+        children: [
+          Divider(
+            color: kLabelColor,
+            height: 5.0,
+            thickness: 2.0,
+          ),
+          nextButton(),
+        ],
+      ),
     );
   }
 

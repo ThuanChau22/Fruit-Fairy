@@ -47,12 +47,12 @@ class _ProfileDonorScreenState extends State<ProfileDonorScreen> {
   final TextEditingController _email = TextEditingController();
   final TextEditingController _firstName = TextEditingController();
   final TextEditingController _lastName = TextEditingController();
-  final TextEditingController _phoneNumber = TextEditingController();
-  final TextEditingController _confirmCode = TextEditingController();
   final TextEditingController _street = TextEditingController();
   final TextEditingController _city = TextEditingController();
   final TextEditingController _state = TextEditingController();
   final TextEditingController _zipCode = TextEditingController();
+  final TextEditingController _phoneNumber = TextEditingController();
+  final TextEditingController _confirmCode = TextEditingController();
   final TextEditingController _oldPassword = TextEditingController();
   final TextEditingController _newPassword = TextEditingController();
   final TextEditingController _confirmPassword = TextEditingController();
@@ -67,11 +67,11 @@ class _ProfileDonorScreenState extends State<ProfileDonorScreen> {
 
   String _firstNameError = '';
   String _lastNameError = '';
-  String _phoneError = '';
   String _streetError = '';
   String _cityError = '';
   String _stateError = '';
   String _zipError = '';
+  String _phoneError = '';
   String _oldPasswordError = '';
   String _newPasswordError = '';
   String _confirmPasswordError = '';
@@ -196,7 +196,7 @@ class _ProfileDonorScreenState extends State<ProfileDonorScreen> {
       if (error.isEmpty) {
         try {
           _updated.add(Field.Name);
-          await context.read<FireStoreService>().updateUserName(
+          await context.read<FireStoreService>().updateDonorName(
                 firstName: firstName,
                 lastName: lastName,
               );

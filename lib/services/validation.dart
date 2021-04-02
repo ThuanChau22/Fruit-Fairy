@@ -124,6 +124,12 @@ class Validate {
     return password.isEmpty ? 'Please enter password\n' : '';
   }
 
+  /// Simple check password on signin
+  /// Return empty String on correct [charityName]
+  static String checkCharityName(String charityName) {
+    return charityName.isEmpty ? 'Please enter your charity name\n' : '';
+  }
+
   /// Simple check confirmation code on verifying
   /// Return empty String on correct [confirmationCode]
   static String checkConfirmCode(String confirmationCode) {
