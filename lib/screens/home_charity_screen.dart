@@ -48,9 +48,10 @@ class _HomeCharityScreenState extends State<HomeCharityScreen> {
   @override
   void initState() {
     super.initState();
+    FireStoreService fireStoreService = context.read<FireStoreService>();
     WishList wishlist = context.read<WishList>();
     Produce produce = context.read<Produce>();
-    _produceStream = context.read<FireStoreService>().produceStream((data) {
+    _produceStream = fireStoreService.produceStream((data) {
       if (data is Fruit) {
         produce.fromDBLoading(data);
       }
@@ -61,9 +62,10 @@ class _HomeCharityScreenState extends State<HomeCharityScreen> {
             wishlist.removeFruit(fruitId);
           }
         });
+        fireStoreService.updateWishList(wishlist.produce);
       }
     });
-    _wishlistStream = context.read<FireStoreService>().wishlistStream((data) {
+    _wishlistStream = fireStoreService.wishlistStream((data) {
       wishlist.fromDB(data);
     });
   }

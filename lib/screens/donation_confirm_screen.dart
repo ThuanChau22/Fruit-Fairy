@@ -130,18 +130,19 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
 
   List<Widget> fruitTiles() {
     List<Widget> fruitList = [];
-    Map<String, Fruit> produce = context.read<Produce>().fruits;
     Donation donation = context.read<Donation>();
+    Produce produce = context.read<Produce>();
+    Map<String, Fruit> fruits = produce.fruits;
     donation.produce.forEach((fruitId) {
-      int amount = produce[fruitId].amount;
+      int amount = fruits[fruitId].amount;
       fruitList.add(Container(
         decoration: BoxDecoration(
           color: kObjectColor,
           borderRadius: BorderRadius.circular(20.0),
         ),
         child: FruitTile(
-          fruitName: produce[fruitId].name,
-          fruitImage: produce[fruitId].imageURL,
+          fruitName: fruits[fruitId].name,
+          fruitImage: fruits[fruitId].imageURL,
           percentage: donation.needCollected ? '$amount' : '',
         ),
       ));

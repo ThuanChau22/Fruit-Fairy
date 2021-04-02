@@ -45,9 +45,10 @@ class _HomeDonorScreenState extends State<HomeDonorScreen> {
   @override
   void initState() {
     super.initState();
+    FireStoreService fireStoreService = context.read<FireStoreService>();
     Donation donation = context.read<Donation>();
     Produce produce = context.read<Produce>();
-    _produceStream = context.read<FireStoreService>().produceStream((data) {
+    _produceStream = fireStoreService.produceStream((data) {
       if (data is Fruit) {
         produce.fromDBLoading(data);
       }
