@@ -56,31 +56,31 @@ class Account extends ChangeNotifier {
 
   /// Parse account information from database
   /// [accountData]: A Map with keys that are declared in [FireStoreService]
-  void fromDB(Map<String, dynamic> accountData) {
+  void fromDB(Map<String, dynamic> userData) {
     // Clean up current data
     clear();
 
     // Email
-    _email = accountData[FireStoreService.kEmail];
+    _email = userData[FireStoreService.kEmail];
 
     // First and Last name (Donor only)
-    String firstName = accountData[FireStoreService.kFirstName];
-    String lastName = accountData[FireStoreService.kLastName];
+    String firstName = userData[FireStoreService.kFirstName];
+    String lastName = userData[FireStoreService.kLastName];
     if (firstName != null && lastName != null) {
       _firstName = firstName;
       _lastName = lastName;
     }
 
     // EIN and charity name (Charity only)
-    String ein = accountData[FireStoreService.kEIN];
-    String charityName = accountData[FireStoreService.kCharityName];
+    String ein = userData[FireStoreService.kEIN];
+    String charityName = userData[FireStoreService.kCharityName];
     if (ein != null && charityName != null) {
       _ein = ein;
       _charityName = charityName;
     }
 
     // Phone number
-    Map<String, dynamic> phone = accountData[FireStoreService.kPhone];
+    Map<String, dynamic> phone = userData[FireStoreService.kPhone];
     if (phone != null) {
       _phone[FireStoreService.kPhoneCountry] =
           phone[FireStoreService.kPhoneCountry];
@@ -91,7 +91,7 @@ class Account extends ChangeNotifier {
     }
 
     // Address
-    Map<String, dynamic> address = accountData[FireStoreService.kAddress];
+    Map<String, dynamic> address = userData[FireStoreService.kAddress];
     if (address != null) {
       _address[FireStoreService.kAddressStreet] =
           address[FireStoreService.kAddressStreet];
