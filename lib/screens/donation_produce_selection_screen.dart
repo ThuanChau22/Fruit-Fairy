@@ -137,23 +137,22 @@ class _DonationProduceSelectionScreenState
     List<Widget> fruitTiles = [];
     Donation donation = context.watch<Donation>();
     Produce produce = context.read<Produce>();
-    List<Fruit> fruitList = produce.fruits.values.toList();
-    fruitList.sort((f1, f2) => f1.id.compareTo(f2.id));
-    fruitList.forEach((fruit) {
+    Map<String, Fruit> fruits = produce.fruits;
+    fruits.forEach((fruitId, fruit) {
       if (RegExp(
         '^${_search.text.trim()}',
         caseSensitive: false,
-      ).hasMatch(fruit.id)) {
-        bool selected = donation.produce.contains(fruit.id);
+      ).hasMatch(fruitId)) {
+        bool selected = donation.produce.contains(fruitId);
         fruitTiles.add(selectableFruitTile(
           fruit: fruit,
           selected: selected,
           onTap: () {
             setState(() {
               if (selected) {
-                donation.removeFruit(fruit.id);
+                donation.removeFruit(fruitId);
               } else {
-                donation.pickFruit(fruit.id);
+                donation.pickFruit(fruitId);
               }
             });
           },

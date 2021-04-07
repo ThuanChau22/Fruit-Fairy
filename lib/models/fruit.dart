@@ -10,7 +10,7 @@ import 'package:meta/meta.dart';
 /// [Max]: maximun percentage a donor can select
 /// [AdjustAmount]: number of percentage can be adjusted each time
 /// [_currentAmount]: current percentage of a produce
-class Fruit {
+class Fruit implements Comparable<Fruit> {
   static const Min = 25;
   static const Max = 100;
   static const int AdjustAmount = 5;
@@ -49,5 +49,10 @@ class Fruit {
   /// Set [_currentAmount] to default value
   void clear() {
     _currentAmount = Min;
+  }
+
+  @override
+  int compareTo(Fruit other) {
+    return this.name.compareTo(other.name);
   }
 }

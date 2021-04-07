@@ -6,7 +6,7 @@ import 'package:fruitfairy/models/fruit.dart';
 /// A class holds a list of all possible produce that a user can select
 /// [_fruits]: a map of [Fruit] that can be access through [fruit.id]
 class Produce extends ChangeNotifier {
-  final Map<String, Fruit> _fruits = {};
+  final Map<String, Fruit> _fruits = SplayTreeMap();
 
   /// Return a copy of [_fruits]
   UnmodifiableMapView<String, Fruit> get fruits {
