@@ -129,9 +129,9 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
 
   List<Widget> fruitTiles() {
     List<Widget> fruitList = [];
-    Donation donation = context.read<Donation>();
     Produce produce = context.read<Produce>();
     Map<String, Fruit> fruits = produce.fruits;
+    Donation donation = context.watch<Donation>();
     donation.produce.forEach((fruitId) {
       int amount = fruits[fruitId].amount;
       fruitList.add(Container(

@@ -15,6 +15,7 @@ import 'package:fruitfairy/screens/donation_produce_selection_screen.dart';
 import 'package:fruitfairy/screens/donor_donation_detail_screen.dart';
 import 'package:fruitfairy/screens/profile_donor_screen.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
+import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
 
@@ -54,11 +55,20 @@ class _HomeDonorScreenState extends State<HomeDonorScreen> {
       }
       if (data is Map<String, Fruit>) {
         produce.fromDBComplete(data);
+        bool removed = false;
         List.from(donation.produce).forEach((fruitId) {
           if (!produce.fruits.containsKey(fruitId)) {
             donation.removeFruit(fruitId);
+            removed = true;
           }
         });
+        if (removed) {
+          MessageBar(
+            context,
+            message:
+                'One or more produce on your basket are no longer available!',
+          ).show();
+        }
       }
     });
     donation.onEmptyBasket(() {

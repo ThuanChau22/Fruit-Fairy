@@ -15,6 +15,7 @@ import 'package:fruitfairy/screens/charity_donation_detail_screen.dart';
 import 'package:fruitfairy/screens/charity_wishlist_screen.dart';
 import 'package:fruitfairy/screens/profile_charity_screen.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
+import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
 
@@ -57,12 +58,21 @@ class _HomeCharityScreenState extends State<HomeCharityScreen> {
       }
       if (data is Map<String, Fruit>) {
         produce.fromDBComplete(data);
+        bool removed = false;
         List.from(wishlist.produce).forEach((fruitId) {
           if (!produce.fruits.containsKey(fruitId)) {
             wishlist.removeFruit(fruitId);
+            removed = true;
           }
         });
         fireStoreService.updateWishList(wishlist.produce);
+        if (removed) {
+          MessageBar(
+            context,
+            message:
+                'One or more produce on your wish list are no longer available!',
+          ).show();
+        }
       }
     });
     _wishlistStream = fireStoreService.wishlistStream((data) {

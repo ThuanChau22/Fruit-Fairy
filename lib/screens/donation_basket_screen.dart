@@ -160,7 +160,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
     List<Widget> fruitTiles = [];
     Produce produce = context.read<Produce>();
     Map<String, Fruit> fruits = produce.fruits;
-    Donation donation = context.read<Donation>();
+    Donation donation = context.watch<Donation>();
     donation.produce.forEach((fruitId) {
       fruitTiles.add(removableFruitTile(
         fruit: fruits[fruitId],
