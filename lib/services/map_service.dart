@@ -103,4 +103,33 @@ class MapService {
     }
     return results;
   }
+
+  static Future<List<int>> getDistances({String origin, List<String> destinations,}) async {
+    String requestURL =
+        'https://maps.googleapis.com/maps/api/distancematrix/json?';
+    requestURL += 'origins=$origin';
+    requestURL +='&destinations=';
+
+    for (String destination in destinations){
+      requestURL += '$destination|';
+    }
+    requestURL += '&units=imperial';
+    requestURL += '&key=$PLACES_API_KEY';
+
+    http.Response response = await http.get(requestURL);
+    List<int> results = [];
+    if (response.statusCode == 200) {
+      dynamic data = jsonDecode(response.body);
+      for (dynamic element in data['rows'].first['elements'])
+        {
+          if (element['status'] == 'OK')
+            {
+             results.add(element['distance']['value']);
+            }
+        }
+    } else {
+      print(response.statusCode);
+    }
+    return results;
+  }
 }
