@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:meta/meta.dart';
 import 'package:http/http.dart' as http;
 //
 import 'package:fruitfairy/api_keys.dart';
@@ -12,6 +13,7 @@ class MapService {
   static const String kCity = 'city';
   static const String kState = 'state';
   static const String kZipCode = 'zipCode';
+  static const double METER_PER_MILE = 1609.344;
 
   /// Private constructor to prevent instantiation
   MapService._();
@@ -104,11 +106,11 @@ class MapService {
     return results;
   }
 
-  /// Return list of integer values that indicates distances
-  /// between [origin] and list of [destinations]
-  static Future<List<int>> getDistances({
-    String origin,
-    List<String> destinations,
+  /// Return a list of double values in mile that indicates
+  /// distances between [origin] with a list of [destinations]
+  static Future<List<double>> getDistances({
+    @required String origin,
+    @required List<String> destinations,
   }) async {
     String requestURL =
         'https://maps.googleapis.com/maps/api/distancematrix/json?';
@@ -120,17 +122,18 @@ class MapService {
     requestURL += '&units=imperial';
     requestURL += '&key=$PLACES_API_KEY';
     http.Response response = await http.get(requestURL);
-    List<int> results = [];
+    List<double> results = [];
     if (response.statusCode == 200) {
       dynamic data = jsonDecode(response.body);
       for (Map<String, dynamic> element in data['rows'].first['elements']) {
-        if (element['status'] == 'OK') {
-          results.add(element['distance']['value']);
-        }
+        results.add(element['status'] == 'OK'
+            ? element['distance']['value'] / METER_PER_MILE
+            : double.negativeInfinity);
       }
     } else {
       print(response.statusCode);
     }
     return results;
   }
+
 }
