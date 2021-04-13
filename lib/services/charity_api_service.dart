@@ -11,7 +11,6 @@ class CharityAPI {
   static const String kCity = 'city';
   static const String kState = 'state';
   static const String kZip = 'zip';
-  static const CHARITY_API_KEY = 'eab9c25189aa0e7d1b96a0f9362de6f3';
 
   /// Private constructor to prevent instantiation
   CharityAPI._();
