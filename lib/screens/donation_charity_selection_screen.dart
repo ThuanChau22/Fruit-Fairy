@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 //
 import 'package:fruitfairy/constant.dart';
+import 'package:fruitfairy/models/donation.dart';
 import 'package:fruitfairy/screens/donation_confirm_screen.dart';
 import 'package:fruitfairy/widgets/charity_tile.dart';
 import 'package:fruitfairy/widgets/popup_diaglog.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/rounded_icon_button.dart';
+import 'package:fruitfairy/services/firestore_service.dart';
+import 'package:provider/provider.dart';
 
 class DonationCharitySelectionScreen extends StatefulWidget {
   static const String id = 'donation_charity_selection_screen';
@@ -154,7 +157,9 @@ class _DonationCharitySelectionScreenState
       child: RoundedButton(
         label: 'Next',
         onPressed: () {
-          confirm();
+          //confirm();
+          FireStoreService fireStore = context.read<FireStoreService>();
+          fireStore.charitySuggestion(context.read<Donation>());
         },
       ),
     );

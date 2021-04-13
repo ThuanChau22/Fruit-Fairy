@@ -23,9 +23,16 @@ class Charity implements Comparable<Charity> {
     return UnmodifiableMapView(_address);
   }
 
+ double get score{
+    return _score;
+ }
+
   void fromWishListsDB(Map<String, dynamic> wishlistData) {
-    // TODO: parse charity wish list into a set
-    throw UnimplementedError();
+    if(wishlistData !=null) {
+      wishlistData[FireStoreService.kProduceIds].forEach((fruitId) {
+        _produceIds.add(fruitId);
+      });
+    }
   }
 
   /// Parse account information from database
@@ -44,6 +51,10 @@ class Charity implements Comparable<Charity> {
         address[FireStoreService.kAddressState];
     _address[FireStoreService.kAddressZip] =
         address[FireStoreService.kAddressZip];
+  }
+
+  void setScore(double score){
+    _score = score;
   }
 
   @override
