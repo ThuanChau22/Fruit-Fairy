@@ -134,7 +134,6 @@ class FireStoreService {
         .get();
 
     List<Charity> charities = [];
-
     for (DocumentSnapshot wishListDoc in snapshot.docs) {
       DocumentSnapshot userDoc = await _usersDB.doc(wishListDoc.id).get();
       Charity charity = Charity(userDoc.id);
@@ -149,7 +148,6 @@ class FireStoreService {
     String state = address[FireStoreService.kAddressState];
     String zip = address[FireStoreService.kAddressZip];
     String origin = '$street $city $state $zip';
-
     List<String> destinations = [];
     for (Charity charity in charities) {
       Map<String, String> charityAddress = charity.address;
@@ -157,8 +155,7 @@ class FireStoreService {
       String city = charityAddress[FireStoreService.kAddressCity];
       String state = charityAddress[FireStoreService.kAddressState];
       String zip = charityAddress[FireStoreService.kAddressZip];
-      String destination = '$street $city $state $zip';
-      destinations.add(destination);
+      destinations.add('$street $city $state $zip');
     }
 
     List<double> distances = await MapService.getDistances(
@@ -166,8 +163,8 @@ class FireStoreService {
       destinations: destinations,
     );
 
-    PriorityQueue<Charity> rankedCharity = PriorityQueue();
     double distanceLimit = 20.0;
+    PriorityQueue<Charity> rankedCharity = PriorityQueue();
     for (int i = 0; i < charities.length; i++) {
       if (distances[i] <= distanceLimit) {
         double score = 0.0;
