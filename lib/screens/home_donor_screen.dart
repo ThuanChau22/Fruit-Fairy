@@ -8,6 +8,7 @@ import 'package:strings/strings.dart';
 //
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
+import 'package:fruitfairy/models/charities.dart';
 import 'package:fruitfairy/models/donation.dart';
 import 'package:fruitfairy/models/fruit.dart';
 import 'package:fruitfairy/models/produce.dart';
@@ -39,6 +40,7 @@ class _HomeDonorScreenState extends State<HomeDonorScreen> {
     _produceStream.cancel();
     context.read<Produce>().clear();
     context.read<Donation>().clear();
+    context.read<Charities>().clear();
     // Must be called last
     await widget.signOut();
   }
