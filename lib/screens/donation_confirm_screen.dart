@@ -7,6 +7,7 @@ import 'package:fruitfairy/models/fruit.dart';
 import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
+import 'package:fruitfairy/widgets/charity_tile.dart';
 import 'package:fruitfairy/widgets/custom_grid.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
@@ -20,7 +21,6 @@ class DonationConfirmScreen extends StatefulWidget {
 
 class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
   void confirm() {
-    // Do not call setState on reset
     Donation donation = context.read<Donation>();
     donation.produce.forEach((fruitId) {
       context.read<Produce>().fruits[fruitId].clear();
@@ -150,6 +150,21 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
   }
 
   Widget selectedCharities() {
+    List<Widget> selectedCharity = [];
+    int priority = 1;
+    Donation donation = context.read<Donation>();
+    donation.charities.forEach((charity) {
+      selectedCharity.add(Padding(
+        padding: EdgeInsets.symmetric(
+          vertical: 10.0,
+        ),
+        child: CharityTile(
+          charityName: charity.name,
+          selectedOrder: '${priority++}',
+          onTap: () {},
+        ),
+      ));
+    });
     Size screen = MediaQuery.of(context).size;
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -157,12 +172,7 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
         horizontal: screen.width * 0.02,
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          fieldLabel('\u2022 Chariry #1'),
-          fieldLabel('\u2022 Chariry #2'),
-          fieldLabel('\u2022 Chariry #3'),
-        ],
+        children: selectedCharity,
       ),
     );
   }
@@ -177,9 +187,11 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
     Map<String, String> phone = donation.phone;
     String intlPhoneNumber = phone[FireStoreService.kPhoneDialCode];
     String phoneNumber = phone[FireStoreService.kPhoneNumber];
-    intlPhoneNumber += ' (${phoneNumber.substring(0, 3)})';
-    intlPhoneNumber += ' ${phoneNumber.substring(3, 6)}';
-    intlPhoneNumber += ' ${phoneNumber.substring(6, 10)}';
+    if (phoneNumber != null) {
+      intlPhoneNumber += ' (${phoneNumber.substring(0, 3)})';
+      intlPhoneNumber += ' ${phoneNumber.substring(3, 6)}';
+      intlPhoneNumber += ' ${phoneNumber.substring(6, 10)}';
+    }
     Size screen = MediaQuery.of(context).size;
     return Padding(
       padding: EdgeInsets.symmetric(
