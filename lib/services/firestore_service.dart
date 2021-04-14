@@ -170,7 +170,7 @@ class FireStoreService {
         Set<String> wishList = charities[i].produce;
         for (String produceId in donation.produce) {
           if (wishList.contains(produceId)) {
-            score++;
+            score += limitDistance;
           }
         }
         charities[i].setScore(score + limitDistance - distances[i]);
