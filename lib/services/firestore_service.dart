@@ -164,7 +164,7 @@ class FireStoreService {
       destinations: destinations,
     );
     PriorityQueue<Charity> rankedCharity = PriorityQueue();
-    for (int i = 0; i < charities.length; i++) {
+    for (int i = 0; i < distances.length; i++) {
       if (distances[i] <= limitDistance) {
         double score = 0.0;
         Set<String> wishList = charities[i].produce;
