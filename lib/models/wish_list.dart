@@ -1,4 +1,4 @@
-import 'dart:collection';
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 //
 import 'package:fruitfairy/services/firestore_service.dart';
@@ -6,12 +6,11 @@ import 'package:fruitfairy/services/firestore_service.dart';
 /// A class that represents a charity's wishlist
 /// [_produce]: list of produce ids selected by the charity
 class WishList extends ChangeNotifier {
-  final List<String> _produce = [];
+  final PriorityQueue<String> _produce = PriorityQueue();
 
   /// Return a copy of [_produce] sorted in alphabetical order
   UnmodifiableListView<String> get produce {
-    _produce.sort();
-    return UnmodifiableListView(_produce);
+    return UnmodifiableListView(_produce.toList());
   }
 
   /// Add [fruitId] to list
