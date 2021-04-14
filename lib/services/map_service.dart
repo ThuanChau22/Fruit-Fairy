@@ -7,13 +7,13 @@ import 'package:fruitfairy/api_keys.dart';
 /// A class that performs map related operations such as look up addresses
 /// or calulate distances by utilizing Google Map API
 class MapService {
+  static const double MeterPerMile = 1609.344;
   static const String kPlaceId = 'placeId';
   static const String kDescription = 'description';
   static const String kStreet = 'street';
   static const String kCity = 'city';
   static const String kState = 'state';
   static const String kZipCode = 'zipCode';
-  static const double METER_PER_MILE = 1609.344;
 
   /// Private constructor to prevent instantiation
   MapService._();
@@ -127,7 +127,7 @@ class MapService {
       dynamic data = jsonDecode(response.body);
       for (Map<String, dynamic> element in data['rows'].first['elements']) {
         results.add(element['status'] == 'OK'
-            ? element['distance']['value'] / METER_PER_MILE
+            ? element['distance']['value'] / MeterPerMile
             : double.negativeInfinity);
       }
     } else {
@@ -135,5 +135,4 @@ class MapService {
     }
     return results;
   }
-
 }
