@@ -1,12 +1,9 @@
 import 'dart:async';
-import 'package:collection/collection.dart';
-
 import 'package:meta/meta.dart';
+import 'package:collection/collection.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:strings/strings.dart';
-
 //
 import 'package:fruitfairy/models/charity.dart';
 import 'package:fruitfairy/models/donation.dart';
@@ -128,57 +125,64 @@ class FireStoreService {
     );
   }
 
-  Future<List<Charity>> charitySuggestion(Donation donation) async {
-    QuerySnapshot snapshot = await _wishlistsDB
-        .where(kProduceIds, arrayContainsAny: donation.produce)
-        .get();
-
+  Future<List<Charity>> charitySuggestions({
+    @required Donation donation,
+    @required double limitDistance,
+    @required int limitCharity,
+  }) async {
+    Query query = _wishlistsDB.where(
+      kProduceIds,
+      arrayContainsAny: donation.produce,
+    );
+    QuerySnapshot snapshot = await query.get();
     List<Charity> charities = [];
     for (DocumentSnapshot wishListDoc in snapshot.docs) {
       DocumentSnapshot userDoc = await _usersDB.doc(wishListDoc.id).get();
       Charity charity = Charity(userDoc.id);
-      charity.fromWishListsDB(wishListDoc.data());
       charity.fromUsersDB(userDoc.data());
+      charity.fromWishListsDB(wishListDoc.data());
       charities.add(charity);
     }
 
-    Map<String, String> address = donation.address;
-    String street = address[FireStoreService.kAddressStreet];
-    String city = address[FireStoreService.kAddressCity];
-    String state = address[FireStoreService.kAddressState];
-    String zip = address[FireStoreService.kAddressZip];
+    Map<String, String> donationAddress = donation.address;
+    String street = donationAddress[kAddressStreet];
+    String city = donationAddress[kAddressCity];
+    String state = donationAddress[kAddressState];
+    String zip = donationAddress[kAddressZip];
     String origin = '$street $city $state $zip';
     List<String> destinations = [];
     for (Charity charity in charities) {
       Map<String, String> charityAddress = charity.address;
-      String street = charityAddress[FireStoreService.kAddressStreet];
-      String city = charityAddress[FireStoreService.kAddressCity];
-      String state = charityAddress[FireStoreService.kAddressState];
-      String zip = charityAddress[FireStoreService.kAddressZip];
+      String street = charityAddress[kAddressStreet];
+      String city = charityAddress[kAddressCity];
+      String state = charityAddress[kAddressState];
+      String zip = charityAddress[kAddressZip];
       destinations.add('$street $city $state $zip');
     }
-
     List<double> distances = await MapService.getDistances(
       origin: origin,
       destinations: destinations,
     );
-
-    double distanceLimit = 20.0;
     PriorityQueue<Charity> rankedCharity = PriorityQueue();
     for (int i = 0; i < charities.length; i++) {
-      if (distances[i] <= distanceLimit) {
+      if (distances[i] <= limitDistance) {
         double score = 0.0;
-        Set<String> wishList = charities[i].produceIds;
+        Set<String> wishList = charities[i].produce;
         for (String produceId in donation.produce) {
           if (wishList.contains(produceId)) {
             score++;
           }
         }
-        charities[i].setScore(score + distanceLimit - distances[i]);
+        charities[i].setScore(score + limitDistance - distances[i]);
         rankedCharity.add(charities[i]);
       }
     }
-    return rankedCharity.toList();
+
+    charities.clear();
+    for (int i = 0; i < limitCharity && rankedCharity.isNotEmpty; i++) {
+      charities.add(rankedCharity.removeFirst());
+    }
+    return charities;
   }
 
   Future<void> addDonorAccount({
