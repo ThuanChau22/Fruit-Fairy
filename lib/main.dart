@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 //
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
+import 'package:fruitfairy/models/charities.dart';
 import 'package:fruitfairy/models/donation.dart';
 import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/models/wish_list.dart';
@@ -31,6 +32,7 @@ class FruitFairy extends StatelessWidget {
         ChangeNotifierProvider<Account>(create: (_) => Account()),
         ChangeNotifierProvider<Produce>(create: (_) => Produce()),
         ChangeNotifierProvider<Donation>(create: (_) => Donation()),
+        ChangeNotifierProvider<Charities>(create: (_) => Charities()),
         ChangeNotifierProvider<WishList>(create: (_) => WishList()),
       ],
       child: Authentication(),

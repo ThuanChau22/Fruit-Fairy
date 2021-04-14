@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:provider/provider.dart';
 //
 import 'package:fruitfairy/constant.dart';
+import 'package:fruitfairy/models/charities.dart';
+import 'package:fruitfairy/models/charity.dart';
 import 'package:fruitfairy/models/donation.dart';
 import 'package:fruitfairy/screens/donation_confirm_screen.dart';
+import 'package:fruitfairy/services/firestore_service.dart';
 import 'package:fruitfairy/widgets/charity_tile.dart';
+import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/popup_diaglog.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/rounded_icon_button.dart';
-import 'package:fruitfairy/services/firestore_service.dart';
-import 'package:provider/provider.dart';
+
+enum ViewMode { Init, Empty, Suggestion }
 
 class DonationCharitySelectionScreen extends StatefulWidget {
   static const String id = 'donation_charity_selection_screen';
@@ -20,35 +26,88 @@ class DonationCharitySelectionScreen extends StatefulWidget {
 
 class _DonationCharitySelectionScreenState
     extends State<DonationCharitySelectionScreen> {
-  List<String> selectedCharity = [
-    'charity1',
-    'charity2',
-    'charity3',
-    'charity4',
-    'charity5',
-  ];
-  List<String> numbers = [];
+  ViewMode _mode = ViewMode.Init;
+  bool _showSpinner = false;
 
-  void confirm() {
-    Navigator.of(context).pushNamed(DonationConfirmScreen.id);
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      setState(() => _showSpinner = true);
+      FireStoreService fireStore = context.read<FireStoreService>();
+      Charities charities = context.read<Charities>();
+      Donation donation = context.read<Donation>();
+      if (donation.isUpdated) {
+        charities.clear();
+        charities.setList(await fireStore.charitySuggestions(
+          donation: donation,
+          limitDistance: Charities.MaxDistance,
+          limitCharity: Charities.MaxCharity,
+        ));
+        donation.clearUpdated();
+      }
+      _mode = charities.list.isEmpty ? ViewMode.Empty : ViewMode.Suggestion;
+      setState(() => _showSpinner = false);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Charity Selection'),
-        actions: [helpButton()],
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            charityOptions(),
-            buttonSection(),
-          ],
+    return WillPopScope(
+      onWillPop: () async {
+        MessageBar(context).hide();
+        return true;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Charity Selection'),
+          actions: [helpButton()],
+        ),
+        body: SafeArea(
+          child: ModalProgressHUD(
+            inAsyncCall: _showSpinner,
+            progressIndicator: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
+            ),
+            child: Column(
+              children: [
+                layoutMode(),
+                buttonSection(),
+              ],
+            ),
+          ),
         ),
       ),
     );
+  }
+
+  Widget layoutMode() {
+    switch (_mode) {
+      case ViewMode.Init:
+        return Expanded(
+          child: Container(),
+        );
+        break;
+
+      case ViewMode.Empty:
+        return Expanded(
+          child: Center(
+            child: Text(
+              //TODO: Message for no suggestion
+              '(No Suggestion)',
+              style: TextStyle(
+                color: kLabelColor,
+                fontSize: 25.0,
+              ),
+            ),
+          ),
+        );
+        break;
+
+      default:
+        return charityOptions();
+        break;
+    }
   }
 
   Widget charityOptions() {
@@ -62,7 +121,7 @@ class _DonationCharitySelectionScreenState
           return Padding(
             padding: EdgeInsets.symmetric(
               vertical: screen.height * 0.01,
-              horizontal: screen.width * 0.15,
+              horizontal: screen.width * 0.1,
             ),
             child: widgets[index],
           );
@@ -110,24 +169,29 @@ class _DonationCharitySelectionScreenState
   }
 
   List<Widget> charityTiles() {
-    List<Widget> charityList = [];
-    selectedCharity.forEach((charityName) {
-      bool selected = numbers.contains(charityName);
-      charityList.add(CharityTile(
-        charityName: charityName,
-        selectedOrder: selected ? '${numbers.indexOf(charityName) + 1}' : '',
+    List<Widget> charityTiles = [];
+    Donation donation = context.read<Donation>();
+    List<Charity> selectedCharities = donation.charities;
+    Charities charities = context.read<Charities>();
+    charities.list.forEach((charity) {
+      bool selected = selectedCharities.contains(charity);
+      int selectedOrder = selectedCharities.indexOf(charity) + 1;
+      charityTiles.add(CharityTile(
+        charityName: charity.name,
+        selectedOrder: selected ? '$selectedOrder' : '',
         onTap: () {
+          MessageBar(context).hide();
           setState(() {
             if (selected) {
-              numbers.remove(charityName);
-            } else if (numbers.length < 3) {
-              numbers.add(charityName);
+              donation.removeCharity(charity);
+            } else {
+              donation.pickCharity(charity);
             }
           });
         },
       ));
     });
-    return charityList;
+    return charityTiles;
   }
 
   Widget buttonSection() {
@@ -157,9 +221,14 @@ class _DonationCharitySelectionScreenState
       child: RoundedButton(
         label: 'Next',
         onPressed: () {
-          //confirm();
-          FireStoreService fireStore = context.read<FireStoreService>();
-          fireStore.charitySuggestion(context.read<Donation>());
+          if (context.read<Donation>().charities.isNotEmpty) {
+            Navigator.of(context).pushNamed(DonationConfirmScreen.id);
+          } else {
+            MessageBar(
+              context,
+              message: 'Please select at least one charity',
+            ).show();
+          }
         },
       ),
     );

@@ -7,13 +7,13 @@ import 'package:fruitfairy/api_keys.dart';
 /// A class that performs map related operations such as look up addresses
 /// or calulate distances by utilizing Google Map API
 class MapService {
+  static const double MeterPerMile = 1609.344;
   static const String kPlaceId = 'placeId';
   static const String kDescription = 'description';
   static const String kStreet = 'street';
   static const String kCity = 'city';
   static const String kState = 'state';
   static const String kZipCode = 'zipCode';
-  static const double METER_PER_MILE = 1609.344;
 
   /// Private constructor to prevent instantiation
   MapService._();
@@ -24,6 +24,7 @@ class MapService {
     String input, {
     String sessionToken,
   }) async {
+    List<Map<String, String>> results = [];
     String requestURL =
         'https://maps.googleapis.com/maps/api/place/autocomplete/json?';
     requestURL += 'input=$input';
@@ -31,22 +32,25 @@ class MapService {
     requestURL += '&components=country:us';
     requestURL += '&key=$PLACES_API_KEY';
     requestURL += sessionToken != null ? '&sessiontoken=$sessionToken' : '';
-    http.Response response = await http.get(requestURL);
-    List<Map<String, String>> results = [];
-    if (response.statusCode == 200) {
-      dynamic data = jsonDecode(response.body);
-      for (Map<String, dynamic> address in data['predictions']) {
-        for (String type in address['types']) {
-          if (type == 'premise' || type == 'street_address') {
-            results.add({
-              kPlaceId: address['place_id'],
-              kDescription: address['description'],
-            });
+    try {
+      http.Response response = await http.get(requestURL);
+      if (response.statusCode == 200) {
+        dynamic data = jsonDecode(response.body);
+        for (Map<String, dynamic> address in data['predictions']) {
+          for (String type in address['types']) {
+            if (type == 'premise' || type == 'street_address') {
+              results.add({
+                kPlaceId: address['place_id'],
+                kDescription: address['description'],
+              });
+            }
           }
         }
+      } else {
+        print(response.statusCode);
       }
-    } else {
-      print(response.statusCode);
+    } catch (e) {
+      print(e);
     }
     return results;
   }
@@ -59,49 +63,53 @@ class MapService {
     String placeId, {
     String sessionToken,
   }) async {
+    Map<String, String> results = {};
     String requestURL =
         'https://maps.googleapis.com/maps/api/place/details/json?';
     requestURL += 'place_id=$placeId';
     requestURL += '&fields=address_component';
     requestURL += '&key=$PLACES_API_KEY';
     requestURL += sessionToken != null ? '&sessiontoken=$sessionToken' : '';
-    http.Response response = await http.get(requestURL);
-    Map<String, String> results = {};
-    if (response.statusCode == 200) {
-      dynamic result = jsonDecode(response.body)['result'];
-      if (result != null && result['address_components'] != null) {
-        for (Map<String, dynamic> details in result['address_components']) {
-          for (String type in details['types']) {
-            switch (type) {
-              case 'street_number':
-                String number = details['long_name'];
-                String route = results[kStreet];
-                results[kStreet] = route != null ? '$number $route' : number;
-                break;
-              case 'route':
-                String route = details['long_name'];
-                String number = results[kStreet];
-                results[kStreet] = number != null ? '$number $route' : route;
-                break;
+    try {
+      http.Response response = await http.get(requestURL);
+      if (response.statusCode == 200) {
+        dynamic result = jsonDecode(response.body)['result'];
+        if (result != null && result['address_components'] != null) {
+          for (Map<String, dynamic> details in result['address_components']) {
+            for (String type in details['types']) {
+              switch (type) {
+                case 'street_number':
+                  String number = details['long_name'];
+                  String route = results[kStreet];
+                  results[kStreet] = route != null ? '$number $route' : number;
+                  break;
+                case 'route':
+                  String route = details['long_name'];
+                  String number = results[kStreet];
+                  results[kStreet] = number != null ? '$number $route' : route;
+                  break;
 
-              case 'locality':
-                results[kCity] = details['long_name'];
-                break;
+                case 'locality':
+                  results[kCity] = details['long_name'];
+                  break;
 
-              case 'administrative_area_level_1':
-                results[kState] = details['long_name'];
-                break;
+                case 'administrative_area_level_1':
+                  results[kState] = details['long_name'];
+                  break;
 
-              case 'postal_code':
-                results[kZipCode] = details['long_name'];
-                break;
-              default:
+                case 'postal_code':
+                  results[kZipCode] = details['long_name'];
+                  break;
+                default:
+              }
             }
           }
         }
+      } else {
+        print(response.statusCode);
       }
-    } else {
-      print(response.statusCode);
+    } catch (e) {
+      print(e);
     }
     return results;
   }
@@ -112,6 +120,7 @@ class MapService {
     @required String origin,
     @required List<String> destinations,
   }) async {
+    List<double> results = [];
     String requestURL =
         'https://maps.googleapis.com/maps/api/distancematrix/json?';
     requestURL += 'origins=$origin';
@@ -121,19 +130,21 @@ class MapService {
     }
     requestURL += '&units=imperial';
     requestURL += '&key=$PLACES_API_KEY';
-    http.Response response = await http.get(requestURL);
-    List<double> results = [];
-    if (response.statusCode == 200) {
-      dynamic data = jsonDecode(response.body);
-      for (Map<String, dynamic> element in data['rows'].first['elements']) {
-        results.add(element['status'] == 'OK'
-            ? element['distance']['value'] / METER_PER_MILE
-            : double.negativeInfinity);
+    try {
+      http.Response response = await http.get(requestURL);
+      if (response.statusCode == 200) {
+        dynamic data = jsonDecode(response.body);
+        for (Map<String, dynamic> element in data['rows'].first['elements']) {
+          results.add(element['status'] == 'OK'
+              ? element['distance']['value'] / MeterPerMile
+              : double.negativeInfinity);
+        }
+      } else {
+        print(response.statusCode);
       }
-    } else {
-      print(response.statusCode);
+    } catch (e) {
+      print(e);
     }
     return results;
   }
-
 }

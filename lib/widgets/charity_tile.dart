@@ -23,7 +23,7 @@ class CharityTile extends StatelessWidget {
       },
       child: Container(
         constraints: BoxConstraints(
-          minHeight: 60.0,
+          minHeight: 80.0,
         ),
         decoration: BoxDecoration(
           color: kObjectColor,
@@ -36,7 +36,7 @@ class CharityTile extends StatelessWidget {
               child: selectedIcon(),
             ),
             Expanded(
-              flex: 7,
+              flex: 10,
               child: Text(
                 charityName,
                 textAlign: TextAlign.center,
