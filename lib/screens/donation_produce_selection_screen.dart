@@ -137,8 +137,7 @@ class _DonationProduceSelectionScreenState
     List<Widget> fruitTiles = [];
     Donation donation = context.watch<Donation>();
     Produce produce = context.read<Produce>();
-    Map<String, Fruit> fruits = produce.fruits;
-    fruits.forEach((fruitId, fruit) {
+    produce.fruits.forEach((fruitId, fruit) {
       if (RegExp(
         '^${_search.text.trim()}',
         caseSensitive: false,

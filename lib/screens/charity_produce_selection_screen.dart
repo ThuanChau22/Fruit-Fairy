@@ -164,14 +164,12 @@ class _CharityProduceSelectionScreenState
     FireStoreService fireStoreService = context.read<FireStoreService>();
     WishList wishList = context.watch<WishList>();
     Produce produce = context.read<Produce>();
-    Map<String, Fruit> fruits = produce.fruits;
-    fruits.forEach((fruitId, fruit) {
+    produce.fruits.forEach((fruitId, fruit) {
       if (RegExp(
         '^${_search.text.trim()}',
         caseSensitive: false,
       ).hasMatch(fruitId)) {
-        List<String> produceIds = wishList.produce;
-        bool selected = produceIds.contains(fruitId);
+        bool selected = wishList.produce.contains(fruitId);
         fruitTiles.add(selectableFruitTile(
           fruit: fruit,
           selected: selected,
@@ -182,7 +180,7 @@ class _CharityProduceSelectionScreenState
               } else {
                 wishList.pickFruit(fruitId);
               }
-              fireStoreService.updateWishList(produceIds);
+              fireStoreService.updateWishList(wishList.produce);
             });
           },
         ));

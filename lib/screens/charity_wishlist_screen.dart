@@ -112,8 +112,7 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
     Produce produce = context.read<Produce>();
     Map<String, Fruit> fruits = produce.fruits;
     WishList wishList = context.read<WishList>();
-    List<String> produceIds = wishList.produce;
-    produceIds.forEach((fruitId) {
+    wishList.produce.forEach((fruitId) {
       if (fruits.containsKey(fruitId)) {
         fruitTiles.add(removableFruitTile(
           fruit: fruits[fruitId],
@@ -121,7 +120,7 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
             setState(() {
               fruits[fruitId].clear();
               wishList.removeFruit(fruitId);
-              fireStoreService.updateWishList(produceIds);
+              fireStoreService.updateWishList(wishList.produce);
             });
           },
         ));
