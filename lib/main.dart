@@ -46,7 +46,7 @@ class Authentication extends StatelessWidget {
     // Check user authentication status
     User user = context.read<FireAuthService>().user;
     bool signedIn = user != null && user.emailVerified;
-    context.read<FireStoreService>().uid(signedIn ? user.uid : null);
+    context.read<FireStoreService>().setUID(signedIn ? user.uid : null);
     return MaterialApp(
       initialRoute: signedIn ? HomeScreen.id : SignOptionScreen.id,
       onGenerateRoute: RouteGenerator.generate,

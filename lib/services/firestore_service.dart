@@ -66,6 +66,14 @@ class FireStoreService {
     _wishlistsDB = _firestore.collection(kWishLists);
   }
 
+  FirebaseFirestore get instance {
+    return FirebaseFirestore.instance;
+  }
+
+  String get uid {
+    return _uid;
+  }
+
   StreamSubscription<DocumentSnapshot> userStream(
     Function(Map<String, dynamic>) onData,
   ) {
@@ -389,7 +397,7 @@ class FireStoreService {
     }
   }
 
-  void uid(String uid) {
+  void setUID(String uid) {
     this._uid = uid;
   }
 
