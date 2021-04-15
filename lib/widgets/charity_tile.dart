@@ -32,7 +32,7 @@ class CharityTile extends StatelessWidget {
         child: Row(
           children: [
             Expanded(
-              flex: 2,
+              flex: 4,
               child: selectedIcon(),
             ),
             Expanded(
@@ -48,7 +48,7 @@ class CharityTile extends StatelessWidget {
               ),
             ),
             Expanded(
-              flex: 2,
+              flex: 4,
               child: SizedBox.shrink(),
             ),
           ],
