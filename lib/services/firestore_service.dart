@@ -130,9 +130,10 @@ class FireStoreService {
     @required double limitDistance,
     @required int limitCharity,
   }) async {
+    List<String> selectedProduce = donation.produce;
     Query query = _wishlistsDB.where(
       kProduceIds,
-      arrayContainsAny: donation.produce,
+      arrayContainsAny: selectedProduce,
     );
     QuerySnapshot snapshot = await query.get();
     List<Charity> charities = [];
@@ -163,17 +164,18 @@ class FireStoreService {
       origin: origin,
       destinations: destinations,
     );
+
+    double matchPerProduce = limitDistance / selectedProduce.length;
     PriorityQueue<Charity> rankedCharity = PriorityQueue();
     for (int i = 0; i < distances.length; i++) {
       if (distances[i] <= limitDistance) {
-        double score = 0.0;
+        double matchScore = 0.0;
         Set<String> wishList = charities[i].produce;
-        for (String produceId in donation.produce) {
-          if (wishList.contains(produceId)) {
-            score += limitDistance;
-          }
+        for (String produceId in selectedProduce) {
+          matchScore += wishList.contains(produceId) ? matchPerProduce : 0.0;
         }
-        charities[i].setScore(score + limitDistance - distances[i]);
+        double distanceScore = limitDistance - distances[i];
+        charities[i].setScore(matchScore + distanceScore);
         rankedCharity.add(charities[i]);
       }
     }
