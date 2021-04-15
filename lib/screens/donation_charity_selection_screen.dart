@@ -82,6 +82,7 @@ class _DonationCharitySelectionScreenState
   }
 
   Widget layoutMode() {
+    Size screen = MediaQuery.of(context).size;
     switch (_mode) {
       case ViewMode.Init:
         return Expanded(
@@ -92,12 +93,18 @@ class _DonationCharitySelectionScreenState
       case ViewMode.Empty:
         return Expanded(
           child: Center(
-            child: Text(
-              //TODO: Message for no suggestion
-              '(No Suggestion)',
-              style: TextStyle(
-                color: kLabelColor,
-                fontSize: 25.0,
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: screen.width * 0.05,
+              ),
+              child: Text(
+                'No charities in our system match your donation. The produce you wish to donate does not match any charities within a 20 mile radius.\n\nPlease try again at a later time!',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: kLabelColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20.0,
+                ),
               ),
             ),
           ),
@@ -220,6 +227,7 @@ class _DonationCharitySelectionScreenState
       ),
       child: RoundedButton(
         label: 'Next',
+        disabled: _mode == ViewMode.Init || _mode == ViewMode.Empty,
         onPressed: () {
           if (context.read<Donation>().charities.isNotEmpty) {
             Navigator.of(context).pushNamed(DonationConfirmScreen.id);

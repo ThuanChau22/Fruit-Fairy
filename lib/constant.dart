@@ -6,6 +6,7 @@ const Color kPrimaryColor = Color.fromRGBO(240, 94, 92, 1.0);
 const Color kLabelColor = Colors.white;
 const Color kObjectColor = Colors.white;
 const Color kErrorColor = Colors.white;
+const Color kDisabledColor = Color.fromRGBO(179, 179, 179, 1.0);
 
 // Widget Style
 const kTextFieldDecoration = InputDecoration(
