@@ -55,7 +55,7 @@ class Account extends ChangeNotifier {
   }
 
   /// Parse account information from database
-  /// [accountData]: A Map with keys that are declared in [FireStoreService]
+  /// [userData]: A Map with keys that are declared in [FireStoreService]
   void fromDB(Map<String, dynamic> userData) {
     // Clean up current data
     clear();
