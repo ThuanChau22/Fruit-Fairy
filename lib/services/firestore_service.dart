@@ -123,7 +123,7 @@ class FireStoreService {
     @required double limitDistance,
     @required int limitCharity,
   }) async {
-    List<String> selectedProduce = donation.produce;
+    List<String> selectedProduce = donation.produce.keys.toList();
     Query query = _usersDB.where(kWishList, arrayContainsAny: selectedProduce);
     QuerySnapshot snapshot = await query.get();
     List<Charity> charities = [];

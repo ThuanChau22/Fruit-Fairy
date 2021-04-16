@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/produce_item.dart';
 import 'package:fruitfairy/models/donation.dart';
-import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/screens/donation_contact_screen.dart';
 import 'package:fruitfairy/widgets/custom_grid.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
@@ -158,15 +157,12 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
 
   List<Widget> fruitTiles() {
     List<Widget> fruitTiles = [];
-    Produce produce = context.read<Produce>();
-    Map<String, ProduceItem> produceMap = produce.map;
     Donation donation = context.watch<Donation>();
-    donation.produce.forEach((produceId) {
+    donation.produce.forEach((produceId, produceItem) {
       fruitTiles.add(removableFruitTile(
-        produceItem: produceMap[produceId],
+        produceItem: produceItem,
         onPressed: () {
           setState(() {
-            produceMap[produceId].clear();
             donation.removeProduce(produceId);
           });
         },

@@ -142,7 +142,7 @@ class _DonationProduceSelectionScreenState
         '^${_search.text.trim()}',
         caseSensitive: false,
       ).hasMatch(produceItem.name)) {
-        bool selected = donation.produce.contains(produceId);
+        bool selected = donation.produce.containsKey(produceId);
         fruitTiles.add(selectableFruitTile(
           produceItem: produceItem,
           selected: selected,
@@ -151,7 +151,7 @@ class _DonationProduceSelectionScreenState
               if (selected) {
                 donation.removeProduce(produceId);
               } else {
-                donation.pickProduce(produceId);
+                donation.pickProduce(produceId, produceItem);
               }
             });
           },

@@ -58,7 +58,7 @@ class _HomeDonorScreenState extends State<HomeDonorScreen> {
       if (data != null && data is Map<String, ProduceItem>) {
         produce.fromDBComplete(data);
         bool removed = false;
-        List.from(donation.produce).forEach((produceId) {
+        List.from(donation.produce.keys).forEach((produceId) {
           if (!produce.map.containsKey(produceId)) {
             donation.removeProduce(produceId);
             removed = true;
