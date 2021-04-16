@@ -121,26 +121,40 @@ class MapService {
     @required List<String> destinations,
   }) async {
     List<double> results = [];
-    String requestURL =
-        'https://maps.googleapis.com/maps/api/distancematrix/json?';
-    requestURL += 'origins=$origin';
-    requestURL += '&destinations=';
-    for (String destination in destinations) {
-      requestURL += '$destination|';
+
+    // Break number of destinations into groups of 25 each request
+    List<String> requests = [];
+    int index = 0;
+    while (index < destinations.length) {
+      String requestURL =
+          'https://maps.googleapis.com/maps/api/distancematrix/json?';
+      requestURL += 'origins=$origin';
+      requestURL += '&destinations=';
+      for (int i = 0; i < 25 && index < destinations.length; i++) {
+        requestURL += '${destinations[index++]}|';
+      }
+      requestURL += '&units=imperial';
+      requestURL += '&key=$PLACES_API_KEY';
+      requests.add(requestURL);
     }
-    requestURL += '&units=imperial';
-    requestURL += '&key=$PLACES_API_KEY';
+
     try {
-      http.Response response = await http.get(requestURL);
-      if (response.statusCode == 200) {
-        dynamic data = jsonDecode(response.body);
-        for (Map<String, dynamic> element in data['rows'].first['elements']) {
-          results.add(element['status'] == 'OK'
-              ? element['distance']['value'] / MeterPerMile
-              : double.negativeInfinity);
+      // Execute all API calls at the same time and wait for responses
+      List<http.Response> responses = await Future.wait(
+        requests.map((requestURL) => http.get(requestURL)),
+      );
+      // Parse each response into results list
+      for (http.Response response in responses) {
+        if (response.statusCode == 200) {
+          dynamic data = jsonDecode(response.body);
+          for (Map<String, dynamic> element in data['rows'].first['elements']) {
+            results.add(element['status'] == 'OK'
+                ? element['distance']['value'] / MeterPerMile
+                : double.negativeInfinity);
+          }
+        } else {
+          print(response.statusCode);
         }
-      } else {
-        print(response.statusCode);
       }
     } catch (e) {
       print(e);
