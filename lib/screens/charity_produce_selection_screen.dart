@@ -65,9 +65,9 @@ class _CharityProduceSelectionScreenState
   Widget actionButton() {
     FireStoreService fireStoreService = context.read<FireStoreService>();
     Produce produce = context.read<Produce>();
+    Map<String, Fruit> fruits = produce.fruits;
     WishList wishList = context.read<WishList>();
-    List<String> produceIds = wishList.produce;
-    bool isAllSelected = produce.fruits.length == produceIds.length;
+    bool isAllSelected = fruits.length == wishList.produce.length;
     return RoundedIconButton(
       radius: 30.0,
       icon: Icon(
@@ -81,11 +81,11 @@ class _CharityProduceSelectionScreenState
         setState(() {
           wishList.clear();
           if (!isAllSelected) {
-            produce.fruits.forEach((fruitId, fruit) {
+            fruits.forEach((fruitId, fruit) {
               wishList.pickFruit(fruitId);
             });
           }
-          fireStoreService.updateWishList(produceIds);
+          fireStoreService.updateWishList(wishList.produce);
         });
       },
     );
