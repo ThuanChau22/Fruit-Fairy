@@ -52,10 +52,10 @@ class _HomeDonorScreenState extends State<HomeDonorScreen> {
     Donation donation = context.read<Donation>();
     Produce produce = context.read<Produce>();
     _produceStream = fireStoreService.produceStream((data) {
-      if (data is Fruit) {
+      if (data != null && data is Fruit) {
         produce.fromDBLoading(data);
       }
-      if (data is Map<String, Fruit>) {
+      if (data != null && data is Map<String, Fruit>) {
         produce.fromDBComplete(data);
         bool removed = false;
         List.from(donation.produce).forEach((fruitId) {

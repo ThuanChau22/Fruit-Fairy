@@ -53,10 +53,10 @@ class _HomeCharityScreenState extends State<HomeCharityScreen> {
     WishList wishlist = context.read<WishList>();
     Produce produce = context.read<Produce>();
     _produceStream = fireStoreService.produceStream((data) {
-      if (data is Fruit) {
+      if (data != null && data is Fruit) {
         produce.fromDBLoading(data);
       }
-      if (data is Map<String, Fruit>) {
+      if (data != null && data is Map<String, Fruit>) {
         produce.fromDBComplete(data);
         bool removed = false;
         List.from(wishlist.produce).forEach((fruitId) {
@@ -75,8 +75,10 @@ class _HomeCharityScreenState extends State<HomeCharityScreen> {
         }
       }
     });
-    _wishlistStream = fireStoreService.wishlistStream((data) {
-      wishlist.fromDB(data);
+    _wishlistStream = fireStoreService.userStream((data) {
+      if (data != null) {
+        wishlist.fromDB(data);
+      }
     });
   }
 
