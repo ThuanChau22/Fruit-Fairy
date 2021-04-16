@@ -7,7 +7,7 @@ import 'package:strings/strings.dart';
 //
 import 'package:fruitfairy/models/charity.dart';
 import 'package:fruitfairy/models/donation.dart';
-import 'package:fruitfairy/models/fruit.dart';
+import 'package:fruitfairy/models/produce_item.dart';
 import 'package:fruitfairy/services/map_service.dart';
 import 'package:fruitfairy/services/session_token.dart';
 
@@ -25,8 +25,9 @@ class FireStoreService {
 
   /// produce
   static const String kProduce = 'produce';
-  static const String kFruitName = 'name';
-  static const String kFruitPath = 'path';
+  static const String kProduceName = 'name';
+  static const String kProducePath = 'path';
+  static const String kProduceEnabled = 'enabled';
 
   /// users
   static const String kUsers = 'users';
@@ -72,7 +73,8 @@ class FireStoreService {
   StreamSubscription<DocumentSnapshot> userStream(
     Function(Map<String, dynamic>) onData,
   ) {
-    return _usersDB.doc(_uid).snapshots().listen(
+    DocumentReference doc = _usersDB.doc(_uid);
+    return doc.snapshots().listen(
       (snapshot) {
         onData(snapshot.data());
       },
@@ -85,16 +87,17 @@ class FireStoreService {
   StreamSubscription<QuerySnapshot> produceStream(
     Function(dynamic) onData,
   ) {
-    return _produceDB.snapshots().listen(
+    Query query = _produceDB.where(kProduceEnabled, isEqualTo: true);
+    return query.snapshots().listen(
       (snapshot) async {
-        Map<String, Fruit> snapshotData = {};
+        Map<String, ProduceItem> snapshotData = {};
         for (QueryDocumentSnapshot doc in snapshot.docs) {
           Map<String, dynamic> data = doc.data();
-          snapshotData[doc.id] = Fruit(
+          snapshotData[doc.id] = ProduceItem(
             id: doc.id,
-            name: data[FireStoreService.kFruitName],
-            imagePath: data[FireStoreService.kFruitPath],
-            imageURL: await imageURL(data[FireStoreService.kFruitPath]),
+            name: data[kProduceName],
+            imagePath: data[kProducePath],
+            imageURL: await imageURL(data[kProducePath]),
           );
           onData(snapshotData[doc.id]);
         }
@@ -121,10 +124,7 @@ class FireStoreService {
     @required int limitCharity,
   }) async {
     List<String> selectedProduce = donation.produce;
-    Query query = _usersDB.where(
-      kWishList,
-      arrayContainsAny: selectedProduce,
-    );
+    Query query = _usersDB.where(kWishList, arrayContainsAny: selectedProduce);
     QuerySnapshot snapshot = await query.get();
     List<Charity> charities = [];
     for (DocumentSnapshot userDoc in snapshot.docs) {

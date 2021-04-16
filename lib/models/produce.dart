@@ -1,41 +1,41 @@
 import 'dart:collection';
 import 'package:flutter/foundation.dart';
 //
-import 'package:fruitfairy/models/fruit.dart';
+import 'package:fruitfairy/models/produce_item.dart';
 
 /// A class holds a list of all possible produce that a user can select
-/// [_fruits]: a map of [Fruit] that can be access through [fruit.id]
+/// [_produce]: a map of [ProduceItem] that can be access through [produce.id]
 class Produce extends ChangeNotifier {
-  final Map<String, Fruit> _fruits = SplayTreeMap();
+  final Map<String, ProduceItem> _produce = SplayTreeMap();
 
-  /// Return a copy of [_fruits]
-  UnmodifiableMapView<String, Fruit> get fruits {
-    return UnmodifiableMapView(_fruits);
+  /// Return a copy of [_produce]
+  UnmodifiableMapView<String, ProduceItem> get map {
+    return UnmodifiableMapView(_produce);
   }
 
-  /// Parse [produceData] as [Fruit] from database
-  /// This is call every time a [Fruit] is retrieved
-  void fromDBLoading(Fruit produceData) {
-    _fruits[produceData.id] = produceData;
+  /// Parse [produceData] as [ProduceItem] from database
+  /// This is call every time a [ProduceItem] is retrieved
+  void fromDBLoading(ProduceItem produceData) {
+    _produce[produceData.id] = produceData;
     notifyListeners();
   }
 
   /// Parse [produceData] as [Map] from database
-  /// This is call after all [Fruit] are retrieved
+  /// This is call after all [ProduceItem] are retrieved
   /// This method ensures data is retrieved correctly
-  void fromDBComplete(Map<String, Fruit> produceData) {
-    if (produceData.length != _fruits.length) {
+  void fromDBComplete(Map<String, ProduceItem> produceData) {
+    if (produceData.length != _produce.length) {
       clear();
-      produceData.forEach((id, fruit) {
-        _fruits[id] = fruit;
+      produceData.forEach((produceId, produce) {
+        _produce[produceId] = produce;
       });
     }
     notifyListeners();
   }
 
-  /// Set [_fruits] to default value
+  /// Set [_produce] to default value
   void clear() {
-    _fruits.clear();
+    _produce.clear();
     notifyListeners();
   }
 }

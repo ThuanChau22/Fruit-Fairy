@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 //
 import 'package:fruitfairy/constant.dart';
-import 'package:fruitfairy/models/fruit.dart';
+import 'package:fruitfairy/models/produce_item.dart';
 import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/models/wish_list.dart';
 import 'package:fruitfairy/screens/charity_produce_selection_screen.dart';
@@ -33,7 +33,7 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
       ),
       body: SafeArea(
         child: ModalProgressHUD(
-          inAsyncCall: produce.fruits.isEmpty,
+          inAsyncCall: produce.map.isEmpty,
           progressIndicator: CircularProgressIndicator(
             valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
           ),
@@ -110,16 +110,16 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
     List<Widget> fruitTiles = [];
     FireStoreService fireStoreService = context.read<FireStoreService>();
     Produce produce = context.read<Produce>();
-    Map<String, Fruit> fruits = produce.fruits;
+    Map<String, ProduceItem> produceMap = produce.map;
     WishList wishList = context.read<WishList>();
-    wishList.produce.forEach((fruitId) {
-      if (fruits.containsKey(fruitId)) {
+    wishList.produce.forEach((produceId) {
+      if (produceMap.containsKey(produceId)) {
         fruitTiles.add(removableFruitTile(
-          fruit: fruits[fruitId],
+          produceItem: produceMap[produceId],
           onPressed: () {
             setState(() {
-              fruits[fruitId].clear();
-              wishList.removeFruit(fruitId);
+              produceMap[produceId].clear();
+              wishList.removeProduce(produceId);
               fireStoreService.updateWishList(wishList.produce);
             });
           },
@@ -130,7 +130,7 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
   }
 
   Widget removableFruitTile({
-    @required Fruit fruit,
+    @required ProduceItem produceItem,
     @required VoidCallback onPressed,
   }) {
     return Stack(
@@ -148,8 +148,8 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
               borderRadius: BorderRadius.circular(20.0),
             ),
             child: FruitTile(
-              fruitName: fruit.name,
-              fruitImage: fruit.imageURL,
+              fruitName: produceItem.name,
+              fruitImage: produceItem.imageURL,
             ),
           ),
         ),

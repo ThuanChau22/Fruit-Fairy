@@ -13,26 +13,26 @@ class WishList extends ChangeNotifier {
     return UnmodifiableListView(_produce.toList());
   }
 
-  /// Add [fruitId] to list
-  void pickFruit(String fruitId) {
-    _produce.add(fruitId);
+  /// Add [produceId] to list
+  void pickProduce(String produceId) {
+    _produce.add(produceId);
     notifyListeners();
   }
 
-  /// Remove [fruitId] from list
-  void removeFruit(String fruitId) {
-    _produce.remove(fruitId);
+  /// Remove [produceId] from list
+  void removeProduce(String produceId) {
+    _produce.remove(produceId);
     notifyListeners();
   }
 
-  /// Parse [fruitId] from database
+  /// Parse [produceId] from database
   /// [wishlistData]: A Map with keys that are declared in [FireStoreService]
   void fromDB(Map<String, dynamic> userData) {
     _produce.clear();
     List<dynamic> wishlist = userData[FireStoreService.kWishList];
     if (wishlist != null) {
-      wishlist.forEach((fruitId) {
-        _produce.add(fruitId);
+      wishlist.forEach((produceId) {
+        _produce.add(produceId);
       });
     }
     notifyListeners();

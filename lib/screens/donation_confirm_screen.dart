@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 //
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/donation.dart';
-import 'package:fruitfairy/models/fruit.dart';
+import 'package:fruitfairy/models/produce_item.dart';
 import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
@@ -22,8 +22,8 @@ class DonationConfirmScreen extends StatefulWidget {
 class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
   void confirm() {
     Donation donation = context.read<Donation>();
-    donation.produce.forEach((fruitId) {
-      context.read<Produce>().fruits[fruitId].clear();
+    donation.produce.forEach((produceId) {
+      context.read<Produce>().map[produceId].clear();
     });
     donation.reset();
     Navigator.of(context).popUntil((route) {
@@ -130,18 +130,18 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
   List<Widget> fruitTiles() {
     List<Widget> fruitList = [];
     Produce produce = context.read<Produce>();
-    Map<String, Fruit> fruits = produce.fruits;
+    Map<String, ProduceItem> produceMap = produce.map;
     Donation donation = context.watch<Donation>();
-    donation.produce.forEach((fruitId) {
-      int amount = fruits[fruitId].amount;
+    donation.produce.forEach((produceId) {
+      int amount = produceMap[produceId].amount;
       fruitList.add(Container(
         decoration: BoxDecoration(
           color: kObjectColor,
           borderRadius: BorderRadius.circular(20.0),
         ),
         child: FruitTile(
-          fruitName: fruits[fruitId].name,
-          fruitImage: fruits[fruitId].imageURL,
+          fruitName: produceMap[produceId].name,
+          fruitImage: produceMap[produceId].imageURL,
           percentage: donation.needCollected ? '$amount' : '',
         ),
       ));

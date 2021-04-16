@@ -8,7 +8,7 @@ import 'package:strings/strings.dart';
 //
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
-import 'package:fruitfairy/models/fruit.dart';
+import 'package:fruitfairy/models/produce_item.dart';
 import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/models/wish_list.dart';
 import 'package:fruitfairy/screens/charity_donation_detail_screen.dart';
@@ -53,15 +53,15 @@ class _HomeCharityScreenState extends State<HomeCharityScreen> {
     WishList wishlist = context.read<WishList>();
     Produce produce = context.read<Produce>();
     _produceStream = fireStoreService.produceStream((data) {
-      if (data != null && data is Fruit) {
+      if (data != null && data is ProduceItem) {
         produce.fromDBLoading(data);
       }
-      if (data != null && data is Map<String, Fruit>) {
+      if (data != null && data is Map<String, ProduceItem>) {
         produce.fromDBComplete(data);
         bool removed = false;
-        List.from(wishlist.produce).forEach((fruitId) {
-          if (!produce.fruits.containsKey(fruitId)) {
-            wishlist.removeFruit(fruitId);
+        List.from(wishlist.produce).forEach((produceId) {
+          if (!produce.map.containsKey(produceId)) {
+            wishlist.removeProduce(produceId);
             removed = true;
           }
         });

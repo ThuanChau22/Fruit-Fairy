@@ -68,16 +68,16 @@ class Donation extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Add [fruitId] to list
-  void pickFruit(String fruitId) {
-    _produce.add(fruitId);
+  /// Add [produceId] to list
+  void pickProduce(String produceId) {
+    _produce.add(produceId);
     _updated = true;
     notifyListeners();
   }
 
-  /// Remove [fruitId] from list
-  void removeFruit(String fruitId) {
-    _produce.remove(fruitId);
+  /// Remove [produceId] from list
+  void removeProduce(String produceId) {
+    _produce.remove(produceId);
     _updated = true;
     notifyListeners();
   }

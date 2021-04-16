@@ -62,8 +62,8 @@ class Charity implements Comparable<Charity> {
     // Wishlist
     List<dynamic> wishlist = userData[FireStoreService.kWishList];
     if (wishlist != null) {
-      wishlist.forEach((fruitId) {
-        _produce.add(fruitId);
+      wishlist.forEach((produceId) {
+        _produce.add(produceId);
       });
     }
   }
