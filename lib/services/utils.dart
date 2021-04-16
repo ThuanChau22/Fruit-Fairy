@@ -6,7 +6,11 @@ import 'package:fruitfairy/services/firestore_service.dart';
 class Utils {
   Utils._();
 
-  static void createTestCharities(FireStoreService fireStore, int max) async {
+  static void createTestCharities(
+    FireStoreService fireStore, {
+    int from,
+    int to,
+  }) async {
     List<Map<String, String>> addresses = [
       {
         FireStoreService.kAddressStreet: '1299 San Tomas Aquino Rd',
@@ -138,8 +142,8 @@ class Utils {
     }
     String currentUID = fireStore.uid;
     Random rand = Random();
-    for (int i = 1; i <= max; i++) {
-      Map<String, String> address = addresses[i - 1];
+    for (int i = from; i <= to; i++) {
+      Map<String, String> address = addresses[(i - 1) % addresses.length];
       String testUID = 'TestCharity$i';
       fireStore.setUID(testUID);
       await fireStore.addCharityAccount(
@@ -166,11 +170,14 @@ class Utils {
     fireStore.setUID(currentUID);
   }
 
-  static void deleteTestCharities(FireStoreService fireStore, int max) {
+  static void deleteTestCharities(
+    FireStoreService fireStore, {
+    int from,
+    int to,
+  }) {
     String currentUID = fireStore.uid;
-    for (int i = 1; i <= max; i++) {
+    for (int i = from; i <= to; i++) {
       fireStore.setUID('TestCharity$i');
-      fireStore.deleteWishList();
       fireStore.deleteAccount();
     }
     fireStore.setUID(currentUID);
