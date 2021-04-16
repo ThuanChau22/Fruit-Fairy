@@ -27,10 +27,11 @@ class WishList extends ChangeNotifier {
 
   /// Parse [fruitId] from database
   /// [wishlistData]: A Map with keys that are declared in [FireStoreService]
-  void fromDB(Map<String, dynamic> wishlistData) {
+  void fromDB(Map<String, dynamic> userData) {
     _produce.clear();
-    if (wishlistData != null) {
-      wishlistData[FireStoreService.kProduceIds].forEach((fruitId) {
+    List<dynamic> wishlist = userData[FireStoreService.kWishList];
+    if (wishlist != null) {
+      wishlist.forEach((fruitId) {
         _produce.add(fruitId);
       });
     }

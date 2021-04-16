@@ -40,32 +40,32 @@ class Charity implements Comparable<Charity> {
     return _score;
   }
 
-  /// Parse [fruitId] from database
-  /// [wishlistData]: A Map with keys that are declared in [FireStoreService]
-  void fromWishListsDB(Map<String, dynamic> wishlistData) {
-    if (wishlistData != null) {
-      wishlistData[FireStoreService.kProduceIds].forEach((fruitId) {
-        _produce.add(fruitId);
-      });
-    }
-  }
-
   /// Parse account information from database
-  /// [accountData]: A Map with keys that are declared in [FireStoreService]
+  /// [userData]: A Map with keys that are declared in [FireStoreService]
   void fromUsersDB(Map<String, dynamic> userData) {
     // Charity name
     _name = userData[FireStoreService.kCharityName];
 
     // Address
     Map<String, dynamic> address = userData[FireStoreService.kAddress];
-    _address[FireStoreService.kAddressStreet] =
-        address[FireStoreService.kAddressStreet];
-    _address[FireStoreService.kAddressCity] =
-        address[FireStoreService.kAddressCity];
-    _address[FireStoreService.kAddressState] =
-        address[FireStoreService.kAddressState];
-    _address[FireStoreService.kAddressZip] =
-        address[FireStoreService.kAddressZip];
+    if (address != null) {
+      _address[FireStoreService.kAddressStreet] =
+          address[FireStoreService.kAddressStreet];
+      _address[FireStoreService.kAddressCity] =
+          address[FireStoreService.kAddressCity];
+      _address[FireStoreService.kAddressState] =
+          address[FireStoreService.kAddressState];
+      _address[FireStoreService.kAddressZip] =
+          address[FireStoreService.kAddressZip];
+    }
+
+    // Wishlist
+    List<dynamic> wishlist = userData[FireStoreService.kWishList];
+    if (wishlist != null) {
+      wishlist.forEach((fruitId) {
+        _produce.add(fruitId);
+      });
+    }
   }
 
   /// Set new ranking score

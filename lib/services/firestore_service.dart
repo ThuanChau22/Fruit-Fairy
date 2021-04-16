@@ -44,10 +44,7 @@ class FireStoreService {
   static const String kAddressCity = 'city';
   static const String kAddressState = 'state';
   static const String kAddressZip = 'zip';
-
-  /// wishlists
-  static const String kWishLists = 'wishlists';
-  static const String kProduceIds = 'produceIds';
+  static const String kWishList = 'wishlist';
 
   ///////////////
 
@@ -56,14 +53,12 @@ class FireStoreService {
 
   CollectionReference _usersDB;
   CollectionReference _produceDB;
-  CollectionReference _wishlistsDB;
 
   String _uid;
 
   FireStoreService() {
     _usersDB = _firestore.collection(kUsers);
     _produceDB = _firestore.collection(kProduce);
-    _wishlistsDB = _firestore.collection(kWishLists);
   }
 
   FirebaseFirestore get instance {
@@ -120,36 +115,21 @@ class FireStoreService {
     }
   }
 
-  StreamSubscription<DocumentSnapshot> wishlistStream(
-    Function(Map<String, dynamic>) onData,
-  ) {
-    return _wishlistsDB.doc(_uid).snapshots().listen(
-      (snapshot) async {
-        onData(snapshot.data());
-      },
-      onError: (e) {
-        print(e);
-      },
-    );
-  }
-
   Future<List<Charity>> charitySuggestions({
     @required Donation donation,
     @required double limitDistance,
     @required int limitCharity,
   }) async {
     List<String> selectedProduce = donation.produce;
-    Query query = _wishlistsDB.where(
-      kProduceIds,
+    Query query = _usersDB.where(
+      kWishList,
       arrayContainsAny: selectedProduce,
     );
     QuerySnapshot snapshot = await query.get();
     List<Charity> charities = [];
-    for (DocumentSnapshot wishListDoc in snapshot.docs) {
-      DocumentSnapshot userDoc = await _usersDB.doc(wishListDoc.id).get();
+    for (DocumentSnapshot userDoc in snapshot.docs) {
       Charity charity = Charity(userDoc.id);
       charity.fromUsersDB(userDoc.data());
-      charity.fromWishListsDB(wishListDoc.data());
       charities.add(charity);
     }
 
@@ -238,15 +218,15 @@ class FireStoreService {
       await updateCharityName(
         camelize(charityName),
       );
-      String sessionToken = SessionToken().getToken();
+      SessionToken sessionToken = SessionToken();
       List<Map<String, String>> results = await MapService.addressSuggestions(
         '$street, $city, $state $zip',
-        sessionToken: sessionToken,
+        sessionToken: sessionToken.getToken(),
       );
       if (results.isNotEmpty) {
         Map<String, String> charityAddress = await MapService.addressDetails(
           results.first[MapService.kPlaceId],
-          sessionToken: sessionToken,
+          sessionToken: sessionToken.getToken(),
         );
         await updateUserAddress(
           street: charityAddress[MapService.kStreet],
@@ -255,9 +235,8 @@ class FireStoreService {
           zip: charityAddress[MapService.kZipCode],
         );
       }
-      await _wishlistsDB.doc(_uid).set({
-        kProduceIds: [],
-      });
+      sessionToken.clear();
+      await updateWishList([]);
     } catch (e) {
       throw e.message;
     }
@@ -358,28 +337,16 @@ class FireStoreService {
   }
 
   Future<void> updateWishList(
-    List<String> produceIds,
+    List<String> wishlist,
   ) async {
     if (_uid == null) {
       print('UID Unset');
       return;
     }
     try {
-      await _wishlistsDB.doc(_uid).update({
-        kProduceIds: produceIds,
+      await _usersDB.doc(_uid).update({
+        kWishList: wishlist,
       });
-    } catch (e) {
-      throw e.message;
-    }
-  }
-
-  Future<void> deleteWishList() async {
-    if (_uid == null) {
-      print('UID Unset');
-      return;
-    }
-    try {
-      await _wishlistsDB.doc(_uid).delete();
     } catch (e) {
       throw e.message;
     }
