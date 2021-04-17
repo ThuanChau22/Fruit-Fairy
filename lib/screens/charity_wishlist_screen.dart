@@ -70,7 +70,7 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
 
   Widget layoutMode() {
     WishList wishList = context.watch<WishList>();
-    bool isEmpty = wishList.produce.isEmpty;
+    bool isEmpty = wishList.produceIds.isEmpty;
     _buttonLabel = '${isEmpty ? 'Create' : 'Edit'} Wish List';
     return isEmpty ? emptyWishList() : selectedFruits();
   }
@@ -112,7 +112,7 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
     Produce produce = context.read<Produce>();
     Map<String, ProduceItem> produceMap = produce.map;
     WishList wishList = context.read<WishList>();
-    wishList.produce.forEach((produceId) {
+    wishList.produceIds.forEach((produceId) {
       if (produceMap.containsKey(produceId)) {
         fruitTiles.add(removableFruitTile(
           produceItem: produceMap[produceId],
@@ -120,7 +120,7 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
             setState(() {
               produceMap[produceId].clear();
               wishList.removeProduce(produceId);
-              fireStoreService.updateWishList(wishList.produce);
+              fireStoreService.updateWishList(wishList.produceIds);
             });
           },
         ));

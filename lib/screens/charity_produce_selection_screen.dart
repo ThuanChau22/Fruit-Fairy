@@ -67,7 +67,7 @@ class _CharityProduceSelectionScreenState
     Produce produce = context.read<Produce>();
     Map<String, ProduceItem> produceMap = produce.map;
     WishList wishList = context.read<WishList>();
-    bool isAllSelected = produceMap.length == wishList.produce.length;
+    bool isAllSelected = produceMap.length == wishList.produceIds.length;
     return RoundedIconButton(
       radius: 30.0,
       icon: Icon(
@@ -85,7 +85,7 @@ class _CharityProduceSelectionScreenState
               wishList.pickProduce(produceId);
             });
           }
-          fireStoreService.updateWishList(wishList.produce);
+          fireStoreService.updateWishList(wishList.produceIds);
         });
       },
     );
@@ -169,7 +169,7 @@ class _CharityProduceSelectionScreenState
         '^${_search.text.trim()}',
         caseSensitive: false,
       ).hasMatch(produceItem.name)) {
-        bool selected = wishList.produce.contains(produceId);
+        bool selected = wishList.produceIds.contains(produceId);
         fruitTiles.add(selectableFruitTile(
           produceItem: produceItem,
           selected: selected,
@@ -180,7 +180,7 @@ class _CharityProduceSelectionScreenState
               } else {
                 wishList.pickProduce(produceId);
               }
-              fireStoreService.updateWishList(wishList.produce);
+              fireStoreService.updateWishList(wishList.produceIds);
             });
           },
         ));
