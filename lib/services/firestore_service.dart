@@ -85,7 +85,7 @@ class FireStoreService {
   }
 
   StreamSubscription<QuerySnapshot> produceStream(
-    Function(dynamic) onData,
+    Function(Map<String, ProduceItem>) onData,
   ) {
     Query query = _produceDB.where(kProduceEnabled, isEqualTo: true);
     return query.snapshots().listen(
