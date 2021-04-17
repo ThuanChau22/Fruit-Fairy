@@ -10,26 +10,38 @@ import 'package:meta/meta.dart';
 /// [Max]: maximun percentage a donor can select
 /// [AdjustAmount]: number of percentage can be adjusted each time
 /// [_currentAmount]: current percentage of a produce
-class Fruit implements Comparable<Fruit> {
+class ProduceItem implements Comparable<ProduceItem> {
   static const Min = 25;
   static const Max = 100;
   static const int AdjustAmount = 5;
   final String id;
   final String name;
   final String imagePath;
-  final String imageURL;
+  String _imageURL = '';
   int _currentAmount = Min;
 
-  Fruit({
+  ProduceItem({
     @required this.id,
     @required this.name,
     @required this.imagePath,
-    @required this.imageURL,
-  });
+    imageURL = '',
+  }) {
+    _imageURL = imageURL;
+  }
+
+  /// Return a copy of [_imageURL]
+  String get imageURL {
+    return _imageURL;
+  }
 
   /// Return a copy of [_currentAmount]
   int get amount {
     return _currentAmount;
+  }
+
+  /// Set image URL
+  void setImageURL(String imageURL) {
+    _imageURL = imageURL;
   }
 
   /// Increase [_currentAmount]
@@ -52,7 +64,7 @@ class Fruit implements Comparable<Fruit> {
   }
 
   @override
-  int compareTo(Fruit other) {
+  int compareTo(ProduceItem other) {
     return this.name.compareTo(other.name);
   }
 }

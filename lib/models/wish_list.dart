@@ -6,40 +6,41 @@ import 'package:fruitfairy/services/firestore_service.dart';
 /// A class that represents a charity's wishlist
 /// [_produce]: list of produce ids selected by the charity
 class WishList extends ChangeNotifier {
-  final PriorityQueue<String> _produce = PriorityQueue();
+  final PriorityQueue<String> _produceIds = PriorityQueue();
 
-  /// Return a copy of [_produce] sorted in alphabetical order
-  UnmodifiableListView<String> get produce {
-    return UnmodifiableListView(_produce.toList());
+  /// Return a copy of [_produceIds] sorted in alphabetical order
+  UnmodifiableListView<String> get produceIds {
+    return UnmodifiableListView(_produceIds.toList());
   }
 
-  /// Add [fruitId] to list
-  void pickFruit(String fruitId) {
-    _produce.add(fruitId);
+  /// Add [produceId] to list
+  void pickProduce(String produceId) {
+    _produceIds.add(produceId);
     notifyListeners();
   }
 
-  /// Remove [fruitId] from list
-  void removeFruit(String fruitId) {
-    _produce.remove(fruitId);
+  /// Remove [produceId] from list
+  void removeProduce(String produceId) {
+    _produceIds.remove(produceId);
     notifyListeners();
   }
 
-  /// Parse [fruitId] from database
+  /// Parse [produceId] from database
   /// [wishlistData]: A Map with keys that are declared in [FireStoreService]
-  void fromDB(Map<String, dynamic> wishlistData) {
-    _produce.clear();
-    if (wishlistData != null) {
-      wishlistData[FireStoreService.kProduceIds].forEach((fruitId) {
-        _produce.add(fruitId);
+  void fromDB(Map<String, dynamic> userData) {
+    _produceIds.clear();
+    List<dynamic> wishlist = userData[FireStoreService.kWishList];
+    if (wishlist != null) {
+      wishlist.forEach((produceId) {
+        _produceIds.add(produceId);
       });
     }
     notifyListeners();
   }
 
-  /// Set [_produce] to default value
+  /// Set [_produceIds] to default value
   void clear() {
-    _produce.clear();
+    _produceIds.clear();
     notifyListeners();
   }
 }

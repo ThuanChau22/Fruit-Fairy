@@ -7,7 +7,7 @@ import 'package:strings/strings.dart';
 //
 import 'package:fruitfairy/models/charity.dart';
 import 'package:fruitfairy/models/donation.dart';
-import 'package:fruitfairy/models/fruit.dart';
+import 'package:fruitfairy/models/produce_item.dart';
 import 'package:fruitfairy/services/map_service.dart';
 import 'package:fruitfairy/services/session_token.dart';
 
@@ -18,15 +18,16 @@ class FireStoreService {
   static const String kCharities = 'charities';
   static const String kCharityId = 'charityId';
   static const String kDonorId = 'donorId';
-  static const String kDonorName = 'donorName';
-  static const String kFruit = 'fruit';
+  static const String kProduceId = 'produceId';
   static const String kAmount = 'amount';
   static const String kStatus = 'status';
+  static const String kCreatedAt = 'createdAt';
 
   /// produce
   static const String kProduce = 'produce';
-  static const String kFruitName = 'name';
-  static const String kFruitPath = 'path';
+  static const String kProduceName = 'name';
+  static const String kProducePath = 'path';
+  static const String kProduceEnabled = 'enabled';
 
   /// users
   static const String kUsers = 'users';
@@ -44,10 +45,7 @@ class FireStoreService {
   static const String kAddressCity = 'city';
   static const String kAddressState = 'state';
   static const String kAddressZip = 'zip';
-
-  /// wishlists
-  static const String kWishLists = 'wishlists';
-  static const String kProduceIds = 'produceIds';
+  static const String kWishList = 'wishlist';
 
   ///////////////
 
@@ -56,14 +54,12 @@ class FireStoreService {
 
   CollectionReference _usersDB;
   CollectionReference _produceDB;
-  CollectionReference _wishlistsDB;
 
   String _uid;
 
   FireStoreService() {
     _usersDB = _firestore.collection(kUsers);
     _produceDB = _firestore.collection(kProduce);
-    _wishlistsDB = _firestore.collection(kWishLists);
   }
 
   FirebaseFirestore get instance {
@@ -77,7 +73,8 @@ class FireStoreService {
   StreamSubscription<DocumentSnapshot> userStream(
     Function(Map<String, dynamic>) onData,
   ) {
-    return _usersDB.doc(_uid).snapshots().listen(
+    DocumentReference doc = _usersDB.doc(_uid);
+    return doc.snapshots().listen(
       (snapshot) {
         onData(snapshot.data());
       },
@@ -90,19 +87,21 @@ class FireStoreService {
   StreamSubscription<QuerySnapshot> produceStream(
     Function(dynamic) onData,
   ) {
-    return _produceDB.snapshots().listen(
+    Query query = _produceDB.where(kProduceEnabled, isEqualTo: true);
+    return query.snapshots().listen(
       (snapshot) async {
-        Map<String, Fruit> snapshotData = {};
+        Map<String, ProduceItem> snapshotData = {};
         for (QueryDocumentSnapshot doc in snapshot.docs) {
           Map<String, dynamic> data = doc.data();
-          snapshotData[doc.id] = Fruit(
+          snapshotData[doc.id] = ProduceItem(
             id: doc.id,
-            name: data[FireStoreService.kFruitName],
-            imagePath: data[FireStoreService.kFruitPath],
-            imageURL: await imageURL(data[FireStoreService.kFruitPath]),
+            name: data[kProduceName],
+            imagePath: data[kProducePath],
           );
-          onData(snapshotData[doc.id]);
         }
+        await Future.wait(snapshotData.values.map((produceItem) async {
+          produceItem.setImageURL(await imageURL(produceItem.imagePath));
+        }));
         onData(snapshotData);
       },
       onError: (e) {
@@ -120,36 +119,18 @@ class FireStoreService {
     }
   }
 
-  StreamSubscription<DocumentSnapshot> wishlistStream(
-    Function(Map<String, dynamic>) onData,
-  ) {
-    return _wishlistsDB.doc(_uid).snapshots().listen(
-      (snapshot) async {
-        onData(snapshot.data());
-      },
-      onError: (e) {
-        print(e);
-      },
-    );
-  }
-
   Future<List<Charity>> charitySuggestions({
     @required Donation donation,
     @required double limitDistance,
     @required int limitCharity,
   }) async {
-    List<String> selectedProduce = donation.produce;
-    Query query = _wishlistsDB.where(
-      kProduceIds,
-      arrayContainsAny: selectedProduce,
-    );
+    List<String> selectedProduce = donation.produce.keys.toList();
+    Query query = _usersDB.where(kWishList, arrayContainsAny: selectedProduce);
     QuerySnapshot snapshot = await query.get();
     List<Charity> charities = [];
-    for (DocumentSnapshot wishListDoc in snapshot.docs) {
-      DocumentSnapshot userDoc = await _usersDB.doc(wishListDoc.id).get();
+    for (DocumentSnapshot userDoc in snapshot.docs) {
       Charity charity = Charity(userDoc.id);
       charity.fromUsersDB(userDoc.data());
-      charity.fromWishListsDB(wishListDoc.data());
       charities.add(charity);
     }
 
@@ -238,15 +219,15 @@ class FireStoreService {
       await updateCharityName(
         camelize(charityName),
       );
-      String sessionToken = SessionToken().getToken();
+      SessionToken sessionToken = SessionToken();
       List<Map<String, String>> results = await MapService.addressSuggestions(
         '$street, $city, $state $zip',
-        sessionToken: sessionToken,
+        sessionToken: sessionToken.getToken(),
       );
       if (results.isNotEmpty) {
         Map<String, String> charityAddress = await MapService.addressDetails(
           results.first[MapService.kPlaceId],
-          sessionToken: sessionToken,
+          sessionToken: sessionToken.getToken(),
         );
         await updateUserAddress(
           street: charityAddress[MapService.kStreet],
@@ -255,9 +236,8 @@ class FireStoreService {
           zip: charityAddress[MapService.kZipCode],
         );
       }
-      await _wishlistsDB.doc(_uid).set({
-        kProduceIds: [],
-      });
+      sessionToken.clear();
+      await updateWishList([]);
     } catch (e) {
       throw e.message;
     }
@@ -358,28 +338,16 @@ class FireStoreService {
   }
 
   Future<void> updateWishList(
-    List<String> produceIds,
+    List<String> wishlist,
   ) async {
     if (_uid == null) {
       print('UID Unset');
       return;
     }
     try {
-      await _wishlistsDB.doc(_uid).update({
-        kProduceIds: produceIds,
+      await _usersDB.doc(_uid).update({
+        kWishList: wishlist,
       });
-    } catch (e) {
-      throw e.message;
-    }
-  }
-
-  Future<void> deleteWishList() async {
-    if (_uid == null) {
-      print('UID Unset');
-      return;
-    }
-    try {
-      await _wishlistsDB.doc(_uid).delete();
     } catch (e) {
       throw e.message;
     }

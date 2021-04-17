@@ -5,7 +5,7 @@ import 'package:modal_progress_hud/modal_progress_hud.dart';
 //
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/donation.dart';
-import 'package:fruitfairy/models/fruit.dart';
+import 'package:fruitfairy/models/produce_item.dart';
 import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/screens/donation_basket_screen.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
@@ -46,7 +46,7 @@ class _DonationProduceSelectionScreenState
           appBar: AppBar(title: Text('Produce Selection')),
           body: SafeArea(
             child: ModalProgressHUD(
-              inAsyncCall: produce.fruits.isEmpty,
+              inAsyncCall: produce.map.isEmpty,
               progressIndicator: CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
               ),
@@ -54,7 +54,7 @@ class _DonationProduceSelectionScreenState
                 children: [
                   instructionLabel(),
                   searchInputField(),
-                  fruitOptions(),
+                  produceOptions(),
                   buttonSection(),
                 ],
               ),
@@ -95,7 +95,7 @@ class _DonationProduceSelectionScreenState
         right: screen.width * 0.05,
       ),
       child: InputField(
-        label: 'Enter Fruit Name',
+        label: 'Enter Produce Name',
         controller: _search,
         helperText: null,
         prefixIcon: Icon(
@@ -111,7 +111,7 @@ class _DonationProduceSelectionScreenState
     );
   }
 
-  Widget fruitOptions() {
+  Widget produceOptions() {
     Size screen = MediaQuery.of(context).size;
     int axisCount = 2;
     if (screen.width >= 600) {
@@ -137,21 +137,21 @@ class _DonationProduceSelectionScreenState
     List<Widget> fruitTiles = [];
     Donation donation = context.watch<Donation>();
     Produce produce = context.read<Produce>();
-    produce.fruits.forEach((fruitId, fruit) {
+    produce.map.forEach((produceId, produceItem) {
       if (RegExp(
         '^${_search.text.trim()}',
         caseSensitive: false,
-      ).hasMatch(fruitId)) {
-        bool selected = donation.produce.contains(fruitId);
+      ).hasMatch(produceItem.name)) {
+        bool selected = donation.produce.containsKey(produceId);
         fruitTiles.add(selectableFruitTile(
-          fruit: fruit,
+          produceItem: produceItem,
           selected: selected,
           onTap: () {
             setState(() {
               if (selected) {
-                donation.removeFruit(fruitId);
+                donation.removeProduce(produceId);
               } else {
-                donation.pickFruit(fruitId);
+                donation.pickProduce(produceId, produceItem);
               }
             });
           },
@@ -162,7 +162,7 @@ class _DonationProduceSelectionScreenState
   }
 
   Widget selectableFruitTile({
-    @required Fruit fruit,
+    @required ProduceItem produceItem,
     @required bool selected,
     @required GestureTapCallback onTap,
   }) {
@@ -181,8 +181,8 @@ class _DonationProduceSelectionScreenState
         child: Stack(
           children: [
             FruitTile(
-              fruitName: fruit.name,
-              fruitImage: fruit.imageURL,
+              fruitName: produceItem.name,
+              fruitImage: produceItem.imageURL,
             ),
             Container(
               decoration: BoxDecoration(

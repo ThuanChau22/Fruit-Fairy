@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 //
 import 'package:fruitfairy/constant.dart';
-import 'package:fruitfairy/models/fruit.dart';
+import 'package:fruitfairy/models/produce_item.dart';
 import 'package:fruitfairy/models/donation.dart';
-import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/screens/donation_contact_screen.dart';
 import 'package:fruitfairy/widgets/custom_grid.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
@@ -158,16 +157,13 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
 
   List<Widget> fruitTiles() {
     List<Widget> fruitTiles = [];
-    Produce produce = context.read<Produce>();
-    Map<String, Fruit> fruits = produce.fruits;
     Donation donation = context.watch<Donation>();
-    donation.produce.forEach((fruitId) {
+    donation.produce.forEach((produceId, produceItem) {
       fruitTiles.add(removableFruitTile(
-        fruit: fruits[fruitId],
+        produceItem: produceItem,
         onPressed: () {
           setState(() {
-            fruits[fruitId].clear();
-            donation.removeFruit(fruitId);
+            donation.removeProduce(produceId);
           });
         },
       ));
@@ -176,7 +172,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
   }
 
   Widget removableFruitTile({
-    @required Fruit fruit,
+    @required ProduceItem produceItem,
     @required VoidCallback onPressed,
   }) {
     Size screen = MediaQuery.of(context).size;
@@ -201,10 +197,10 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
                 borderRadius: BorderRadius.circular(20.0),
               ),
               child: needCollect
-                  ? adjustableFruitTile(fruit)
+                  ? adjustableFruitTile(produceItem)
                   : FruitTile(
-                      fruitName: fruit.name,
-                      fruitImage: fruit.imageURL,
+                      fruitName: produceItem.name,
+                      fruitImage: produceItem.imageURL,
                     ),
             ),
           ),
@@ -231,7 +227,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
     );
   }
 
-  Widget adjustableFruitTile(Fruit fruit) {
+  Widget adjustableFruitTile(ProduceItem produceItem) {
     Size screen = MediaQuery.of(context).size;
     return Container(
       decoration: BoxDecoration(
@@ -252,8 +248,8 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
                 top: screen.height * 0.01,
               ),
               child: FruitTile(
-                fruitName: fruit.name,
-                fruitImage: fruit.imageURL,
+                fruitName: produceItem.name,
+                fruitImage: produceItem.imageURL,
               ),
             ),
           ),
@@ -265,7 +261,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
                 Padding(
                   padding: EdgeInsets.only(left: 20.0),
                   child: Text(
-                    '${fruit.amount}%',
+                    '${produceItem.amount}%',
                     style: TextStyle(
                       color: kPrimaryColor,
                       fontSize: 30.0,
@@ -280,7 +276,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
                       icon: Icons.remove,
                       onPressed: () {
                         setState(() {
-                          fruit.decrease();
+                          produceItem.decrease();
                         });
                       },
                     ),
@@ -288,7 +284,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
                       icon: Icons.add,
                       onPressed: () {
                         setState(() {
-                          fruit.increase();
+                          produceItem.increase();
                         });
                       },
                     ),

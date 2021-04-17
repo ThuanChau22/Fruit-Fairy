@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'package:flutter/foundation.dart';
 //
 import 'package:fruitfairy/models/charity.dart';
+import 'package:fruitfairy/models/produce_item.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
 
 /// A class that represents a dontation
@@ -16,8 +17,8 @@ import 'package:fruitfairy/services/firestore_service.dart';
 /// [MaxCharity]: maximum number of charity can be selected
 class Donation extends ChangeNotifier {
   static const int MaxCharity = 3;
-  final List<String> _produce = [];
   final List<Charity> _charities = [];
+  final Map<String, ProduceItem> _produce = {};
   final Map<String, String> _address = {};
   final Map<String, String> _phone = {};
   bool _needCollected = true;
@@ -29,14 +30,14 @@ class Donation extends ChangeNotifier {
     return _needCollected;
   }
 
-  /// Return a copy of [_produce]
-  UnmodifiableListView<String> get produce {
-    return UnmodifiableListView(_produce);
-  }
-
   /// Return a copy of [_charities]
   UnmodifiableListView<Charity> get charities {
     return UnmodifiableListView(_charities);
+  }
+
+  /// Return a copy of [_produce]
+  UnmodifiableMapView<String, ProduceItem> get produce {
+    return UnmodifiableMapView(_produce);
   }
 
   /// Return a copy of [_address]
@@ -68,16 +69,17 @@ class Donation extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Add [fruitId] to list
-  void pickFruit(String fruitId) {
-    _produce.add(fruitId);
+  /// Add [produceId] to list
+  void pickProduce(String produceId, ProduceItem produceItem) {
+    _produce[produceId] = produceItem;
     _updated = true;
     notifyListeners();
   }
 
-  /// Remove [fruitId] from list
-  void removeFruit(String fruitId) {
-    _produce.remove(fruitId);
+  /// Remove [produceId] from list
+  void removeProduce(String produceId) {
+    _produce[produceId].clear();
+    _produce.remove(produceId);
     _updated = true;
     notifyListeners();
   }

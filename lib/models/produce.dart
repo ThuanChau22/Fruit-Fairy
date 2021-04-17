@@ -1,41 +1,30 @@
 import 'dart:collection';
 import 'package:flutter/foundation.dart';
 //
-import 'package:fruitfairy/models/fruit.dart';
+import 'package:fruitfairy/models/produce_item.dart';
 
 /// A class holds a list of all possible produce that a user can select
-/// [_fruits]: a map of [Fruit] that can be access through [fruit.id]
+/// [_produce]: a map of [ProduceItem] that can be access through [ProduceItem.id]
 class Produce extends ChangeNotifier {
-  final Map<String, Fruit> _fruits = SplayTreeMap();
+  final Map<String, ProduceItem> _produce = SplayTreeMap();
 
-  /// Return a copy of [_fruits]
-  UnmodifiableMapView<String, Fruit> get fruits {
-    return UnmodifiableMapView(_fruits);
-  }
-
-  /// Parse [produceData] as [Fruit] from database
-  /// This is call every time a [Fruit] is retrieved
-  void fromDBLoading(Fruit produceData) {
-    _fruits[produceData.id] = produceData;
-    notifyListeners();
+  /// Return a copy of [_produce]
+  UnmodifiableMapView<String, ProduceItem> get map {
+    return UnmodifiableMapView(_produce);
   }
 
   /// Parse [produceData] as [Map] from database
-  /// This is call after all [Fruit] are retrieved
-  /// This method ensures data is retrieved correctly
-  void fromDBComplete(Map<String, Fruit> produceData) {
-    if (produceData.length != _fruits.length) {
-      clear();
-      produceData.forEach((id, fruit) {
-        _fruits[id] = fruit;
-      });
-    }
+  void fromDB(Map<String, ProduceItem> produceData) {
+    clear();
+    produceData.forEach((produceId, produceItem) {
+      _produce[produceId] = produceItem;
+    });
     notifyListeners();
   }
 
-  /// Set [_fruits] to default value
+  /// Set [_produce] to default value
   void clear() {
-    _fruits.clear();
+    _produce.clear();
     notifyListeners();
   }
 }

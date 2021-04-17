@@ -368,7 +368,6 @@ class FireAuthService {
   Future<void> deleteAccount({
     @required String email,
     @required String password,
-    bool isCharity = false,
   }) async {
     try {
       // Re-authenticate user to verified user's action
@@ -382,9 +381,6 @@ class FireAuthService {
       FireStoreService fireStoreService = FireStoreService();
       fireStoreService.setUID(user.uid);
       await fireStoreService.deleteAccount();
-      if (isCharity) {
-        await fireStoreService.deleteWishList();
-      }
 
       // Remove user from Authentication
       await user.delete();

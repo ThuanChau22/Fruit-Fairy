@@ -393,7 +393,6 @@ class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
         await context.read<FireAuthService>().deleteAccount(
               email: _email.text.trim(),
               password: password,
-              isCharity: true,
             );
         _setDialogState(() => _deleteMode = DeleteMode.Success);
         await Future.delayed(Duration(milliseconds: 1500));

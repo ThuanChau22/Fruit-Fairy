@@ -8,7 +8,6 @@ import 'package:strings/strings.dart';
 //
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
-import 'package:fruitfairy/models/fruit.dart';
 import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/models/wish_list.dart';
 import 'package:fruitfairy/screens/charity_donation_detail_screen.dart';
@@ -51,21 +50,23 @@ class _HomeCharityScreenState extends State<HomeCharityScreen> {
     super.initState();
     FireStoreService fireStoreService = context.read<FireStoreService>();
     WishList wishlist = context.read<WishList>();
+    _wishlistStream = fireStoreService.userStream((data) {
+      if (data != null) {
+        wishlist.fromDB(data);
+      }
+    });
     Produce produce = context.read<Produce>();
     _produceStream = fireStoreService.produceStream((data) {
-      if (data is Fruit) {
-        produce.fromDBLoading(data);
-      }
-      if (data is Map<String, Fruit>) {
-        produce.fromDBComplete(data);
+      if (data != null) {
+        produce.fromDB(data);
         bool removed = false;
-        List.from(wishlist.produce).forEach((fruitId) {
-          if (!produce.fruits.containsKey(fruitId)) {
-            wishlist.removeFruit(fruitId);
+        List.from(wishlist.produceIds).forEach((produceId) {
+          if (!produce.map.containsKey(produceId)) {
+            wishlist.removeProduce(produceId);
             removed = true;
           }
         });
-        fireStoreService.updateWishList(wishlist.produce);
+        fireStoreService.updateWishList(wishlist.produceIds);
         if (removed) {
           MessageBar(
             context,
@@ -74,9 +75,6 @@ class _HomeCharityScreenState extends State<HomeCharityScreen> {
           ).show();
         }
       }
-    });
-    _wishlistStream = fireStoreService.wishlistStream((data) {
-      wishlist.fromDB(data);
     });
   }
 
