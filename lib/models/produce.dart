@@ -13,23 +13,12 @@ class Produce extends ChangeNotifier {
     return UnmodifiableMapView(_produce);
   }
 
-  /// Parse [produceData] as [ProduceItem] from database
-  /// This is call every time a [ProduceItem] is retrieved
-  void fromDBLoading(ProduceItem produceData) {
-    _produce[produceData.id] = produceData;
-    notifyListeners();
-  }
-
   /// Parse [produceData] as [Map] from database
-  /// This is call after all [ProduceItem] are retrieved
-  /// This method ensures data is retrieved correctly
-  void fromDBComplete(Map<String, ProduceItem> produceData) {
-    if (produceData.length != _produce.length) {
-      clear();
-      produceData.forEach((produceId, produce) {
-        _produce[produceId] = produce;
-      });
-    }
+  void fromDB(Map<String, ProduceItem> produceData) {
+    clear();
+    produceData.forEach((produceId, produceItem) {
+      _produce[produceId] = produceItem;
+    });
     notifyListeners();
   }
 

@@ -17,19 +17,28 @@ class ProduceItem implements Comparable<ProduceItem> {
   final String id;
   final String name;
   final String imagePath;
-  final String imageURL;
+  String _imageURL = '';
   int _currentAmount = Min;
 
   ProduceItem({
     @required this.id,
     @required this.name,
     @required this.imagePath,
-    @required this.imageURL,
   });
+
+  /// Return a copy of [_imageURL]
+  String get imageURL {
+    return _imageURL;
+  }
 
   /// Return a copy of [_currentAmount]
   int get amount {
     return _currentAmount;
+  }
+
+  /// Set image URL
+  void setImageURL(String imageURL) {
+    _imageURL = imageURL;
   }
 
   /// Increase [_currentAmount]
