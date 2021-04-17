@@ -18,10 +18,10 @@ class FireStoreService {
   static const String kCharities = 'charities';
   static const String kCharityId = 'charityId';
   static const String kDonorId = 'donorId';
-  static const String kDonorName = 'donorName';
-  static const String kFruit = 'fruit';
+  static const String kProduceId = 'produceId';
   static const String kAmount = 'amount';
   static const String kStatus = 'status';
+  static const String kCreatedAt = 'createdAt';
 
   /// produce
   static const String kProduce = 'produce';
@@ -97,10 +97,11 @@ class FireStoreService {
             id: doc.id,
             name: data[kProduceName],
             imagePath: data[kProducePath],
-            imageURL: await imageURL(data[kProducePath]),
           );
-          onData(snapshotData[doc.id]);
         }
+        await Future.wait(snapshotData.values.map((produceItem) async {
+          produceItem.setImageURL(await imageURL(produceItem.imagePath));
+        }));
         onData(snapshotData);
       },
       onError: (e) {

@@ -24,7 +24,10 @@ class ProduceItem implements Comparable<ProduceItem> {
     @required this.id,
     @required this.name,
     @required this.imagePath,
-  });
+    imageURL = '',
+  }) {
+    _imageURL = imageURL;
+  }
 
   /// Return a copy of [_imageURL]
   String get imageURL {

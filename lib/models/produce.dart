@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:fruitfairy/models/produce_item.dart';
 
 /// A class holds a list of all possible produce that a user can select
-/// [_produce]: a map of [ProduceItem] that can be access through [produce.id]
+/// [_produce]: a map of [ProduceItem] that can be access through [ProduceItem.id]
 class Produce extends ChangeNotifier {
   final Map<String, ProduceItem> _produce = SplayTreeMap();
 
