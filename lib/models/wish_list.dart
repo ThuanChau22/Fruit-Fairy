@@ -48,7 +48,8 @@ class WishList extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Set [_produceIds] to default value
+  /// Set object to initial state
+  /// Cancel all [_subscriptions]
   void clear() {
     _subscriptions.forEach((subscription) {
       subscription.cancel();

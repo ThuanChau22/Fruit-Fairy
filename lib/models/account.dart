@@ -138,8 +138,8 @@ class Account extends ChangeNotifier {
     _address.clear();
   }
 
+  /// Set object to initial state
   /// Cancel all [_subscriptions]
-  /// Set all fields to default values
   void clear() {
     _subscriptions.forEach((subscription) {
       subscription.cancel();
