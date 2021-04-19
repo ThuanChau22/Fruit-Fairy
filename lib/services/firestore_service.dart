@@ -8,6 +8,7 @@ import 'package:strings/strings.dart';
 import 'package:fruitfairy/models/charity.dart';
 import 'package:fruitfairy/models/donation.dart';
 import 'package:fruitfairy/models/produce_item.dart';
+import 'package:fruitfairy/models/status.dart';
 import 'package:fruitfairy/services/map_service.dart';
 import 'package:fruitfairy/services/session_token.dart';
 
@@ -15,9 +16,10 @@ class FireStoreService {
   /// Database fields
 
   /// donations
-  static const String kCharities = 'charities';
-  static const String kCharityId = 'charityId';
+  static const String kDonations = 'donations';
   static const String kDonorId = 'donorId';
+  static const String kCharityIds = 'charityIds';
+  static const String kNeedCollected = 'needCollected';
   static const String kProduceId = 'produceId';
   static const String kAmount = 'amount';
   static const String kStatus = 'status';
@@ -54,12 +56,14 @@ class FireStoreService {
 
   CollectionReference _usersDB;
   CollectionReference _produceDB;
+  CollectionReference _donationsDB;
 
   String _uid;
 
   FireStoreService() {
     _usersDB = _firestore.collection(kUsers);
     _produceDB = _firestore.collection(kProduce);
+    _donationsDB = _firestore.collection(kDonations);
   }
 
   FirebaseFirestore get instance {
@@ -188,11 +192,9 @@ class FireStoreService {
     try {
       await _usersDB.doc(_uid).set({
         kEmail: email,
-      });
-      await updateDonorName(
         firstName: firstName,
         lastName: lastName,
-      );
+      });
     } catch (e) {
       throw e.message;
     }
@@ -215,10 +217,9 @@ class FireStoreService {
       await _usersDB.doc(_uid).set({
         kEmail: email,
         kEIN: ein,
+        kCharityName: camelize(charityName),
+        kWishList: [],
       });
-      await updateCharityName(
-        camelize(charityName),
-      );
       SessionToken sessionToken = SessionToken();
       List<Map<String, String>> results = await MapService.addressSuggestions(
         '$street, $city, $state $zip',
@@ -237,7 +238,6 @@ class FireStoreService {
         );
       }
       sessionToken.clear();
-      await updateWishList([]);
     } catch (e) {
       throw e.message;
     }
@@ -349,6 +349,49 @@ class FireStoreService {
         kWishList: wishlist,
       });
     } catch (e) {
+      throw e.message;
+    }
+  }
+
+  Future<void> addDonation(Donation donation) async {
+    if (_uid == null) {
+      print('UID Unset');
+      return;
+    }
+    try {
+      Map<String, String> address = donation.address;
+      Map<String, String> phone = donation.phone;
+      _donationsDB.add({
+        kDonorId: _uid,
+        kCharityIds: donation.charities.map((charity) {
+          return charity.id;
+        }).toList(),
+        kNeedCollected: donation.needCollected,
+        kProduce: donation.produce.entries.map((entry) {
+          Map<String, dynamic> produce = {
+            kProduceId: entry.key,
+          };
+          if (donation.needCollected) {
+            produce[kAmount] = entry.value.amount;
+          }
+          return produce;
+        }).toList(),
+        kAddress: {
+          kAddressStreet: address[kAddressStreet],
+          kAddressCity: address[kAddressCity],
+          kAddressState: address[kAddressState],
+          kAddressZip: address[kAddressZip],
+        },
+        kPhone: {
+          kPhoneCountry: phone[kPhoneCountry],
+          kPhoneDialCode: phone[kPhoneDialCode],
+          kPhoneNumber: phone[kPhoneNumber],
+        },
+        kStatus: Status.init(),
+        kCreatedAt: Timestamp.now(),
+      });
+    } catch (e) {
+      print(e);
       throw e.message;
     }
   }
