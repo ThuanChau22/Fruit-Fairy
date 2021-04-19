@@ -9,30 +9,25 @@ import 'package:fruitfairy/services/firestore_service.dart';
 /// [_needCollected]: specify whether
 /// the donor need help collecting
 /// [_produce]: selected produce IDs
-/// [_charities]: selected charities
 /// [_address]: donor's address
 /// [_phone]: donor's phone number
+/// [_charities]: selected charities
 /// [_updated]: object state's update status
 /// [_onEmptyBasket]: a callback that handles when [_produce] is empty
 /// [MaxCharity]: maximum number of charity can be selected
 class Donation extends ChangeNotifier {
   static const int MaxCharity = 3;
-  final List<Charity> _charities = [];
+  bool _needCollected = true;
   final Map<String, ProduceItem> _produce = {};
   final Map<String, String> _address = {};
   final Map<String, String> _phone = {};
-  bool _needCollected = true;
+  final List<Charity> _charities = [];
   bool _updated = false;
   VoidCallback _onEmptyBasket;
 
   /// Return a copy of [_needCollected]
   bool get needCollected {
     return _needCollected;
-  }
-
-  /// Return a copy of [_charities]
-  UnmodifiableListView<Charity> get charities {
-    return UnmodifiableListView(_charities);
   }
 
   /// Return a copy of [_produce]
@@ -48,6 +43,11 @@ class Donation extends ChangeNotifier {
   /// Return a copy of [_phone]
   UnmodifiableMapView<String, String> get phone {
     return UnmodifiableMapView(_phone);
+  }
+
+  /// Return a copy of [_charities]
+  UnmodifiableListView<Charity> get charities {
+    return UnmodifiableListView(_charities);
   }
 
   /// Return [_updated] status

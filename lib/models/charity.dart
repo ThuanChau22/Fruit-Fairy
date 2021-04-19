@@ -11,9 +11,9 @@ import 'package:fruitfairy/services/firestore_service.dart';
 class Charity implements Comparable<Charity> {
   /// Set default values for all fields
   final String id;
+  String _name = '';
   final Set<String> _produce = {};
   final Map<String, String> _address = {};
-  String _name = '';
   double _score = 0;
 
   /// Instantiate with charity document [id]
