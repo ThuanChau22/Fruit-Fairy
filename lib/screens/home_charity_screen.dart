@@ -1,7 +1,5 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
 import 'package:strings/strings.dart';
@@ -32,12 +30,9 @@ class HomeCharityScreen extends StatefulWidget {
 class _HomeCharityScreenState extends State<HomeCharityScreen> {
   bool _showSpinner = false;
 
-  StreamSubscription<DocumentSnapshot> _wishlistStream;
-
   void _signOut() async {
-    _wishlistStream.cancel();
-    context.read<Produce>().clear();
     context.read<WishList>().clear();
+    context.read<Produce>().clear();
     // Must be called last
     await widget.signOut();
   }
@@ -47,11 +42,11 @@ class _HomeCharityScreenState extends State<HomeCharityScreen> {
     super.initState();
     FireStoreService fireStore = context.read<FireStoreService>();
     WishList wishlist = context.read<WishList>();
-    _wishlistStream = fireStore.userStream((data) {
+    wishlist.addStream(fireStore.userStream((data) {
       if (data != null) {
         wishlist.fromDB(data);
       }
-    });
+    }));
     Produce produce = context.read<Produce>();
     produce.addStream(fireStore.produceStream((data) {
       if (data != null) {
