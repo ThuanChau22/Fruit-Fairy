@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
 //
 import 'package:fruitfairy/constant.dart';
@@ -18,8 +19,13 @@ class DonationConfirmScreen extends StatefulWidget {
 }
 
 class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
-  void confirm() {
+  bool _showSpinner = false;
+
+  void confirm() async {
+    setState(() => _showSpinner = true);
     Donation donation = context.read<Donation>();
+    FireStoreService fireStoreService = context.read<FireStoreService>();
+    await fireStoreService.addDonation(donation);
     donation.produce.values.forEach((produceItem) {
       produceItem.clear();
     });
@@ -27,6 +33,7 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
     Navigator.of(context).popUntil((route) {
       return route.settings.name == HomeScreen.id;
     });
+    setState(() => _showSpinner = false);
   }
 
   @override
@@ -34,11 +41,17 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
     return Scaffold(
       appBar: AppBar(title: Text('Review and Confirm')),
       body: SafeArea(
-        child: Column(
-          children: [
-            reviewDetails(),
-            buttonSection(),
-          ],
+        child: ModalProgressHUD(
+          inAsyncCall: _showSpinner,
+          progressIndicator: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
+          ),
+          child: Column(
+            children: [
+              reviewDetails(),
+              buttonSection(),
+            ],
+          ),
         ),
       ),
     );
@@ -158,6 +171,7 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
           charityName: charity.name,
           selectedOrder: '${priority++}',
           onTap: () {},
+          disabled: true,
         ),
       ));
     });
