@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
 import 'package:strings/strings.dart';
 //
@@ -10,33 +9,16 @@ import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/models/wish_list.dart';
 import 'package:fruitfairy/screens/charity_donation_detail_screen.dart';
 import 'package:fruitfairy/screens/charity_wishlist_screen.dart';
-import 'package:fruitfairy/screens/profile_charity_screen.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
 import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
-import 'package:fruitfairy/widgets/scrollable_layout.dart';
 
-enum Options { Edit, SignOut, WishList }
-
-class HomeCharityScreen extends StatefulWidget {
-  final Future<void> Function() signOut;
-
-  HomeCharityScreen(this.signOut);
-
+class HomeCharityBody extends StatefulWidget {
   @override
-  _HomeCharityScreenState createState() => _HomeCharityScreenState();
+  _HomeCharityBodyState createState() => _HomeCharityBodyState();
 }
 
-class _HomeCharityScreenState extends State<HomeCharityScreen> {
-  bool _showSpinner = false;
-
-  void _signOut() async {
-    context.read<WishList>().clear();
-    context.read<Produce>().clear();
-    // Must be called last
-    await widget.signOut();
-  }
-
+class _HomeCharityBodyState extends State<HomeCharityBody> {
   @override
   void initState() {
     super.initState();
@@ -73,174 +55,93 @@ class _HomeCharityScreenState extends State<HomeCharityScreen> {
   @override
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Home'),
-        actions: [settingsIcon()],
-      ),
-      body: SafeArea(
-        child: ModalProgressHUD(
-          inAsyncCall: _showSpinner,
-          progressIndicator: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
-          ),
-          child: ScrollableLayout(
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                vertical: screen.height * 0.03,
-              ),
-              child: Column(
-                children: [
-                  greeting(),
-                  wishListButton(),
-                  //TODO: Donation tracking status
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 36.0),
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: Text(
-                        'Review Incoming Donations',
-                        style: TextStyle(
-                          fontSize: 25.0,
-                          fontWeight: FontWeight.bold,
-                          color: kLabelColor,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Container(
-                    child: Column(
-                      children: [
-                        GestureDetector(
-                            onTap: () {
-                              Navigator.of(context)
-                                  .pushNamed(CharityDonationDetailScreen.id);
-                            },
-                            child: HistoryTile()),
-                        HistoryTile(),
-                        HistoryTile(),
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    height: screen.height * 0.01,
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 36.0),
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: Text(
-                        'Donations In Progress',
-                        style: TextStyle(
-                          fontSize: 25.0,
-                          fontWeight: FontWeight.bold,
-                          color: kLabelColor,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Container(
-                    child: Column(
-                      children: [
-                        HistoryTile(),
-                        HistoryTile(),
-                        HistoryTile(),
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    height: screen.height * 0.01,
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 36.0),
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: Text(
-                        'Donations Completed',
-                        style: TextStyle(
-                          fontSize: 25.0,
-                          fontWeight: FontWeight.bold,
-                          color: kLabelColor,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Container(
-                    child: Column(
-                      children: [
-                        HistoryTile(),
-                        HistoryTile(),
-                        HistoryTile(),
-                      ],
-                    ),
-                  ),
-                ],
+    return Column(
+      children: [
+        greeting(),
+        wishListButton(),
+        //TODO: Donation tracking status
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 36.0),
+          child: Align(
+            alignment: Alignment.center,
+            child: Text(
+              'Review Incoming Donations',
+              style: TextStyle(
+                fontSize: 25.0,
+                fontWeight: FontWeight.bold,
+                color: kLabelColor,
               ),
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget settingsIcon() {
-    return Container(
-      width: 50.0,
-      child: PopupMenuButton<Options>(
-        offset: Offset(0.0, 25.0),
-        icon: Container(
-          decoration: ShapeDecoration(
-            color: kObjectColor,
-            shape: CircleBorder(
-              side: BorderSide.none,
-            ),
+        Container(
+          child: Column(
+            children: [
+              GestureDetector(
+                  onTap: () {
+                    HapticFeedback.mediumImpact();
+                    Navigator.of(context)
+                        .pushNamed(CharityDonationDetailScreen.id);
+                  },
+                  child: HistoryTile()),
+              HistoryTile(),
+              HistoryTile(),
+            ],
           ),
-          child: Center(
-            child: Icon(
-              Icons.settings,
-              size: 25.0,
-              color: kPrimaryColor,
+        ),
+        SizedBox(
+          height: screen.height * 0.01,
+        ),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 36.0),
+          child: Align(
+            alignment: Alignment.center,
+            child: Text(
+              'Donations In Progress',
+              style: TextStyle(
+                fontSize: 25.0,
+                fontWeight: FontWeight.bold,
+                color: kLabelColor,
+              ),
             ),
           ),
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.0),
+        Container(
+          child: Column(
+            children: [
+              HistoryTile(),
+              HistoryTile(),
+              HistoryTile(),
+            ],
+          ),
         ),
-        itemBuilder: (context) => [
-          PopupMenuItem(
-            value: Options.Edit,
-            child: Text("Profile"),
-            textStyle: TextStyle(
-              color: kPrimaryColor,
-              fontSize: 16.0,
-              fontWeight: FontWeight.bold,
+        SizedBox(
+          height: screen.height * 0.01,
+        ),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 36.0),
+          child: Align(
+            alignment: Alignment.center,
+            child: Text(
+              'Donations Completed',
+              style: TextStyle(
+                fontSize: 25.0,
+                fontWeight: FontWeight.bold,
+                color: kLabelColor,
+              ),
             ),
           ),
-          PopupMenuItem(
-            value: Options.SignOut,
-            child: Text("Sign Out"),
-            textStyle: TextStyle(
-              color: kPrimaryColor,
-              fontSize: 16.0,
-              fontWeight: FontWeight.bold,
-            ),
+        ),
+        Container(
+          child: Column(
+            children: [
+              HistoryTile(),
+              HistoryTile(),
+              HistoryTile(),
+            ],
           ),
-        ],
-        onSelected: (action) {
-          switch (action) {
-            case Options.Edit:
-              HapticFeedback.mediumImpact();
-              Navigator.of(context).pushNamed(ProfileCharityScreen.id);
-              break;
-
-            case Options.SignOut:
-              HapticFeedback.mediumImpact();
-              _signOut();
-              break;
-            default:
-          }
-        },
-      ),
+        ),
+      ],
     );
   }
 

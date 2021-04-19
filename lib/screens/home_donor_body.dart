@@ -1,49 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:strings/strings.dart';
 //
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
-import 'package:fruitfairy/models/charities.dart';
 import 'package:fruitfairy/models/donation.dart';
 import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/screens/donation_produce_selection_screen.dart';
 import 'package:fruitfairy/screens/donor_donation_detail_screen.dart';
-import 'package:fruitfairy/screens/profile_donor_screen.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
 import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
-import 'package:fruitfairy/widgets/scrollable_layout.dart';
 
-enum Profile { Edit, SignOut }
-
-class HomeDonorScreen extends StatefulWidget {
-  final Future<void> Function() signOut;
-
-  HomeDonorScreen(this.signOut);
-
+class HomeDonorBody extends StatefulWidget {
   @override
-  _HomeDonorScreenState createState() => _HomeDonorScreenState();
+  _HomeDonorBodyState createState() => _HomeDonorBodyState();
 }
 
-class _HomeDonorScreenState extends State<HomeDonorScreen> {
-  bool _showSpinner = false;
-
-  Future<void> _signOut() async {
-    context.read<Donation>().clear();
-    context.read<Produce>().clear();
-    context.read<Charities>().clear();
-    // Must be called last
-    await widget.signOut();
-  }
-
+class _HomeDonorBodyState extends State<HomeDonorBody> {
   @override
   void initState() {
     super.initState();
     FireStoreService fireStore = context.read<FireStoreService>();
     Donation donation = context.read<Donation>();
+    donation.onEmptyBasket(() {
+      Navigator.of(context).popUntil((route) {
+        return route.settings.name == DonationProduceSelectionScreen.id;
+      });
+    });
     Produce produce = context.read<Produce>();
     produce.addStream(fireStore.produceStream((data) {
       if (data != null) {
@@ -64,138 +49,45 @@ class _HomeDonorScreenState extends State<HomeDonorScreen> {
         }
       }
     }));
-    donation.onEmptyBasket(() {
-      Navigator.of(context).popUntil((route) {
-        return route.settings.name == DonationProduceSelectionScreen.id;
-      });
-    });
   }
 
   @override
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Home'),
-        actions: [initialIcon()],
-      ),
-      body: SafeArea(
-        child: ModalProgressHUD(
-          inAsyncCall: _showSpinner,
-          progressIndicator: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
-          ),
-          child: ScrollableLayout(
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                vertical: screen.height * 0.03,
-              ),
-              child: Column(
-                children: [
-                  greeting(),
-                  donateButton(),
-                  //TODO: Donation tracking status
-                  Text(
-                    'Donation History',
-                    style: TextStyle(
-                      fontSize: 30.0,
-                      fontWeight: FontWeight.bold,
-                      color: kLabelColor,
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(left: 50.0),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Today',
-                        style: TextStyle(
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.bold,
-                          color: kLabelColor,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: screen.height * 0.02),
-                  HistoryTile(),
-                  SizedBox(height: screen.height * 0.02),
-                  HistoryTile(),
-                  SizedBox(height: screen.height * 0.02),
-                  HistoryTile(),
-                ],
-              ),
-            ),
+    return Column(
+      children: [
+        greeting(),
+        donateButton(),
+        //TODO: Donation tracking status
+        Text(
+          'Donation History',
+          style: TextStyle(
+            fontSize: 30.0,
+            fontWeight: FontWeight.bold,
+            color: kLabelColor,
           ),
         ),
-      ),
-    );
-  }
-
-  Widget initialIcon() {
-    Account account = context.read<Account>();
-    String firstName = account.firstName;
-    String lastName = account.lastName;
-    String initialName = '${firstName[0] + lastName[0]}'.toUpperCase();
-    return Container(
-      width: 50.0,
-      child: PopupMenuButton<Profile>(
-        offset: Offset(0.0, 25.0),
-        icon: Container(
-          decoration: ShapeDecoration(
-            color: kObjectColor,
-            shape: CircleBorder(
-              side: BorderSide.none,
-            ),
-          ),
-          child: Center(
+        Padding(
+          padding: EdgeInsets.only(left: 50.0),
+          child: Align(
+            alignment: Alignment.centerLeft,
             child: Text(
-              initialName,
+              'Today',
               style: TextStyle(
-                color: kPrimaryColor,
-                fontSize: 18.0,
+                fontSize: 20.0,
                 fontWeight: FontWeight.bold,
+                color: kLabelColor,
               ),
             ),
           ),
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-        itemBuilder: (context) => [
-          PopupMenuItem(
-            value: Profile.Edit,
-            child: Text("Profile"),
-            textStyle: TextStyle(
-              color: kPrimaryColor,
-              fontSize: 16.0,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          PopupMenuItem(
-            value: Profile.SignOut,
-            child: Text("Sign Out"),
-            textStyle: TextStyle(
-              color: kPrimaryColor,
-              fontSize: 16.0,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-        onSelected: (action) {
-          switch (action) {
-            case Profile.Edit:
-              HapticFeedback.mediumImpact();
-              Navigator.of(context).pushNamed(ProfileDonorScreen.id);
-              break;
-
-            case Profile.SignOut:
-              HapticFeedback.mediumImpact();
-              _signOut();
-              break;
-          }
-        },
-      ),
+        SizedBox(height: screen.height * 0.02),
+        HistoryTile(),
+        SizedBox(height: screen.height * 0.02),
+        HistoryTile(),
+        SizedBox(height: screen.height * 0.02),
+        HistoryTile(),
+      ],
     );
   }
 
@@ -237,6 +129,7 @@ class HistoryTile extends StatelessWidget {
     Size screen = MediaQuery.of(context).size;
     return GestureDetector(
       onTap: () {
+        HapticFeedback.mediumImpact();
         Navigator.of(context).pushNamed(DonorDonationDetailScreen.id);
       },
       child: Container(
