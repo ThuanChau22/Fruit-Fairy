@@ -230,10 +230,7 @@ class _HomeCharityScreenState extends State<HomeCharityScreen> {
           switch (action) {
             case Options.Edit:
               HapticFeedback.mediumImpact();
-              Navigator.of(context).pushNamed(
-                ProfileCharityScreen.id,
-                arguments: {ProfileCharityScreen.signOut: _signOut},
-              );
+              Navigator.of(context).pushNamed(ProfileCharityScreen.id);
               break;
 
             case Options.SignOut:

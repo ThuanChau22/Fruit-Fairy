@@ -1,7 +1,5 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:strings/strings.dart';
@@ -33,12 +31,9 @@ class HomeDonorScreen extends StatefulWidget {
 class _HomeDonorScreenState extends State<HomeDonorScreen> {
   bool _showSpinner = false;
 
-  StreamSubscription<QuerySnapshot> _donationStream;
-
   Future<void> _signOut() async {
-    _donationStream.cancel();
-    context.read<Produce>().clear();
     context.read<Donation>().clear();
+    context.read<Produce>().clear();
     context.read<Charities>().clear();
     // Must be called last
     await widget.signOut();
@@ -48,7 +43,6 @@ class _HomeDonorScreenState extends State<HomeDonorScreen> {
   void initState() {
     super.initState();
     FireStoreService fireStore = context.read<FireStoreService>();
-    _donationStream = fireStore.donationStreamDonor((data) {});
     Donation donation = context.read<Donation>();
     Produce produce = context.read<Produce>();
     produce.addStream(fireStore.produceStream((data) {
@@ -192,10 +186,7 @@ class _HomeDonorScreenState extends State<HomeDonorScreen> {
           switch (action) {
             case Profile.Edit:
               HapticFeedback.mediumImpact();
-              Navigator.of(context).pushNamed(
-                ProfileDonorScreen.id,
-                arguments: {ProfileDonorScreen.signOut: _signOut},
-              );
+              Navigator.of(context).pushNamed(ProfileDonorScreen.id);
               break;
 
             case Profile.SignOut:

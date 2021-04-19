@@ -6,6 +6,10 @@ import 'package:rflutter_alert/rflutter_alert.dart';
 //
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
+import 'package:fruitfairy/models/produce.dart';
+import 'package:fruitfairy/models/wish_list.dart';
+import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
+import 'package:fruitfairy/screens/authentication/signin_screen.dart';
 import 'package:fruitfairy/services/map_service.dart';
 import 'package:fruitfairy/services/fireauth_service.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
@@ -26,7 +30,6 @@ enum DeleteMode { Input, Loading, Success }
 
 class ProfileCharityScreen extends StatefulWidget {
   static const String id = 'profile_charity_screen';
-  static const String signOut = 'sign_out';
 
   @override
   _ProfileCharityScreenState createState() => _ProfileCharityScreenState();
@@ -85,8 +88,6 @@ class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
   Future<String> Function(String smsCode) _verifyCode;
 
   StateSetter _setDialogState;
-
-  Function _signOut;
 
   void _updateInputFields() {
     fillEmail();
@@ -390,9 +391,17 @@ class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
               email: _email.text.trim(),
               password: password,
             );
+        context.read<Account>().clear();
+        context.read<WishList>().clear();
+        context.read<Produce>().clear();
+        context.read<FireStoreService>().clear();
         _setDialogState(() => _deleteMode = DeleteMode.Success);
         await Future.delayed(Duration(milliseconds: 1500));
-        _signOut();
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          SignOptionScreen.id,
+          (route) => false,
+        );
+        Navigator.of(context).pushNamed(SignInScreen.id);
       } catch (errorMessage) {
         _deleteError = errorMessage;
         _setDialogState(() => _deleteMode = DeleteMode.Input);
@@ -404,10 +413,6 @@ class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      Map<String, Object> args = ModalRoute.of(context).settings.arguments;
-      _signOut = args[ProfileCharityScreen.signOut];
-    });
     fillEmail();
     fillName();
     fillAddress();
