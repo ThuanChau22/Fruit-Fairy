@@ -33,11 +33,9 @@ class HomeDonorScreen extends StatefulWidget {
 class _HomeDonorScreenState extends State<HomeDonorScreen> {
   bool _showSpinner = false;
 
-  StreamSubscription<QuerySnapshot> _produceStream;
   StreamSubscription<QuerySnapshot> _donationStream;
 
   Future<void> _signOut() async {
-    _produceStream.cancel();
     _donationStream.cancel();
     context.read<Produce>().clear();
     context.read<Donation>().clear();
@@ -53,7 +51,7 @@ class _HomeDonorScreenState extends State<HomeDonorScreen> {
     _donationStream = fireStore.donationStreamDonor((data) {});
     Donation donation = context.read<Donation>();
     Produce produce = context.read<Produce>();
-    _produceStream = fireStore.produceStream((data) {
+    produce.addStream(fireStore.produceStream((data) {
       if (data != null) {
         produce.fromDB(data);
         bool removed = false;
@@ -71,7 +69,7 @@ class _HomeDonorScreenState extends State<HomeDonorScreen> {
           ).show();
         }
       }
-    });
+    }));
     donation.onEmptyBasket(() {
       Navigator.of(context).popUntil((route) {
         return route.settings.name == DonationProduceSelectionScreen.id;

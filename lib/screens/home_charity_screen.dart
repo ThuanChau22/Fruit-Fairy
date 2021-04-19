@@ -32,12 +32,9 @@ class HomeCharityScreen extends StatefulWidget {
 class _HomeCharityScreenState extends State<HomeCharityScreen> {
   bool _showSpinner = false;
 
-  StreamSubscription<QuerySnapshot> _produceStream;
-
   StreamSubscription<DocumentSnapshot> _wishlistStream;
 
   void _signOut() async {
-    _produceStream.cancel();
     _wishlistStream.cancel();
     context.read<Produce>().clear();
     context.read<WishList>().clear();
@@ -56,7 +53,7 @@ class _HomeCharityScreenState extends State<HomeCharityScreen> {
       }
     });
     Produce produce = context.read<Produce>();
-    _produceStream = fireStore.produceStream((data) {
+    produce.addStream(fireStore.produceStream((data) {
       if (data != null) {
         produce.fromDB(data);
         bool removed = false;
@@ -75,7 +72,7 @@ class _HomeCharityScreenState extends State<HomeCharityScreen> {
           ).show();
         }
       }
-    });
+    }));
   }
 
   @override
