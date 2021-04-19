@@ -1,7 +1,5 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
@@ -83,8 +81,6 @@ class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
   bool _obscureNewPassword = true;
   DeleteMode _deleteMode = DeleteMode.Input;
   bool _obscureDeletePassword = true;
-
-  StreamSubscription<DocumentSnapshot> _userStream;
 
   Future<String> Function(String smsCode) _verifyCode;
 
@@ -416,9 +412,11 @@ class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
     fillName();
     fillAddress();
     fillPhone();
-    _userStream = context.read<FireStoreService>().userStream((userData) {
+    Account account = context.read<Account>();
+    FireStoreService fireStore = context.read<FireStoreService>();
+    account.addStream(fireStore.userStream((userData) {
       _updateInputFields();
-    });
+    }));
   }
 
   @override
@@ -436,7 +434,6 @@ class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
     _state.dispose();
     _zipCode.dispose();
     _deleteConfirm.dispose();
-    _userStream.cancel();
   }
 
   @override
@@ -445,6 +442,7 @@ class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
     return WillPopScope(
       onWillPop: () async {
         MessageBar(context).hide();
+        context.read<Account>().cancelLastSubscription();
         return true;
       },
       child: GestureWrapper(

@@ -1,6 +1,4 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
 //
@@ -63,11 +61,9 @@ class _ContactConfirmation extends State<DonationContactScreen> {
   bool _showVerifyPhone = false;
   bool _phoneVerified = false;
 
-  StreamSubscription<DocumentSnapshot> _subscription;
-
   Future<String> Function(String smsCode) _verifyCode;
 
-  void _fillInputFields() {
+  void _updateInputFields() {
     if (_updated.isEmpty) {
       fillAddress();
       fillPhone();
@@ -287,9 +283,11 @@ class _ContactConfirmation extends State<DonationContactScreen> {
     super.initState();
     fillAddress();
     fillPhone();
-    _subscription = context.read<FireStoreService>().userStream((userData) {
-      _fillInputFields();
-    });
+    Account account = context.read<Account>();
+    FireStoreService fireStore = context.read<FireStoreService>();
+    account.addStream(fireStore.userStream((userData) {
+      _updateInputFields();
+    }));
   }
 
   @override
@@ -302,7 +300,6 @@ class _ContactConfirmation extends State<DonationContactScreen> {
     _zipCode.dispose();
     _phoneNumber.dispose();
     _confirmCode.dispose();
-    _subscription.cancel();
   }
 
   @override
@@ -310,6 +307,7 @@ class _ContactConfirmation extends State<DonationContactScreen> {
     return WillPopScope(
       onWillPop: () async {
         MessageBar(context).hide();
+        context.read<Account>().cancelLastSubscription();
         return true;
       },
       child: GestureWrapper(

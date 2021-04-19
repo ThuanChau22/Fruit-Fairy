@@ -1,8 +1,6 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:provider/provider.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:provider/provider.dart';
 //
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
@@ -25,11 +23,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   bool _showSpinner = false;
 
-  StreamSubscription<DocumentSnapshot> _userStream;
-
   Future<void> _signOut() async {
     setState(() => _showSpinner = true);
-    _userStream.cancel();
     context.read<Account>().clear();
     context.read<FireStoreService>().clear();
     await context.read<FireAuthService>().signOut();
@@ -44,11 +39,13 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _userStream = context.read<FireStoreService>().userStream((data) {
+    Account account = context.read<Account>();
+    FireStoreService fireStore = context.read<FireStoreService>();
+    account.addStream(fireStore.userStream((data) {
       if (data != null) {
-        context.read<Account>().fromDB(data);
+        account.fromDB(data);
       }
-    });
+    }));
   }
 
   @override

@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:collection';
 import 'package:flutter/foundation.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 //
 import 'package:fruitfairy/services/firestore_service.dart';
 
@@ -7,6 +9,15 @@ import 'package:fruitfairy/services/firestore_service.dart';
 /// This class is used for both donor and charity user
 /// where donor will have non-empty [_firstName] and [_lastName]
 /// and charity will have non-empty [_ein] and [_charityName]
+/// [_email]: user's email
+/// [_firstName]: donor's first name
+/// [_lastName]: donor's last name
+/// [_ein]: charity's EIN
+/// [_charityName]: charity name
+/// [_phone]: user's phone number
+/// [_address]: user's address
+/// [_subscriptions]: list of stream subcriptions that
+/// performs an opperation for each subcription on changes
 class Account extends ChangeNotifier {
   /// Set default values for all fields
   String _email = '';
@@ -16,6 +27,7 @@ class Account extends ChangeNotifier {
   String _charityName = '';
   final Map<String, String> _phone = {};
   final Map<String, String> _address = {};
+  final List<StreamSubscription<DocumentSnapshot>> _subscriptions = [];
 
   /// Return a copy of [_email]
   String get email {
@@ -54,11 +66,21 @@ class Account extends ChangeNotifier {
     return UnmodifiableMapView(_address);
   }
 
+  /// Add [subscription] to [_subscriptions] list
+  void addStream(StreamSubscription<DocumentSnapshot> subscription) {
+    _subscriptions.add(subscription);
+  }
+
+  /// Cancel last subscription from [_subscriptions]
+  void cancelLastSubscription() {
+    _subscriptions.last.cancel();
+  }
+
   /// Parse account information from database
   /// [userData]: A Map with keys that are declared in [FireStoreService]
   void fromDB(Map<String, dynamic> userData) {
-    // Clean up current data
-    clear();
+    // Reset current data
+    reset();
 
     // Email
     _email = userData[FireStoreService.kEmail];
@@ -106,7 +128,7 @@ class Account extends ChangeNotifier {
   }
 
   /// Set all fields to default values
-  void clear() {
+  void reset() {
     _email = '';
     _firstName = '';
     _lastName = '';
@@ -114,6 +136,16 @@ class Account extends ChangeNotifier {
     _charityName = '';
     _phone.clear();
     _address.clear();
+  }
+
+  /// Cancel all [_subscriptions]
+  /// Set all fields to default values
+  void clear() {
+    _subscriptions.forEach((subscription) {
+      subscription.cancel();
+    });
+    _subscriptions.clear();
+    reset();
     notifyListeners();
   }
 }
