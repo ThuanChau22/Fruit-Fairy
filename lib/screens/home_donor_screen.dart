@@ -34,9 +34,11 @@ class _HomeDonorScreenState extends State<HomeDonorScreen> {
   bool _showSpinner = false;
 
   StreamSubscription<QuerySnapshot> _produceStream;
+  StreamSubscription<QuerySnapshot> _donationStream;
 
   Future<void> _signOut() async {
     _produceStream.cancel();
+    _donationStream.cancel();
     context.read<Produce>().clear();
     context.read<Donation>().clear();
     context.read<Charities>().clear();
@@ -47,10 +49,11 @@ class _HomeDonorScreenState extends State<HomeDonorScreen> {
   @override
   void initState() {
     super.initState();
-    FireStoreService fireStoreService = context.read<FireStoreService>();
+    FireStoreService fireStore = context.read<FireStoreService>();
+    _donationStream = fireStore.donationStreamDonor((data) {});
     Donation donation = context.read<Donation>();
     Produce produce = context.read<Produce>();
-    _produceStream = fireStoreService.produceStream((data) {
+    _produceStream = fireStore.produceStream((data) {
       if (data != null) {
         produce.fromDB(data);
         bool removed = false;

@@ -108,7 +108,7 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
 
   List<Widget> fruitTiles() {
     List<Widget> fruitTiles = [];
-    FireStoreService fireStoreService = context.read<FireStoreService>();
+    FireStoreService fireStore = context.read<FireStoreService>();
     Produce produce = context.read<Produce>();
     Map<String, ProduceItem> produceMap = produce.map;
     WishList wishList = context.read<WishList>();
@@ -120,7 +120,7 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
             setState(() {
               produceMap[produceId].clear();
               wishList.removeProduce(produceId);
-              fireStoreService.updateWishList(wishList.produceIds);
+              fireStore.updateWishList(wishList.produceIds);
             });
           },
         ));

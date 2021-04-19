@@ -48,15 +48,15 @@ class _HomeCharityScreenState extends State<HomeCharityScreen> {
   @override
   void initState() {
     super.initState();
-    FireStoreService fireStoreService = context.read<FireStoreService>();
+    FireStoreService fireStore = context.read<FireStoreService>();
     WishList wishlist = context.read<WishList>();
-    _wishlistStream = fireStoreService.userStream((data) {
+    _wishlistStream = fireStore.userStream((data) {
       if (data != null) {
         wishlist.fromDB(data);
       }
     });
     Produce produce = context.read<Produce>();
-    _produceStream = fireStoreService.produceStream((data) {
+    _produceStream = fireStore.produceStream((data) {
       if (data != null) {
         produce.fromDB(data);
         bool removed = false;
@@ -66,7 +66,7 @@ class _HomeCharityScreenState extends State<HomeCharityScreen> {
             removed = true;
           }
         });
-        fireStoreService.updateWishList(wishlist.produceIds);
+        fireStore.updateWishList(wishlist.produceIds);
         if (removed) {
           MessageBar(
             context,

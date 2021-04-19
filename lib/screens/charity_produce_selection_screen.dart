@@ -63,7 +63,7 @@ class _CharityProduceSelectionScreenState
   }
 
   Widget actionButton() {
-    FireStoreService fireStoreService = context.read<FireStoreService>();
+    FireStoreService fireStore = context.read<FireStoreService>();
     Produce produce = context.read<Produce>();
     Map<String, ProduceItem> produceMap = produce.map;
     WishList wishList = context.read<WishList>();
@@ -85,7 +85,7 @@ class _CharityProduceSelectionScreenState
               wishList.pickProduce(produceId);
             });
           }
-          fireStoreService.updateWishList(wishList.produceIds);
+          fireStore.updateWishList(wishList.produceIds);
         });
       },
     );
@@ -161,7 +161,7 @@ class _CharityProduceSelectionScreenState
 
   List<Widget> fruitTiles() {
     List<Widget> fruitTiles = [];
-    FireStoreService fireStoreService = context.read<FireStoreService>();
+    FireStoreService fireStore = context.read<FireStoreService>();
     WishList wishList = context.watch<WishList>();
     Produce produce = context.read<Produce>();
     produce.map.forEach((produceId, produceItem) {
@@ -180,7 +180,7 @@ class _CharityProduceSelectionScreenState
               } else {
                 wishList.pickProduce(produceId);
               }
-              fireStoreService.updateWishList(wishList.produceIds);
+              fireStore.updateWishList(wishList.produceIds);
             });
           },
         ));

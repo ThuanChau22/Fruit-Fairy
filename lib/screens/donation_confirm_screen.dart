@@ -24,8 +24,7 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
   void confirm() async {
     setState(() => _showSpinner = true);
     Donation donation = context.read<Donation>();
-    FireStoreService fireStoreService = context.read<FireStoreService>();
-    await fireStoreService.addDonation(donation);
+    await context.read<FireStoreService>().addDonation(donation);
     donation.produce.values.forEach((produceItem) {
       produceItem.clear();
     });
