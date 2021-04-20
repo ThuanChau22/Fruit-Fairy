@@ -148,7 +148,7 @@ class _DonationCharitySelectionScreenState
         top: screen.height * 0.02,
       ),
       child: Text(
-        'Select 3 charities:',
+        'Select 3 charities',
         textAlign: TextAlign.center,
         style: TextStyle(
           color: kLabelColor,

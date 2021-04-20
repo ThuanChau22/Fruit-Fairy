@@ -110,7 +110,7 @@ class _CharityProduceSelectionScreenState
         right: screen.width * 0.05,
       ),
       child: Text(
-        'Add produce to wish list:',
+        'Add produce to wish list',
         textAlign: TextAlign.center,
         style: TextStyle(
           color: kLabelColor,

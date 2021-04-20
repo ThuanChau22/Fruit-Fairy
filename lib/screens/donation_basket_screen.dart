@@ -52,7 +52,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
     Size screen = MediaQuery.of(context).size;
     List<Widget> widgets = [
       SizedBox(height: screen.height * 0.02),
-      instructionLabel('Do you need help collecting?'),
+      instructionLabel('Need help collecting?'),
       collectOptionTile(),
       Divider(
         color: kLabelColor,
@@ -62,7 +62,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
       Visibility(
         visible: context.read<Donation>().needCollected,
         child: instructionLabel(
-          'Adjust percentage of produce you want to donate:',
+          'Adjust donation percentage',
         ),
       ),
       selectedFruits(),
@@ -91,7 +91,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
         label,
         textAlign: TextAlign.center,
         style: TextStyle(
-          fontSize: 20.0,
+          fontSize: 25.0,
           fontWeight: FontWeight.bold,
           color: kLabelColor,
         ),
@@ -102,8 +102,9 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
   Widget collectOptionTile() {
     Size screen = MediaQuery.of(context).size;
     return Padding(
-      padding: EdgeInsets.symmetric(
-        vertical: screen.height * 0.02,
+      padding: EdgeInsets.only(
+        top: screen.height * 0.01,
+        bottom: screen.height * 0.03,
       ),
       child: Row(
         children: [

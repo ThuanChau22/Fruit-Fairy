@@ -84,7 +84,7 @@ class _DonationProduceSelectionScreenState
         right: screen.width * 0.05,
       ),
       child: Text(
-        'Choose produce to donate:',
+        'Choose produce to donate',
         textAlign: TextAlign.center,
         style: TextStyle(
           color: kLabelColor,
