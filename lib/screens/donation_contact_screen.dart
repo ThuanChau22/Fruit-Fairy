@@ -319,10 +319,15 @@ class _ContactConfirmation extends State<DonationContactScreen> {
               progressIndicator: CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
               ),
-              child: Column(
+              child: Stack(
                 children: [
                   contactInfo(),
-                  buttonSection(),
+                  Positioned(
+                    left: 0.0,
+                    right: 0.0,
+                    bottom: 0.0,
+                    child: buttonSection(),
+                  ),
                 ],
               ),
             ),
@@ -354,20 +359,19 @@ class _ContactConfirmation extends State<DonationContactScreen> {
       ),
       phoneNumberField(),
       verifyCodeField(),
+      SizedBox(height: 60 + screen.height * 0.03),
     ];
-    return Expanded(
-      child: ListView.builder(
-        controller: _scroller.controller,
-        itemCount: widgets.length,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: screen.width * 0.15,
-            ),
-            child: widgets[index],
-          );
-        },
-      ),
+    return ListView.builder(
+      controller: _scroller.controller,
+      itemCount: widgets.length,
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: screen.width * 0.15,
+          ),
+          child: widgets[index],
+        );
+      },
     );
   }
 
@@ -645,15 +649,18 @@ class _ContactConfirmation extends State<DonationContactScreen> {
     EdgeInsets view = MediaQuery.of(context).viewInsets;
     return Visibility(
       visible: view.bottom == 0.0,
-      child: Column(
-        children: [
-          Divider(
-            color: kLabelColor,
-            height: 5.0,
-            thickness: 2.0,
-          ),
-          nextButton(),
-        ],
+      child: Container(
+        color: kPrimaryColor.withOpacity(0.75),
+        child: Column(
+          children: [
+            Divider(
+              color: kLabelColor,
+              height: 5.0,
+              thickness: 2.0,
+            ),
+            nextButton(),
+          ],
+        ),
       ),
     );
   }
@@ -662,7 +669,7 @@ class _ContactConfirmation extends State<DonationContactScreen> {
     Size screen = MediaQuery.of(context).size;
     return Padding(
       padding: EdgeInsets.symmetric(
-        vertical: screen.height * 0.03,
+        vertical: screen.height * 0.015,
         horizontal: screen.width * 0.25,
       ),
       child: RoundedButton(

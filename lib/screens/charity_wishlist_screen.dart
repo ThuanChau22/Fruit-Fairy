@@ -8,6 +8,7 @@ import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/models/wish_list.dart';
 import 'package:fruitfairy/screens/charity_produce_selection_screen.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
+import 'package:fruitfairy/widgets/custom_grid.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
 import 'package:fruitfairy/widgets/popup_diaglog.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
@@ -37,10 +38,15 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
           progressIndicator: CircularProgressIndicator(
             valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
           ),
-          child: Column(
+          child: Stack(
             children: [
               layoutMode(),
-              buttonSection(),
+              Positioned(
+                left: 0.0,
+                right: 0.0,
+                bottom: 0.0,
+                child: buttonSection(),
+              ),
             ],
           ),
         ),
@@ -76,15 +82,20 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
   }
 
   Widget emptyWishList() {
-    return Expanded(
-      child: Center(
-        child: Text(
-          '(Empty)',
-          style: TextStyle(
-            color: kLabelColor.withOpacity(0.5),
-            fontSize: 20.0,
+    Size screen = MediaQuery.of(context).size;
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            '(Empty)',
+            style: TextStyle(
+              color: kLabelColor.withOpacity(0.5),
+              fontSize: 20.0,
+            ),
           ),
-        ),
+          SizedBox(height: 60 + screen.height * 0.03),
+        ],
       ),
     );
   }
@@ -92,17 +103,27 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
   Widget selectedFruits() {
     Size screen = MediaQuery.of(context).size;
     int axisCount = screen.width >= 600 ? 5 : 3;
-    return Expanded(
-      child: GridView.count(
-        primary: false,
-        padding: EdgeInsets.only(
-          top: screen.height * 0.03,
-          left: screen.width * 0.02,
-          right: screen.width * 0.02,
-        ),
+    double padding = screen.width * 0.02;
+    List<Widget> widgets = [
+      CustomGrid(
+        assistPadding: padding,
         crossAxisCount: axisCount,
         children: fruitTiles(),
       ),
+      SizedBox(height: 60 + screen.height * 0.03),
+    ];
+    return ListView.builder(
+      itemCount: widgets.length,
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: EdgeInsets.only(
+            top: screen.height * 0.03,
+            left: padding,
+            right: padding,
+          ),
+          child: widgets[index],
+        );
+      },
     );
   }
 
@@ -179,15 +200,18 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
     EdgeInsets view = MediaQuery.of(context).viewInsets;
     return Visibility(
       visible: view.bottom == 0.0,
-      child: Column(
-        children: [
-          Divider(
-            color: kLabelColor,
-            height: 5.0,
-            thickness: 2.0,
-          ),
-          nextButton(),
-        ],
+      child: Container(
+        color: kPrimaryColor.withOpacity(0.75),
+        child: Column(
+          children: [
+            Divider(
+              color: kLabelColor,
+              height: 5.0,
+              thickness: 2.0,
+            ),
+            nextButton(),
+          ],
+        ),
       ),
     );
   }
@@ -196,7 +220,7 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
     Size screen = MediaQuery.of(context).size;
     return Padding(
       padding: EdgeInsets.symmetric(
-        vertical: screen.height * 0.03,
+        vertical: screen.height * 0.015,
         horizontal: screen.width * 0.25,
       ),
       child: RoundedButton(

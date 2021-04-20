@@ -8,6 +8,7 @@ import 'package:fruitfairy/models/produce_item.dart';
 import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/models/wish_list.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
+import 'package:fruitfairy/widgets/custom_grid.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
 import 'package:fruitfairy/widgets/gesture_wrapper.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
@@ -48,12 +49,21 @@ class _CharityProduceSelectionScreenState
             progressIndicator: CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
             ),
-            child: Column(
+            child: Stack(
               children: [
-                instructionLabel(),
-                searchInputField(),
-                produceOptions(),
-                buttonSection(),
+                Column(
+                  children: [
+                    instructionLabel(),
+                    searchInputField(),
+                    produceOptions(),
+                  ],
+                ),
+                Positioned(
+                  left: 0.0,
+                  right: 0.0,
+                  bottom: 0.0,
+                  child: buttonSection(),
+                ),
               ],
             ),
           ),
@@ -114,11 +124,9 @@ class _CharityProduceSelectionScreenState
   Widget searchInputField() {
     Size screen = MediaQuery.of(context).size;
     return Padding(
-      padding: EdgeInsets.only(
-        top: screen.height * 0.01,
-        bottom: screen.height * 0.02,
-        left: screen.width * 0.05,
-        right: screen.width * 0.05,
+      padding: EdgeInsets.symmetric(
+        vertical: screen.height * 0.01,
+        horizontal: screen.width * 0.05,
       ),
       child: InputField(
         label: 'Enter Produce Name',
@@ -145,16 +153,27 @@ class _CharityProduceSelectionScreenState
     } else if (screen.width >= 320) {
       axisCount = 3;
     }
-    return Expanded(
-      child: GridView.count(
-        primary: false,
-        padding: EdgeInsets.symmetric(
-          horizontal: screen.width * 0.05,
-        ),
-        mainAxisSpacing: 20,
-        crossAxisSpacing: 20,
+    double padding = screen.width * 0.03;
+    List<Widget> widgets = [
+      CustomGrid(
+        padding: EdgeInsets.all(10.0),
+        assistPadding: padding,
         crossAxisCount: axisCount,
         children: fruitTiles(),
+      ),
+      SizedBox(height: 60 + screen.height * 0.03),
+    ];
+    return Expanded(
+      child: ListView.builder(
+        itemCount: widgets.length,
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: padding,
+            ),
+            child: widgets[index],
+          );
+        },
       ),
     );
   }
@@ -227,15 +246,18 @@ class _CharityProduceSelectionScreenState
     EdgeInsets view = MediaQuery.of(context).viewInsets;
     return Visibility(
       visible: view.bottom == 0.0,
-      child: Column(
-        children: [
-          Divider(
-            color: kLabelColor,
-            height: 5.0,
-            thickness: 2.0,
-          ),
-          backButton(),
-        ],
+      child: Container(
+        color: kPrimaryColor.withOpacity(0.75),
+        child: Column(
+          children: [
+            Divider(
+              color: kLabelColor,
+              height: 5.0,
+              thickness: 2.0,
+            ),
+            backButton(),
+          ],
+        ),
       ),
     );
   }
@@ -244,7 +266,7 @@ class _CharityProduceSelectionScreenState
     Size screen = MediaQuery.of(context).size;
     return Padding(
       padding: EdgeInsets.symmetric(
-        vertical: screen.height * 0.03,
+        vertical: screen.height * 0.015,
         horizontal: screen.width * 0.25,
       ),
       child: RoundedButton(

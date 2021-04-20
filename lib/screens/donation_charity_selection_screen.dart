@@ -69,10 +69,15 @@ class _DonationCharitySelectionScreenState
             progressIndicator: CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
             ),
-            child: Column(
+            child: Stack(
               children: [
                 layoutMode(),
-                buttonSection(),
+                Positioned(
+                  left: 0.0,
+                  right: 0.0,
+                  bottom: 0.0,
+                  child: buttonSection(),
+                ),
               ],
             ),
           ),
@@ -85,19 +90,18 @@ class _DonationCharitySelectionScreenState
     Size screen = MediaQuery.of(context).size;
     switch (_mode) {
       case ViewMode.Init:
-        return Expanded(
-          child: Container(),
-        );
+        return Container();
         break;
 
       case ViewMode.Empty:
-        return Expanded(
-          child: Center(
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: screen.width * 0.05,
-              ),
-              child: Text(
+        return Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: screen.width * 0.05,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
                 'No charities in our system match your donation. The produce you wish to donate does not match any charities within a 20 mile radius.\n\nPlease try again at a later time!',
                 textAlign: TextAlign.center,
                 style: TextStyle(
@@ -106,7 +110,8 @@ class _DonationCharitySelectionScreenState
                   fontSize: 20.0,
                 ),
               ),
-            ),
+              SizedBox(height: 60 + screen.height * 0.03),
+            ],
           ),
         );
         break;
@@ -118,22 +123,21 @@ class _DonationCharitySelectionScreenState
   }
 
   Widget charityOptions() {
+    Size screen = MediaQuery.of(context).size;
     List<Widget> widgets = [instructionSection()];
     widgets.addAll(charityTiles());
-    Size screen = MediaQuery.of(context).size;
-    return Expanded(
-      child: ListView.builder(
-        itemCount: widgets.length,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: EdgeInsets.symmetric(
-              vertical: screen.height * 0.01,
-              horizontal: screen.width * 0.1,
-            ),
-            child: widgets[index],
-          );
-        },
-      ),
+    widgets.add(SizedBox(height: 60 + screen.height * 0.03));
+    return ListView.builder(
+      itemCount: widgets.length,
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: EdgeInsets.symmetric(
+            vertical: screen.height * 0.01,
+            horizontal: screen.width * 0.1,
+          ),
+          child: widgets[index],
+        );
+      },
     );
   }
 
@@ -205,15 +209,18 @@ class _DonationCharitySelectionScreenState
     EdgeInsets view = MediaQuery.of(context).viewInsets;
     return Visibility(
       visible: view.bottom == 0.0,
-      child: Column(
-        children: [
-          Divider(
-            color: kLabelColor,
-            height: 5.0,
-            thickness: 2.0,
-          ),
-          nextButton(),
-        ],
+      child: Container(
+        color: kPrimaryColor.withOpacity(0.75),
+        child: Column(
+          children: [
+            Divider(
+              color: kLabelColor,
+              height: 5.0,
+              thickness: 2.0,
+            ),
+            nextButton(),
+          ],
+        ),
       ),
     );
   }
@@ -222,7 +229,7 @@ class _DonationCharitySelectionScreenState
     Size screen = MediaQuery.of(context).size;
     return Padding(
       padding: EdgeInsets.symmetric(
-        vertical: screen.height * 0.03,
+        vertical: screen.height * 0.015,
         horizontal: screen.width * 0.25,
       ),
       child: RoundedButton(

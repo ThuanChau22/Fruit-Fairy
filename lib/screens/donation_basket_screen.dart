@@ -33,10 +33,15 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
     return Scaffold(
       appBar: AppBar(title: Text('My Basket')),
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
             basketSection(),
-            buttonSection(),
+            Positioned(
+              left: 0.0,
+              right: 0.0,
+              bottom: 0.0,
+              child: buttonSection(),
+            ),
           ],
         ),
       ),
@@ -61,19 +66,18 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
         ),
       ),
       selectedFruits(),
+      SizedBox(height: 60 + screen.height * 0.03),
     ];
-    return Expanded(
-      child: ListView.builder(
-        itemCount: widgets.length,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: screen.width * 0.1,
-            ),
-            child: widgets[index],
-          );
-        },
-      ),
+    return ListView.builder(
+      itemCount: widgets.length,
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: screen.width * 0.1,
+          ),
+          child: widgets[index],
+        );
+      },
     );
   }
 
@@ -319,15 +323,18 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
     EdgeInsets view = MediaQuery.of(context).viewInsets;
     return Visibility(
       visible: view.bottom == 0.0,
-      child: Column(
-        children: [
-          Divider(
-            color: kLabelColor,
-            height: 5.0,
-            thickness: 2.0,
-          ),
-          nextButton(),
-        ],
+      child: Container(
+        color: kPrimaryColor.withOpacity(0.75),
+        child: Column(
+          children: [
+            Divider(
+              color: kLabelColor,
+              height: 5.0,
+              thickness: 2.0,
+            ),
+            nextButton(),
+          ],
+        ),
       ),
     );
   }
@@ -336,7 +343,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
     Size screen = MediaQuery.of(context).size;
     return Padding(
       padding: EdgeInsets.symmetric(
-        vertical: screen.height * 0.03,
+        vertical: screen.height * 0.015,
         horizontal: screen.width * 0.25,
       ),
       child: RoundedButton(
