@@ -5,12 +5,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 //
 import 'package:fruitfairy/models/produce_item.dart';
 
-/// A class holds a list of all possible produce that a user can select
-/// [_produce]: a map of [ProduceItem] that can be access through [ProduceItem.id]
+/// A class holds a list of produce that a user can select
+/// [_produce]: a map of [ProduceItem]
 /// [_subscriptions]: list of stream subcriptions that
 /// performs an opperation for each subcription on changes
 class Produce extends ChangeNotifier {
-  final Map<String, ProduceItem> _produce = SplayTreeMap();
+  final Map<String, ProduceItem> _produce = {};
   final List<StreamSubscription<QuerySnapshot>> _subscriptions = [];
 
   /// Return a copy of [_produce]

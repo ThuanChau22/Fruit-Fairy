@@ -1,12 +1,12 @@
-class Status {
+class Status implements Comparable<Status> {
   static const int kPending = 0;
   static const int kInProgress = 10;
   static const int kDenied = 11;
   static const int kCompleted = 20;
 
   final int code;
-  String _description;
-  String _message;
+  String _description = '';
+  String _message = '';
 
   Status(this.code) {
     //TODO: Add messages for donor's donation details
@@ -40,5 +40,10 @@ class Status {
 
   static int init() {
     return kPending;
+  }
+
+  @override
+  int compareTo(Status other) {
+    return this.code - other.code;
   }
 }
