@@ -1,29 +1,52 @@
 import 'dart:collection';
 import 'package:flutter/foundation.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 //
 import 'package:fruitfairy/models/charity.dart';
 import 'package:fruitfairy/models/produce_item.dart';
+import 'package:fruitfairy/models/status.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
 
 /// A class that represents a dontation
+/// [_id]: donation id
 /// [_needCollected]: specify whether
 /// the donor need help collecting
-/// [_produce]: selected produce IDs
+/// [_produce]: selected produce
 /// [_address]: donor's address
 /// [_phone]: donor's phone number
 /// [_charities]: selected charities
 /// [_updated]: object state's update status
+/// [_status]: donation status
+/// [_createdAt]: donation created timestamp
 /// [_onEmptyBasket]: a callback that handles when [_produce] is empty
 /// [MaxCharity]: maximum number of charity can be selected
-class Donation extends ChangeNotifier {
+class Donation extends ChangeNotifier implements Comparable<Donation> {
   static const int MaxCharity = 3;
+  String _id = '';
+  Status _status = Status(Status.init());
+  Timestamp _createdAt = Timestamp.now();
   bool _needCollected = true;
   final Map<String, ProduceItem> _produce = {};
   final Map<String, String> _address = {};
   final Map<String, String> _phone = {};
   final List<Charity> _charities = [];
   bool _updated = false;
-  VoidCallback _onEmptyBasket;
+  VoidCallback _onEmptyBasket = () {};
+
+  /// Return a copy of [_id]
+  String get id {
+    return _id;
+  }
+
+  /// Return a copy of [_status]
+  Status get status {
+    return _status;
+  }
+
+  /// Return a copy of [_createdAt]
+  Timestamp get createdAt {
+    return _createdAt;
+  }
 
   /// Return a copy of [_needCollected]
   bool get needCollected {
@@ -61,6 +84,21 @@ class Donation extends ChangeNotifier {
       if (_produce.isEmpty) action();
     };
     addListener(_onEmptyBasket);
+  }
+
+  /// Set donation Id
+  void setId(String id) {
+    _id = id;
+  }
+
+  /// Set donation current status
+  void setStatus(Status status) {
+    _status = status;
+  }
+
+  /// Set donation created timestamp
+  void setCreatedAt(Timestamp createdAt) {
+    _createdAt = createdAt;
   }
 
   /// Set collecting option
@@ -155,5 +193,14 @@ class Donation extends ChangeNotifier {
     reset();
     removeListener(_onEmptyBasket);
     notifyListeners();
+  }
+
+  @override
+  int compareTo(Donation other) {
+    int result = this.status.compareTo(other.status);
+    if (result != 0) {
+      return result;
+    }
+    return other.createdAt.compareTo(this.createdAt);
   }
 }
