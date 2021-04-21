@@ -9,23 +9,23 @@ class Status implements Comparable<Status> {
   String _message = '';
 
   Status(this.code) {
-    //TODO: Add messages for donor's donation details
     switch (code) {
       case kPending:
         _description = 'Pending';
-        _message = '';
+        _message = 'Donation waiting for charity approval';
         break;
       case kInProgress:
         _description = 'In Progress';
-        _message = '';
+        _message =
+            'Donation accepted. The charity will schedule a pickup with you';
         break;
       case kDenied:
         _description = 'Denied';
-        _message = '';
+        _message = 'Donation declined by selected charities';
         break;
       case kCompleted:
         _description = 'Completed';
-        _message = '';
+        _message = 'Donation completed';
         break;
     }
   }
