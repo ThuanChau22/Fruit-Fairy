@@ -48,6 +48,7 @@ class FireStoreService {
   static const String kAddressState = 'state';
   static const String kAddressZip = 'zip';
   static const String kWishList = 'wishlist';
+  static const String kLastSignedIn = 'lastSignedIn';
 
   ///////////////
 
@@ -192,8 +193,8 @@ class FireStoreService {
     try {
       await _usersDB.doc(_uid).set({
         kEmail: email,
-        firstName: firstName,
-        lastName: lastName,
+        kFirstName: firstName,
+        kLastName: lastName,
       });
     } catch (e) {
       throw e.message;
@@ -353,6 +354,20 @@ class FireStoreService {
     }
   }
 
+  Future<void> updateLastSignedIn() async {
+    if (_uid == null) {
+      print('UID Unset');
+      return;
+    }
+    try {
+      await _usersDB.doc(_uid).update({
+        kLastSignedIn: FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      throw e.message;
+    }
+  }
+
   Future<void> addDonation(Donation donation) async {
     if (_uid == null) {
       print('UID Unset');
@@ -361,7 +376,7 @@ class FireStoreService {
     try {
       Map<String, String> address = donation.address;
       Map<String, String> phone = donation.phone;
-      _donationsDB.add({
+      await _donationsDB.add({
         kDonorId: _uid,
         kCharityIds: donation.charities.map((charity) {
           return charity.id;
@@ -388,7 +403,7 @@ class FireStoreService {
           kPhoneNumber: phone[kPhoneNumber],
         },
         kStatus: Status.init(),
-        kCreatedAt: Timestamp.now(),
+        kCreatedAt: FieldValue.serverTimestamp(),
       });
     } catch (e) {
       print(e);

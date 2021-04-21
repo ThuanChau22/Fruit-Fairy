@@ -30,9 +30,9 @@ class FruitFairy extends StatelessWidget {
         Provider<FireAuthService>(create: (_) => FireAuthService()),
         Provider<FireStoreService>(create: (_) => FireStoreService()),
         ChangeNotifierProvider<Account>(create: (_) => Account()),
-        ChangeNotifierProvider<Produce>(create: (_) => Produce()),
-        ChangeNotifierProvider<Donation>(create: (_) => Donation()),
         ChangeNotifierProvider<Charities>(create: (_) => Charities()),
+        ChangeNotifierProvider<Donation>(create: (_) => Donation()),
+        ChangeNotifierProvider<Produce>(create: (_) => Produce()),
         ChangeNotifierProvider<WishList>(create: (_) => WishList()),
       ],
       child: Authentication(),
@@ -46,7 +46,11 @@ class Authentication extends StatelessWidget {
     // Check user authentication status
     User user = context.read<FireAuthService>().user;
     bool signedIn = user != null && user.emailVerified;
-    context.read<FireStoreService>().setUID(signedIn ? user.uid : null);
+    if (signedIn) {
+      FireStoreService fireStore = context.read<FireStoreService>();
+      fireStore.setUID(user.uid);
+      fireStore.updateLastSignedIn();
+    }
     return MaterialApp(
       initialRoute: signedIn ? HomeScreen.id : SignOptionScreen.id,
       onGenerateRoute: RouteGenerator.generate,

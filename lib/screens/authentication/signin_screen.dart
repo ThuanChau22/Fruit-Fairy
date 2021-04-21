@@ -194,7 +194,9 @@ class _SignInScreenState extends State<SignInScreen> {
       );
     }
     String uid = context.read<FireAuthService>().user.uid;
-    context.read<FireStoreService>().setUID(uid);
+    FireStoreService fireStore = context.read<FireStoreService>();
+    fireStore.setUID(uid);
+    fireStore.updateLastSignedIn();
     Navigator.of(context).pushNamedAndRemoveUntil(
       HomeScreen.id,
       (route) => false,
