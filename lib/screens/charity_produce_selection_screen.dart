@@ -183,11 +183,14 @@ class _CharityProduceSelectionScreenState
     FireStoreService fireStore = context.read<FireStoreService>();
     WishList wishList = context.watch<WishList>();
     Produce produce = context.read<Produce>();
-    produce.map.forEach((produceId, produceItem) {
+    List<ProduceItem> produceList = produce.map.values.toList();
+    produceList.sort();
+    produceList.forEach((produceItem) {
       if (RegExp(
         '^${_search.text.trim()}',
         caseSensitive: false,
       ).hasMatch(produceItem.name)) {
+        String produceId = produceItem.id;
         bool selected = wishList.produceIds.contains(produceId);
         fruitTiles.add(selectableFruitTile(
           produceItem: produceItem,

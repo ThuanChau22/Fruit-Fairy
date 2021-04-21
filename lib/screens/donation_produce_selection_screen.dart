@@ -156,11 +156,14 @@ class _DonationProduceSelectionScreenState
     List<Widget> fruitTiles = [];
     Donation donation = context.watch<Donation>();
     Produce produce = context.read<Produce>();
-    produce.map.forEach((produceId, produceItem) {
+    List<ProduceItem> produceList = produce.map.values.toList();
+    produceList.sort();
+    produceList.forEach((produceItem) {
       if (RegExp(
         '^${_search.text.trim()}',
         caseSensitive: false,
       ).hasMatch(produceItem.name)) {
+        String produceId = produceItem.id;
         bool selected = donation.produce.containsKey(produceId);
         fruitTiles.add(selectableFruitTile(
           produceItem: produceItem,
