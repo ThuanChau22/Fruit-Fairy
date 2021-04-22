@@ -164,7 +164,7 @@ class FireStoreService {
     for (int i = 0; i < distances.length; i++) {
       if (distances[i] <= limitDistance) {
         double matchScore = 0.0;
-        Set<String> wishList = charities[i].produce;
+        Set<String> wishList = charities[i].wishlist;
         for (String produceId in selectedProduce) {
           matchScore += wishList.contains(produceId) ? matchPerProduce : 0.0;
         }

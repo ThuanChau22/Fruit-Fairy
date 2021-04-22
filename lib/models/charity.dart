@@ -12,7 +12,7 @@ class Charity implements Comparable<Charity> {
   /// Set default values for all fields
   final String id;
   String _name = '';
-  final Set<String> _produce = {};
+  final Set<String> _wishlist = {};
   final Map<String, String> _address = {};
   double _score = 0;
 
@@ -24,9 +24,9 @@ class Charity implements Comparable<Charity> {
     return _name;
   }
 
-  /// Return a copy of [_produce] as a set
-  UnmodifiableSetView<String> get produce {
-    return UnmodifiableSetView(_produce);
+  /// Return a copy of [_wishlist] as a set
+  UnmodifiableSetView<String> get wishlist {
+    return UnmodifiableSetView(_wishlist);
   }
 
   /// Return a copy of [_address]
@@ -63,7 +63,7 @@ class Charity implements Comparable<Charity> {
     List<dynamic> wishlist = userData[FireStoreService.kWishList];
     if (wishlist != null) {
       wishlist.forEach((produceId) {
-        _produce.add(produceId);
+        _wishlist.add(produceId);
       });
     }
   }
