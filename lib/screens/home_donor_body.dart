@@ -6,6 +6,7 @@ import 'package:strings/strings.dart';
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
 import 'package:fruitfairy/models/donation.dart';
+import 'package:fruitfairy/models/donations.dart';
 import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/screens/donation_produce_selection_screen.dart';
 import 'package:fruitfairy/screens/donor_donation_detail_screen.dart';
@@ -23,6 +24,12 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
   void initState() {
     super.initState();
     FireStoreService fireStore = context.read<FireStoreService>();
+    Donations donations = context.read<Donations>();
+    donations.addStream(fireStore.donationDonorStream((data) {
+      if (data != null) {
+        //do something
+      }
+    }));
     Donation donation = context.read<Donation>();
     donation.onEmptyBasket(() {
       Navigator.of(context).popUntil((route) {
@@ -34,7 +41,7 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
       if (data != null) {
         produce.fromDB(data);
         bool removed = false;
-        List.from(donation.produce.keys).forEach((produceId) {
+        List<String>.from(donation.produce.keys).forEach((produceId) {
           if (!produce.map.containsKey(produceId)) {
             donation.removeProduce(produceId);
             removed = true;

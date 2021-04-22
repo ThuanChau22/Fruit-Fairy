@@ -7,6 +7,7 @@ import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
 import 'package:fruitfairy/models/charities.dart';
 import 'package:fruitfairy/models/donation.dart';
+import 'package:fruitfairy/models/donations.dart';
 import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/models/wish_list.dart';
 import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
@@ -37,6 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
     context.read<Account>().clear();
     context.read<Charities>().clear();
     context.read<Donation>().clear();
+    context.read<Donations>().clear();
     context.read<Produce>().clear();
     context.read<WishList>().clear();
     context.read<FireStoreService>().clear();

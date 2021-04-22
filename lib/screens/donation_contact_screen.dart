@@ -117,7 +117,9 @@ class _ContactConfirmation extends State<DonationContactScreen> {
       isoCode: _isoCode,
     );
     if (addressError.isEmpty && _phoneError.isEmpty && _phoneVerified) {
+      Account account = context.read<Account>();
       context.read<Donation>().setContactInfo(
+            donorName: '${account.firstName} ${account.lastName}',
             street: _street.text.trim(),
             city: _city.text.trim(),
             state: _state.text.trim(),

@@ -5,6 +5,7 @@ import 'package:strings/strings.dart';
 //
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
+import 'package:fruitfairy/models/donations.dart';
 import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/models/wish_list.dart';
 import 'package:fruitfairy/screens/charity_donation_detail_screen.dart';
@@ -23,6 +24,12 @@ class _HomeCharityBodyState extends State<HomeCharityBody> {
   void initState() {
     super.initState();
     FireStoreService fireStore = context.read<FireStoreService>();
+    Donations donations = context.read<Donations>();
+    donations.addStream(fireStore.donationCharityStream((data) {
+      if (data != null) {
+        //do something
+      }
+    }));
     WishList wishlist = context.read<WishList>();
     wishlist.addStream(fireStore.userStream((data) {
       if (data != null) {

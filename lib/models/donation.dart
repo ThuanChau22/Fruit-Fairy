@@ -12,41 +12,30 @@ import 'package:fruitfairy/services/firestore_service.dart';
 /// [_needCollected]: specify whether
 /// the donor need help collecting
 /// [_produce]: selected produce
+/// [_donorName]: donor name
 /// [_address]: donor's address
 /// [_phone]: donor's phone number
 /// [_charities]: selected charities
-/// [_updated]: object state's update status
 /// [_status]: donation status
 /// [_createdAt]: donation created timestamp
+/// [_updated]: object state's update status
 /// [_onEmptyBasket]: a callback that handles when [_produce] is empty
 /// [MaxCharity]: maximum number of charity can be selected
 class Donation extends ChangeNotifier implements Comparable<Donation> {
   static const int MaxCharity = 3;
-  String _id = '';
-  Status _status = Status(Status.init());
-  Timestamp _createdAt = Timestamp.now();
+  final String id;
   bool _needCollected = true;
   final Map<String, ProduceItem> _produce = {};
+  String _donorName = '';
   final Map<String, String> _address = {};
   final Map<String, String> _phone = {};
   final List<Charity> _charities = [];
+  Status _status = Status(Status.init());
+  Timestamp _createdAt = Timestamp.now();
   bool _updated = false;
   VoidCallback _onEmptyBasket = () {};
 
-  /// Return a copy of [_id]
-  String get id {
-    return _id;
-  }
-
-  /// Return a copy of [_status]
-  Status get status {
-    return _status;
-  }
-
-  /// Return a copy of [_createdAt]
-  Timestamp get createdAt {
-    return _createdAt;
-  }
+  Donation(this.id);
 
   /// Return a copy of [_needCollected]
   bool get needCollected {
@@ -56,6 +45,11 @@ class Donation extends ChangeNotifier implements Comparable<Donation> {
   /// Return a copy of [_produce]
   UnmodifiableMapView<String, ProduceItem> get produce {
     return UnmodifiableMapView(_produce);
+  }
+
+  /// Return a copy of [_donorName]
+  String get donorName {
+    return _donorName;
   }
 
   /// Return a copy of [_address]
@@ -73,32 +67,19 @@ class Donation extends ChangeNotifier implements Comparable<Donation> {
     return UnmodifiableListView(_charities);
   }
 
+  /// Return a copy of [_status]
+  Status get status {
+    return _status;
+  }
+
+  /// Return a copy of [_createdAt]
+  Timestamp get createdAt {
+    return _createdAt;
+  }
+
   /// Return [_updated] status
   bool get isUpdated {
     return _updated;
-  }
-
-  /// Listen to callback when [_produce] is empty
-  void onEmptyBasket(VoidCallback action) {
-    _onEmptyBasket = () {
-      if (_produce.isEmpty) action();
-    };
-    addListener(_onEmptyBasket);
-  }
-
-  /// Set donation Id
-  void setId(String id) {
-    _id = id;
-  }
-
-  /// Set donation current status
-  void setStatus(Status status) {
-    _status = status;
-  }
-
-  /// Set donation created timestamp
-  void setCreatedAt(Timestamp createdAt) {
-    _createdAt = createdAt;
   }
 
   /// Set collecting option
@@ -124,6 +105,7 @@ class Donation extends ChangeNotifier implements Comparable<Donation> {
 
   /// Set donor contact info
   void setContactInfo({
+    @required String donorName,
     @required String street,
     @required String city,
     @required String state,
@@ -146,6 +128,7 @@ class Donation extends ChangeNotifier implements Comparable<Donation> {
         oldCountry != country ||
         oldDialCode != dialCode ||
         oldPhoneNumber != phoneNumber) {
+      _donorName = donorName;
       _address[FireStoreService.kAddressStreet] = street;
       _address[FireStoreService.kAddressCity] = city;
       _address[FireStoreService.kAddressState] = state;
@@ -170,6 +153,24 @@ class Donation extends ChangeNotifier implements Comparable<Donation> {
   void removeCharity(Charity charity) {
     _charities.remove(charity);
     notifyListeners();
+  }
+
+  /// Set current status from [code]
+  void setStatus(int code) {
+    _status = Status(code);
+  }
+
+  /// Set created timestamp
+  void setCreatedAt(Timestamp createdAt) {
+    _createdAt = createdAt ?? Timestamp.now();
+  }
+
+  /// Listen to callback when [_produce] is empty
+  void onEmptyBasket(VoidCallback action) {
+    _onEmptyBasket = () {
+      if (_produce.isEmpty) action();
+    };
+    addListener(_onEmptyBasket);
   }
 
   /// Reset update status and clear [_charities]
@@ -198,9 +199,6 @@ class Donation extends ChangeNotifier implements Comparable<Donation> {
   @override
   int compareTo(Donation other) {
     int result = this.status.compareTo(other.status);
-    if (result != 0) {
-      return result;
-    }
-    return other.createdAt.compareTo(this.createdAt);
+    return result == 0 ? other.createdAt.compareTo(this.createdAt) : result;
   }
 }
