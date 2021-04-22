@@ -108,8 +108,8 @@ class Donation extends ChangeNotifier implements Comparable<Donation> {
   }
 
   /// Add [produceId] to list
-  void pickProduce(String produceId, ProduceItem produceItem) {
-    _produce[produceId] = produceItem;
+  void pickProduce(ProduceItem produceItem) {
+    _produce[produceItem.id] = produceItem;
     _updated = true;
     notifyListeners();
   }
