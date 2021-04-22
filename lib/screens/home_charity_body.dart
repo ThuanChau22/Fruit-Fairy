@@ -34,7 +34,7 @@ class _HomeCharityBodyState extends State<HomeCharityBody> {
       if (data != null) {
         produce.fromDB(data);
         bool removed = false;
-        List.from(wishlist.produceIds).forEach((produceId) {
+        List<String>.from(wishlist.produceIds).forEach((produceId) {
           if (!produce.map.containsKey(produceId)) {
             wishlist.removeProduce(produceId);
             removed = true;

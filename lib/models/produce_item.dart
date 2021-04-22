@@ -1,4 +1,4 @@
-import 'package:meta/meta.dart';
+import 'package:fruitfairy/services/firestore_service.dart';
 
 /// A class that represents a produce
 /// [id]: unique String to identify a produce
@@ -15,18 +15,21 @@ class ProduceItem implements Comparable<ProduceItem> {
   static const Max = 100;
   static const int AdjustAmount = 5;
   final String id;
-  final String name;
-  final String imagePath;
+  String _name;
+  String _imagePath;
   String _imageURL = '';
   int _currentAmount = Min;
 
-  ProduceItem({
-    @required this.id,
-    @required this.name,
-    @required this.imagePath,
-    imageURL = '',
-  }) {
-    _imageURL = imageURL;
+  ProduceItem(this.id);
+
+  /// Return a copy of [_name]
+  String get name {
+    return _name;
+  }
+
+  /// Return a copy of [_imagePath]
+  String get imagePath {
+    return _imagePath;
   }
 
   /// Return a copy of [_imageURL]
@@ -56,6 +59,13 @@ class ProduceItem implements Comparable<ProduceItem> {
   void decrease() {
     int result = _currentAmount - AdjustAmount;
     _currentAmount = result > Min ? result : Min;
+  }
+
+  /// Parse donation information from database
+  /// [produceItemData]: A Map with keys that are declared in [FireStoreService]
+  void fromDB(Map<String, dynamic> produceItemData) {
+    _name = produceItemData[FireStoreService.kProduceName];
+    _imagePath = produceItemData[FireStoreService.kProducePath];
   }
 
   /// Set [_currentAmount] to default value

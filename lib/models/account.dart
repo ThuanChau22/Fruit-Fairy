@@ -101,17 +101,6 @@ class Account extends ChangeNotifier {
       _charityName = charityName;
     }
 
-    // Phone number
-    Map<String, dynamic> phone = userData[FireStoreService.kPhone];
-    if (phone != null) {
-      _phone[FireStoreService.kPhoneCountry] =
-          phone[FireStoreService.kPhoneCountry];
-      _phone[FireStoreService.kPhoneDialCode] =
-          phone[FireStoreService.kPhoneDialCode];
-      _phone[FireStoreService.kPhoneNumber] =
-          phone[FireStoreService.kPhoneNumber];
-    }
-
     // Address
     Map<String, dynamic> address = userData[FireStoreService.kAddress];
     if (address != null) {
@@ -123,6 +112,17 @@ class Account extends ChangeNotifier {
           address[FireStoreService.kAddressState];
       _address[FireStoreService.kAddressZip] =
           address[FireStoreService.kAddressZip];
+    }
+
+    // Phone number
+    Map<String, dynamic> phone = userData[FireStoreService.kPhone];
+    if (phone != null) {
+      _phone[FireStoreService.kPhoneCountry] =
+          phone[FireStoreService.kPhoneCountry];
+      _phone[FireStoreService.kPhoneDialCode] =
+          phone[FireStoreService.kPhoneDialCode];
+      _phone[FireStoreService.kPhoneNumber] =
+          phone[FireStoreService.kPhoneNumber];
     }
     notifyListeners();
   }

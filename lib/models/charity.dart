@@ -6,7 +6,7 @@ import 'package:fruitfairy/services/firestore_service.dart';
 /// [id]: charity document id on database
 /// [_produce]: a set of produceIds from charity wishlist
 /// [_address]: charity address
-/// [_name]: charity display name
+/// [_name]: charity name
 /// [_score]: a value that is used to rank charity suggestion priorrity
 class Charity implements Comparable<Charity> {
   /// Set default values for all fields
@@ -40,13 +40,16 @@ class Charity implements Comparable<Charity> {
     return _score;
   }
 
+  /// Set new ranking score
+  void setScore(double score) {
+    _score = score;
+  }
+
   /// Parse account information from database
   /// [userData]: A Map with keys that are declared in [FireStoreService]
-  void fromUsersDB(Map<String, dynamic> userData) {
-    // Charity name
+  void fromDB(Map<String, dynamic> userData) {
     _name = userData[FireStoreService.kCharityName];
 
-    // Address
     Map<String, dynamic> address = userData[FireStoreService.kAddress];
     if (address != null) {
       _address[FireStoreService.kAddressStreet] =
@@ -59,18 +62,12 @@ class Charity implements Comparable<Charity> {
           address[FireStoreService.kAddressZip];
     }
 
-    // Wishlist
     List<dynamic> wishlist = userData[FireStoreService.kWishList];
     if (wishlist != null) {
       wishlist.forEach((produceId) {
         _wishlist.add(produceId);
       });
     }
-  }
-
-  /// Set new ranking score
-  void setScore(double score) {
-    _score = score;
   }
 
   @override
