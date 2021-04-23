@@ -28,26 +28,23 @@ class _HomeCharityBodyState extends State<HomeCharityBody> {
     WishList wishlist = context.read<WishList>();
     fireStore.wishListStream(wishlist);
     Produce produce = context.read<Produce>();
-    produce.addStream(fireStore.produceStream((data) {
-      if (data != null) {
-        produce.fromDB(data);
-        bool removed = false;
-        List<String>.from(wishlist.produceIds).forEach((produceId) {
-          if (!produce.map.containsKey(produceId)) {
-            wishlist.removeProduce(produceId);
-            removed = true;
-          }
-        });
-        fireStore.updateWishList(wishlist.produceIds);
-        if (removed) {
-          MessageBar(
-            context,
-            message:
-                'One or more produce on your wish list are no longer available!',
-          ).show();
+    fireStore.produceStream(produce, onChange: () {
+      bool removed = false;
+      List<String>.from(wishlist.produceIds).forEach((produceId) {
+        if (!produce.map.containsKey(produceId)) {
+          wishlist.removeProduce(produceId);
+          removed = true;
         }
+      });
+      fireStore.updateWishList(wishlist.produceIds);
+      if (removed) {
+        MessageBar(
+          context,
+          message:
+              'One or more produce on your wish list are no longer available!',
+        ).show();
       }
-    }));
+    });
   }
 
   @override

@@ -32,25 +32,22 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
       });
     });
     Produce produce = context.read<Produce>();
-    produce.addStream(fireStore.produceStream((data) {
-      if (data != null) {
-        produce.fromDB(data);
-        bool removed = false;
-        List<String>.from(donation.produce.keys).forEach((produceId) {
-          if (!produce.map.containsKey(produceId)) {
-            donation.removeProduce(produceId);
-            removed = true;
-          }
-        });
-        if (removed) {
-          MessageBar(
-            context,
-            message:
-                'One or more produce on your basket are no longer available!',
-          ).show();
+    fireStore.produceStream(produce, onChange: () {
+      bool removed = false;
+      List<String>.from(donation.produce.keys).forEach((produceId) {
+        if (!produce.map.containsKey(produceId)) {
+          donation.removeProduce(produceId);
+          removed = true;
         }
+      });
+      if (removed) {
+        MessageBar(
+          context,
+          message:
+              'One or more produce on your basket are no longer available!',
+        ).show();
       }
-    }));
+    });
   }
 
   @override

@@ -1,15 +1,18 @@
 import 'dart:async';
+import 'package:fruitfairy/models/produce.dart';
 import 'package:meta/meta.dart';
 import 'package:collection/collection.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:strings/strings.dart';
 //
+import 'package:fruitfairy/models/account.dart';
 import 'package:fruitfairy/models/charity.dart';
 import 'package:fruitfairy/models/donation.dart';
 import 'package:fruitfairy/models/donations.dart';
 import 'package:fruitfairy/models/produce_item.dart';
 import 'package:fruitfairy/models/status.dart';
+import 'package:fruitfairy/models/wish_list.dart';
 import 'package:fruitfairy/services/map_service.dart';
 import 'package:fruitfairy/services/session_token.dart';
 
@@ -81,28 +84,58 @@ class FireStoreService {
     return _uid;
   }
 
-  StreamSubscription<DocumentSnapshot> userStream(
-    Function(Map<String, dynamic>) onData,
-  ) {
+  void userStream(
+    Account account, {
+    Function onChange,
+  }) {
     DocumentReference doc = _usersDB.doc(_uid);
-    return doc.snapshots().listen(
+    account.addStream(doc.snapshots().listen(
       (snapshot) {
-        onData(snapshot.data());
+        Map<String, dynamic> data = snapshot.data();
+        if (data != null) {
+          account.fromDB(data);
+        }
+        if (onChange != null) {
+          onChange();
+        }
       },
       onError: (e) {
         print(e);
       },
-    );
+    ));
   }
 
-  StreamSubscription<QuerySnapshot> produceStream(
-    Function(Map<String, ProduceItem>) onData,
-  ) {
-    Query query = _produceDB
+  void wishListStream(
+    WishList wishList, {
+    Function onChange,
+  }) {
+    DocumentReference doc = _usersDB.doc(_uid);
+    wishList.addStream(doc.snapshots().listen(
+      (snapshot) {
+        Map<String, dynamic> data = snapshot.data();
+        if (data != null) {
+          wishList.fromDB(data);
+        }
+        if (onChange != null) {
+          onChange();
+        }
+      },
+      onError: (e) {
+        print(e);
+      },
+    ));
+  }
+
+  void produceStream(
+    Produce produce, {
+    Function onChange,
+  }) {
+    produce.addStream(_produceDB
         .where(kProduceEnabled, isEqualTo: true)
         .orderBy(kProduceName)
-        .limit(12);
-    return query.snapshots().listen(
+        .limit(12)
+        .snapshots()
+        .listen(
       (snapshot) async {
         Map<String, ProduceItem> snapshotData = {};
         for (QueryDocumentSnapshot doc in snapshot.docs) {
@@ -113,12 +146,15 @@ class FireStoreService {
         await Future.wait(snapshotData.values.map((produceItem) async {
           produceItem.setImageURL(await imageURL(produceItem.imagePath));
         }));
-        onData(snapshotData);
+        produce.fromDB(snapshotData);
+        if (onChange != null) {
+          onChange();
+        }
       },
       onError: (e) {
         print(e);
       },
-    );
+    ));
   }
 
   void donationStreamDonor(
