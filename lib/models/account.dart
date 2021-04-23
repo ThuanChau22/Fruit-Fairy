@@ -74,6 +74,15 @@ class Account extends ChangeNotifier {
   /// Cancel last subscription from [_subscriptions]
   void cancelLastSubscription() {
     _subscriptions.last.cancel();
+    _subscriptions.removeAt(_subscriptions.length - 1);
+  }
+
+  /// Cancel all subscriptions from [_subscriptions]
+  void clearStream() {
+    _subscriptions.forEach((subscription) {
+      subscription.cancel();
+    });
+    _subscriptions.clear();
   }
 
   /// Parse account information from database
@@ -141,10 +150,7 @@ class Account extends ChangeNotifier {
   /// Set object to initial state
   /// Cancel all [_subscriptions]
   void clear() {
-    _subscriptions.forEach((subscription) {
-      subscription.cancel();
-    });
-    _subscriptions.clear();
+    clearStream();
     reset();
     notifyListeners();
   }

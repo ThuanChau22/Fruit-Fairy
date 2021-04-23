@@ -35,6 +35,14 @@ class WishList extends ChangeNotifier {
     _subscriptions.add(subscription);
   }
 
+  /// Cancel all subscriptions from [_subscriptions]
+  void clearStream() {
+    _subscriptions.forEach((subscription) {
+      subscription.cancel();
+    });
+    _subscriptions.clear();
+  }
+
   /// Parse [produceId] from database
   /// [wishlistData]: A Map with keys that are declared in [FireStoreService]
   void fromDB(Map<String, dynamic> userData) {
@@ -51,10 +59,7 @@ class WishList extends ChangeNotifier {
   /// Set object to initial state
   /// Cancel all [_subscriptions]
   void clear() {
-    _subscriptions.forEach((subscription) {
-      subscription.cancel();
-    });
-    _subscriptions.clear();
+    clearStream();
     _produceIds.clear();
     notifyListeners();
   }

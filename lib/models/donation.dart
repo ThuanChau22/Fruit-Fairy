@@ -88,14 +88,16 @@ class Donation extends ChangeNotifier implements Comparable<Donation> {
     notifyListeners();
   }
 
-  /// Add [produceId] to list
+  /// Add [produceItem] to map [_produce]
+  /// access through [produceItem.id]
   void pickProduce(ProduceItem produceItem) {
     _produce[produceItem.id] = produceItem;
     _updated = true;
     notifyListeners();
   }
 
-  /// Remove [produceId] from list
+  /// Remove [ProduceItem] from map [_produce]
+  /// through [produceId]
   void removeProduce(String produceId) {
     _produce[produceId].clear();
     _produce.remove(produceId);
@@ -155,9 +157,9 @@ class Donation extends ChangeNotifier implements Comparable<Donation> {
     notifyListeners();
   }
 
-  /// Set current status from [code]
-  void setStatus(int code) {
-    _status = Status(code);
+  /// Set current status from [code] and [isDenied]
+  void setStatus(int code, bool isDenied) {
+    _status = Status(code, isDenied: isDenied);
   }
 
   /// Set created timestamp

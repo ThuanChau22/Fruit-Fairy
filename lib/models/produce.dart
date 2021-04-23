@@ -23,6 +23,14 @@ class Produce extends ChangeNotifier {
     _subscriptions.add(subscription);
   }
 
+  /// Cancel all subscriptions from [_subscriptions]
+  void clearStream() {
+    _subscriptions.forEach((subscription) {
+      subscription.cancel();
+    });
+    _subscriptions.clear();
+  }
+
   /// Parse [produceData] as [Map] from database
   void fromDB(Map<String, ProduceItem> produceData) {
     _produce.clear();
@@ -35,10 +43,7 @@ class Produce extends ChangeNotifier {
   /// Set object to initial state
   /// Cancel all [_subscriptions]
   void clear() {
-    _subscriptions.forEach((subscription) {
-      subscription.cancel();
-    });
-    _subscriptions.clear();
+    clearStream();
     _produce.clear();
     notifyListeners();
   }
