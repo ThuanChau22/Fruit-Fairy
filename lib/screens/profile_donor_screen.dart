@@ -449,11 +449,10 @@ class _ProfileDonorScreenState extends State<ProfileDonorScreen> {
     fillName();
     fillAddress();
     fillPhone();
-    Account account = context.read<Account>();
     FireStoreService fireStore = context.read<FireStoreService>();
-    account.addStream(fireStore.userStream((userData) {
+    fireStore.userStream(context.read<Account>(), onChange: () {
       _updateInputFields();
-    }));
+    });
   }
 
   @override

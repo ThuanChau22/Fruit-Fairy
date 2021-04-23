@@ -26,11 +26,7 @@ class _HomeCharityBodyState extends State<HomeCharityBody> {
     FireStoreService fireStore = context.read<FireStoreService>();
     fireStore.donationStreamCharity(context.read<Donations>());
     WishList wishlist = context.read<WishList>();
-    wishlist.addStream(fireStore.userStream((data) {
-      if (data != null) {
-        wishlist.fromDB(data);
-      }
-    }));
+    fireStore.wishListStream(wishlist);
     Produce produce = context.read<Produce>();
     produce.addStream(fireStore.produceStream((data) {
       if (data != null) {
