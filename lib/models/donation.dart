@@ -157,9 +157,9 @@ class Donation extends ChangeNotifier implements Comparable<Donation> {
     notifyListeners();
   }
 
-  /// Set current status from [code] and [isDenied]
-  void setStatus(int code, bool isDenied) {
-    _status = Status(code, isDenied: isDenied);
+  /// Set current status
+  void setStatus(Status status) {
+    _status = status;
   }
 
   /// Set created timestamp
