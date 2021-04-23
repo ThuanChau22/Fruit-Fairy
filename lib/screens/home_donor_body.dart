@@ -24,12 +24,7 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
   void initState() {
     super.initState();
     FireStoreService fireStore = context.read<FireStoreService>();
-    Donations donations = context.read<Donations>();
-    donations.addStream(fireStore.donationDonorStream((data) {
-      if (data != null) {
-        //do something
-      }
-    }));
+    fireStore.donationStreamDonor(context.read<Donations>());
     Donation donation = context.read<Donation>();
     donation.onEmptyBasket(() {
       Navigator.of(context).popUntil((route) {

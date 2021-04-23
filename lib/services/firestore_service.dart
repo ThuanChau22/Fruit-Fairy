@@ -7,7 +7,9 @@ import 'package:strings/strings.dart';
 //
 import 'package:fruitfairy/models/charity.dart';
 import 'package:fruitfairy/models/donation.dart';
+import 'package:fruitfairy/models/donations.dart';
 import 'package:fruitfairy/models/produce_item.dart';
+import 'package:fruitfairy/models/status.dart';
 import 'package:fruitfairy/services/map_service.dart';
 import 'package:fruitfairy/services/session_token.dart';
 
@@ -20,12 +22,13 @@ class FireStoreService {
   static const String kCharity = 'charity';
   static const String kUserId = 'userId';
   static const String kUserName = 'userName';
-  static const String kSelectedCharities = 'selectedCharities';
-  static const String kRequestedCharities = 'requestedCharities';
   static const String kNeedCollected = 'needCollected';
   static const String kProduceId = 'produceId';
   static const String kAmount = 'amount';
+  static const String kSelectedCharities = 'selectedCharities';
+  static const String kRequestedCharities = 'requestedCharities';
   static const String kStatus = 'status';
+  static const String kDenied = 'denied';
   static const String kCreatedAt = 'createdAt';
 
   /// produce
@@ -118,68 +121,199 @@ class FireStoreService {
     );
   }
 
-  StreamSubscription<QuerySnapshot> donationDonorStream(
-    Function(Map<String, Donation>) onData,
-  ) {
-    Query query = _donationsDB
-        .where('$kDonor.$kUserId', isEqualTo: _uid)
-        .orderBy(kStatus)
-        .orderBy(kCreatedAt, descending: true)
-        .limit(10);
-    return query.snapshots().listen(
-      (snapshot) async {
-        Map<String, Donation> snapshotData = {};
-        for (DocumentChange docChange in snapshot.docChanges) {
-          Map<String, dynamic> data = docChange.doc.data();
-          Donation donation = Donation(docChange.doc.id);
-          donation.setStatus(data[kStatus]);
-          donation.setCreatedAt(data[kCreatedAt]);
-          snapshotData[donation.id] = donation;
-        }
-        print('Updated:');
-        List<Donation> donationList = snapshotData.values.toList();
-        donationList.sort();
-        donationList.forEach((donation) {
-          print(
-              '${donation.id}|${donation.status.code}|${donation.createdAt.toDate()}');
-        });
-      },
-      onError: (e) {
-        print(e);
-      },
-    );
+  void donationStreamDonor(
+    Donations donations, {
+    Function onChange,
+  }) async {
+    String donorId = '$kDonor.$kUserId';
+    if (donations.startDocument == null) {
+      QuerySnapshot snapshot = await _donationsDB
+          .where(donorId, isEqualTo: _uid)
+          .orderBy(kStatus)
+          .orderBy(kCreatedAt, descending: true)
+          .limit(3)
+          .get();
+      List<QueryDocumentSnapshot> docs = snapshot.docs;
+      if (docs.isNotEmpty) {
+        donations.setStartDocument(docs.last);
+        Stream<QuerySnapshot> snapshots = _donationsDB
+            .where(donorId, isEqualTo: _uid)
+            .orderBy(kStatus, descending: true)
+            .orderBy(kCreatedAt)
+            .startAtDocument(donations.startDocument)
+            .snapshots();
+        _donationStreamDonor(snapshots, donations, onChange);
+      } else {
+        Stream<QuerySnapshot> snapshots = _donationsDB
+            .where(donorId, isEqualTo: _uid)
+            .orderBy(kStatus, descending: true)
+            .orderBy(kCreatedAt)
+            .snapshots();
+        _donationStreamDonor(snapshots, donations, onChange);
+      }
+    } else {
+      QuerySnapshot snapshot = await _donationsDB
+          .where(donorId, isEqualTo: _uid)
+          .orderBy(kStatus)
+          .orderBy(kCreatedAt, descending: true)
+          .startAfterDocument(donations.startDocument)
+          .limit(3)
+          .get();
+      List<QueryDocumentSnapshot> docs = snapshot.docs;
+      if (docs.isNotEmpty) {
+        donations.setEndDocument(docs.first);
+        donations.setStartDocument(docs.last);
+        Stream<QuerySnapshot> snapshots = _donationsDB
+            .where(donorId, isEqualTo: _uid)
+            .orderBy(kStatus, descending: true)
+            .orderBy(kCreatedAt)
+            .startAtDocument(donations.startDocument)
+            .endAtDocument(donations.endDocument)
+            .snapshots();
+        _donationStreamDonor(snapshots, donations, onChange);
+      }
+    }
   }
 
-  StreamSubscription<QuerySnapshot> donationCharityStream(
-    Function(Map<String, Donation>) onData,
+  void _donationStreamDonor(
+    Stream<QuerySnapshot> snapshots,
+    Donations donations,
+    Function onChange,
   ) {
-    Query query = _donationsDB
-        .where(kRequestedCharities, arrayContains: _uid)
-        .orderBy(kStatus)
-        .orderBy(kCreatedAt, descending: true)
-        .limit(10);
-    return query.snapshots().listen(
+    donations.addStream(snapshots.listen(
       (snapshot) async {
-        Map<String, Donation> snapshotData = {};
         for (DocumentChange docChange in snapshot.docChanges) {
-          Map<String, dynamic> data = docChange.doc.data();
-          Donation donation = Donation(docChange.doc.id);
-          donation.setStatus(data[kStatus]);
-          donation.setCreatedAt(data[kCreatedAt]);
-          snapshotData[donation.id] = donation;
+          String donationId = docChange.doc.id;
+          if (docChange.type == DocumentChangeType.removed) {
+            donations.removeDonation(donationId);
+            donations.clearStream();
+            _donationStreamDonor(
+              _donationsDB
+                  .where('$kDonor.$kUserId', isEqualTo: _uid)
+                  .orderBy(kStatus, descending: true)
+                  .orderBy(kCreatedAt)
+                  .startAtDocument(donations.startDocument)
+                  .snapshots(),
+              donations,
+              onChange,
+            );
+          } else {
+            Map<String, dynamic> data = docChange.doc.data();
+            Donation donation = Donation(donationId);
+            donation.setStatus(Status(
+              data[kStatus],
+              isDenied: data[kDenied],
+            ));
+            donation.setCreatedAt(data[kCreatedAt]);
+            donations.pickDonation(donation);
+          }
         }
-        print('Updated:');
-        List<Donation> donationList = snapshotData.values.toList();
-        donationList.sort();
-        donationList.forEach((donation) {
-          print(
-              '${donation.id}|${donation.status.code}|${donation.createdAt.toDate()}');
-        });
+        if (onChange != null) {
+          onChange();
+        }
       },
       onError: (e) {
         print(e);
       },
-    );
+    ));
+  }
+
+  void donationStreamCharity(
+    Donations donations, {
+    Function onChange,
+  }) async {
+    if (donations.startDocument == null) {
+      QuerySnapshot snapshot = await _donationsDB
+          .where(kRequestedCharities, arrayContains: _uid)
+          .orderBy(kStatus)
+          .orderBy(kCreatedAt, descending: true)
+          .limit(3)
+          .get();
+      List<QueryDocumentSnapshot> docs = snapshot.docs;
+      if (docs.isNotEmpty) {
+        donations.setStartDocument(docs.last);
+        Stream<QuerySnapshot> snapshots = _donationsDB
+            .where(kRequestedCharities, arrayContains: _uid)
+            .orderBy(kStatus, descending: true)
+            .orderBy(kCreatedAt)
+            .startAtDocument(donations.startDocument)
+            .snapshots();
+        _donationStreamCharity(snapshots, donations, onChange);
+      } else {
+        Stream<QuerySnapshot> snapshots = _donationsDB
+            .where(kRequestedCharities, arrayContains: _uid)
+            .orderBy(kStatus, descending: true)
+            .orderBy(kCreatedAt)
+            .snapshots();
+        _donationStreamCharity(snapshots, donations, onChange);
+      }
+    } else {
+      QuerySnapshot snapshot = await _donationsDB
+          .where(kRequestedCharities, arrayContains: _uid)
+          .orderBy(kStatus)
+          .orderBy(kCreatedAt, descending: true)
+          .startAfterDocument(donations.startDocument)
+          .limit(3)
+          .get();
+      List<QueryDocumentSnapshot> docs = snapshot.docs;
+      if (docs.isNotEmpty) {
+        donations.setEndDocument(docs.first);
+        donations.setStartDocument(docs.last);
+        Stream<QuerySnapshot> snapshots = _donationsDB
+            .where(kRequestedCharities, arrayContains: _uid)
+            .orderBy(kStatus, descending: true)
+            .orderBy(kCreatedAt)
+            .startAtDocument(donations.startDocument)
+            .endAtDocument(donations.endDocument)
+            .snapshots();
+        _donationStreamCharity(snapshots, donations, onChange);
+      }
+    }
+  }
+
+  void _donationStreamCharity(
+    Stream<QuerySnapshot> snapshots,
+    Donations donations,
+    Function onChange,
+  ) {
+    donations.addStream(snapshots.listen(
+      (snapshot) async {
+        for (DocumentChange docChange in snapshot.docChanges) {
+          String donationId = docChange.doc.id;
+          if (docChange.type == DocumentChangeType.removed) {
+            donations.removeDonation(donationId);
+            donations.clearStream();
+            _donationStreamDonor(
+              _donationsDB
+                  .where(kRequestedCharities, arrayContains: _uid)
+                  .orderBy(kStatus, descending: true)
+                  .orderBy(kCreatedAt)
+                  .startAtDocument(donations.startDocument)
+                  .snapshots(),
+              donations,
+              onChange,
+            );
+          } else {
+            Map<String, dynamic> data = docChange.doc.data();
+            Donation donation = Donation(donationId);
+            donation.setStatus(Status(
+              data[kStatus],
+              isDenied: data[kDenied],
+              isCharity: true,
+            ));
+            donation.setCreatedAt(data[kCreatedAt]);
+            donation.setNeedCollected(data[kNeedCollected]);
+            donations.pickDonation(donation);
+          }
+        }
+        if (onChange != null) {
+          onChange();
+        }
+      },
+      onError: (e) {
+        print(e);
+      },
+    ));
   }
 
   Future<String> imageURL(String path) async {
@@ -474,6 +608,7 @@ class FireStoreService {
         }).toList(),
         kRequestedCharities: [],
         kStatus: donation.status.code,
+        kDenied: donation.status.isDenied,
         kCreatedAt: FieldValue.serverTimestamp(),
       });
     } catch (e) {
