@@ -31,7 +31,7 @@ class FireStoreService {
   static const String kSelectedCharities = 'selectedCharities';
   static const String kRequestedCharities = 'requestedCharities';
   static const String kStatus = 'status';
-  static const String kDenied = 'denied';
+  static const String kSubStatus = 'subStatus';
   static const String kCreatedAt = 'createdAt';
 
   /// produce
@@ -86,7 +86,7 @@ class FireStoreService {
 
   void userStream(
     Account account, {
-    Function onChange,
+    Function onComplete,
   }) {
     DocumentReference doc = _usersDB.doc(_uid);
     account.addStream(doc.snapshots().listen(
@@ -95,8 +95,8 @@ class FireStoreService {
         if (data != null) {
           account.fromDB(data);
         }
-        if (onChange != null) {
-          onChange();
+        if (onComplete != null) {
+          onComplete();
         }
       },
       onError: (e) {
@@ -107,7 +107,7 @@ class FireStoreService {
 
   void wishListStream(
     WishList wishList, {
-    Function onChange,
+    Function onComplete,
   }) {
     DocumentReference doc = _usersDB.doc(_uid);
     wishList.addStream(doc.snapshots().listen(
@@ -116,8 +116,8 @@ class FireStoreService {
         if (data != null) {
           wishList.fromDB(data);
         }
-        if (onChange != null) {
-          onChange();
+        if (onComplete != null) {
+          onComplete();
         }
       },
       onError: (e) {
@@ -128,7 +128,7 @@ class FireStoreService {
 
   void produceStream(
     Produce produce, {
-    Function onChange,
+    Function onComplete,
   }) {
     produce.addStream(_produceDB
         .where(kProduceEnabled, isEqualTo: true)
@@ -147,8 +147,8 @@ class FireStoreService {
           produceItem.setImageURL(await imageURL(produceItem.imagePath));
         }));
         produce.fromDB(snapshotData);
-        if (onChange != null) {
-          onChange();
+        if (onComplete != null) {
+          onComplete();
         }
       },
       onError: (e) {
@@ -159,7 +159,7 @@ class FireStoreService {
 
   void donationStreamDonor(
     Donations donations, {
-    Function onChange,
+    Function onComplete,
   }) async {
     String donorId = '$kDonor.$kUserId';
     if (donations.startDocument == null) {
@@ -167,7 +167,7 @@ class FireStoreService {
           .where(donorId, isEqualTo: _uid)
           .orderBy(kStatus)
           .orderBy(kCreatedAt, descending: true)
-          .limit(3)
+          .limit(Donations.LOAD_LIMIT)
           .get();
       List<QueryDocumentSnapshot> docs = snapshot.docs;
       if (docs.isNotEmpty) {
@@ -178,14 +178,14 @@ class FireStoreService {
             .orderBy(kCreatedAt)
             .startAtDocument(donations.startDocument)
             .snapshots();
-        _donationStreamDonor(snapshots, donations, onChange);
+        _donationStreamDonor(snapshots, donations, onComplete);
       } else {
         Stream<QuerySnapshot> snapshots = _donationsDB
             .where(donorId, isEqualTo: _uid)
             .orderBy(kStatus, descending: true)
             .orderBy(kCreatedAt)
             .snapshots();
-        _donationStreamDonor(snapshots, donations, onChange);
+        _donationStreamDonor(snapshots, donations, onComplete);
       }
     } else {
       QuerySnapshot snapshot = await _donationsDB
@@ -193,7 +193,7 @@ class FireStoreService {
           .orderBy(kStatus)
           .orderBy(kCreatedAt, descending: true)
           .startAfterDocument(donations.startDocument)
-          .limit(3)
+          .limit(Donations.LOAD_LIMIT)
           .get();
       List<QueryDocumentSnapshot> docs = snapshot.docs;
       if (docs.isNotEmpty) {
@@ -206,7 +206,11 @@ class FireStoreService {
             .startAtDocument(donations.startDocument)
             .endAtDocument(donations.endDocument)
             .snapshots();
-        _donationStreamDonor(snapshots, donations, onChange);
+        _donationStreamDonor(snapshots, donations, onComplete);
+      } else {
+        if (onComplete != null) {
+          onComplete();
+        }
       }
     }
   }
@@ -214,13 +218,14 @@ class FireStoreService {
   void _donationStreamDonor(
     Stream<QuerySnapshot> snapshots,
     Donations donations,
-    Function onChange,
+    Function onComplete,
   ) {
     donations.addStream(snapshots.listen(
       (snapshot) async {
         for (DocumentChange docChange in snapshot.docChanges) {
           String donationId = docChange.doc.id;
           if (docChange.type == DocumentChangeType.removed) {
+            int currentSize = donations.map.length;
             donations.removeDonation(donationId);
             donations.clearStream();
             _donationStreamDonor(
@@ -228,24 +233,25 @@ class FireStoreService {
                   .where('$kDonor.$kUserId', isEqualTo: _uid)
                   .orderBy(kStatus, descending: true)
                   .orderBy(kCreatedAt)
-                  .startAtDocument(donations.startDocument)
+                  .limit(currentSize)
                   .snapshots(),
               donations,
-              onChange,
+              onComplete,
             );
           } else {
             Map<String, dynamic> data = docChange.doc.data();
             Donation donation = Donation(donationId);
             donation.setStatus(Status(
               data[kStatus],
-              isDenied: data[kDenied],
+              data[kSubStatus],
             ));
             donation.setCreatedAt(data[kCreatedAt]);
+            donation.setCharityName(data[kCharity][kUserName]);
             donations.pickDonation(donation);
           }
         }
-        if (onChange != null) {
-          onChange();
+        if (onComplete != null) {
+          onComplete();
         }
       },
       onError: (e) {
@@ -256,14 +262,14 @@ class FireStoreService {
 
   void donationStreamCharity(
     Donations donations, {
-    Function onChange,
+    Function onComplete,
   }) async {
     if (donations.startDocument == null) {
       QuerySnapshot snapshot = await _donationsDB
           .where(kRequestedCharities, arrayContains: _uid)
           .orderBy(kStatus)
           .orderBy(kCreatedAt, descending: true)
-          .limit(3)
+          .limit(Donations.LOAD_LIMIT)
           .get();
       List<QueryDocumentSnapshot> docs = snapshot.docs;
       if (docs.isNotEmpty) {
@@ -274,14 +280,14 @@ class FireStoreService {
             .orderBy(kCreatedAt)
             .startAtDocument(donations.startDocument)
             .snapshots();
-        _donationStreamCharity(snapshots, donations, onChange);
+        _donationStreamCharity(snapshots, donations, onComplete);
       } else {
         Stream<QuerySnapshot> snapshots = _donationsDB
             .where(kRequestedCharities, arrayContains: _uid)
             .orderBy(kStatus, descending: true)
             .orderBy(kCreatedAt)
             .snapshots();
-        _donationStreamCharity(snapshots, donations, onChange);
+        _donationStreamCharity(snapshots, donations, onComplete);
       }
     } else {
       QuerySnapshot snapshot = await _donationsDB
@@ -289,7 +295,7 @@ class FireStoreService {
           .orderBy(kStatus)
           .orderBy(kCreatedAt, descending: true)
           .startAfterDocument(donations.startDocument)
-          .limit(3)
+          .limit(Donations.LOAD_LIMIT)
           .get();
       List<QueryDocumentSnapshot> docs = snapshot.docs;
       if (docs.isNotEmpty) {
@@ -302,7 +308,11 @@ class FireStoreService {
             .startAtDocument(donations.startDocument)
             .endAtDocument(donations.endDocument)
             .snapshots();
-        _donationStreamCharity(snapshots, donations, onChange);
+        _donationStreamCharity(snapshots, donations, onComplete);
+      } else {
+        if (onComplete != null) {
+          onComplete();
+        }
       }
     }
   }
@@ -310,31 +320,32 @@ class FireStoreService {
   void _donationStreamCharity(
     Stream<QuerySnapshot> snapshots,
     Donations donations,
-    Function onChange,
+    Function onComplete,
   ) {
     donations.addStream(snapshots.listen(
       (snapshot) async {
         for (DocumentChange docChange in snapshot.docChanges) {
           String donationId = docChange.doc.id;
           if (docChange.type == DocumentChangeType.removed) {
+            int currentSize = donations.map.length;
             donations.removeDonation(donationId);
             donations.clearStream();
-            _donationStreamDonor(
+            _donationStreamCharity(
               _donationsDB
                   .where(kRequestedCharities, arrayContains: _uid)
                   .orderBy(kStatus, descending: true)
                   .orderBy(kCreatedAt)
-                  .startAtDocument(donations.startDocument)
+                  .limit(currentSize)
                   .snapshots(),
               donations,
-              onChange,
+              onComplete,
             );
           } else {
             Map<String, dynamic> data = docChange.doc.data();
             Donation donation = Donation(donationId);
             donation.setStatus(Status(
               data[kStatus],
-              isDenied: data[kDenied],
+              data[kSubStatus],
               isCharity: true,
             ));
             donation.setCreatedAt(data[kCreatedAt]);
@@ -342,8 +353,8 @@ class FireStoreService {
             donations.pickDonation(donation);
           }
         }
-        if (onChange != null) {
-          onChange();
+        if (onComplete != null) {
+          onComplete();
         }
       },
       onError: (e) {
@@ -613,10 +624,15 @@ class FireStoreService {
     try {
       Map<String, String> address = donation.address;
       Map<String, String> phone = donation.phone;
+      List<Charity> charities = donation.charities;
       await _donationsDB.add({
         kDonor: {
           kUserId: _uid,
           kUserName: donation.donorName,
+        },
+        kCharity: {
+          kUserId: charities.first.id,
+          kUserName: charities.first.name,
         },
         kNeedCollected: donation.needCollected,
         kProduce: donation.produce.values.map((produceItem) {
@@ -639,12 +655,12 @@ class FireStoreService {
           kPhoneDialCode: phone[kPhoneDialCode],
           kPhoneNumber: phone[kPhoneNumber],
         },
-        kSelectedCharities: donation.charities.map((charity) {
+        kSelectedCharities: charities.map((charity) {
           return charity.id;
         }).toList(),
         kRequestedCharities: [],
         kStatus: donation.status.code,
-        kDenied: donation.status.isDenied,
+        kSubStatus: donation.status.subCode,
         kCreatedAt: FieldValue.serverTimestamp(),
       });
     } catch (e) {

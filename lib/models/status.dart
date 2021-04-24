@@ -1,68 +1,79 @@
 /// A class that represents a donation status
-/// [code]: number represent current status
+/// [code]: number represent current main status
+/// [subCode]: number represent current sub status
 /// [isCharity]: true if status is retrieve from a charity
-/// [isDenied]: true if a charity denies the donation
-/// [_description]: status description based on [code]
+/// [_description]: description of current status
 /// [_message]: inform user about current status with explanation
-/// [kPending]: After a donation is requested
-/// [kInProgress]: After a donation is accepted
-/// [kCompleted]: After a donation is marked as completed or denied
 class Status implements Comparable<Status> {
-  static const int kPending = 0;
-  static const int kInProgress = 1;
-  static const int kCompleted = 2;
-
   final int code;
+  final int subCode;
   final bool isCharity;
-  final bool isDenied;
   String _description = '';
   String _message = '';
 
   Status(
-    this.code, {
+    this.code,
+    this.subCode, {
     this.isCharity = false,
-    this.isDenied = false,
   }) {
+    //TODO: Message for charity
     if (isCharity) {
-      switch (code) {
-        case kPending:
-          _description = 'Pending';
-          _message = '';
-          break;
-        case kInProgress:
-          _description = 'In Progress';
-          _message = '';
-          break;
-        case kCompleted:
-          _description = 'Completed';
-          _message = '';
-          if (isDenied) {
-            _description = 'Denied';
-            _message = '';
-          }
-          break;
+      if (isPennding) {
+        _description = 'Pending';
+        _message = '';
+      }
+      if (isInProgress) {
+        _description = 'In Progress';
+        _message = '';
+      }
+      if (isDenied) {
+        _description = 'Denied';
+        _message = '';
+      }
+      if (isCompleted) {
+        _description = 'Completed';
+        _message = '';
       }
     } else {
-      switch (code) {
-        case kPending:
-          _description = 'Pending';
-          _message = 'Donation waiting for charity approval';
-          break;
-        case kInProgress:
-          _description = 'In Progress';
-          _message =
-              'Donation accepted. The charity will schedule a pickup with you';
-          break;
-        case kCompleted:
-          _description = 'Completed';
-          _message = 'Donation completed';
-          if (isDenied) {
-            _description = 'Denied';
-            _message = 'Donation declined by selected charities';
-          }
-          break;
+      if (isPennding) {
+        _description = 'Pending';
+        _message = 'Donation waiting for charity approval';
+      }
+      if (isInProgress) {
+        _description = 'In Progress';
+        _message =
+            'Donation accepted. The charity will schedule a pickup with you';
+      }
+      if (isDenied) {
+        _description = 'Denied';
+        _message = 'Donation declined by selected charities';
+      }
+      if (isCompleted) {
+        _description = 'Completed';
+        _message = 'Donation completed';
       }
     }
+  }
+
+  /// Return true if donation is waiting
+  /// for charity response
+  bool get isPennding {
+    return code == 0 && subCode == 0;
+  }
+
+  /// Return true if donation is in progress
+  bool get isInProgress {
+    return code == 0 && subCode == 1;
+  }
+
+  /// Return true if donation is denied by charity
+  bool get isDenied {
+    return code == 1 && subCode == 0;
+  }
+
+  /// Return true if donation is completed
+  bool get isCompleted {
+    return code == 1 && subCode == 1;
   }
 
   /// Return a copy of [_description]
@@ -76,8 +87,8 @@ class Status implements Comparable<Status> {
   }
 
   /// Return initial status code
-  static int init() {
-    return kPending;
+  static Status init() {
+    return Status(0, 0);
   }
 
   @override

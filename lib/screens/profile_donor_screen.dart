@@ -62,7 +62,7 @@ class _ProfileDonorScreenState extends State<ProfileDonorScreen> {
 
   final Set<Field> _updated = {};
 
-  final SessionToken sessionToken = SessionToken();
+  final SessionToken _sessionToken = SessionToken();
 
   String _isoCode = 'US';
   String _dialCode = '+1';
@@ -450,7 +450,7 @@ class _ProfileDonorScreenState extends State<ProfileDonorScreen> {
     fillAddress();
     fillPhone();
     FireStoreService fireStore = context.read<FireStoreService>();
-    fireStore.userStream(context.read<Account>(), onChange: () {
+    fireStore.userStream(context.read<Account>(), onComplete: () {
       _updateInputFields();
     });
   }
@@ -642,7 +642,7 @@ class _ProfileDonorScreenState extends State<ProfileDonorScreen> {
             if (pattern.isNotEmpty) {
               return await MapService.addressSuggestions(
                 pattern,
-                sessionToken: sessionToken.getToken(),
+                sessionToken: _sessionToken.getToken(),
               );
             }
             return null;
@@ -677,7 +677,7 @@ class _ProfileDonorScreenState extends State<ProfileDonorScreen> {
           onSuggestionSelected: (suggestion) async {
             Map<String, String> address = await MapService.addressDetails(
               suggestion[MapService.kPlaceId],
-              sessionToken: sessionToken.getToken(),
+              sessionToken: _sessionToken.getToken(),
             );
             if (address.isNotEmpty) {
               setState(() {
@@ -690,7 +690,7 @@ class _ProfileDonorScreenState extends State<ProfileDonorScreen> {
                 _stateError = Validate.checkState(_state.text.trim());
                 _zipError = Validate.zipCode(_zipCode.text.trim());
               });
-              sessionToken.clear();
+              _sessionToken.clear();
             }
           },
         ),

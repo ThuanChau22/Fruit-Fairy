@@ -11,7 +11,9 @@ import 'package:fruitfairy/models/donation.dart';
 /// [_donations]: a map of [Donation]
 /// [_subscriptions]: list of stream subcriptions that
 /// performs an opperation for each subcription on changes
+/// [LOAD_LIMIT]: Limit amount per donation retrieval
 class Donations extends ChangeNotifier {
+  static const LOAD_LIMIT = 5;
   final Map<String, Donation> _donations = {};
   final List<StreamSubscription<QuerySnapshot>> _subscriptions = [];
   DocumentSnapshot _startDocument;

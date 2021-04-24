@@ -18,7 +18,6 @@ import 'package:fruitfairy/screens/profile_charity_screen.dart';
 import 'package:fruitfairy/screens/profile_donor_screen.dart';
 import 'package:fruitfairy/services/fireauth_service.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
-import 'package:fruitfairy/widgets/scrollable_layout.dart';
 
 enum Profile { Edit, SignOut }
 enum Role { Donor, Charity }
@@ -71,7 +70,6 @@ class _HomeScreenState extends State<HomeScreen> {
       role = Role.Charity;
       _showSpinner = false;
     }
-    Size screen = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
         title: Text('Home'),
@@ -83,14 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
           progressIndicator: CircularProgressIndicator(
             valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
           ),
-          child: ScrollableLayout(
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                vertical: screen.height * 0.03,
-              ),
-              child: roleLayout(role),
-            ),
-          ),
+          child: roleLayout(role),
         ),
       ),
     );

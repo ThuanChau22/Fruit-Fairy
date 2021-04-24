@@ -13,6 +13,7 @@ import 'package:fruitfairy/screens/charity_wishlist_screen.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
 import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
+import 'package:fruitfairy/widgets/scrollable_layout.dart';
 
 class HomeCharityBody extends StatefulWidget {
   @override
@@ -20,6 +21,8 @@ class HomeCharityBody extends StatefulWidget {
 }
 
 class _HomeCharityBodyState extends State<HomeCharityBody> {
+  final ScrollController scrollController = new ScrollController();
+
   @override
   void initState() {
     super.initState();
@@ -28,7 +31,7 @@ class _HomeCharityBodyState extends State<HomeCharityBody> {
     WishList wishlist = context.read<WishList>();
     fireStore.wishListStream(wishlist);
     Produce produce = context.read<Produce>();
-    fireStore.produceStream(produce, onChange: () {
+    fireStore.produceStream(produce, onComplete: () {
       bool removed = false;
       List<String>.from(wishlist.produceIds).forEach((produceId) {
         if (!produce.map.containsKey(produceId)) {
@@ -50,93 +53,101 @@ class _HomeCharityBodyState extends State<HomeCharityBody> {
   @override
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
-    return Column(
-      children: [
-        greeting(),
-        wishListButton(),
-        //TODO: Donation tracking status
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 36.0),
-          child: Align(
-            alignment: Alignment.center,
-            child: Text(
-              'Review Incoming Donations',
-              style: TextStyle(
-                fontSize: 25.0,
-                fontWeight: FontWeight.bold,
-                color: kLabelColor,
+    return ScrollableLayout(
+      controller: scrollController,
+      child: Padding(
+        padding: EdgeInsets.only(
+          top: screen.height * 0.03,
+        ),
+        child: Column(
+          children: [
+            greeting(),
+            wishListButton(),
+            //TODO: Donation tracking status
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 36.0),
+              child: Align(
+                alignment: Alignment.center,
+                child: Text(
+                  'Review Incoming Donations',
+                  style: TextStyle(
+                    fontSize: 25.0,
+                    fontWeight: FontWeight.bold,
+                    color: kLabelColor,
+                  ),
+                ),
               ),
             ),
-          ),
-        ),
-        Container(
-          child: Column(
-            children: [
-              GestureDetector(
-                  onTap: () {
-                    HapticFeedback.mediumImpact();
-                    Navigator.of(context)
-                        .pushNamed(CharityDonationDetailScreen.id);
-                  },
-                  child: HistoryTile()),
-              HistoryTile(),
-              HistoryTile(),
-            ],
-          ),
-        ),
-        SizedBox(
-          height: screen.height * 0.01,
-        ),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 36.0),
-          child: Align(
-            alignment: Alignment.center,
-            child: Text(
-              'Donations In Progress',
-              style: TextStyle(
-                fontSize: 25.0,
-                fontWeight: FontWeight.bold,
-                color: kLabelColor,
+            Container(
+              child: Column(
+                children: [
+                  GestureDetector(
+                      onTap: () {
+                        HapticFeedback.mediumImpact();
+                        Navigator.of(context)
+                            .pushNamed(CharityDonationDetailScreen.id);
+                      },
+                      child: HistoryTile()),
+                  HistoryTile(),
+                  HistoryTile(),
+                ],
               ),
             ),
-          ),
-        ),
-        Container(
-          child: Column(
-            children: [
-              HistoryTile(),
-              HistoryTile(),
-              HistoryTile(),
-            ],
-          ),
-        ),
-        SizedBox(
-          height: screen.height * 0.01,
-        ),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 36.0),
-          child: Align(
-            alignment: Alignment.center,
-            child: Text(
-              'Donations Completed',
-              style: TextStyle(
-                fontSize: 25.0,
-                fontWeight: FontWeight.bold,
-                color: kLabelColor,
+            SizedBox(
+              height: screen.height * 0.01,
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 36.0),
+              child: Align(
+                alignment: Alignment.center,
+                child: Text(
+                  'Donations In Progress',
+                  style: TextStyle(
+                    fontSize: 25.0,
+                    fontWeight: FontWeight.bold,
+                    color: kLabelColor,
+                  ),
+                ),
               ),
             ),
-          ),
+            Container(
+              child: Column(
+                children: [
+                  HistoryTile(),
+                  HistoryTile(),
+                  HistoryTile(),
+                ],
+              ),
+            ),
+            SizedBox(
+              height: screen.height * 0.01,
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 36.0),
+              child: Align(
+                alignment: Alignment.center,
+                child: Text(
+                  'Donations Completed',
+                  style: TextStyle(
+                    fontSize: 25.0,
+                    fontWeight: FontWeight.bold,
+                    color: kLabelColor,
+                  ),
+                ),
+              ),
+            ),
+            Container(
+              child: Column(
+                children: [
+                  HistoryTile(),
+                  HistoryTile(),
+                  HistoryTile(),
+                ],
+              ),
+            ),
+          ],
         ),
-        Container(
-          child: Column(
-            children: [
-              HistoryTile(),
-              HistoryTile(),
-              HistoryTile(),
-            ],
-          ),
-        ),
-      ],
+      ),
     );
   }
 

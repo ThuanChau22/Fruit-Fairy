@@ -418,7 +418,7 @@ class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
     fillAddress();
     fillPhone();
     FireStoreService fireStore = context.read<FireStoreService>();
-    fireStore.userStream(context.read<Account>(), onChange: () {
+    fireStore.userStream(context.read<Account>(), onComplete: () {
       _updateInputFields();
     });
   }

@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 //
 import 'package:fruitfairy/constant.dart';
-import 'package:fruitfairy/screens/home_donor_body.dart';
 import 'package:fruitfairy/widgets/scrollable_layout.dart';
 
 //TODO This screen needs to get the corresponding data from the database of a chosen donation. It needs the donation number,data,status,charity name, and the picture of fruit and percentage donated
@@ -33,7 +32,7 @@ class DonorDonationDetailScreen extends StatelessWidget {
               SizedBox(height: screen.height * 0.02),
               divider(),
               SizedBox(height: screen.height * 0.02),
-              HistoryTile(),
+              // HistoryTile(),
               SizedBox(height: screen.height * 0.04),
               subtitle("Selected Charity:"),
               SizedBox(height: screen.height * 0.02),

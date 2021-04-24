@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:strings/strings.dart';
 //
@@ -8,11 +7,14 @@ import 'package:fruitfairy/models/account.dart';
 import 'package:fruitfairy/models/donation.dart';
 import 'package:fruitfairy/models/donations.dart';
 import 'package:fruitfairy/models/produce.dart';
+import 'package:fruitfairy/models/status.dart';
 import 'package:fruitfairy/screens/donation_produce_selection_screen.dart';
 import 'package:fruitfairy/screens/donor_donation_detail_screen.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
+import 'package:fruitfairy/widgets/donation_tile.dart';
 import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
+import 'package:fruitfairy/widgets/scrollable_layout.dart';
 
 class HomeDonorBody extends StatefulWidget {
   @override
@@ -20,11 +22,29 @@ class HomeDonorBody extends StatefulWidget {
 }
 
 class _HomeDonorBodyState extends State<HomeDonorBody> {
+  final ScrollController _scrollController = new ScrollController();
+
+  bool _isLoading = true;
+  bool _isLoadingMore = true;
+
   @override
   void initState() {
     super.initState();
     FireStoreService fireStore = context.read<FireStoreService>();
-    fireStore.donationStreamDonor(context.read<Donations>());
+    Donations donations = context.read<Donations>();
+    fireStore.donationStreamDonor(donations, onComplete: () {
+      setState(() => _isLoading = false);
+    });
+    _scrollController.addListener(() {
+      ScrollPosition pos = _scrollController.position;
+      if (pos.pixels == pos.maxScrollExtent) {
+        // setState(() => _isLoadingMore = true);
+        int currentSize = donations.map.length;
+        fireStore.donationStreamDonor(donations, onComplete: () {
+          setState(() => _isLoadingMore = currentSize != donations.map.length);
+        });
+      }
+    });
     Donation donation = context.read<Donation>();
     donation.onEmptyBasket(() {
       Navigator.of(context).popUntil((route) {
@@ -32,7 +52,7 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
       });
     });
     Produce produce = context.read<Produce>();
-    fireStore.produceStream(produce, onChange: () {
+    fireStore.produceStream(produce, onComplete: () {
       bool removed = false;
       List<String>.from(donation.produce.keys).forEach((produceId) {
         if (!produce.map.containsKey(produceId)) {
@@ -51,42 +71,30 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    _scrollController.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
-    return Column(
-      children: [
-        greeting(),
-        donateButton(),
-        //TODO: Donation tracking status
-        Text(
-          'Donation History',
-          style: TextStyle(
-            fontSize: 30.0,
-            fontWeight: FontWeight.bold,
-            color: kLabelColor,
+    return ScrollableLayout(
+      controller: _scrollController,
+      child: Padding(
+        padding: EdgeInsets.only(
+          top: screen.height * 0.03,
+        ),
+        child: IntrinsicHeight(
+          child: Column(
+            children: [
+              greeting(),
+              donateButton(),
+              donationSection(),
+            ],
           ),
         ),
-        Padding(
-          padding: EdgeInsets.only(left: 50.0),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              'Today',
-              style: TextStyle(
-                fontSize: 20.0,
-                fontWeight: FontWeight.bold,
-                color: kLabelColor,
-              ),
-            ),
-          ),
-        ),
-        SizedBox(height: screen.height * 0.02),
-        HistoryTile(),
-        SizedBox(height: screen.height * 0.02),
-        HistoryTile(),
-        SizedBox(height: screen.height * 0.02),
-        HistoryTile(),
-      ],
+      ),
     );
   }
 
@@ -105,12 +113,12 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
     );
   }
 
-  Padding donateButton() {
-    Size size = MediaQuery.of(context).size;
+  Widget donateButton() {
+    Size screen = MediaQuery.of(context).size;
     return Padding(
       padding: EdgeInsets.symmetric(
         vertical: 16.0,
-        horizontal: size.width * 0.25,
+        horizontal: screen.width * 0.25,
       ),
       child: RoundedButton(
         label: 'Donate',
@@ -120,77 +128,157 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
       ),
     );
   }
-}
 
-class HistoryTile extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
+  Widget donationSection() {
     Size screen = MediaQuery.of(context).size;
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.mediumImpact();
-        Navigator.of(context).pushNamed(DonorDonationDetailScreen.id);
-      },
-      child: Container(
-        height: screen.height * 0.15,
-        width: screen.width * 0.8,
-        decoration: BoxDecoration(
-          color: kObjectColor,
-          borderRadius: BorderRadius.circular(15.0),
+    return Expanded(
+      child: Padding(
+        padding: EdgeInsets.only(
+          top: screen.height * 0.02,
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            //TODO future for loop to see how many donations were done on either today or yesterday or 2 days ago
-            //SizedBox(height: screen.height * 0.02),
-            Padding(
-              padding: EdgeInsets.only(left: 8.0),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Donation #23',
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(30.0),
+              topRight: Radius.circular(30.0),
+            ),
+            border: Border.all(
+              color: kObjectColor.withOpacity(0.3),
+              width: 2.0,
+            ),
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              vertical: screen.height * 0.03,
+            ),
+            child: Column(
+              children: [
+                Text(
+                  'My Donations',
                   style: TextStyle(
-                    color: kPrimaryColor,
+                    fontSize: 30.0,
                     fontWeight: FontWeight.bold,
-                    fontSize: 25.0,
+                    color: kLabelColor,
                   ),
                 ),
-              ),
+                donationLayout(),
+              ],
             ),
-            SizedBox(height: screen.height * 0.02),
-            Padding(
-              padding: EdgeInsets.only(left: 8.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: Text(
-                      'Date: 02/30/2021',
-                      style: TextStyle(
-                        color: kPrimaryColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 25.0,
-                      ),
-                    ),
-                  ),
-
-                  //TODO get status from db
-                  Expanded(
-                    flex: 1,
-                    child: Text(
-                      'In Progress',
-                      style: TextStyle(
-                        color: Colors.green,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20.0,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget donationLayout() {
+    Donations donations = context.watch<Donations>();
+    if (_isLoading) {
+      return Expanded(
+        child: Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
+          ),
+        ),
+      );
+    }
+    if (donations.map.isEmpty) {
+      // TODO: Message on empty donation
+      return Expanded(
+        child: Center(
+          child: Text(
+            '(Empty)',
+            style: TextStyle(
+              color: kLabelColor.withOpacity(0.5),
+              fontSize: 20.0,
+            ),
+          ),
+        ),
+      );
+    }
+    Size screen = MediaQuery.of(context).size;
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: screen.width * 0.08,
+      ),
+      child: Column(children: donationTiles()),
+    );
+  }
+
+  List<Widget> donationTiles() {
+    List<Widget> donationTiles = [];
+    Donations donations = context.read<Donations>();
+    List<Donation> donationList = donations.map.values.toList();
+    donationList.sort();
+    bool hasActive = false;
+    bool hasHistory = false;
+    donationList.forEach((donation) {
+      Status status = donation.status;
+      if ((status.isPennding || status.isInProgress) && !hasActive) {
+        donationTiles.add(groupLabel('Active'));
+        hasActive = true;
+      }
+      if ((status.isDenied || status.isCompleted) && !hasHistory) {
+        donationTiles.add(groupLabel('History'));
+        hasHistory = true;
+      }
+      donationTiles.add(Padding(
+        padding: EdgeInsets.only(
+          top: 20.0,
+        ),
+        child: DonationTile(
+          charityName: donation.charityName,
+          dateTime: donation.createdAt.toDate(),
+          status: donation.status,
+          onTap: () {
+            Navigator.of(context).pushNamed(DonorDonationDetailScreen.id);
+            print(donation.id);
+          },
+        ),
+      ));
+    });
+    if (donationList.length >= Donations.LOAD_LIMIT) {
+      donationTiles.add(loadingTile());
+    }
+    return donationTiles;
+  }
+
+  Widget loadingTile() {
+    return Visibility(
+      visible: _isLoadingMore,
+      child: Padding(
+        padding: EdgeInsets.only(
+          top: 20.0,
+        ),
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
+        ),
+      ),
+    );
+  }
+
+  Widget groupLabel(String label) {
+    Size screen = MediaQuery.of(context).size;
+    return Padding(
+      padding: EdgeInsets.only(
+        top: screen.height * 0.03,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: kLabelColor,
+              fontSize: 25.0,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Divider(
+            color: kLabelColor,
+            height: 2.0,
+            thickness: 2.0,
+          ),
+        ],
       ),
     );
   }

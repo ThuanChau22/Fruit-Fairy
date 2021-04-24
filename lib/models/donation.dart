@@ -31,7 +31,7 @@ class Donation extends ChangeNotifier implements Comparable<Donation> {
   final Map<String, String> _address = {};
   final Map<String, String> _phone = {};
   final List<Charity> _charities = [];
-  Status _status = Status(Status.init());
+  Status _status = Status.init();
   Timestamp _createdAt = Timestamp.now();
   bool _updated = false;
   VoidCallback _onEmptyBasket = () {};
