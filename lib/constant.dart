@@ -7,6 +7,10 @@ const Color kLabelColor = Colors.white;
 const Color kObjectColor = Colors.white;
 const Color kErrorColor = Colors.white;
 const Color kDisabledColor = Color.fromRGBO(179, 179, 179, 1.0);
+const Color kPendingStatus = Color.fromRGBO(255, 166, 77, 1.0);
+const Color kInProgressStatus = Color.fromRGBO(255, 209, 26, 1.0);
+const Color kCompletedStatus = Color.fromRGBO(46, 184, 46, 1.0);
+const Color kDeniedStatus = Color.fromRGBO(179, 36, 0, 1.0);
 
 // Widget Style
 const kTextFieldDecoration = InputDecoration(
