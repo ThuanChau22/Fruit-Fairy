@@ -12,6 +12,7 @@ import 'package:fruitfairy/services/firestore_service.dart';
 /// [_needCollected]: specify whether
 /// the donor need help collecting
 /// [_produce]: selected produce
+/// [_donorId]: donor unique id
 /// [_donorName]: donor name
 /// [_address]: donor's address
 /// [_phone]: donor's phone number
@@ -26,13 +27,13 @@ class Donation extends ChangeNotifier implements Comparable<Donation> {
   final String id;
   bool _needCollected = true;
   final Map<String, ProduceItem> _produce = {};
-  String _donorName = '';
-  String _charityName = '';
   final Map<String, String> _address = {};
   final Map<String, String> _phone = {};
   final List<Charity> _charities = [];
+  String _donorId = '';
+  String _donorName = '';
   Status _status = Status.init();
-  Timestamp _createdAt = Timestamp.now();
+  DateTime _createdAt = DateTime.now();
   bool _updated = false;
   VoidCallback _onEmptyBasket = () {};
 
@@ -48,14 +49,14 @@ class Donation extends ChangeNotifier implements Comparable<Donation> {
     return UnmodifiableMapView(_produce);
   }
 
+  /// Return a copy of [_donorId]
+  String get donorId {
+    return _donorId;
+  }
+
   /// Return a copy of [_donorName]
   String get donorName {
     return _donorName;
-  }
-
-  /// Return a copy of [_charityName]
-  String get charityName {
-    return _charityName;
   }
 
   /// Return a copy of [_address]
@@ -79,7 +80,7 @@ class Donation extends ChangeNotifier implements Comparable<Donation> {
   }
 
   /// Return a copy of [_createdAt]
-  Timestamp get createdAt {
+  DateTime get createdAt {
     return _createdAt;
   }
 
@@ -112,6 +113,7 @@ class Donation extends ChangeNotifier implements Comparable<Donation> {
 
   /// Set donor contact info
   void setContactInfo({
+    @required String donorId,
     @required String donorName,
     @required String street,
     @required String city,
@@ -135,6 +137,7 @@ class Donation extends ChangeNotifier implements Comparable<Donation> {
         oldCountry != country ||
         oldDialCode != dialCode ||
         oldPhoneNumber != phoneNumber) {
+      _donorId = donorId;
       _donorName = donorName;
       _address[FireStoreService.kAddressStreet] = street;
       _address[FireStoreService.kAddressCity] = city;
@@ -146,11 +149,6 @@ class Donation extends ChangeNotifier implements Comparable<Donation> {
       _updated = true;
     }
     notifyListeners();
-  }
-
-  /// Set charity name
-  void setCharityName(String charityName) {
-    _charityName = charityName;
   }
 
   /// Add [charity] to list
@@ -174,7 +172,7 @@ class Donation extends ChangeNotifier implements Comparable<Donation> {
 
   /// Set created timestamp
   void setCreatedAt(Timestamp createdAt) {
-    _createdAt = createdAt ?? Timestamp.now();
+    _createdAt = createdAt.toDate() ?? DateTime.now();
   }
 
   /// Listen to callback when [_produce] is empty
@@ -194,11 +192,15 @@ class Donation extends ChangeNotifier implements Comparable<Donation> {
   /// Set all fields to default values
   void reset() {
     _needCollected = true;
-    _updated = false;
     _produce.clear();
     _charities.clear();
     _address.clear();
     _phone.clear();
+    _updated = false;
+    _donorId = '';
+    _donorName = '';
+    _status = Status.init();
+    _createdAt = DateTime.now();
   }
 
   /// Set object to initial state

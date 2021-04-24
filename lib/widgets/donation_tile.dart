@@ -6,15 +6,15 @@ import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/status.dart';
 
 class DonationTile extends StatelessWidget {
-  final String charityName;
-  final DateTime dateTime;
   final Status status;
+  final DateTime dateTime;
+  final String charityName;
   final VoidCallback onTap;
 
   DonationTile({
-    @required this.charityName,
-    @required this.dateTime,
     @required this.status,
+    @required this.dateTime,
+    @required this.charityName,
     @required this.onTap,
   });
 

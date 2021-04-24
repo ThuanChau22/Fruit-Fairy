@@ -4,9 +4,9 @@ import 'package:fruitfairy/services/firestore_service.dart';
 
 /// A class that represents a suggested charity to a donation
 /// [id]: charity document id on database
-/// [_produce]: a set of produceIds from charity wishlist
-/// [_address]: charity address
 /// [_name]: charity name
+/// [_address]: charity address
+/// [_wishlist]: a set of produce ids from charity wishlist
 /// [_score]: a value that is used to rank charity suggestion priorrity
 class Charity implements Comparable<Charity> {
   /// Set default values for all fields
@@ -40,17 +40,14 @@ class Charity implements Comparable<Charity> {
     return _score;
   }
 
-  /// Set new ranking score
-  void setScore(double score) {
-    _score = score;
+  /// Set charity name
+  void setName(String name) {
+    _name = name;
   }
 
-  /// Parse account information from database
-  /// [userData]: A Map with keys that are declared in [FireStoreService]
-  void fromDB(Map<String, dynamic> userData) {
-    _name = userData[FireStoreService.kCharityName];
-
-    Map<String, dynamic> address = userData[FireStoreService.kAddress];
+  /// Set charity address
+  /// [address]: A Map with keys that are declared in [FireStoreService]
+  void setAddress(Map<String, dynamic> address) {
     if (address != null) {
       _address[FireStoreService.kAddressStreet] =
           address[FireStoreService.kAddressStreet];
@@ -61,13 +58,20 @@ class Charity implements Comparable<Charity> {
       _address[FireStoreService.kAddressZip] =
           address[FireStoreService.kAddressZip];
     }
+  }
 
-    List<dynamic> wishlist = userData[FireStoreService.kWishList];
+  /// Set charity wishlist
+  void setWishList(List<dynamic> wishlist) {
     if (wishlist != null) {
       wishlist.forEach((produceId) {
         _wishlist.add(produceId);
       });
     }
+  }
+
+  /// Set new ranking score
+  void setScore(double score) {
+    _score = score;
   }
 
   @override

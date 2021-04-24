@@ -261,7 +261,9 @@ class FireStoreService {
               data[kSubStatus],
             ));
             donation.setCreatedAt(data[kCreatedAt]);
-            donation.setCharityName(data[kCharity][kUserName]);
+            Charity charity = Charity(data[kCharity][kUserId]);
+            charity.setName(data[kCharity][kUserName]);
+            donation.pickCharity(charity);
             donations.pickDonation(donation);
           }
         }
@@ -409,9 +411,12 @@ class FireStoreService {
     Query query = _usersDB.where(kWishList, arrayContainsAny: selectedProduce);
     QuerySnapshot snapshot = await query.get();
     List<Charity> charities = [];
-    for (DocumentSnapshot userDoc in snapshot.docs) {
-      Charity charity = Charity(userDoc.id);
-      charity.fromDB(userDoc.data());
+    for (DocumentSnapshot doc in snapshot.docs) {
+      Map<String, dynamic> data = doc.data();
+      Charity charity = Charity(doc.id);
+      charity.setName(data[kCharityName]);
+      charity.setAddress(data[kAddress]);
+      charity.setWishList(data[kWishList]);
       charities.add(charity);
     }
 
@@ -655,7 +660,7 @@ class FireStoreService {
       List<Charity> charities = donation.charities;
       await _donationsDB.add({
         kDonor: {
-          kUserId: _uid,
+          kUserId: donation.donorId,
           kUserName: donation.donorName,
         },
         kCharity: {

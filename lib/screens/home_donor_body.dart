@@ -23,6 +23,7 @@ class HomeDonorBody extends StatefulWidget {
 
 class _HomeDonorBodyState extends State<HomeDonorBody> {
   final ScrollController _scrollController = new ScrollController();
+  final int _scrollOffset = 65;
 
   bool _isLoading = true;
   bool _isLoadingMore = true;
@@ -37,8 +38,7 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
     });
     _scrollController.addListener(() {
       ScrollPosition pos = _scrollController.position;
-      if (pos.pixels == pos.maxScrollExtent) {
-        // setState(() => _isLoadingMore = true);
+      if (pos.pixels + _scrollOffset >= pos.maxScrollExtent) {
         int currentSize = donations.map.length;
         fireStore.donationStreamDonor(donations, onComplete: () {
           setState(() => _isLoadingMore = currentSize != donations.map.length);
@@ -226,9 +226,9 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
           top: 20.0,
         ),
         child: DonationTile(
-          charityName: donation.charityName,
-          dateTime: donation.createdAt.toDate(),
           status: donation.status,
+          dateTime: donation.createdAt,
+          charityName: donation.charities.first.name,
           onTap: () {
             Navigator.of(context).pushNamed(DonorDonationDetailScreen.id);
             print(donation.id);
