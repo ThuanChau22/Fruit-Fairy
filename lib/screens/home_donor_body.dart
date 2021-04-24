@@ -237,23 +237,19 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
       ));
     });
     if (donationList.length >= Donations.LOAD_LIMIT) {
-      donationTiles.add(loadingTile());
+      donationTiles.add(Visibility(
+        visible: _isLoadingMore,
+        child: Padding(
+          padding: EdgeInsets.only(
+            top: 20.0,
+          ),
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
+          ),
+        ),
+      ));
     }
     return donationTiles;
-  }
-
-  Widget loadingTile() {
-    return Visibility(
-      visible: _isLoadingMore,
-      child: Padding(
-        padding: EdgeInsets.only(
-          top: 20.0,
-        ),
-        child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
-        ),
-      ),
-    );
   }
 
   Widget groupLabel(String label) {

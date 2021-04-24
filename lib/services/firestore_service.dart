@@ -228,16 +228,29 @@ class FireStoreService {
             int currentSize = donations.map.length;
             donations.removeDonation(donationId);
             donations.clearStream();
-            _donationStreamDonor(
-              _donationsDB
-                  .where('$kDonor.$kUserId', isEqualTo: _uid)
-                  .orderBy(kStatus, descending: true)
-                  .orderBy(kCreatedAt)
-                  .limit(currentSize)
-                  .snapshots(),
-              donations,
-              onComplete,
-            );
+            if (currentSize < Donations.LOAD_LIMIT) {
+              _donationStreamDonor(
+                _donationsDB
+                    .where('$kDonor.$kUserId', isEqualTo: _uid)
+                    .orderBy(kStatus, descending: true)
+                    .orderBy(kCreatedAt)
+                    .limit(currentSize)
+                    .snapshots(),
+                donations,
+                onComplete,
+              );
+            } else {
+              _donationStreamDonor(
+                _donationsDB
+                    .where('$kDonor.$kUserId', isEqualTo: _uid)
+                    .orderBy(kStatus, descending: true)
+                    .orderBy(kCreatedAt)
+                    .startAtDocument(donations.startDocument)
+                    .snapshots(),
+                donations,
+                onComplete,
+              );
+            }
           } else {
             Map<String, dynamic> data = docChange.doc.data();
             Donation donation = Donation(donationId);
@@ -330,16 +343,29 @@ class FireStoreService {
             int currentSize = donations.map.length;
             donations.removeDonation(donationId);
             donations.clearStream();
-            _donationStreamCharity(
-              _donationsDB
-                  .where(kRequestedCharities, arrayContains: _uid)
-                  .orderBy(kStatus, descending: true)
-                  .orderBy(kCreatedAt)
-                  .limit(currentSize)
-                  .snapshots(),
-              donations,
-              onComplete,
-            );
+            if (currentSize < Donations.LOAD_LIMIT) {
+              _donationStreamCharity(
+                _donationsDB
+                    .where(kRequestedCharities, arrayContains: _uid)
+                    .orderBy(kStatus, descending: true)
+                    .orderBy(kCreatedAt)
+                    .limit(currentSize)
+                    .snapshots(),
+                donations,
+                onComplete,
+              );
+            } else {
+              _donationStreamCharity(
+                _donationsDB
+                    .where(kRequestedCharities, arrayContains: _uid)
+                    .orderBy(kStatus, descending: true)
+                    .orderBy(kCreatedAt)
+                    .startAtDocument(donations.startDocument)
+                    .snapshots(),
+                donations,
+                onComplete,
+              );
+            }
           } else {
             Map<String, dynamic> data = docChange.doc.data();
             Donation donation = Donation(donationId);
