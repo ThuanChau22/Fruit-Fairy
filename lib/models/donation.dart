@@ -27,6 +27,7 @@ class Donation extends ChangeNotifier implements Comparable<Donation> {
   bool _needCollected = true;
   final Map<String, ProduceItem> _produce = {};
   String _donorName = '';
+  String _charityName = '';
   final Map<String, String> _address = {};
   final Map<String, String> _phone = {};
   final List<Charity> _charities = [];
@@ -50,6 +51,11 @@ class Donation extends ChangeNotifier implements Comparable<Donation> {
   /// Return a copy of [_donorName]
   String get donorName {
     return _donorName;
+  }
+
+  /// Return a copy of [_charityName]
+  String get charityName {
+    return _charityName;
   }
 
   /// Return a copy of [_address]
@@ -141,6 +147,11 @@ class Donation extends ChangeNotifier implements Comparable<Donation> {
       _updated = true;
     }
     notifyListeners();
+  }
+
+  /// Set charity name
+  void setCharityName(String charityName) {
+    _charityName = charityName;
   }
 
   /// Add [charity] to list
