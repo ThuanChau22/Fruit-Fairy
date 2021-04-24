@@ -27,9 +27,6 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
     FireStoreService firestore = context.read<FireStoreService>();
     Donation donation = context.read<Donation>();
     await firestore.addDonation(donation);
-    donation.produce.values.forEach((produceItem) {
-      produceItem.clear();
-    });
     donation.reset();
     context.read<Account>().cancelLastSubscription();
     Navigator.of(context).popUntil((route) {

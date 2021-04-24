@@ -139,8 +139,10 @@ class FireStoreService {
       (snapshot) async {
         Map<String, ProduceItem> snapshotData = {};
         for (QueryDocumentSnapshot doc in snapshot.docs) {
+          Map<String, dynamic> data = doc.data();
           ProduceItem produceItem = ProduceItem(doc.id);
-          produceItem.fromDB(doc.data());
+          produceItem.setName(data[kProduceName]);
+          produceItem.setImagePath(data[kProducePath]);
           snapshotData[produceItem.id] = produceItem;
         }
         await Future.wait(snapshotData.values.map((produceItem) async {

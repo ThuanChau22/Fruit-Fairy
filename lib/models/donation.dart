@@ -105,7 +105,6 @@ class Donation extends ChangeNotifier implements Comparable<Donation> {
   /// Remove [ProduceItem] from map [_produce]
   /// through [produceId]
   void removeProduce(String produceId) {
-    _produce[produceId].clear();
     _produce.remove(produceId);
     _updated = true;
     notifyListeners();

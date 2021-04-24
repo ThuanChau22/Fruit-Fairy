@@ -139,7 +139,6 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
           produceItem: produceMap[produceId],
           onPressed: () {
             setState(() {
-              produceMap[produceId].clear();
               wishList.removeProduce(produceId);
               fireStore.updateWishList(wishList.produceIds);
             });

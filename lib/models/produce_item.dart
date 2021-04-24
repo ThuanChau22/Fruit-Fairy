@@ -1,5 +1,3 @@
-import 'package:fruitfairy/services/firestore_service.dart';
-
 /// A class that represents a produce
 /// [id]: unique String to identify a produce
 /// in both system and database (produce name)
@@ -42,9 +40,31 @@ class ProduceItem implements Comparable<ProduceItem> {
     return _currentAmount;
   }
 
+  /// Set produce item name
+  void setName(String name) {
+    _name = name;
+  }
+
+  /// Set produce item image path
+  void setImagePath(String imagePath) {
+    _imagePath = imagePath;
+  }
+
   /// Set image URL
   void setImageURL(String imageURL) {
     _imageURL = imageURL;
+  }
+
+  /// Set default [_currentAmount]
+  /// between [Min] and [Max]
+  void setAmount(int amount) {
+    if (amount < Min) {
+      amount = Min;
+    }
+    if (amount > Max) {
+      amount = Max;
+    }
+    _currentAmount = amount;
   }
 
   /// Increase [_currentAmount]
@@ -61,16 +81,13 @@ class ProduceItem implements Comparable<ProduceItem> {
     _currentAmount = result > Min ? result : Min;
   }
 
-  /// Parse donation information from database
-  /// [produceItemData]: A Map with keys that are declared in [FireStoreService]
-  void fromDB(Map<String, dynamic> produceItemData) {
-    _name = produceItemData[FireStoreService.kProduceName];
-    _imagePath = produceItemData[FireStoreService.kProducePath];
-  }
-
-  /// Set [_currentAmount] to default value
-  void clear() {
-    _currentAmount = Min;
+  /// Return a clone of this produce
+  ProduceItem clone() {
+    ProduceItem produceItem = ProduceItem(id);
+    produceItem.setName(_name);
+    produceItem.setImagePath(_imagePath);
+    produceItem.setImageURL(_imageURL);
+    return produceItem;
   }
 
   @override

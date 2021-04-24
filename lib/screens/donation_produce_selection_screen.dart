@@ -173,7 +173,7 @@ class _DonationProduceSelectionScreenState
               if (selected) {
                 donation.removeProduce(produceId);
               } else {
-                donation.pickProduce(produceItem);
+                donation.pickProduce(produceItem.clone());
               }
             });
           },
