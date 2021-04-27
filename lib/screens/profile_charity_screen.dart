@@ -91,21 +91,14 @@ class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
 
   void _updateInputFields() {
     fillEmail();
-    if (_updated.isEmpty) {
+    if (_updated.contains(Field.Name)) {
       fillName();
+    }
+    if (_updated.contains(Field.Address)) {
       fillAddress();
+    }
+    if (_updated.contains(Field.Phone)) {
       fillPhone();
-    } else {
-      if (_updated.contains(Field.Name)) {
-        fillName();
-      }
-      if (_updated.contains(Field.Address)) {
-        fillAddress();
-      }
-      if (_updated.contains(Field.Phone)) {
-        fillPhone();
-      }
-      _updated.remove(Field.Password);
     }
     setState(() {});
   }
@@ -158,20 +151,19 @@ class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
     if (errorMessage.isEmpty) {
       errorMessage = await _updatePassword();
     }
-    String updateMessage;
+    String notifyMessage;
     if (errorMessage.isEmpty) {
-      updateMessage = _updated.contains(Field.Name) ||
-              _updated.contains(Field.Address) ||
-              _updated.contains(Field.Password)
-          ? 'Profile updated'
-          : 'Profile is up-to-date';
-      _updated.removeAll([Field.Name, Field.Address, Field.Password]);
+      notifyMessage = 'Profile is up-to-date';
+      if (_updated.isNotEmpty) {
+        notifyMessage = 'Profile updated';
+        _updated.clear();
+      }
     } else {
       _scrollToError();
-      updateMessage = errorMessage;
+      notifyMessage = errorMessage;
     }
     setState(() => _showSpinner = false);
-    MessageBar(context, message: updateMessage).show();
+    MessageBar(context, message: notifyMessage).show();
   }
 
   Future<String> _updateName() async {
@@ -419,7 +411,9 @@ class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
     fillPhone();
     FireStoreService fireStore = context.read<FireStoreService>();
     fireStore.userStream(context.read<Account>(), onComplete: () {
-      _updateInputFields();
+      if (mounted) {
+        _updateInputFields();
+      }
     });
   }
 

@@ -64,16 +64,11 @@ class _ContactConfirmation extends State<DonationContactScreen> {
   Future<String> Function(String smsCode) _verifyCode;
 
   void _updateInputFields() {
-    if (_updated.isEmpty) {
+    if (_updated.contains(Field.Address)) {
       fillAddress();
+    }
+    if (_updated.contains(Field.Phone)) {
       fillPhone();
-    } else {
-      if (_updated.contains(Field.Address)) {
-        fillAddress();
-      }
-      if (_updated.contains(Field.Phone)) {
-        fillPhone();
-      }
     }
     setState(() {});
   }
@@ -289,7 +284,9 @@ class _ContactConfirmation extends State<DonationContactScreen> {
     fillPhone();
     FireStoreService fireStore = context.read<FireStoreService>();
     fireStore.userStream(context.read<Account>(), onComplete: () {
-      _updateInputFields();
+      if (mounted) {
+        _updateInputFields();
+      }
     });
   }
 

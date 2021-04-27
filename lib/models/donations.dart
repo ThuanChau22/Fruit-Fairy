@@ -6,11 +6,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fruitfairy/models/donation.dart';
 
 /// A class holds a list of donations of the current user
-/// [_startDocument]: A cursor used to traverse DB
-/// [_endDocument]: A cursor used to traverse DB
 /// [_donations]: a map of [Donation]
 /// [_subscriptions]: list of stream subcriptions that
 /// performs an opperation for each subcription on changes
+/// [_startDocument]: A cursor used to traverse DB
+/// [_endDocument]: A cursor used to traverse DB
 /// [LOAD_LIMIT]: Limit amount per donation retrieval
 class Donations extends ChangeNotifier {
   static const LOAD_LIMIT = 5;
