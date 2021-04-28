@@ -37,9 +37,9 @@ class WishList extends ChangeNotifier {
 
   /// Cancel all subscriptions from [_subscriptions]
   void clearStream() {
-    _subscriptions.forEach((subscription) {
+    for (StreamSubscription<DocumentSnapshot> subscription in _subscriptions) {
       subscription.cancel();
-    });
+    }
     _subscriptions.clear();
   }
 
@@ -49,9 +49,9 @@ class WishList extends ChangeNotifier {
     _produceIds.clear();
     List<dynamic> wishlist = userData[FireStoreService.kWishList];
     if (wishlist != null) {
-      wishlist.forEach((produceId) {
+      for (dynamic produceId in wishlist) {
         _produceIds.add(produceId);
-      });
+      }
     }
     notifyListeners();
   }

@@ -133,7 +133,7 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
     Produce produce = context.read<Produce>();
     Map<String, ProduceItem> produceMap = produce.map;
     WishList wishList = context.read<WishList>();
-    wishList.produceIds.forEach((produceId) {
+    for (String produceId in wishList.produceIds) {
       if (produceMap.containsKey(produceId)) {
         fruitTiles.add(removableFruitTile(
           produceItem: produceMap[produceId],
@@ -145,7 +145,7 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
           },
         ));
       }
-    });
+    }
     return fruitTiles;
   }
 

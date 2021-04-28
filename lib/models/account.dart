@@ -79,9 +79,9 @@ class Account extends ChangeNotifier {
 
   /// Cancel all subscriptions from [_subscriptions]
   void clearStream() {
-    _subscriptions.forEach((subscription) {
+    for (StreamSubscription<DocumentSnapshot> subscription in _subscriptions) {
       subscription.cancel();
-    });
+    }
     _subscriptions.clear();
   }
 

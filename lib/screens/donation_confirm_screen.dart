@@ -4,7 +4,9 @@ import 'package:provider/provider.dart';
 //
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
+import 'package:fruitfairy/models/charity.dart';
 import 'package:fruitfairy/models/donation.dart';
+import 'package:fruitfairy/models/produce_item.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
 import 'package:fruitfairy/widgets/charity_tile.dart';
@@ -144,7 +146,7 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
   List<Widget> fruitTiles() {
     List<Widget> fruitList = [];
     Donation donation = context.watch<Donation>();
-    donation.produce.values.forEach((produceItem) {
+    for (ProduceItem produceItem in donation.produce.values) {
       int amount = produceItem.amount;
       fruitList.add(Container(
         decoration: BoxDecoration(
@@ -157,7 +159,7 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
           percentage: donation.needCollected ? '$amount' : '',
         ),
       ));
-    });
+    }
     return fruitList;
   }
 
@@ -165,7 +167,7 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
     List<Widget> selectedCharity = [];
     int priority = 1;
     Donation donation = context.read<Donation>();
-    donation.charities.forEach((charity) {
+    for (Charity charity in donation.charities) {
       selectedCharity.add(Padding(
         padding: EdgeInsets.symmetric(
           vertical: 10.0,
@@ -177,7 +179,7 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
           disabled: true,
         ),
       ));
-    });
+    }
     Size screen = MediaQuery.of(context).size;
     return Padding(
       padding: EdgeInsets.symmetric(

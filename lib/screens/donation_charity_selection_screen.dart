@@ -29,25 +29,29 @@ class _DonationCharitySelectionScreenState
   ViewMode _mode = ViewMode.Init;
   bool _showSpinner = false;
 
+  void suggestCharities() async {
+    setState(() => _showSpinner = true);
+    FireStoreService fireStore = context.read<FireStoreService>();
+    Charities charities = context.read<Charities>();
+    Donation donation = context.read<Donation>();
+    if (donation.isUpdated) {
+      charities.clear();
+      charities.setList(await fireStore.charitySuggestions(
+        donation: donation,
+        limitDistance: Charities.MaxDistance,
+        limitCharity: Charities.MaxCharity,
+      ));
+      donation.clearUpdated();
+    }
+    _mode = charities.list.isEmpty ? ViewMode.Empty : ViewMode.Suggestion;
+    setState(() => _showSpinner = false);
+  }
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      setState(() => _showSpinner = true);
-      FireStoreService fireStore = context.read<FireStoreService>();
-      Charities charities = context.read<Charities>();
-      Donation donation = context.read<Donation>();
-      if (donation.isUpdated) {
-        charities.clear();
-        charities.setList(await fireStore.charitySuggestions(
-          donation: donation,
-          limitDistance: Charities.MaxDistance,
-          limitCharity: Charities.MaxCharity,
-        ));
-        donation.clearUpdated();
-      }
-      _mode = charities.list.isEmpty ? ViewMode.Empty : ViewMode.Suggestion;
-      setState(() => _showSpinner = false);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      suggestCharities();
     });
   }
 
@@ -184,7 +188,7 @@ class _DonationCharitySelectionScreenState
     Donation donation = context.read<Donation>();
     List<Charity> selectedCharities = donation.charities;
     Charities charities = context.read<Charities>();
-    charities.list.forEach((charity) {
+    for (Charity charity in charities.list) {
       bool selected = selectedCharities.contains(charity);
       int selectedOrder = selectedCharities.indexOf(charity) + 1;
       charityTiles.add(CharityTile(
@@ -201,7 +205,7 @@ class _DonationCharitySelectionScreenState
           });
         },
       ));
-    });
+    }
     return charityTiles;
   }
 

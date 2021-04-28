@@ -65,9 +65,9 @@ class Donations extends ChangeNotifier {
 
   /// Cancel all subscriptions from [_subscriptions]
   void clearStream() {
-    _subscriptions.forEach((subscription) {
+    for (StreamSubscription<QuerySnapshot> subscription in _subscriptions) {
       subscription.cancel();
-    });
+    }
     _subscriptions.clear();
   }
 

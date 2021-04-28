@@ -63,9 +63,9 @@ class Charity implements Comparable<Charity> {
   /// Set charity wishlist
   void setWishList(List<dynamic> wishlist) {
     if (wishlist != null) {
-      wishlist.forEach((produceId) {
+      for (dynamic produceId in wishlist) {
         _wishlist.add(produceId);
-      });
+      }
     }
   }
 
