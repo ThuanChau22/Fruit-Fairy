@@ -14,7 +14,7 @@ import 'package:fruitfairy/models/produce_item.dart';
 /// [_endDocument]: A cursor used to traverse DB
 /// [LOAD_LIMIT]: Limit amount per donation retrieval
 class Produce extends ChangeNotifier {
-  static const LOAD_LIMIT = 12;
+  static const LOAD_LIMIT = 20;
   final Set<String> _produceIds = {};
   final Map<String, ProduceItem> _produce = {};
   final List<StreamSubscription<QuerySnapshot>> _subscriptions = [];

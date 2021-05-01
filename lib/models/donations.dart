@@ -13,7 +13,7 @@ import 'package:fruitfairy/models/donation.dart';
 /// [_endDocument]: A cursor used to traverse DB
 /// [LOAD_LIMIT]: Limit amount per donation retrieval
 class Donations extends ChangeNotifier {
-  static const LOAD_LIMIT = 5;
+  static const LOAD_LIMIT = 20;
   final Map<String, Donation> _donations = {};
   final List<StreamSubscription<QuerySnapshot>> _subscriptions = [];
   DocumentSnapshot _startDocument;
