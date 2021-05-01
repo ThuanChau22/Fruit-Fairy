@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:strings/strings.dart';
@@ -22,44 +23,62 @@ class HomeDonorBody extends StatefulWidget {
 }
 
 class _HomeDonorBodyState extends State<HomeDonorBody> {
-  final ScrollController _scrollController = new ScrollController();
-  final int _scrollOffset = 65;
+  final ScrollController _scroll = new ScrollController();
+  final double _scrollOffset = 60.0;
 
-  bool _isLoading = true;
+  Timer _loadingTimer = Timer(Duration(seconds: 0), () {});
+  bool _isLoadingInit = true;
   bool _isLoadingMore = true;
 
-  @override
-  void initState() {
-    super.initState();
+  void initDonations() {
     FireStoreService fireStore = context.read<FireStoreService>();
     Donations donations = context.read<Donations>();
     fireStore.donationStreamDonor(donations, onComplete: () {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoadingInit = false);
+      }
     });
-    _scrollController.addListener(() {
-      ScrollPosition pos = _scrollController.position;
-      if (pos.pixels + _scrollOffset >= pos.maxScrollExtent) {
+    _scroll.addListener(() {
+      ScrollPosition pos = _scroll.position;
+      bool loadTriggered = pos.pixels + _scrollOffset >= pos.maxScrollExtent;
+      if (loadTriggered && !_loadingTimer.isActive) {
+        _loadingTimer = Timer(Duration(seconds: 2), () {
+          if (mounted) {
+            setState(() => _isLoadingMore = false);
+          }
+        });
         int currentSize = donations.map.length;
         fireStore.donationStreamDonor(donations, onComplete: () {
-          setState(() => _isLoadingMore = currentSize != donations.map.length);
+          if (mounted && currentSize != donations.map.length) {
+            setState(() => _isLoadingMore = true);
+            _loadingTimer.cancel();
+          }
         });
       }
     });
+  }
+
+  void initDonation() {
     Donation donation = context.read<Donation>();
     donation.onEmptyBasket(() {
       Navigator.of(context).popUntil((route) {
         return route.settings.name == DonationProduceSelectionScreen.id;
       });
     });
+  }
+
+  void initProduce() {
+    FireStoreService fireStore = context.read<FireStoreService>();
+    Donation donation = context.read<Donation>();
     Produce produce = context.read<Produce>();
     fireStore.produceStream(produce, onComplete: () {
       bool removed = false;
-      List<String>.from(donation.produce.keys).forEach((produceId) {
-        if (!produce.map.containsKey(produceId)) {
+      for (String produceId in donation.produce.keys.toList()) {
+        if (!produce.set.contains(produceId)) {
           donation.removeProduce(produceId);
           removed = true;
         }
-      });
+      }
       if (removed) {
         MessageBar(
           context,
@@ -71,16 +90,24 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    initDonations();
+    initDonation();
+    initProduce();
+  }
+
+  @override
   void dispose() {
     super.dispose();
-    _scrollController.dispose();
+    _scroll.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
     return ScrollableLayout(
-      controller: _scrollController,
+      controller: _scroll,
       child: Padding(
         padding: EdgeInsets.only(
           top: screen.height * 0.03,
@@ -172,7 +199,7 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
 
   Widget donationLayout() {
     Donations donations = context.watch<Donations>();
-    if (_isLoading) {
+    if (_isLoadingInit) {
       return Expanded(
         child: Center(
           child: CircularProgressIndicator(
@@ -211,7 +238,7 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
     donationList.sort();
     bool hasActive = false;
     bool hasHistory = false;
-    donationList.forEach((donation) {
+    for (Donation donation in donationList) {
       Status status = donation.status;
       if ((status.isPennding || status.isInProgress) && !hasActive) {
         donationTiles.add(groupLabel('Active'));
@@ -235,21 +262,23 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
           },
         ),
       ));
-    });
-    if (donationList.length >= Donations.LOAD_LIMIT) {
-      donationTiles.add(Visibility(
-        visible: _isLoadingMore,
-        child: Padding(
-          padding: EdgeInsets.only(
-            top: 20.0,
-          ),
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
-          ),
-        ),
-      ));
     }
+    donationTiles.add(loadingTile());
     return donationTiles;
+  }
+
+  Widget loadingTile() {
+    Donations donations = context.read<Donations>();
+    bool underLimit = donations.map.length < Donations.LOAD_LIMIT;
+    return Visibility(
+      visible: !underLimit && _isLoadingMore,
+      child: Padding(
+        padding: EdgeInsets.only(top: 20.0),
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
+        ),
+      ),
+    );
   }
 
   Widget groupLabel(String label) {
