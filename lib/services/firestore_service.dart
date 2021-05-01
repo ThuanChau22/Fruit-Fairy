@@ -88,132 +88,209 @@ class FireStoreService {
     Account account, {
     Function onComplete,
   }) {
-    DocumentReference doc = _usersDB.doc(_uid);
-    account.addStream(doc.snapshots().listen(
-      (snapshot) {
-        Map<String, dynamic> data = snapshot.data();
-        if (data != null) {
-          account.fromDB(data);
-        }
-        if (onComplete != null) {
+    onComplete = onComplete ?? () {};
+    try {
+      DocumentReference doc = _usersDB.doc(_uid);
+      account.addStream(doc.snapshots().listen(
+        (snapshot) {
+          Map<String, dynamic> data = snapshot.data();
+          if (data != null) {
+            account.fromDB(data);
+          }
           onComplete();
-        }
-      },
-      onError: (e) {
-        print(e);
-      },
-    ));
+        },
+        onError: (e) {
+          print(e);
+        },
+      ));
+    } catch (e) {
+      print(e);
+    }
   }
 
   void wishListStream(
     WishList wishList, {
     Function onComplete,
   }) {
-    DocumentReference doc = _usersDB.doc(_uid);
-    wishList.addStream(doc.snapshots().listen(
-      (snapshot) {
-        Map<String, dynamic> data = snapshot.data();
-        if (data != null) {
-          wishList.fromDB(data);
-        }
-        if (onComplete != null) {
+    onComplete = onComplete ?? () {};
+    try {
+      DocumentReference doc = _usersDB.doc(_uid);
+      wishList.addStream(doc.snapshots().listen(
+        (snapshot) {
+          Map<String, dynamic> data = snapshot.data();
+          if (data != null) {
+            wishList.fromDB(data);
+          }
           onComplete();
-        }
-      },
-      onError: (e) {
-        print(e);
-      },
-    ));
+        },
+        onError: (e) {
+          print(e);
+        },
+      ));
+    } catch (e) {
+      print(e);
+    }
   }
 
   void produceStream(
     Produce produce, {
     Function onComplete,
-  }) {
-    produce.addStream(_produceDB
-        .where(kProduceEnabled, isEqualTo: true)
-        .orderBy(kProduceName)
-        .limit(12)
-        .snapshots()
-        .listen(
-      (snapshot) async {
-        Map<String, ProduceItem> snapshotData = {};
-        for (QueryDocumentSnapshot doc in snapshot.docs) {
-          Map<String, dynamic> data = doc.data();
-          ProduceItem produceItem = ProduceItem(doc.id);
-          produceItem.setName(data[kProduceName]);
-          produceItem.setImagePath(data[kProducePath]);
-          snapshotData[produceItem.id] = produceItem;
+  }) async {
+    onComplete = onComplete ?? () {};
+    try {
+      if (produce.startDocument == null) {
+        QuerySnapshot snapshot = await _produceDB
+            .where(kProduceEnabled, isEqualTo: true)
+            .orderBy(kProduceName)
+            .orderBy(kCreatedAt, descending: true)
+            .limit(Produce.LOAD_LIMIT)
+            .get();
+        List<QueryDocumentSnapshot> docs = snapshot.docs;
+        if (docs.isNotEmpty) {
+          produce.setStartDocument(docs.last);
+          Stream<QuerySnapshot> snapshots = _produceDB
+              .where(kProduceEnabled, isEqualTo: true)
+              .orderBy(kProduceName, descending: true)
+              .orderBy(kCreatedAt)
+              .startAtDocument(produce.startDocument)
+              .snapshots();
+          _produceStream(snapshots, produce, onComplete);
+        } else {
+          Stream<QuerySnapshot> snapshots = _produceDB
+              .where(kProduceEnabled, isEqualTo: true)
+              .orderBy(kProduceName, descending: true)
+              .orderBy(kCreatedAt)
+              .snapshots();
+          _produceStream(snapshots, produce, onComplete);
         }
-        await Future.wait(snapshotData.values.map((produceItem) async {
-          produceItem.setImageURL(await imageURL(produceItem.imagePath));
-        }));
-        produce.fromDB(snapshotData);
-        if (onComplete != null) {
+      } else {
+        QuerySnapshot snapshot = await _produceDB
+            .where(kProduceEnabled, isEqualTo: true)
+            .orderBy(kProduceName)
+            .orderBy(kCreatedAt, descending: true)
+            .startAfterDocument(produce.startDocument)
+            .limit(Produce.LOAD_LIMIT)
+            .get();
+        List<QueryDocumentSnapshot> docs = snapshot.docs;
+        if (docs.isNotEmpty) {
+          produce.setEndDocument(docs.first);
+          produce.setStartDocument(docs.last);
+          Stream<QuerySnapshot> snapshots = _produceDB
+              .where(kProduceEnabled, isEqualTo: true)
+              .orderBy(kProduceName, descending: true)
+              .orderBy(kCreatedAt)
+              .startAtDocument(produce.startDocument)
+              .endAtDocument(produce.endDocument)
+              .snapshots();
+          _produceStream(snapshots, produce, onComplete);
+        } else {
           onComplete();
         }
-      },
-      onError: (e) {
-        print(e);
-      },
-    ));
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  void _produceStream(
+    Stream<QuerySnapshot> snapshots,
+    Produce produce,
+    Function onComplete,
+  ) {
+    try {
+      produce.addStream(snapshots.listen(
+        (snapshot) async {
+          List<ProduceItem> produceList = [];
+          for (DocumentChange docChange in snapshot.docChanges) {
+            DocumentSnapshot doc = docChange.doc;
+            if (docChange.type == DocumentChangeType.removed) {
+              produce.removeProduce(doc.id);
+            } else {
+              Map<String, dynamic> data = doc.data();
+              ProduceItem produceItem = ProduceItem(doc.id);
+              produceItem.setName(data[kProduceName]);
+              produceItem.setImagePath(data[kProducePath]);
+              produce.pickProduce(produceItem.id);
+              if ((docChange.type == DocumentChangeType.added &&
+                      !produce.map.containsKey(produceItem.id)) ||
+                  docChange.type == DocumentChangeType.modified) {
+                produceList.add(produceItem);
+              }
+            }
+          }
+          await Future.wait(produceList.reversed.map((produceItem) async {
+            produceItem.setImageURL(await imageURL(produceItem.imagePath));
+            produce.storeProduce(produceItem);
+          }));
+          onComplete();
+        },
+        onError: (e) {
+          print(e);
+        },
+      ));
+    } catch (e) {
+      print(e);
+    }
   }
 
   void donationStreamDonor(
     Donations donations, {
     Function onComplete,
   }) async {
-    String donorId = '$kDonor.$kUserId';
-    if (donations.startDocument == null) {
-      QuerySnapshot snapshot = await _donationsDB
-          .where(donorId, isEqualTo: _uid)
-          .orderBy(kStatus)
-          .orderBy(kCreatedAt, descending: true)
-          .limit(Donations.LOAD_LIMIT)
-          .get();
-      List<QueryDocumentSnapshot> docs = snapshot.docs;
-      if (docs.isNotEmpty) {
-        donations.setStartDocument(docs.last);
-        Stream<QuerySnapshot> snapshots = _donationsDB
+    onComplete = onComplete ?? () {};
+    try {
+      String donorId = '$kDonor.$kUserId';
+      if (donations.startDocument == null) {
+        QuerySnapshot snapshot = await _donationsDB
             .where(donorId, isEqualTo: _uid)
-            .orderBy(kStatus, descending: true)
-            .orderBy(kCreatedAt)
-            .startAtDocument(donations.startDocument)
-            .snapshots();
-        _donationStreamDonor(snapshots, donations, onComplete);
+            .orderBy(kStatus)
+            .orderBy(kCreatedAt, descending: true)
+            .limit(Donations.LOAD_LIMIT)
+            .get();
+        List<QueryDocumentSnapshot> docs = snapshot.docs;
+        if (docs.isNotEmpty) {
+          donations.setStartDocument(docs.last);
+          Stream<QuerySnapshot> snapshots = _donationsDB
+              .where(donorId, isEqualTo: _uid)
+              .orderBy(kStatus, descending: true)
+              .orderBy(kCreatedAt)
+              .startAtDocument(donations.startDocument)
+              .snapshots();
+          _donationStreamDonor(snapshots, donations, onComplete);
+        } else {
+          Stream<QuerySnapshot> snapshots = _donationsDB
+              .where(donorId, isEqualTo: _uid)
+              .orderBy(kStatus, descending: true)
+              .orderBy(kCreatedAt)
+              .snapshots();
+          _donationStreamDonor(snapshots, donations, onComplete);
+        }
       } else {
-        Stream<QuerySnapshot> snapshots = _donationsDB
+        QuerySnapshot snapshot = await _donationsDB
             .where(donorId, isEqualTo: _uid)
-            .orderBy(kStatus, descending: true)
-            .orderBy(kCreatedAt)
-            .snapshots();
-        _donationStreamDonor(snapshots, donations, onComplete);
-      }
-    } else {
-      QuerySnapshot snapshot = await _donationsDB
-          .where(donorId, isEqualTo: _uid)
-          .orderBy(kStatus)
-          .orderBy(kCreatedAt, descending: true)
-          .startAfterDocument(donations.startDocument)
-          .limit(Donations.LOAD_LIMIT)
-          .get();
-      List<QueryDocumentSnapshot> docs = snapshot.docs;
-      if (docs.isNotEmpty) {
-        donations.setEndDocument(docs.first);
-        donations.setStartDocument(docs.last);
-        Stream<QuerySnapshot> snapshots = _donationsDB
-            .where(donorId, isEqualTo: _uid)
-            .orderBy(kStatus, descending: true)
-            .orderBy(kCreatedAt)
-            .startAtDocument(donations.startDocument)
-            .endAtDocument(donations.endDocument)
-            .snapshots();
-        _donationStreamDonor(snapshots, donations, onComplete);
-      } else {
-        if (onComplete != null) {
+            .orderBy(kStatus)
+            .orderBy(kCreatedAt, descending: true)
+            .startAfterDocument(donations.startDocument)
+            .limit(Donations.LOAD_LIMIT)
+            .get();
+        List<QueryDocumentSnapshot> docs = snapshot.docs;
+        if (docs.isNotEmpty) {
+          donations.setEndDocument(docs.first);
+          donations.setStartDocument(docs.last);
+          Stream<QuerySnapshot> snapshots = _donationsDB
+              .where(donorId, isEqualTo: _uid)
+              .orderBy(kStatus, descending: true)
+              .orderBy(kCreatedAt)
+              .startAtDocument(donations.startDocument)
+              .endAtDocument(donations.endDocument)
+              .snapshots();
+          _donationStreamDonor(snapshots, donations, onComplete);
+        } else {
           onComplete();
         }
       }
+    } catch (e) {
+      print(e);
     }
   }
 
@@ -222,115 +299,120 @@ class FireStoreService {
     Donations donations,
     Function onComplete,
   ) {
-    donations.addStream(snapshots.listen(
-      (snapshot) async {
-        for (DocumentChange docChange in snapshot.docChanges) {
-          String donationId = docChange.doc.id;
-          if (docChange.type == DocumentChangeType.removed) {
-            int currentSize = donations.map.length;
-            donations.removeDonation(donationId);
-            donations.clearStream();
-            if (currentSize < Donations.LOAD_LIMIT) {
-              _donationStreamDonor(
-                _donationsDB
-                    .where('$kDonor.$kUserId', isEqualTo: _uid)
-                    .orderBy(kStatus, descending: true)
-                    .orderBy(kCreatedAt)
-                    .limit(currentSize)
-                    .snapshots(),
-                donations,
-                onComplete,
-              );
+    try {
+      donations.addStream(snapshots.listen(
+        (snapshot) {
+          for (DocumentChange docChange in snapshot.docChanges) {
+            String donationId = docChange.doc.id;
+            if (docChange.type == DocumentChangeType.removed) {
+              int currentSize = donations.map.length;
+              donations.removeDonation(donationId);
+              donations.clearStream();
+              if (currentSize < Donations.LOAD_LIMIT) {
+                _donationStreamDonor(
+                  _donationsDB
+                      .where('$kDonor.$kUserId', isEqualTo: _uid)
+                      .orderBy(kStatus, descending: true)
+                      .orderBy(kCreatedAt)
+                      .limit(currentSize)
+                      .snapshots(),
+                  donations,
+                  onComplete,
+                );
+              } else {
+                _donationStreamDonor(
+                  _donationsDB
+                      .where('$kDonor.$kUserId', isEqualTo: _uid)
+                      .orderBy(kStatus, descending: true)
+                      .orderBy(kCreatedAt)
+                      .startAtDocument(donations.startDocument)
+                      .snapshots(),
+                  donations,
+                  onComplete,
+                );
+              }
             } else {
-              _donationStreamDonor(
-                _donationsDB
-                    .where('$kDonor.$kUserId', isEqualTo: _uid)
-                    .orderBy(kStatus, descending: true)
-                    .orderBy(kCreatedAt)
-                    .startAtDocument(donations.startDocument)
-                    .snapshots(),
-                donations,
-                onComplete,
-              );
+              Map<String, dynamic> data = docChange.doc.data();
+              Donation donation = Donation(donationId);
+              donation.setStatus(Status(
+                data[kStatus],
+                data[kSubStatus],
+              ));
+              donation.setCreatedAt(data[kCreatedAt]);
+              Charity charity = Charity(data[kCharity][kUserId]);
+              charity.setName(data[kCharity][kUserName]);
+              donation.pickCharity(charity);
+              donations.pickDonation(donation);
             }
-          } else {
-            Map<String, dynamic> data = docChange.doc.data();
-            Donation donation = Donation(donationId);
-            donation.setStatus(Status(
-              data[kStatus],
-              data[kSubStatus],
-            ));
-            donation.setCreatedAt(data[kCreatedAt]);
-            Charity charity = Charity(data[kCharity][kUserId]);
-            charity.setName(data[kCharity][kUserName]);
-            donation.pickCharity(charity);
-            donations.pickDonation(donation);
           }
-        }
-        if (onComplete != null) {
           onComplete();
-        }
-      },
-      onError: (e) {
-        print(e);
-      },
-    ));
+        },
+        onError: (e) {
+          print(e);
+        },
+      ));
+    } catch (e) {
+      print(e);
+    }
   }
 
   void donationStreamCharity(
     Donations donations, {
     Function onComplete,
   }) async {
-    if (donations.startDocument == null) {
-      QuerySnapshot snapshot = await _donationsDB
-          .where(kRequestedCharities, arrayContains: _uid)
-          .orderBy(kStatus)
-          .orderBy(kCreatedAt, descending: true)
-          .limit(Donations.LOAD_LIMIT)
-          .get();
-      List<QueryDocumentSnapshot> docs = snapshot.docs;
-      if (docs.isNotEmpty) {
-        donations.setStartDocument(docs.last);
-        Stream<QuerySnapshot> snapshots = _donationsDB
+    onComplete = onComplete ?? () {};
+    try {
+      if (donations.startDocument == null) {
+        QuerySnapshot snapshot = await _donationsDB
             .where(kRequestedCharities, arrayContains: _uid)
-            .orderBy(kStatus, descending: true)
-            .orderBy(kCreatedAt)
-            .startAtDocument(donations.startDocument)
-            .snapshots();
-        _donationStreamCharity(snapshots, donations, onComplete);
+            .orderBy(kStatus)
+            .orderBy(kCreatedAt, descending: true)
+            .limit(Donations.LOAD_LIMIT)
+            .get();
+        List<QueryDocumentSnapshot> docs = snapshot.docs;
+        if (docs.isNotEmpty) {
+          donations.setStartDocument(docs.last);
+          Stream<QuerySnapshot> snapshots = _donationsDB
+              .where(kRequestedCharities, arrayContains: _uid)
+              .orderBy(kStatus, descending: true)
+              .orderBy(kCreatedAt)
+              .startAtDocument(donations.startDocument)
+              .snapshots();
+          _donationStreamCharity(snapshots, donations, onComplete);
+        } else {
+          Stream<QuerySnapshot> snapshots = _donationsDB
+              .where(kRequestedCharities, arrayContains: _uid)
+              .orderBy(kStatus, descending: true)
+              .orderBy(kCreatedAt)
+              .snapshots();
+          _donationStreamCharity(snapshots, donations, onComplete);
+        }
       } else {
-        Stream<QuerySnapshot> snapshots = _donationsDB
+        QuerySnapshot snapshot = await _donationsDB
             .where(kRequestedCharities, arrayContains: _uid)
-            .orderBy(kStatus, descending: true)
-            .orderBy(kCreatedAt)
-            .snapshots();
-        _donationStreamCharity(snapshots, donations, onComplete);
-      }
-    } else {
-      QuerySnapshot snapshot = await _donationsDB
-          .where(kRequestedCharities, arrayContains: _uid)
-          .orderBy(kStatus)
-          .orderBy(kCreatedAt, descending: true)
-          .startAfterDocument(donations.startDocument)
-          .limit(Donations.LOAD_LIMIT)
-          .get();
-      List<QueryDocumentSnapshot> docs = snapshot.docs;
-      if (docs.isNotEmpty) {
-        donations.setEndDocument(docs.first);
-        donations.setStartDocument(docs.last);
-        Stream<QuerySnapshot> snapshots = _donationsDB
-            .where(kRequestedCharities, arrayContains: _uid)
-            .orderBy(kStatus, descending: true)
-            .orderBy(kCreatedAt)
-            .startAtDocument(donations.startDocument)
-            .endAtDocument(donations.endDocument)
-            .snapshots();
-        _donationStreamCharity(snapshots, donations, onComplete);
-      } else {
-        if (onComplete != null) {
+            .orderBy(kStatus)
+            .orderBy(kCreatedAt, descending: true)
+            .startAfterDocument(donations.startDocument)
+            .limit(Donations.LOAD_LIMIT)
+            .get();
+        List<QueryDocumentSnapshot> docs = snapshot.docs;
+        if (docs.isNotEmpty) {
+          donations.setEndDocument(docs.first);
+          donations.setStartDocument(docs.last);
+          Stream<QuerySnapshot> snapshots = _donationsDB
+              .where(kRequestedCharities, arrayContains: _uid)
+              .orderBy(kStatus, descending: true)
+              .orderBy(kCreatedAt)
+              .startAtDocument(donations.startDocument)
+              .endAtDocument(donations.endDocument)
+              .snapshots();
+          _donationStreamCharity(snapshots, donations, onComplete);
+        } else {
           onComplete();
         }
       }
+    } catch (e) {
+      print(e);
     }
   }
 
@@ -339,58 +421,60 @@ class FireStoreService {
     Donations donations,
     Function onComplete,
   ) {
-    donations.addStream(snapshots.listen(
-      (snapshot) async {
-        for (DocumentChange docChange in snapshot.docChanges) {
-          String donationId = docChange.doc.id;
-          if (docChange.type == DocumentChangeType.removed) {
-            int currentSize = donations.map.length;
-            donations.removeDonation(donationId);
-            donations.clearStream();
-            if (currentSize < Donations.LOAD_LIMIT) {
-              _donationStreamCharity(
-                _donationsDB
-                    .where(kRequestedCharities, arrayContains: _uid)
-                    .orderBy(kStatus, descending: true)
-                    .orderBy(kCreatedAt)
-                    .limit(currentSize)
-                    .snapshots(),
-                donations,
-                onComplete,
-              );
+    try {
+      donations.addStream(snapshots.listen(
+        (snapshot) {
+          for (DocumentChange docChange in snapshot.docChanges) {
+            String donationId = docChange.doc.id;
+            if (docChange.type == DocumentChangeType.removed) {
+              int currentSize = donations.map.length;
+              donations.removeDonation(donationId);
+              donations.clearStream();
+              if (currentSize < Donations.LOAD_LIMIT) {
+                _donationStreamCharity(
+                  _donationsDB
+                      .where(kRequestedCharities, arrayContains: _uid)
+                      .orderBy(kStatus, descending: true)
+                      .orderBy(kCreatedAt)
+                      .limit(currentSize)
+                      .snapshots(),
+                  donations,
+                  onComplete,
+                );
+              } else {
+                _donationStreamCharity(
+                  _donationsDB
+                      .where(kRequestedCharities, arrayContains: _uid)
+                      .orderBy(kStatus, descending: true)
+                      .orderBy(kCreatedAt)
+                      .startAtDocument(donations.startDocument)
+                      .snapshots(),
+                  donations,
+                  onComplete,
+                );
+              }
             } else {
-              _donationStreamCharity(
-                _donationsDB
-                    .where(kRequestedCharities, arrayContains: _uid)
-                    .orderBy(kStatus, descending: true)
-                    .orderBy(kCreatedAt)
-                    .startAtDocument(donations.startDocument)
-                    .snapshots(),
-                donations,
-                onComplete,
-              );
+              Map<String, dynamic> data = docChange.doc.data();
+              Donation donation = Donation(donationId);
+              donation.setStatus(Status(
+                data[kStatus],
+                data[kSubStatus],
+                isCharity: true,
+              ));
+              donation.setCreatedAt(data[kCreatedAt]);
+              donation.setNeedCollected(data[kNeedCollected]);
+              donations.pickDonation(donation);
             }
-          } else {
-            Map<String, dynamic> data = docChange.doc.data();
-            Donation donation = Donation(donationId);
-            donation.setStatus(Status(
-              data[kStatus],
-              data[kSubStatus],
-              isCharity: true,
-            ));
-            donation.setCreatedAt(data[kCreatedAt]);
-            donation.setNeedCollected(data[kNeedCollected]);
-            donations.pickDonation(donation);
           }
-        }
-        if (onComplete != null) {
           onComplete();
-        }
-      },
-      onError: (e) {
-        print(e);
-      },
-    ));
+        },
+        onError: (e) {
+          print(e);
+        },
+      ));
+    } catch (e) {
+      print(e);
+    }
   }
 
   Future<String> imageURL(String path) async {
@@ -407,57 +491,62 @@ class FireStoreService {
     @required double limitDistance,
     @required int limitCharity,
   }) async {
-    List<String> selectedProduce = donation.produce.keys.toList();
-    Query query = _usersDB.where(kWishList, arrayContainsAny: selectedProduce);
-    QuerySnapshot snapshot = await query.get();
     List<Charity> charities = [];
-    for (DocumentSnapshot doc in snapshot.docs) {
-      Map<String, dynamic> data = doc.data();
-      Charity charity = Charity(doc.id);
-      charity.setName(data[kCharityName]);
-      charity.setAddress(data[kAddress]);
-      charity.setWishList(data[kWishList]);
-      charities.add(charity);
-    }
-
-    Map<String, String> donationAddress = donation.address;
-    String street = donationAddress[kAddressStreet];
-    String city = donationAddress[kAddressCity];
-    String state = donationAddress[kAddressState];
-    String zip = donationAddress[kAddressZip];
-    String origin = '$street $city $state $zip';
-    List<String> destinations = [];
-    for (Charity charity in charities) {
-      Map<String, String> charityAddress = charity.address;
-      String street = charityAddress[kAddressStreet];
-      String city = charityAddress[kAddressCity];
-      String state = charityAddress[kAddressState];
-      String zip = charityAddress[kAddressZip];
-      destinations.add('$street $city $state $zip');
-    }
-    List<double> distances = await MapService.getDistances(
-      origin: origin,
-      destinations: destinations,
-    );
-
-    double matchPerProduce = limitDistance / selectedProduce.length;
-    PriorityQueue<Charity> rankedCharity = PriorityQueue();
-    for (int i = 0; i < distances.length; i++) {
-      if (distances[i] <= limitDistance) {
-        double matchScore = 0.0;
-        Set<String> wishList = charities[i].wishlist;
-        for (String produceId in selectedProduce) {
-          matchScore += wishList.contains(produceId) ? matchPerProduce : 0.0;
-        }
-        double distanceScore = limitDistance - distances[i];
-        charities[i].setScore(matchScore + distanceScore);
-        rankedCharity.add(charities[i]);
+    try {
+      List<String> selectedProduce = donation.produce.keys.toList();
+      Query query =
+          _usersDB.where(kWishList, arrayContainsAny: selectedProduce);
+      QuerySnapshot snapshot = await query.get();
+      for (DocumentSnapshot doc in snapshot.docs) {
+        Map<String, dynamic> data = doc.data();
+        Charity charity = Charity(doc.id);
+        charity.setName(data[kCharityName]);
+        charity.setAddress(data[kAddress]);
+        charity.setWishList(data[kWishList]);
+        charities.add(charity);
       }
-    }
 
-    charities.clear();
-    for (int i = 0; i < limitCharity && rankedCharity.isNotEmpty; i++) {
-      charities.add(rankedCharity.removeFirst());
+      Map<String, String> donationAddress = donation.address;
+      String street = donationAddress[kAddressStreet];
+      String city = donationAddress[kAddressCity];
+      String state = donationAddress[kAddressState];
+      String zip = donationAddress[kAddressZip];
+      String origin = '$street $city $state $zip';
+      List<String> destinations = [];
+      for (Charity charity in charities) {
+        Map<String, String> charityAddress = charity.address;
+        String street = charityAddress[kAddressStreet];
+        String city = charityAddress[kAddressCity];
+        String state = charityAddress[kAddressState];
+        String zip = charityAddress[kAddressZip];
+        destinations.add('$street $city $state $zip');
+      }
+      List<double> distances = await MapService.getDistances(
+        origin: origin,
+        destinations: destinations,
+      );
+
+      double matchPerProduce = limitDistance / selectedProduce.length;
+      PriorityQueue<Charity> rankedCharity = PriorityQueue();
+      for (int i = 0; i < distances.length; i++) {
+        if (distances[i] <= limitDistance) {
+          double matchScore = 0.0;
+          Set<String> wishList = charities[i].wishlist;
+          for (String produceId in selectedProduce) {
+            matchScore += wishList.contains(produceId) ? matchPerProduce : 0.0;
+          }
+          double distanceScore = limitDistance - distances[i];
+          charities[i].setScore(matchScore + distanceScore);
+          rankedCharity.add(charities[i]);
+        }
+      }
+
+      charities.clear();
+      for (int i = 0; i < limitCharity && rankedCharity.isNotEmpty; i++) {
+        charities.add(rankedCharity.removeFirst());
+      }
+    } catch (e) {
+      print(e);
     }
     return charities;
   }
