@@ -172,7 +172,7 @@ class Donation extends ChangeNotifier implements Comparable<Donation> {
 
   /// Set created timestamp
   void setCreatedAt(Timestamp createdAt) {
-    _createdAt = createdAt.toDate() ?? DateTime.now();
+    _createdAt = (createdAt ?? Timestamp.now()).toDate();
   }
 
   /// Listen to callback when [_produce] is empty
