@@ -233,6 +233,63 @@ class FireStoreService {
     }
   }
 
+  void searchProduce(
+    String produceName,
+    Produce produce, {
+    Function onComplete,
+  }) async {
+    onComplete = onComplete ?? () {};
+    try {
+      Query query = _produceDB
+          .where(kProduceEnabled, isEqualTo: true)
+          .orderBy(kProduceName)
+          .startAt([produceName]).endAt(['$produceName\uf8ff']);
+      Map<String, ProduceItem> produceStorage = produce.map;
+      bool hasNewProduce = false;
+      for (QueryDocumentSnapshot doc in (await query.get()).docs) {
+        if (!produceStorage.containsKey(doc.id)) {
+          hasNewProduce = true;
+        }
+      }
+      if (hasNewProduce) {
+        produce.addStream(query.snapshots().listen(
+          (snapshot) async {
+            List<ProduceItem> produceList = [];
+            for (DocumentChange docChange in snapshot.docChanges) {
+              DocumentSnapshot doc = docChange.doc;
+              if (docChange.type == DocumentChangeType.removed) {
+                produce.removeSearchProduce(doc.id);
+              } else {
+                Map<String, dynamic> data = doc.data();
+                ProduceItem produceItem = ProduceItem(doc.id);
+                produceItem.setName(data[kProduceName]);
+                produceItem.setImagePath(data[kProducePath]);
+                produce.pickSearchProduce(doc.id);
+                if ((docChange.type == DocumentChangeType.added &&
+                        !produce.map.containsKey(produceItem.id)) ||
+                    docChange.type == DocumentChangeType.modified) {
+                  produceList.add(produceItem);
+                }
+              }
+            }
+            await Future.wait(produceList.reversed.map((produceItem) async {
+              produceItem.setImageURL(await imageURL(produceItem.imagePath));
+              produce.storeProduce(produceItem);
+            }));
+            onComplete();
+          },
+          onError: (e) {
+            print(e);
+          },
+        ));
+      } else {
+        onComplete();
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
   void donationStreamDonor(
     Donations donations, {
     Function onComplete,

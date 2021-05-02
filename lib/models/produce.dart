@@ -7,6 +7,7 @@ import 'package:fruitfairy/models/produce_item.dart';
 
 /// A class holds a list of produce that a user can select
 /// [_produceIds]: a set of produce ids
+/// [_searchIds]: a set of produce ids from search result
 /// [_produce]: a map of [ProduceItem]
 /// [_subscriptions]: list of stream subcriptions that
 /// performs an opperation for each subcription on changes
@@ -16,6 +17,7 @@ import 'package:fruitfairy/models/produce_item.dart';
 class Produce extends ChangeNotifier {
   static const LOAD_LIMIT = 20;
   final Set<String> _produceIds = {};
+  final Set<String> _searchIds = {};
   final Map<String, ProduceItem> _produce = {};
   final List<StreamSubscription<QuerySnapshot>> _subscriptions = [];
   DocumentSnapshot _startDocument;
@@ -24,6 +26,11 @@ class Produce extends ChangeNotifier {
   /// Return a copy of [_produceIds]
   UnmodifiableSetView<String> get set {
     return UnmodifiableSetView(_produceIds);
+  }
+
+  /// Return a copy of [_searchIds]
+  UnmodifiableSetView<String> get searches {
+    return UnmodifiableSetView(_searchIds);
   }
 
   /// Return a copy of [_produce]
@@ -50,6 +57,18 @@ class Produce extends ChangeNotifier {
   /// Remove [produceId] from [_produceIds]
   void removeProduce(String produceId) {
     _produceIds.remove(produceId);
+    notifyListeners();
+  }
+
+  /// Add [produceId] to [_searchIds]
+  void pickSearchProduce(String produceId) {
+    _searchIds.add(produceId);
+    notifyListeners();
+  }
+
+  /// Remove [produceId] from [_searchIds]
+  void removeSearchProduce(String produceId) {
+    _searchIds.remove(produceId);
     notifyListeners();
   }
 
@@ -87,6 +106,7 @@ class Produce extends ChangeNotifier {
   void clear() {
     clearStream();
     _produceIds.clear();
+    _searchIds.clear();
     _produce.clear();
     _startDocument = null;
     _endDocument = null;
