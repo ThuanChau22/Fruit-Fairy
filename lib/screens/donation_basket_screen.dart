@@ -66,7 +66,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
         ),
       ),
       selectedFruits(),
-      SizedBox(height: 60 + screen.height * 0.03),
+      bottomPadding(),
     ];
     return ListView.builder(
       itemCount: widgets.length,
@@ -138,7 +138,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
           onPressed: () {
             setState(() {
               _collectOption = needCollected;
-              context.read<Donation>().setNeedCollected(_collectOption);
+              context.read<Donation>().needCollected = _collectOption;
             });
           },
         ),
@@ -317,6 +317,15 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
       buttonColor: kPrimaryColor,
       hitBoxPadding: 10.0,
       onPressed: onPressed,
+    );
+  }
+
+  Widget bottomPadding() {
+    Size screen = MediaQuery.of(context).size;
+    EdgeInsets view = MediaQuery.of(context).viewInsets;
+    return Visibility(
+      visible: view.bottom == 0.0,
+      child: SizedBox(height: 60 + screen.height * 0.03),
     );
   }
 

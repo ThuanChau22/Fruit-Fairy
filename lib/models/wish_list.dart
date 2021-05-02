@@ -2,8 +2,6 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-//
-import 'package:fruitfairy/services/firestore_service.dart';
 
 /// A class that represents a charity's wishlist
 /// [_produce]: list of produce ids selected by the charity
@@ -44,10 +42,8 @@ class WishList extends ChangeNotifier {
   }
 
   /// Parse [produceId] from database
-  /// [wishlistData]: A Map with keys that are declared in [FireStoreService]
-  void fromDB(Map<String, dynamic> userData) {
+  void fromDB(List<dynamic> wishlist) {
     _produceIds.clear();
-    List<dynamic> wishlist = userData[FireStoreService.kWishList];
     if (wishlist != null) {
       for (dynamic produceId in wishlist) {
         _produceIds.add(produceId);

@@ -73,7 +73,7 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
       groupLabel('Contact Information'),
       contactInfo(),
       appreciation(),
-      SizedBox(height: 60 + screen.height * 0.03),
+      bottomPadding(),
     ];
     return ListView.builder(
       itemCount: widgets.length,
@@ -147,7 +147,6 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
     List<Widget> fruitList = [];
     Donation donation = context.watch<Donation>();
     for (ProduceItem produceItem in donation.produce.values) {
-      int amount = produceItem.amount;
       fruitList.add(Container(
         decoration: BoxDecoration(
           color: kObjectColor,
@@ -156,7 +155,7 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
         child: FruitTile(
           fruitName: produceItem.name,
           fruitImage: produceItem.imageURL,
-          percentage: donation.needCollected ? '$amount' : '',
+          percentage: donation.needCollected ? '${produceItem.amount}' : '',
         ),
       ));
     }
@@ -239,6 +238,15 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
           fontWeight: FontWeight.bold,
         ),
       ),
+    );
+  }
+
+  Widget bottomPadding() {
+    Size screen = MediaQuery.of(context).size;
+    EdgeInsets view = MediaQuery.of(context).viewInsets;
+    return Visibility(
+      visible: view.bottom == 0.0,
+      child: SizedBox(height: 60 + screen.height * 0.03),
     );
   }
 

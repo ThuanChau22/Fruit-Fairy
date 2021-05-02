@@ -11,8 +11,8 @@ import 'package:fruitfairy/models/produce_item.dart';
 /// [_produce]: a map of [ProduceItem]
 /// [_subscriptions]: list of stream subcriptions that
 /// performs an opperation for each subcription on changes
-/// [_startDocument]: A cursor used to traverse DB
-/// [_endDocument]: A cursor used to traverse DB
+/// [startDocument]: A cursor used to traverse DB
+/// [endDocument]: A cursor used to traverse DB
 /// [LOAD_LIMIT]: Limit amount per donation retrieval
 class Produce extends ChangeNotifier {
   static const LOAD_LIMIT = 20;
@@ -20,8 +20,8 @@ class Produce extends ChangeNotifier {
   final Set<String> _searchIds = {};
   final Map<String, ProduceItem> _produce = {};
   final List<StreamSubscription<QuerySnapshot>> _subscriptions = [];
-  DocumentSnapshot _startDocument;
-  DocumentSnapshot _endDocument;
+  DocumentSnapshot startDocument;
+  DocumentSnapshot endDocument;
 
   /// Return a copy of [_produceIds]
   UnmodifiableSetView<String> get set {
@@ -36,16 +36,6 @@ class Produce extends ChangeNotifier {
   /// Return a copy of [_produce]
   UnmodifiableMapView<String, ProduceItem> get map {
     return UnmodifiableMapView(_produce);
-  }
-
-  /// Return a copy of [_startDocument]
-  DocumentSnapshot get startDocument {
-    return _startDocument;
-  }
-
-  /// Return a copy of [_endDocument]
-  DocumentSnapshot get endDocument {
-    return _endDocument;
   }
 
   /// Add [produceId] to [_produceIds]
@@ -78,16 +68,6 @@ class Produce extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Set [doc] as starting cursor
-  void setStartDocument(DocumentSnapshot doc) {
-    _startDocument = doc;
-  }
-
-  /// Set [doc] as ending cursor
-  void setEndDocument(DocumentSnapshot doc) {
-    _endDocument = doc;
-  }
-
   /// Add [subscription] to [_subscriptions] list
   void addStream(StreamSubscription<QuerySnapshot> subscription) {
     _subscriptions.add(subscription);
@@ -108,8 +88,8 @@ class Produce extends ChangeNotifier {
     _produceIds.clear();
     _searchIds.clear();
     _produce.clear();
-    _startDocument = null;
-    _endDocument = null;
+    startDocument = null;
+    endDocument = null;
     notifyListeners();
   }
 }

@@ -1,6 +1,5 @@
 import 'dart:collection';
 import 'package:flutter/foundation.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 //
 import 'package:fruitfairy/models/charity.dart';
 import 'package:fruitfairy/models/produce_item.dart';
@@ -17,46 +16,31 @@ import 'package:fruitfairy/services/firestore_service.dart';
 /// [_address]: donor's address
 /// [_phone]: donor's phone number
 /// [_charities]: selected charities
-/// [_status]: donation status
-/// [_createdAt]: donation created timestamp
 /// [_updated]: object state's update status
 /// [_onEmptyBasket]: a callback that handles when [_produce] is empty
+/// [status]: donation status
+/// [createdAt]: donation created timestamp
 /// [MaxCharity]: maximum number of charity can be selected
 class Donation extends ChangeNotifier implements Comparable<Donation> {
   static const int MaxCharity = 3;
   final String id;
-  bool _needCollected = true;
-  final Map<String, ProduceItem> _produce = {};
+  final Map<String, ProduceItem> _produce = SplayTreeMap();
   final Map<String, String> _address = {};
   final Map<String, String> _phone = {};
   final List<Charity> _charities = [];
+  bool _needCollected = true;
   String _donorId = '';
   String _donorName = '';
-  Status _status = Status.init();
-  DateTime _createdAt = DateTime.now();
   bool _updated = false;
   VoidCallback _onEmptyBasket = () {};
+  Status status = Status.init();
+  DateTime createdAt = DateTime.now();
 
   Donation(this.id);
-
-  /// Return a copy of [_needCollected]
-  bool get needCollected {
-    return _needCollected;
-  }
 
   /// Return a copy of [_produce]
   UnmodifiableMapView<String, ProduceItem> get produce {
     return UnmodifiableMapView(_produce);
-  }
-
-  /// Return a copy of [_donorId]
-  String get donorId {
-    return _donorId;
-  }
-
-  /// Return a copy of [_donorName]
-  String get donorName {
-    return _donorName;
   }
 
   /// Return a copy of [_address]
@@ -74,14 +58,19 @@ class Donation extends ChangeNotifier implements Comparable<Donation> {
     return UnmodifiableListView(_charities);
   }
 
-  /// Return a copy of [_status]
-  Status get status {
-    return _status;
+  /// Return a copy of [_needCollected]
+  bool get needCollected {
+    return _needCollected;
   }
 
-  /// Return a copy of [_createdAt]
-  DateTime get createdAt {
-    return _createdAt;
+  /// Return a copy of [_donorId]
+  String get donorId {
+    return _donorId;
+  }
+
+  /// Return a copy of [_donorName]
+  String get donorName {
+    return _donorName;
   }
 
   /// Return [_updated] status
@@ -90,7 +79,7 @@ class Donation extends ChangeNotifier implements Comparable<Donation> {
   }
 
   /// Set collecting option
-  void setNeedCollected(bool option) {
+  set needCollected(bool option) {
     _needCollected = option;
     notifyListeners();
   }
@@ -165,16 +154,6 @@ class Donation extends ChangeNotifier implements Comparable<Donation> {
     notifyListeners();
   }
 
-  /// Set current status
-  void setStatus(Status status) {
-    _status = status;
-  }
-
-  /// Set created timestamp
-  void setCreatedAt(Timestamp createdAt) {
-    _createdAt = (createdAt ?? Timestamp.now()).toDate();
-  }
-
   /// Listen to callback when [_produce] is empty
   void onEmptyBasket(VoidCallback action) {
     _onEmptyBasket = () {
@@ -191,16 +170,16 @@ class Donation extends ChangeNotifier implements Comparable<Donation> {
 
   /// Set all fields to default values
   void reset() {
-    _needCollected = true;
     _produce.clear();
     _charities.clear();
     _address.clear();
     _phone.clear();
-    _updated = false;
+    _needCollected = true;
     _donorId = '';
     _donorName = '';
-    _status = Status.init();
-    _createdAt = DateTime.now();
+    _updated = false;
+    status = Status.init();
+    createdAt = DateTime.now();
   }
 
   /// Set object to initial state

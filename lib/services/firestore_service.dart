@@ -119,7 +119,7 @@ class FireStoreService {
         (snapshot) {
           Map<String, dynamic> data = snapshot.data();
           if (data != null) {
-            wishList.fromDB(data);
+            wishList.fromDB(data[kWishList]);
           }
           onComplete();
         },
@@ -147,7 +147,7 @@ class FireStoreService {
             .get();
         List<QueryDocumentSnapshot> docs = snapshot.docs;
         if (docs.isNotEmpty) {
-          produce.setStartDocument(docs.last);
+          produce.startDocument = docs.last;
           Stream<QuerySnapshot> snapshots = _produceDB
               .where(kProduceEnabled, isEqualTo: true)
               .orderBy(kProduceName, descending: true)
@@ -173,8 +173,8 @@ class FireStoreService {
             .get();
         List<QueryDocumentSnapshot> docs = snapshot.docs;
         if (docs.isNotEmpty) {
-          produce.setEndDocument(docs.first);
-          produce.setStartDocument(docs.last);
+          produce.endDocument = docs.first;
+          produce.startDocument = docs.last;
           Stream<QuerySnapshot> snapshots = _produceDB
               .where(kProduceEnabled, isEqualTo: true)
               .orderBy(kProduceName, descending: true)
@@ -204,12 +204,13 @@ class FireStoreService {
           for (DocumentChange docChange in snapshot.docChanges) {
             DocumentSnapshot doc = docChange.doc;
             if (docChange.type == DocumentChangeType.removed) {
+              produce.map[doc.id].enabled = false;
               produce.removeProduce(doc.id);
             } else {
               Map<String, dynamic> data = doc.data();
               ProduceItem produceItem = ProduceItem(doc.id);
-              produceItem.setName(data[kProduceName]);
-              produceItem.setImagePath(data[kProducePath]);
+              produceItem.name = data[kProduceName];
+              produceItem.imagePath = data[kProducePath];
               produce.pickProduce(produceItem.id);
               if ((docChange.type == DocumentChangeType.added &&
                       !produce.map.containsKey(produceItem.id)) ||
@@ -219,7 +220,7 @@ class FireStoreService {
             }
           }
           await Future.wait(produceList.reversed.map((produceItem) async {
-            produceItem.setImageURL(await imageURL(produceItem.imagePath));
+            produceItem.imageURL = await imageURL(produceItem.imagePath);
             produce.storeProduce(produceItem);
           }));
           onComplete();
@@ -258,12 +259,13 @@ class FireStoreService {
             for (DocumentChange docChange in snapshot.docChanges) {
               DocumentSnapshot doc = docChange.doc;
               if (docChange.type == DocumentChangeType.removed) {
+                produce.map[doc.id].enabled = false;
                 produce.removeSearchProduce(doc.id);
               } else {
                 Map<String, dynamic> data = doc.data();
                 ProduceItem produceItem = ProduceItem(doc.id);
-                produceItem.setName(data[kProduceName]);
-                produceItem.setImagePath(data[kProducePath]);
+                produceItem.name = data[kProduceName];
+                produceItem.imagePath = data[kProducePath];
                 produce.pickSearchProduce(doc.id);
                 if ((docChange.type == DocumentChangeType.added &&
                         !produce.map.containsKey(produceItem.id)) ||
@@ -273,7 +275,7 @@ class FireStoreService {
               }
             }
             await Future.wait(produceList.reversed.map((produceItem) async {
-              produceItem.setImageURL(await imageURL(produceItem.imagePath));
+              produceItem.imageURL = await imageURL(produceItem.imagePath);
               produce.storeProduce(produceItem);
             }));
             onComplete();
@@ -306,7 +308,7 @@ class FireStoreService {
             .get();
         List<QueryDocumentSnapshot> docs = snapshot.docs;
         if (docs.isNotEmpty) {
-          donations.setStartDocument(docs.last);
+          donations.startDocument = docs.last;
           Stream<QuerySnapshot> snapshots = _donationsDB
               .where(donorId, isEqualTo: _uid)
               .orderBy(kStatus, descending: true)
@@ -332,8 +334,8 @@ class FireStoreService {
             .get();
         List<QueryDocumentSnapshot> docs = snapshot.docs;
         if (docs.isNotEmpty) {
-          donations.setEndDocument(docs.first);
-          donations.setStartDocument(docs.last);
+          donations.endDocument = docs.first;
+          donations.startDocument = docs.last;
           Stream<QuerySnapshot> snapshots = _donationsDB
               .where(donorId, isEqualTo: _uid)
               .orderBy(kStatus, descending: true)
@@ -391,13 +393,14 @@ class FireStoreService {
             } else {
               Map<String, dynamic> data = docChange.doc.data();
               Donation donation = Donation(donationId);
-              donation.setStatus(Status(
+              donation.status = Status(
                 data[kStatus],
                 data[kSubStatus],
-              ));
-              donation.setCreatedAt(data[kCreatedAt]);
+              );
+              Timestamp timeStamp = data[kCreatedAt] ?? Timestamp.now();
+              donation.createdAt = timeStamp.toDate();
               Charity charity = Charity(data[kCharity][kUserId]);
-              charity.setName(data[kCharity][kUserName]);
+              charity.name = data[kCharity][kUserName];
               donation.pickCharity(charity);
               donations.pickDonation(donation);
             }
@@ -428,7 +431,7 @@ class FireStoreService {
             .get();
         List<QueryDocumentSnapshot> docs = snapshot.docs;
         if (docs.isNotEmpty) {
-          donations.setStartDocument(docs.last);
+          donations.startDocument = docs.last;
           Stream<QuerySnapshot> snapshots = _donationsDB
               .where(kRequestedCharities, arrayContains: _uid)
               .orderBy(kStatus, descending: true)
@@ -454,8 +457,8 @@ class FireStoreService {
             .get();
         List<QueryDocumentSnapshot> docs = snapshot.docs;
         if (docs.isNotEmpty) {
-          donations.setEndDocument(docs.first);
-          donations.setStartDocument(docs.last);
+          donations.endDocument = docs.first;
+          donations.startDocument = docs.last;
           Stream<QuerySnapshot> snapshots = _donationsDB
               .where(kRequestedCharities, arrayContains: _uid)
               .orderBy(kStatus, descending: true)
@@ -513,13 +516,14 @@ class FireStoreService {
             } else {
               Map<String, dynamic> data = docChange.doc.data();
               Donation donation = Donation(donationId);
-              donation.setStatus(Status(
+              donation.status = Status(
                 data[kStatus],
                 data[kSubStatus],
                 isCharity: true,
-              ));
-              donation.setCreatedAt(data[kCreatedAt]);
-              donation.setNeedCollected(data[kNeedCollected]);
+              );
+              Timestamp timeStamp = data[kCreatedAt] ?? Timestamp.now();
+              donation.createdAt = timeStamp.toDate();
+              donation.needCollected = data[kNeedCollected];
               donations.pickDonation(donation);
             }
           }
@@ -551,15 +555,15 @@ class FireStoreService {
     List<Charity> charities = [];
     try {
       List<String> selectedProduce = donation.produce.keys.toList();
-      Query query =
-          _usersDB.where(kWishList, arrayContainsAny: selectedProduce);
-      QuerySnapshot snapshot = await query.get();
+      QuerySnapshot snapshot = await _usersDB
+          .where(kWishList, arrayContainsAny: selectedProduce)
+          .get();
       for (DocumentSnapshot doc in snapshot.docs) {
         Map<String, dynamic> data = doc.data();
         Charity charity = Charity(doc.id);
-        charity.setName(data[kCharityName]);
-        charity.setAddress(data[kAddress]);
-        charity.setWishList(data[kWishList]);
+        charity.name = data[kCharityName];
+        charity.address = data[kAddress];
+        charity.wishList = data[kWishList];
         charities.add(charity);
       }
 
@@ -593,7 +597,7 @@ class FireStoreService {
             matchScore += wishList.contains(produceId) ? matchPerProduce : 0.0;
           }
           double distanceScore = limitDistance - distances[i];
-          charities[i].setScore(matchScore + distanceScore);
+          charities[i].score = matchScore + distanceScore;
           rankedCharity.add(charities[i]);
         }
       }

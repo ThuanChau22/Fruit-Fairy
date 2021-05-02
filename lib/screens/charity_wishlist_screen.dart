@@ -82,7 +82,6 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
   }
 
   Widget emptyWishList() {
-    Size screen = MediaQuery.of(context).size;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -94,7 +93,7 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
               fontSize: 20.0,
             ),
           ),
-          SizedBox(height: 60 + screen.height * 0.03),
+          bottomPadding(),
         ],
       ),
     );
@@ -105,21 +104,22 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
     int axisCount = screen.width >= 600 ? 5 : 3;
     double padding = screen.width * 0.02;
     List<Widget> widgets = [
-      CustomGrid(
-        assistPadding: padding,
-        crossAxisCount: axisCount,
-        children: fruitTiles(),
+      Padding(
+        padding: EdgeInsets.only(top: screen.height * 0.03),
+        child: CustomGrid(
+          assistPadding: padding,
+          crossAxisCount: axisCount,
+          children: fruitTiles(),
+        ),
       ),
-      SizedBox(height: 60 + screen.height * 0.03),
+      bottomPadding(),
     ];
     return ListView.builder(
       itemCount: widgets.length,
       itemBuilder: (context, index) {
         return Padding(
-          padding: EdgeInsets.only(
-            top: screen.height * 0.03,
-            left: padding,
-            right: padding,
+          padding: EdgeInsets.symmetric(
+            horizontal: padding,
           ),
           child: widgets[index],
         );
@@ -192,6 +192,15 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
       ),
       buttonColor: kDarkPrimaryColor,
       onPressed: onPressed,
+    );
+  }
+
+  Widget bottomPadding() {
+    Size screen = MediaQuery.of(context).size;
+    EdgeInsets view = MediaQuery.of(context).viewInsets;
+    return Visibility(
+      visible: view.bottom == 0.0,
+      child: SizedBox(height: 60 + screen.height * 0.03),
     );
   }
 

@@ -36,11 +36,11 @@ class _DonationCharitySelectionScreenState
     Donation donation = context.read<Donation>();
     if (donation.isUpdated) {
       charities.clear();
-      charities.setList(await fireStore.charitySuggestions(
+      charities.list = await fireStore.charitySuggestions(
         donation: donation,
         limitDistance: Charities.MaxDistance,
         limitCharity: Charities.MaxCharity,
-      ));
+      );
       donation.clearUpdated();
     }
     _mode = charities.list.isEmpty ? ViewMode.Empty : ViewMode.Suggestion;
@@ -114,7 +114,7 @@ class _DonationCharitySelectionScreenState
                   fontSize: 20.0,
                 ),
               ),
-              SizedBox(height: 60 + screen.height * 0.03),
+              bottomPadding(),
             ],
           ),
         );
@@ -130,7 +130,7 @@ class _DonationCharitySelectionScreenState
     Size screen = MediaQuery.of(context).size;
     List<Widget> widgets = [instructionSection()];
     widgets.addAll(charityTiles());
-    widgets.add(SizedBox(height: 60 + screen.height * 0.03));
+    widgets.add(bottomPadding());
     return ListView.builder(
       itemCount: widgets.length,
       itemBuilder: (context, index) {
@@ -207,6 +207,15 @@ class _DonationCharitySelectionScreenState
       ));
     }
     return charityTiles;
+  }
+
+  Widget bottomPadding() {
+    Size screen = MediaQuery.of(context).size;
+    EdgeInsets view = MediaQuery.of(context).viewInsets;
+    return Visibility(
+      visible: view.bottom == 0.0,
+      child: SizedBox(height: 60 + screen.height * 0.03),
+    );
   }
 
   Widget buttonSection() {

@@ -359,7 +359,7 @@ class _ContactConfirmation extends State<DonationContactScreen> {
       ),
       phoneNumberField(),
       verifyCodeField(),
-      SizedBox(height: 60 + screen.height * 0.03),
+      bottomPadding(),
     ];
     return ListView.builder(
       controller: _scroller.controller,
@@ -642,6 +642,15 @@ class _ContactConfirmation extends State<DonationContactScreen> {
           SizedBox(height: 16.0),
         ],
       ),
+    );
+  }
+
+  Widget bottomPadding() {
+    Size screen = MediaQuery.of(context).size;
+    EdgeInsets view = MediaQuery.of(context).viewInsets;
+    return Visibility(
+      visible: view.bottom == 0.0,
+      child: SizedBox(height: 60 + screen.height * 0.03),
     );
   }
 

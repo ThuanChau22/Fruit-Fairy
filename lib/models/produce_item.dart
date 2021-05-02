@@ -7,86 +7,57 @@
 /// [Min]: minimun percentage a donor can select
 /// [Max]: maximun percentage a donor can select
 /// [AdjustAmount]: number of percentage can be adjusted each time
-/// [_currentAmount]: current percentage of a produce
+/// [amount]: current percentage of a produce
 class ProduceItem implements Comparable<ProduceItem> {
   static const Min = 25;
   static const Max = 100;
   static const int AdjustAmount = 5;
   final String id;
-  String _name;
-  String _imagePath;
-  String _imageURL = '';
-  int _currentAmount = Min;
+  String name = '';
+  String imagePath = '';
+  String imageURL = '';
+  bool enabled = true;
+  int _amount = Min;
 
   ProduceItem(this.id);
 
-  /// Return a copy of [_name]
-  String get name {
-    return _name;
-  }
-
-  /// Return a copy of [_imagePath]
-  String get imagePath {
-    return _imagePath;
-  }
-
-  /// Return a copy of [_imageURL]
-  String get imageURL {
-    return _imageURL;
-  }
-
-  /// Return a copy of [_currentAmount]
+  /// Return a copy of [_amount]
   int get amount {
-    return _currentAmount;
+    return _amount;
   }
 
-  /// Set produce item name
-  void setName(String name) {
-    _name = name;
-  }
-
-  /// Set produce item image path
-  void setImagePath(String imagePath) {
-    _imagePath = imagePath;
-  }
-
-  /// Set image URL
-  void setImageURL(String imageURL) {
-    _imageURL = imageURL;
-  }
-
-  /// Set default [_currentAmount]
+  /// Set default [_amount]
   /// between [Min] and [Max]
-  void setAmount(int amount) {
+  set amount(int amount) {
     if (amount < Min) {
       amount = Min;
     }
     if (amount > Max) {
       amount = Max;
     }
-    _currentAmount = amount;
+    _amount = amount;
   }
 
-  /// Increase [_currentAmount]
+  /// Increase [_amount]
   /// Cap at [Max]
   void increase() {
-    int result = _currentAmount + AdjustAmount;
-    _currentAmount = result < Max ? result : Max;
+    int result = _amount + AdjustAmount;
+    _amount = result < Max ? result : Max;
   }
 
-  /// Decrease [_currentAmount]
+  /// Decrease [_amount]
   /// Cap at [Min]
   void decrease() {
-    int result = _currentAmount - AdjustAmount;
-    _currentAmount = result > Min ? result : Min;
+    int result = _amount - AdjustAmount;
+    _amount = result > Min ? result : Min;
   }
 
   /// Return a clone of this produce
   ProduceItem clone() {
     ProduceItem produceItem = ProduceItem(id);
-    produceItem.setName(_name);
-    produceItem.setImagePath(_imagePath);
-    produceItem.setImageURL(_imageURL);
+    produceItem.name = name;
+    produceItem.imagePath = imagePath;
+    produceItem.imageURL = imageURL;
     return produceItem;
   }
 
