@@ -198,6 +198,7 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
           keyboardType: TextInputType.visiblePassword,
           errorMessage: _passwordError,
           obscureText: _obscurePassword,
+          suffixWidget: SizedBox(width: 20.0),
           onChanged: (value) {
             setState(() {
               String password = _password.text;

@@ -380,6 +380,7 @@ class _SignInScreenState extends State<SignInScreen> {
           keyboardType: TextInputType.visiblePassword,
           errorMessage: _passwordError,
           obscureText: _obscurePassword,
+          suffixWidget: SizedBox(width: 20.0),
           onChanged: (value) {
             setState(() {
               _passwordError = Validate.checkPassword(_password.text);

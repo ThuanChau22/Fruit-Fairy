@@ -799,6 +799,7 @@ class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
           keyboardType: TextInputType.visiblePassword,
           errorMessage: _oldPasswordError,
           obscureText: _obscureOldPassword,
+          suffixWidget: SizedBox(width: 20.0),
           onChanged: (value) {
             setState(() {
               _oldPasswordError = '';
@@ -833,6 +834,7 @@ class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
           keyboardType: TextInputType.visiblePassword,
           errorMessage: _newPasswordError,
           obscureText: _obscureNewPassword,
+          suffixWidget: SizedBox(width: 20.0),
           onChanged: (value) {
             setState(() {
               String oldPassword = _oldPassword.text;
