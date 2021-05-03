@@ -6,6 +6,18 @@ import 'package:fruitfairy/services/firestore_service.dart';
 class Utils {
   Utils._();
 
+  static List<List<E>> decompose<E>(List<E> list, size) {
+    List<List<E>> results = [];
+    int index = 0;
+    while (index < list.length) {
+      results.add([]);
+      for (int i = 0; i < size && index < list.length; i++) {
+        results.last.add(list[index++]);
+      }
+    }
+    return results;
+  }
+
   static void createTestCharities(
     FireStoreService fireStore, {
     int from,
