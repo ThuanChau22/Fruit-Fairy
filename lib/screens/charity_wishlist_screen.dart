@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
@@ -22,11 +23,58 @@ class CharityWishListScreen extends StatefulWidget {
 }
 
 class _CharityWishListScreenState extends State<CharityWishListScreen> {
+  final ScrollController _scroll = new ScrollController();
+  final double _scrollOffset = 135.0;
+
+  Timer _loadingTimer = Timer(Duration.zero, () {});
+  bool _isLoadingInit = true;
+  bool _isLoadingMore = true;
+
   String _buttonLabel = '';
+
+  void initWishList() {
+    FireStoreService fireStore = context.read<FireStoreService>();
+    WishList wishList = context.read<WishList>();
+    Produce produce = context.read<Produce>();
+    _scroll.addListener(() {
+      ScrollPosition pos = _scroll.position;
+      bool loadTriggered = pos.pixels + _scrollOffset >= pos.maxScrollExtent;
+      if (loadTriggered && !_loadingTimer.isActive) {
+        _loadingTimer = Timer(Duration(seconds: 2), () {
+          if (mounted) {
+            setState(() => _isLoadingMore = false);
+          }
+        });
+        int currentSize = wishList.produceIds.length;
+        fireStore.wishListProduce(wishList, produce, onData: () {
+          if (mounted) {
+            if (currentSize < wishList.produceIds.length) {
+              _loadingTimer.cancel();
+            }
+          }
+        });
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initWishList();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _scroll.dispose();
+    _loadingTimer.cancel();
+  }
 
   @override
   Widget build(BuildContext context) {
     Produce produce = context.watch<Produce>();
+    WishList wishList = context.watch<WishList>();
+    _isLoadingInit = produce.map.isEmpty || wishList.isLoading;
     return Scaffold(
       appBar: AppBar(
         title: Text('Wish List'),
@@ -34,7 +82,7 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
       ),
       body: SafeArea(
         child: ModalProgressHUD(
-          inAsyncCall: produce.map.isEmpty,
+          inAsyncCall: _isLoadingInit,
           progressIndicator: CircularProgressIndicator(
             valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
           ),
@@ -67,36 +115,38 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
       onPressed: () {
         PopUpDialog(
           context,
-          message:
-              'The purpose of a wish list is to match donors to charities based on a charity\'s needs. If your needs change, you can manage your wish list accordingly.',
+          message: 'The purpose of a wish list is to'
+              ' match donors to charities based on a'
+              ' charity\'s needs. If your needs change,'
+              ' you can manage your wish list accordingly.',
         ).show();
       },
     );
   }
 
   Widget layoutMode() {
-    WishList wishList = context.watch<WishList>();
+    if (_isLoadingInit) return Container();
+    WishList wishList = context.read<WishList>();
     bool isEmpty = wishList.produceIds.isEmpty;
     _buttonLabel = '${isEmpty ? 'Create' : 'Edit'} Wish List';
-    return isEmpty ? emptyWishList() : selectedFruits();
-  }
-
-  Widget emptyWishList() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            '(Empty)',
-            style: TextStyle(
-              color: kLabelColor.withOpacity(0.5),
-              fontSize: 20.0,
+    if (isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              '(Empty)',
+              style: TextStyle(
+                color: kLabelColor.withOpacity(0.5),
+                fontSize: 20.0,
+              ),
             ),
-          ),
-          bottomPadding(),
-        ],
-      ),
-    );
+            bottomPadding(),
+          ],
+        ),
+      );
+    }
+    return selectedFruits();
   }
 
   Widget selectedFruits() {
@@ -112,9 +162,11 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
           children: fruitTiles(),
         ),
       ),
+      loadingTile(),
       bottomPadding(),
     ];
     return ListView.builder(
+      controller: _scroll,
       itemCount: widgets.length,
       itemBuilder: (context, index) {
         return Padding(
@@ -127,13 +179,31 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
     );
   }
 
+  Widget loadingTile() {
+    WishList wishList = context.read<WishList>();
+    bool underLimit = wishList.produceIds.length < Produce.LoadLimit;
+    return Visibility(
+      visible: !_isLoadingInit && !underLimit && _isLoadingMore,
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 10.0),
+        child: Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
+          ),
+        ),
+      ),
+    );
+  }
+
   List<Widget> fruitTiles() {
     List<Widget> fruitTiles = [];
     FireStoreService fireStore = context.read<FireStoreService>();
     Produce produce = context.read<Produce>();
     Map<String, ProduceItem> produceMap = produce.map;
     WishList wishList = context.read<WishList>();
-    for (String produceId in wishList.produceIds) {
+    List<String> produceIdList = wishList.produceIds;
+    for (int i = 0; i < wishList.endCursor && i < produceIdList.length; i++) {
+      String produceId = produceIdList[i];
       if (produceMap.containsKey(produceId)) {
         fruitTiles.add(removableFruitTile(
           produceItem: produceMap[produceId],
@@ -170,6 +240,7 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
             child: FruitTile(
               fruitName: produceItem.name,
               fruitImage: produceItem.imageURL,
+              isLoading: produceItem.isLoading,
             ),
           ),
         ),

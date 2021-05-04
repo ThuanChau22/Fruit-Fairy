@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -8,6 +9,7 @@ import 'package:fruitfairy/models/donation.dart';
 import 'package:fruitfairy/models/produce_item.dart';
 import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/screens/donation_basket_screen.dart';
+import 'package:fruitfairy/services/firestore_service.dart';
 import 'package:fruitfairy/widgets/custom_grid.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
 import 'package:fruitfairy/widgets/gesture_wrapper.dart';
@@ -27,16 +29,95 @@ class _DonationProduceSelectionScreenState
     extends State<DonationProduceSelectionScreen> {
   final Color _selectedColor = Colors.grey.shade700.withOpacity(0.5);
   final TextEditingController _search = TextEditingController();
+  final ScrollController _scroll = new ScrollController();
+  final double _scrollOffset = 135.0;
+
+  Timer _searchTimer = Timer(Duration.zero, () {});
+  Timer _loadingTimer = Timer(Duration.zero, () {});
+  bool _isLoadingInit = true;
+  bool _isLoadingMore = true;
+
+  void initProduce() {
+    FireStoreService fireStore = context.read<FireStoreService>();
+    Produce produce = context.read<Produce>();
+    _scroll.addListener(() {
+      ScrollPosition pos = _scroll.position;
+      bool loadTriggered = pos.pixels + _scrollOffset >= pos.maxScrollExtent;
+      if (loadTriggered && !_loadingTimer.isActive) {
+        _loadingTimer = Timer(Duration(seconds: 2), () {
+          if (mounted) {
+            setState(() => _isLoadingMore = false);
+          }
+        });
+        int currentSize = produce.set.length;
+        fireStore.produceStream(produce, onData: () {
+          if (mounted) {
+            checkBasketAvailability();
+            if (currentSize < produce.set.length) {
+              _loadingTimer.cancel();
+            }
+          }
+        });
+      }
+    });
+  }
+
+  void searchProduce() {
+    setState(() => _isLoadingMore = true);
+    _searchTimer.cancel();
+    _searchTimer = Timer(Duration(milliseconds: 500), () {
+      FireStoreService fireStore = context.read<FireStoreService>();
+      Produce produce = context.read<Produce>();
+      String searchTerm = _search.text.trim();
+      if (searchTerm.isNotEmpty) {
+        fireStore.searchProduce(searchTerm, produce, onData: () {
+          if (mounted) {
+            checkBasketAvailability();
+            setState(() => _isLoadingMore = false);
+          }
+        });
+      }
+    });
+  }
+
+  void checkBasketAvailability() {
+    bool removed = false;
+    Donation donation = context.read<Donation>();
+    Produce produce = context.read<Produce>();
+    Map<String, ProduceItem> produceStorage = produce.map;
+    for (String produceId in donation.produce.keys.toList()) {
+      bool hasProduce = produceStorage.containsKey(produceId);
+      if (hasProduce && !produceStorage[produceId].enabled) {
+        donation.removeProduce(produceId);
+        removed = true;
+      }
+    }
+    String notifyMessage = 'One or more produce'
+        ' on your basket are no longer available!';
+    if (removed) {
+      MessageBar(context, message: notifyMessage).show();
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initProduce();
+  }
 
   @override
   void dispose() {
     super.dispose();
     _search.dispose();
+    _scroll.dispose();
+    _searchTimer.cancel();
+    _loadingTimer.cancel();
   }
 
   @override
   Widget build(BuildContext context) {
     Produce produce = context.watch<Produce>();
+    _isLoadingInit = produce.map.isEmpty;
     return WillPopScope(
       onWillPop: () async {
         MessageBar(context).hide();
@@ -47,7 +128,7 @@ class _DonationProduceSelectionScreenState
           appBar: AppBar(title: Text('Produce Selection')),
           body: SafeArea(
             child: ModalProgressHUD(
-              inAsyncCall: produce.map.isEmpty,
+              inAsyncCall: _isLoadingInit,
               progressIndicator: CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
               ),
@@ -102,19 +183,48 @@ class _DonationProduceSelectionScreenState
         vertical: screen.height * 0.01,
         horizontal: screen.width * 0.05,
       ),
-      child: InputField(
-        label: 'Enter Produce Name',
-        controller: _search,
-        helperText: null,
-        prefixIcon: Icon(
-          Icons.search,
-          color: kLabelColor,
-          size: 30.0,
-        ),
-        onChanged: (value) {
-          // Rebuild with search term
-          setState(() {});
-        },
+      child: Stack(
+        children: [
+          InputField(
+            label: 'Enter Produce Name',
+            controller: _search,
+            helperText: null,
+            prefixIcon: Icon(
+              Icons.search,
+              color: kLabelColor,
+              size: 30.0,
+            ),
+            suffixWidget: SizedBox(width: 20.0),
+            onChanged: (value) {
+              searchProduce();
+            },
+          ),
+          Positioned(
+            top: 9.0,
+            right: 10.0,
+            child: Visibility(
+              visible: _search.text.isNotEmpty,
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: () {
+                  HapticFeedback.mediumImpact();
+                  setState(() => _search.clear());
+                },
+                child: Padding(
+                  padding: EdgeInsets.all(5.0),
+                  child: Text(
+                    'Clear',
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      color: kLabelColor,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -135,10 +245,12 @@ class _DonationProduceSelectionScreenState
         crossAxisCount: axisCount,
         children: fruitTiles(),
       ),
-      SizedBox(height: 60 + screen.height * 0.03),
+      loadingTile(),
+      bottomPadding(),
     ];
     return Expanded(
       child: ListView.builder(
+        controller: _scroll,
         itemCount: widgets.length,
         itemBuilder: (context, index) {
           return Padding(
@@ -152,48 +264,62 @@ class _DonationProduceSelectionScreenState
     );
   }
 
+  Widget loadingTile() {
+    Produce produce = context.read<Produce>();
+    bool underLimit = produce.set.length < Produce.LoadLimit;
+    return Visibility(
+      visible: !_isLoadingInit && !underLimit && _isLoadingMore,
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 10.0),
+        child: Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
+          ),
+        ),
+      ),
+    );
+  }
+
   List<Widget> fruitTiles() {
     List<Widget> fruitTiles = [];
-    Donation donation = context.watch<Donation>();
     Produce produce = context.read<Produce>();
     List<ProduceItem> produceList = produce.map.values.toList();
     produceList.sort();
-    produceList.forEach((produceItem) {
-      if (RegExp(
-        '^${_search.text.trim()}',
-        caseSensitive: false,
-      ).hasMatch(produceItem.name)) {
-        String produceId = produceItem.id;
-        bool selected = donation.produce.containsKey(produceId);
-        fruitTiles.add(selectableFruitTile(
-          produceItem: produceItem,
-          selected: selected,
-          onTap: () {
-            setState(() {
-              if (selected) {
-                donation.removeProduce(produceId);
-              } else {
-                donation.pickProduce(produceItem.clone());
-              }
-            });
-          },
-        ));
+    for (ProduceItem produceItem in produceList) {
+      bool loaded = produce.set.contains(produceItem.id);
+      String searchTerm = _search.text.trim();
+      if (searchTerm.isEmpty && loaded) {
+        fruitTiles.add(selectableFruitTile(produceItem));
       }
-    });
+      if (searchTerm.isNotEmpty) {
+        bool searched = produce.searches.contains(produceItem.id);
+        bool searchMatch = RegExp(
+          '^$searchTerm',
+          caseSensitive: false,
+        ).hasMatch(produceItem.name);
+        if (searchMatch && (searched || loaded)) {
+          fruitTiles.add(selectableFruitTile(produceItem));
+        }
+      }
+    }
     return fruitTiles;
   }
 
-  Widget selectableFruitTile({
-    @required ProduceItem produceItem,
-    @required bool selected,
-    @required GestureTapCallback onTap,
-  }) {
+  Widget selectableFruitTile(ProduceItem produceItem) {
+    Donation donation = context.watch<Donation>();
+    bool selected = donation.produce.containsKey(produceItem.id);
     return GestureDetector(
       onTap: () {
         HapticFeedback.mediumImpact();
         FocusScope.of(context).unfocus();
         MessageBar(context).hide();
-        onTap();
+        setState(() {
+          if (selected) {
+            donation.removeProduce(produceItem.id);
+          } else {
+            donation.pickProduce(produceItem.clone());
+          }
+        });
       },
       child: Container(
         decoration: BoxDecoration(
@@ -205,6 +331,7 @@ class _DonationProduceSelectionScreenState
             FruitTile(
               fruitName: produceItem.name,
               fruitImage: produceItem.imageURL,
+              isLoading: produceItem.isLoading,
             ),
             Container(
               decoration: BoxDecoration(
@@ -215,6 +342,15 @@ class _DonationProduceSelectionScreenState
           ],
         ),
       ),
+    );
+  }
+
+  Widget bottomPadding() {
+    Size screen = MediaQuery.of(context).size;
+    EdgeInsets view = MediaQuery.of(context).viewInsets;
+    return Visibility(
+      visible: view.bottom == 0.0,
+      child: SizedBox(height: 60 + screen.height * 0.03),
     );
   }
 
@@ -249,6 +385,7 @@ class _DonationProduceSelectionScreenState
         label: 'My Basket',
         onPressed: () {
           if (context.read<Donation>().produce.isNotEmpty) {
+            setState(() => _search.clear());
             Navigator.of(context).pushNamed(DonationBasketScreen.id);
           } else {
             MessageBar(context, message: 'Your basket is empty!').show();
