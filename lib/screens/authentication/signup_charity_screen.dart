@@ -109,29 +109,39 @@ class _SignUpCharityScreenState extends State<SignUpCharityScreen> {
             actions: [helpButton()],
           ),
           body: SafeArea(
-            child: ModalProgressHUD(
-              inAsyncCall: _showSpinner,
-              progressIndicator: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: [0.5, 1.0],
+                  colors: [kPrimaryColor, kDarkPrimaryColor],
+                ),
               ),
-              child: ScrollableLayout(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    vertical: screen.height * 0.06,
-                    horizontal: screen.width * 0.15,
-                  ),
-                  child: Column(
-                    children: [
-                      einInputField(),
-                      inputFieldSizeBox(),
-                      emailInputField(),
-                      inputFieldSizeBox(),
-                      passwordInputField(),
-                      inputFieldSizeBox(),
-                      confirmPasswordInputField(),
-                      SizedBox(height: screen.height * 0.05),
-                      signUpButton(context),
-                    ],
+              child: ModalProgressHUD(
+                inAsyncCall: _showSpinner,
+                progressIndicator: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
+                ),
+                child: ScrollableLayout(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      vertical: screen.height * 0.06,
+                      horizontal: screen.width * 0.15,
+                    ),
+                    child: Column(
+                      children: [
+                        einInputField(),
+                        inputFieldSizeBox(),
+                        emailInputField(),
+                        inputFieldSizeBox(),
+                        passwordInputField(),
+                        inputFieldSizeBox(),
+                        confirmPasswordInputField(),
+                        SizedBox(height: screen.height * 0.05),
+                        signUpButton(context),
+                      ],
+                    ),
                   ),
                 ),
               ),

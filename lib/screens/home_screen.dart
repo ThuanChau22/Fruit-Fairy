@@ -76,12 +76,22 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [profileIcon(role)],
       ),
       body: SafeArea(
-        child: ModalProgressHUD(
-          inAsyncCall: _showSpinner,
-          progressIndicator: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              stops: [0.5, 1.0],
+              colors: [kPrimaryColor, kDarkPrimaryColor],
+            ),
           ),
-          child: roleLayout(role),
+          child: ModalProgressHUD(
+            inAsyncCall: _showSpinner,
+            progressIndicator: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
+            ),
+            child: roleLayout(role),
+          ),
         ),
       ),
     );

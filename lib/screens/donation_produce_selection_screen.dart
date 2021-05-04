@@ -127,27 +127,37 @@ class _DonationProduceSelectionScreenState
         child: Scaffold(
           appBar: AppBar(title: Text('Produce Selection')),
           body: SafeArea(
-            child: ModalProgressHUD(
-              inAsyncCall: _isLoadingInit,
-              progressIndicator: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: [0.5, 1.0],
+                  colors: [kPrimaryColor, kDarkPrimaryColor],
+                ),
               ),
-              child: Stack(
-                children: [
-                  Column(
-                    children: [
-                      instructionLabel(),
-                      searchInputField(),
-                      produceOptions(),
-                    ],
-                  ),
-                  Positioned(
-                    left: 0.0,
-                    right: 0.0,
-                    bottom: 0.0,
-                    child: buttonSection(),
-                  ),
-                ],
+              child: ModalProgressHUD(
+                inAsyncCall: _isLoadingInit,
+                progressIndicator: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
+                ),
+                child: Stack(
+                  children: [
+                    Column(
+                      children: [
+                        instructionLabel(),
+                        searchInputField(),
+                        produceOptions(),
+                      ],
+                    ),
+                    Positioned(
+                      left: 0.0,
+                      right: 0.0,
+                      bottom: 0.0,
+                      child: buttonSection(),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -359,7 +369,7 @@ class _DonationProduceSelectionScreenState
     return Visibility(
       visible: view.bottom == 0.0,
       child: Container(
-        color: kPrimaryColor.withOpacity(0.75),
+        color: kDarkPrimaryColor.withOpacity(0.75),
         child: Column(
           children: [
             Divider(

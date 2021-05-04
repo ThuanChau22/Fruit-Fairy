@@ -17,26 +17,36 @@ class SignUpRoleScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text('Sign Up')),
       body: SafeArea(
-        child: ScrollableLayout(
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              vertical: screen.height * 0.03,
-              horizontal: screen.width * 0.15,
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              stops: [0.5, 1.0],
+              colors: [kPrimaryColor, kDarkPrimaryColor],
             ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                fairyLogo(context),
-                SizedBox(height: screen.height * 0.03),
-                slogan(),
-                SizedBox(height: screen.height * 0.04),
-                Column(
-                  children: [
-                    donorButton(context),
-                    charityButton(context),
-                  ],
-                ),
-              ],
+          ),
+          child: ScrollableLayout(
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: screen.height * 0.03,
+                horizontal: screen.width * 0.15,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  fairyLogo(context),
+                  SizedBox(height: screen.height * 0.03),
+                  slogan(),
+                  SizedBox(height: screen.height * 0.04),
+                  Column(
+                    children: [
+                      donorButton(context),
+                      charityButton(context),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),

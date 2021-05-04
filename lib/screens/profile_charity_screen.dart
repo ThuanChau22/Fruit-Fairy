@@ -447,61 +447,71 @@ class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
         child: Scaffold(
           appBar: AppBar(title: Text('Profile')),
           body: SafeArea(
-            child: ModalProgressHUD(
-              inAsyncCall: _showSpinner,
-              progressIndicator: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: [0.5, 1.0],
+                  colors: [kPrimaryColor, kDarkPrimaryColor],
+                ),
               ),
-              child: ScrollableLayout(
-                controller: _scroller.controller,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    vertical: screen.height * 0.03,
-                    horizontal: screen.width * 0.15,
-                  ),
-                  child: Column(
-                    children: [
-                      inputGroupLabel(
-                        'Account',
-                        tag: Field.Name,
-                      ),
-                      emailInputField(),
-                      inputFieldSizedBox(),
-                      charityNameInputField(),
-                      inputFieldSizedBox(),
-                      inputGroupLabel(
-                        'Address',
-                        tag: Field.Address,
-                      ),
-                      streetInputField(),
-                      inputFieldSizedBox(),
-                      cityInputField(),
-                      inputFieldSizedBox(),
-                      stateInputField(),
-                      inputFieldSizedBox(),
-                      zipInputField(),
-                      inputFieldSizedBox(),
-                      inputGroupLabel(
-                        'Phone Number',
-                        tag: Field.Phone,
-                      ),
-                      phoneNumberField(),
-                      verifyCodeField(),
-                      inputFieldSizedBox(),
-                      inputGroupLabel(
-                        'Change Password',
-                        tag: Field.Password,
-                      ),
-                      currentPasswordInputField(),
-                      inputFieldSizedBox(),
-                      newPasswordInputField(),
-                      inputFieldSizedBox(),
-                      confirmPasswordInputField(),
-                      inputFieldSizedBox(),
-                      saveButton(),
-                      SizedBox(height: screen.height * 0.05),
-                      deleteAccountLink(),
-                    ],
+              child: ModalProgressHUD(
+                inAsyncCall: _showSpinner,
+                progressIndicator: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
+                ),
+                child: ScrollableLayout(
+                  controller: _scroller.controller,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      vertical: screen.height * 0.03,
+                      horizontal: screen.width * 0.15,
+                    ),
+                    child: Column(
+                      children: [
+                        inputGroupLabel(
+                          'Account',
+                          tag: Field.Name,
+                        ),
+                        emailInputField(),
+                        inputFieldSizedBox(),
+                        charityNameInputField(),
+                        inputFieldSizedBox(),
+                        inputGroupLabel(
+                          'Address',
+                          tag: Field.Address,
+                        ),
+                        streetInputField(),
+                        inputFieldSizedBox(),
+                        cityInputField(),
+                        inputFieldSizedBox(),
+                        stateInputField(),
+                        inputFieldSizedBox(),
+                        zipInputField(),
+                        inputFieldSizedBox(),
+                        inputGroupLabel(
+                          'Phone Number',
+                          tag: Field.Phone,
+                        ),
+                        phoneNumberField(),
+                        verifyCodeField(),
+                        inputFieldSizedBox(),
+                        inputGroupLabel(
+                          'Change Password',
+                          tag: Field.Password,
+                        ),
+                        currentPasswordInputField(),
+                        inputFieldSizedBox(),
+                        newPasswordInputField(),
+                        inputFieldSizedBox(),
+                        confirmPasswordInputField(),
+                        inputFieldSizedBox(),
+                        saveButton(),
+                        SizedBox(height: screen.height * 0.05),
+                        deleteAccountLink(),
+                      ],
+                    ),
                   ),
                 ),
               ),

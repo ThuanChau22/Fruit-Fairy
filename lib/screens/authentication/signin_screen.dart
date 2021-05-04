@@ -240,24 +240,34 @@ class _SignInScreenState extends State<SignInScreen> {
         child: Scaffold(
           appBar: AppBar(title: Text(_appBarLabel)),
           body: SafeArea(
-            child: ModalProgressHUD(
-              inAsyncCall: _showSpinner,
-              progressIndicator: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: [0.5, 1.0],
+                  colors: [kPrimaryColor, kDarkPrimaryColor],
+                ),
               ),
-              child: ScrollableLayout(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    vertical: screen.height * 0.03,
-                    horizontal: screen.width * 0.15,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      fairyLogo(),
-                      SizedBox(height: screen.height * 0.03),
-                      layoutMode(),
-                    ],
+              child: ModalProgressHUD(
+                inAsyncCall: _showSpinner,
+                progressIndicator: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
+                ),
+                child: ScrollableLayout(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      vertical: screen.height * 0.03,
+                      horizontal: screen.width * 0.15,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        fairyLogo(),
+                        SizedBox(height: screen.height * 0.03),
+                        layoutMode(),
+                      ],
+                    ),
                   ),
                 ),
               ),
