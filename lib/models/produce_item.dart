@@ -1,13 +1,13 @@
 /// A class that represents a produce
 /// [id]: unique String to identify a produce
-/// in both system and database (produce name)
 /// [name]: a display name of produce
 /// [imagePath]: a path to image in storage
 /// [imageURL]: public URL for produce image
+/// [isLoading]: A flag indicate loading state
+/// [_amount]: current percentage of a produce
 /// [Min]: minimun percentage a donor can select
 /// [Max]: maximun percentage a donor can select
 /// [AdjustAmount]: number of percentage can be adjusted each time
-/// [amount]: current percentage of a produce
 class ProduceItem implements Comparable<ProduceItem> {
   static const Min = 25;
   static const Max = 100;
@@ -15,8 +15,9 @@ class ProduceItem implements Comparable<ProduceItem> {
   final String id;
   String name = '';
   String imagePath = '';
-  String imageURL;
+  String imageURL = '';
   bool enabled = true;
+  bool isLoading = true;
   int _amount = Min;
 
   ProduceItem(this.id);
@@ -58,6 +59,7 @@ class ProduceItem implements Comparable<ProduceItem> {
     produceItem.name = name;
     produceItem.imagePath = imagePath;
     produceItem.imageURL = imageURL;
+    produceItem.isLoading = false;
     return produceItem;
   }
 

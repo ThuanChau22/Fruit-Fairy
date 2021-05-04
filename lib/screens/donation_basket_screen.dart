@@ -206,6 +206,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
                   : FruitTile(
                       fruitName: produceItem.name,
                       fruitImage: produceItem.imageURL,
+                      isLoading: produceItem.isLoading,
                     ),
             ),
           ),
@@ -255,6 +256,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
               child: FruitTile(
                 fruitName: produceItem.name,
                 fruitImage: produceItem.imageURL,
+                isLoading: produceItem.isLoading,
               ),
             ),
           ),

@@ -155,6 +155,7 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
         child: FruitTile(
           fruitName: produceItem.name,
           fruitImage: produceItem.imageURL,
+          isLoading: produceItem.isLoading,
           percentage: donation.needCollected ? '${produceItem.amount}' : '',
         ),
       ));

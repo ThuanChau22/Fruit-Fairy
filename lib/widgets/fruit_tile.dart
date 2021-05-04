@@ -7,11 +7,13 @@ import 'package:fruitfairy/constant.dart';
 class FruitTile extends StatelessWidget {
   final String fruitName;
   final String fruitImage;
+  final bool isLoading;
   final String percentage;
 
   FruitTile({
     @required this.fruitName,
     @required this.fruitImage,
+    @required this.isLoading,
     this.percentage = '',
   });
 
@@ -28,7 +30,7 @@ class FruitTile extends StatelessWidget {
           ),
         ),
         Expanded(
-          child: fruitImage == null
+          child: isLoading
               ? Center(
                   child: CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
