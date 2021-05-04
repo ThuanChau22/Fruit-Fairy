@@ -156,8 +156,11 @@ class _SignUpCharityScreenState extends State<SignUpCharityScreen> {
         MessageBar(context).hide();
         PopUpDialog(
           context,
-          message:
-              'Your charity is verified using the domain name of your charity’s email. For example, if your charity’s website is charity.org then please use an email from the same domain such as john@charity.org.\nIf your charity does not have a website, please contact us at fruitfairyhelp@gmail.com.',
+          message: 'Your charity is verified using the domain name of your'
+              ' charity’s email. For example, if your charity’s website'
+              ' is charity.org then please use an email from the same'
+              ' domain such as john@charity.org.\nIf your charity does not'
+              ' have a website, please contact us at fruitfairyhelp@gmail.com.',
         ).show();
       },
     );

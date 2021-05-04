@@ -235,73 +235,67 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
 
   Widget adjustableFruitTile(ProduceItem produceItem) {
     Size screen = MediaQuery.of(context).size;
-    return Container(
-      decoration: BoxDecoration(
-        color: kObjectColor,
-        borderRadius: BorderRadius.circular(20.0),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Expanded(
-            flex: 1,
-            child: SizedBox.shrink(),
-          ),
-          Expanded(
-            flex: 4,
-            child: Padding(
-              padding: EdgeInsets.only(
-                top: screen.height * 0.01,
-              ),
-              child: FruitTile(
-                fruitName: produceItem.name,
-                fruitImage: produceItem.imageURL,
-                isLoading: produceItem.isLoading,
-              ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Expanded(
+          flex: 1,
+          child: SizedBox.shrink(),
+        ),
+        Expanded(
+          flex: 4,
+          child: Padding(
+            padding: EdgeInsets.only(
+              top: screen.height * 0.01,
+            ),
+            child: FruitTile(
+              fruitName: produceItem.name,
+              fruitImage: produceItem.imageURL,
+              isLoading: produceItem.isLoading,
             ),
           ),
-          Expanded(
-            flex: 7,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(left: 20.0),
-                  child: Text(
-                    '${produceItem.amount}%',
-                    style: TextStyle(
-                      color: kPrimaryColor,
-                      fontSize: 30.0,
-                      fontWeight: FontWeight.bold,
-                    ),
+        ),
+        Expanded(
+          flex: 7,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                padding: EdgeInsets.only(left: 20.0),
+                child: Text(
+                  '${produceItem.amount}%',
+                  style: TextStyle(
+                    color: kPrimaryColor,
+                    fontSize: 30.0,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    adjustButton(
-                      icon: Icons.remove,
-                      onPressed: () {
-                        setState(() {
-                          produceItem.decrease();
-                        });
-                      },
-                    ),
-                    adjustButton(
-                      icon: Icons.add,
-                      onPressed: () {
-                        setState(() {
-                          produceItem.increase();
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  adjustButton(
+                    icon: Icons.remove,
+                    onPressed: () {
+                      setState(() {
+                        produceItem.decrease();
+                      });
+                    },
+                  ),
+                  adjustButton(
+                    icon: Icons.add,
+                    onPressed: () {
+                      setState(() {
+                        produceItem.increase();
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

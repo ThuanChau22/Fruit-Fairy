@@ -106,7 +106,10 @@ class _DonationCharitySelectionScreenState
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'No charities in our system match your donation. The produce you wish to donate does not match any charities within a 20 mile radius.\n\nPlease try again at a later time!',
+                'No charities in our system match your donation.'
+                ' The produce you wish to donate does not match'
+                ' any charities within a 20 mile radius.'
+                '\n\nPlease try again at a later time!',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: kLabelColor,
@@ -176,8 +179,10 @@ class _DonationCharitySelectionScreenState
       onPressed: () {
         PopUpDialog(
           context,
-          message:
-              'Please select the top three charities to donate to. If your first prioritized charity does not accept your donation, it will be offered to the second prioritized charity and so on.',
+          message: 'Please select the top three charities to'
+              ' donate to. If your first prioritized charity'
+              ' does not accept your donation, it will be offered'
+              ' to the second prioritized charity and so on.',
         ).show();
       },
     );
