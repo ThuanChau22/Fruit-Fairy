@@ -1,19 +1,27 @@
 import 'dart:async';
-import 'package:collection/collection.dart';
+import 'dart:collection';
 import 'package:flutter/foundation.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// A class that represents a charity's wishlist
-/// [_produce]: list of produce ids selected by the charity
-/// [_subscriptions]: list of stream subcriptions that
+/// [_produce]: List of produce ids selected by the charity
+/// [_subscriptions]: List of stream subcriptions that
 /// performs an opperation for each subcription on changes
+/// [isAllSelected]: Indicate whether all produce is on wishlist
+/// [isLoading]: A flag indicate loading state
+/// [cursor]: A cursor used to traverse internal list
+/// [LoadLimit]: Limit amount per Produce retrieval
 class WishList extends ChangeNotifier {
-  final PriorityQueue<String> _produceIds = PriorityQueue();
-  final List<StreamSubscription<DocumentSnapshot>> _subscriptions = [];
+  static const LoadLimit = 20;
+  final List<String> _produceIds = [];
+  final List<StreamSubscription> _subscriptions = [];
+  bool isAllSelected = false;
+  bool isLoading = true;
+  int endCursor = LoadLimit;
 
   /// Return a copy of [_produceIds] sorted in alphabetical order
   UnmodifiableListView<String> get produceIds {
-    return UnmodifiableListView(_produceIds.toList());
+    _produceIds.sort();
+    return UnmodifiableListView(_produceIds);
   }
 
   /// Add [produceId] to list
@@ -28,28 +36,23 @@ class WishList extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Remove all [produceId] from list
+  void removeAllProduce() {
+    _produceIds.clear();
+    notifyListeners();
+  }
+
   /// Add [subscription] to [_subscriptions] list
-  void addStream(StreamSubscription<DocumentSnapshot> subscription) {
+  void addStream(StreamSubscription subscription) {
     _subscriptions.add(subscription);
   }
 
   /// Cancel all subscriptions from [_subscriptions]
   void clearStream() {
-    for (StreamSubscription<DocumentSnapshot> subscription in _subscriptions) {
+    for (StreamSubscription subscription in _subscriptions) {
       subscription.cancel();
     }
     _subscriptions.clear();
-  }
-
-  /// Parse [produceId] from database
-  void fromDB(List<dynamic> wishlist) {
-    _produceIds.clear();
-    if (wishlist != null) {
-      for (dynamic produceId in wishlist) {
-        _produceIds.add(produceId);
-      }
-    }
-    notifyListeners();
   }
 
   /// Set object to initial state
@@ -57,6 +60,9 @@ class WishList extends ChangeNotifier {
   void clear() {
     clearStream();
     _produceIds.clear();
+    isAllSelected = false;
+    isLoading = true;
+    endCursor = LoadLimit;
     notifyListeners();
   }
 }
