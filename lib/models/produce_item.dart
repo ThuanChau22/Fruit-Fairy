@@ -15,7 +15,7 @@ class ProduceItem implements Comparable<ProduceItem> {
   final String id;
   String name = '';
   String imagePath = '';
-  String imageURL = '';
+  String imageURL;
   bool enabled = true;
   int _amount = Min;
 

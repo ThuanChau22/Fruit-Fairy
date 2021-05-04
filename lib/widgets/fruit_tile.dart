@@ -28,38 +28,46 @@ class FruitTile extends StatelessWidget {
           ),
         ),
         Expanded(
-          child: fruitImage.isNotEmpty
-              ? CachedNetworkImage(
-                  imageUrl: fruitImage,
-                  imageBuilder: (context, imageProvider) {
-                    return Container(
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: imageProvider,
-                          fit: BoxFit.contain,
+          child: fruitImage == null
+              ? Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
+                    strokeWidth: 1.5,
+                  ),
+                )
+              : fruitImage.isNotEmpty
+                  ? CachedNetworkImage(
+                      imageUrl: fruitImage,
+                      imageBuilder: (context, imageProvider) {
+                        return Container(
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                              image: imageProvider,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        );
+                      },
+                      placeholder: (context, url) {
+                        return Center(
+                          child: CircularProgressIndicator(
+                            valueColor:
+                                AlwaysStoppedAnimation(kDarkPrimaryColor),
+                            strokeWidth: 1.5,
+                          ),
+                        );
+                      },
+                    )
+                  : Center(
+                      child: Text(
+                        'Image Not Found',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: kPrimaryColor,
+                          fontSize: 16.0,
                         ),
                       ),
-                    );
-                  },
-                  placeholder: (context, url) {
-                    return Center(
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
-                        strokeWidth: 1.5,
-                      ),
-                    );
-                  },
-                )
-              : Center(
-                  child: Text(
-                    'Image Not Found',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: kPrimaryColor,
-                      fontSize: 16.0,
                     ),
-                  ),
-                ),
         ),
         Visibility(
           visible: percentage.isNotEmpty,
