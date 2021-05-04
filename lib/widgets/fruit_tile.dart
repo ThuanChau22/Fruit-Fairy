@@ -19,14 +19,21 @@ class FruitTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Size screen = MediaQuery.of(context).size;
     return Column(
       children: [
-        Text(
-          camelize(fruitName),
-          style: TextStyle(
-            color: kPrimaryColor,
-            fontWeight: FontWeight.bold,
-            fontSize: 20.0,
+        Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: screen.width * 0.005,
+          ),
+          child: Text(
+            camelize(fruitName),
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: kPrimaryColor,
+              fontWeight: FontWeight.bold,
+              fontSize: 18.0,
+            ),
           ),
         ),
         Expanded(
