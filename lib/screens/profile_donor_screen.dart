@@ -442,7 +442,7 @@ class _ProfileDonorScreenState extends State<ProfileDonorScreen> {
     fillAddress();
     fillPhone();
     FireStoreService fireStore = context.read<FireStoreService>();
-    fireStore.userStream(context.read<Account>(), onComplete: () {
+    fireStore.accountStream(context.read<Account>(), onComplete: () {
       if (mounted) {
         _updateInputFields();
       }

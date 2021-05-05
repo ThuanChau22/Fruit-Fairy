@@ -46,7 +46,7 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
           }
         });
         int currentSize = wishList.produceIds.length;
-        fireStore.wishListProduce(wishList, produce, onData: () {
+        fireStore.loadWishListProduce(wishList, produce, onData: () {
           if (mounted) {
             if (currentSize < wishList.produceIds.length) {
               _loadingTimer.cancel();

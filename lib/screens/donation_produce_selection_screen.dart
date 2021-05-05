@@ -50,7 +50,7 @@ class _DonationProduceSelectionScreenState
           }
         });
         int currentSize = produce.set.length;
-        fireStore.produceStream(produce, onData: () {
+        fireStore.loadProduce(produce, onData: () {
           if (mounted) {
             checkBasketAvailability();
             if (currentSize < produce.set.length) {

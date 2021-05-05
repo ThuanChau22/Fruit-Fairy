@@ -279,7 +279,7 @@ class _ContactConfirmation extends State<DonationContactScreen> {
     fillAddress();
     fillPhone();
     FireStoreService fireStore = context.read<FireStoreService>();
-    fireStore.userStream(context.read<Account>(), onComplete: () {
+    fireStore.accountStream(context.read<Account>(), onComplete: () {
       if (mounted) {
         _updateInputFields();
       }

@@ -35,7 +35,7 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
 
     /// Init Produce
     Produce produce = context.read<Produce>();
-    await fireStore.produceStream(produce, onData: () {
+    await fireStore.loadProduce(produce, onData: () {
       if (mounted) {
         bool removed = false;
         Donation donation = context.read<Donation>();
@@ -69,7 +69,7 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
 
     /// Init Donations
     Donations donations = context.read<Donations>();
-    fireStore.donationStreamDonor(donations, onData: () {
+    fireStore.loadDonorDonations(donations, onData: () {
       if (mounted) {
         setState(() => _isLoadingInit = false);
       }
@@ -86,7 +86,7 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
           }
         });
         int currentSize = donations.map.length;
-        fireStore.donationStreamDonor(donations, onData: () {
+        fireStore.loadDonorDonations(donations, onData: () {
           if (mounted && currentSize < donations.map.length) {
             setState(() => _isLoadingMore = true);
             _loadingTimer.cancel();

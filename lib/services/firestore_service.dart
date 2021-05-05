@@ -85,7 +85,7 @@ class FireStoreService {
     return _uid;
   }
 
-  void userStream(
+  void accountStream(
     Account account, {
     Function onComplete,
   }) {
@@ -140,7 +140,7 @@ class FireStoreService {
     }
   }
 
-  Future<void> wishListProduce(
+  Future<void> loadWishListProduce(
     WishList wishList,
     Produce produce, {
     Function onData,
@@ -170,7 +170,7 @@ class FireStoreService {
               .where(FieldPath.documentId, whereIn: produceIds)
               .snapshots();
           produce.addStream(snapshots.listen((snapshot) {
-            _wishListProduce(snapshot, produce, onData);
+            _loadWishListProduce(snapshot, produce, onData);
           }, onError: (e) {
             print(e);
           }));
@@ -183,7 +183,7 @@ class FireStoreService {
     }
   }
 
-  Future<void> _wishListProduce(
+  Future<void> _loadWishListProduce(
     QuerySnapshot snapshot,
     Produce produce,
     Function onData,
@@ -220,7 +220,7 @@ class FireStoreService {
     }
   }
 
-  Future<void> produceStream(
+  Future<void> loadProduce(
     Produce produce, {
     Function onData,
   }) async {
@@ -234,7 +234,7 @@ class FireStoreService {
             .orderBy(kCreatedAt, descending: true)
             .limit(Produce.LoadLimit)
             .get();
-        await _produceStream(snapshot, produce, onData);
+        await _loadProduce(snapshot, produce, onData);
 
         Stream<QuerySnapshot> snapshots;
         List<QueryDocumentSnapshot> docs = snapshot.docs;
@@ -254,7 +254,7 @@ class FireStoreService {
               .snapshots();
         }
         produce.addStream(snapshots.listen((snapshot) {
-          _produceStream(snapshot, produce, onData);
+          _loadProduce(snapshot, produce, onData);
         }, onError: (e) {
           print(e);
         }));
@@ -280,7 +280,7 @@ class FireStoreService {
               .endAtDocument(produce.endDocument)
               .snapshots();
           produce.addStream(snapshots.listen((snapshot) {
-            _produceStream(snapshot, produce, onData);
+            _loadProduce(snapshot, produce, onData);
           }, onError: (e) {
             print(e);
           }));
@@ -293,7 +293,7 @@ class FireStoreService {
     }
   }
 
-  Future<void> _produceStream(
+  Future<void> _loadProduce(
     QuerySnapshot snapshot,
     Produce produce,
     Function onData,
@@ -418,7 +418,7 @@ class FireStoreService {
     }
   }
 
-  Future<void> donationStreamDonor(
+  Future<void> loadDonorDonations(
     Donations donations, {
     Function onData,
   }) async {
@@ -433,7 +433,6 @@ class FireStoreService {
             .orderBy(kCreatedAt, descending: true)
             .limit(Donations.LoadLimit)
             .get();
-        _donationStreamDonor(snapshot, donations, onData);
 
         Stream<QuerySnapshot> snapshots;
         List<QueryDocumentSnapshot> docs = snapshot.docs;
@@ -453,7 +452,7 @@ class FireStoreService {
               .snapshots();
         }
         donations.addStream(snapshots.listen((snapshot) {
-          _donationStreamDonor(snapshot, donations, onData);
+          _loadDonorDonations(snapshot, donations, onData);
         }, onError: (e) {
           print(e);
         }));
@@ -479,7 +478,7 @@ class FireStoreService {
               .endAtDocument(donations.endDocument)
               .snapshots();
           donations.addStream(snapshots.listen((snapshot) {
-            _donationStreamDonor(snapshot, donations, onData);
+            _loadDonorDonations(snapshot, donations, onData);
           }, onError: (e) {
             print(e);
           }));
@@ -492,7 +491,7 @@ class FireStoreService {
     }
   }
 
-  void _donationStreamDonor(
+  void _loadDonorDonations(
     QuerySnapshot snapshot,
     Donations donations,
     Function onData,
@@ -521,7 +520,7 @@ class FireStoreService {
                 .snapshots();
           }
           donations.addStream(snapshots.listen((snapshot) {
-            _donationStreamDonor(snapshot, donations, onData);
+            _loadDonorDonations(snapshot, donations, onData);
           }, onError: (e) {
             print(e);
           }));
@@ -534,6 +533,23 @@ class FireStoreService {
           );
           Timestamp timeStamp = data[kCreatedAt] ?? Timestamp.now();
           donation.createdAt = timeStamp.toDate();
+          donation.needCollected = data[kNeedCollected];
+          for (Map<String, dynamic> produce in data[kProduce]) {
+            ProduceItem produceItem = ProduceItem(produce[kProduceId]);
+            if (donation.needCollected) {
+              produceItem.amount = produce[kAmount];
+            }
+            donation.pickProduce(produceItem);
+          }
+          donation.setContactInfo(
+            street: data[kAddress][kAddressStreet],
+            city: data[kAddress][kAddressCity],
+            state: data[kAddress][kAddressState],
+            zip: data[kAddress][kAddressZip],
+            country: data[kPhone][kPhoneCountry],
+            dialCode: data[kPhone][kPhoneDialCode],
+            phoneNumber: data[kPhone][kPhoneNumber],
+          );
           Charity charity = Charity(data[kCharity][kUserId]);
           charity.name = data[kCharity][kUserName];
           donation.pickCharity(charity);
@@ -546,7 +562,7 @@ class FireStoreService {
     }
   }
 
-  Future<void> donationStreamCharity(
+  Future<void> loadCharityDonations(
     Donations donations, {
     Function onData,
   }) async {
@@ -560,7 +576,6 @@ class FireStoreService {
             .orderBy(kCreatedAt, descending: true)
             .limit(Donations.LoadLimit)
             .get();
-        _donationStreamCharity(snapshot, donations, onData);
 
         Stream<QuerySnapshot> snapshots;
         List<QueryDocumentSnapshot> docs = snapshot.docs;
@@ -580,7 +595,7 @@ class FireStoreService {
               .snapshots();
         }
         donations.addStream(snapshots.listen((snapshot) {
-          _donationStreamCharity(snapshot, donations, onData);
+          _loadCharityDonations(snapshot, donations, onData);
         }, onError: (e) {
           print(e);
         }));
@@ -606,7 +621,7 @@ class FireStoreService {
               .endAtDocument(donations.endDocument)
               .snapshots();
           donations.addStream(snapshots.listen((snapshot) {
-            _donationStreamCharity(snapshot, donations, onData);
+            _loadCharityDonations(snapshot, donations, onData);
           }, onError: (e) {
             print(e);
           }));
@@ -619,7 +634,7 @@ class FireStoreService {
     }
   }
 
-  void _donationStreamCharity(
+  void _loadCharityDonations(
     QuerySnapshot snapshot,
     Donations donations,
     Function onData,
@@ -648,7 +663,7 @@ class FireStoreService {
                 .snapshots();
           }
           donations.addStream(snapshots.listen((snapshot) {
-            _donationStreamCharity(snapshot, donations, onData);
+            _loadCharityDonations(snapshot, donations, onData);
           }, onError: (e) {
             print(e);
           }));
@@ -663,6 +678,24 @@ class FireStoreService {
           Timestamp timeStamp = data[kCreatedAt] ?? Timestamp.now();
           donation.createdAt = timeStamp.toDate();
           donation.needCollected = data[kNeedCollected];
+          for (Map<String, dynamic> produce in data[kProduce]) {
+            ProduceItem produceItem = ProduceItem(produce[kProduceId]);
+            if (donation.needCollected) {
+              produceItem.amount = produce[kAmount];
+            }
+            donation.pickProduce(produceItem);
+          }
+          donation.setContactInfo(
+            street: data[kAddress][kAddressStreet],
+            city: data[kAddress][kAddressCity],
+            state: data[kAddress][kAddressState],
+            zip: data[kAddress][kAddressZip],
+            country: data[kPhone][kPhoneCountry],
+            dialCode: data[kPhone][kPhoneDialCode],
+            phoneNumber: data[kPhone][kPhoneNumber],
+          );
+          donation.donorId = data[kDonor][kUserId];
+          donation.donorName = data[kDonor][kUserName];
           donations.pickDonation(donation);
         }
       }
@@ -699,7 +732,7 @@ class FireStoreService {
     List<Charity> charities = [];
     try {
       List<String> selectedProduce = donation.produce.keys.toList();
-      List<List<String>> lists = Utils.decompose<String>(selectedProduce, 10);
+      List<List<String>> lists = Utils.decompose(selectedProduce, 10);
       Map<String, Charity> charityMap = {};
       await Future.wait(lists.map((selectedProduceList) async {
         QuerySnapshot snapshot = await _usersDB
@@ -950,19 +983,20 @@ class FireStoreService {
     }
   }
 
-  Future<void> addDonation(Donation donation) async {
+  Future<void> addDonation(
+    Account account,
+    Donation donation,
+  ) async {
     if (_uid == null) {
       print('UID Unset');
       return;
     }
     try {
-      Map<String, String> address = donation.address;
-      Map<String, String> phone = donation.phone;
       List<Charity> charities = donation.charities;
       await _donationsDB.add({
         kDonor: {
-          kUserId: donation.donorId,
-          kUserName: donation.donorName,
+          kUserId: _uid,
+          kUserName: '${account.firstName} ${account.lastName}',
         },
         kCharity: {
           kUserId: charities.first.id,
@@ -978,18 +1012,9 @@ class FireStoreService {
           }
           return produce;
         }).toList(),
-        kAddress: {
-          kAddressStreet: address[kAddressStreet],
-          kAddressCity: address[kAddressCity],
-          kAddressState: address[kAddressState],
-          kAddressZip: address[kAddressZip],
-        },
-        kPhone: {
-          kPhoneCountry: phone[kPhoneCountry],
-          kPhoneDialCode: phone[kPhoneDialCode],
-          kPhoneNumber: phone[kPhoneNumber],
-        },
-        kSelectedCharities: charities.map((charity) {
+        kAddress: donation.address,
+        kPhone: donation.phone,
+        kSelectedCharities: donation.charities.map((charity) {
           return charity.id;
         }).toList(),
         kRequestedCharities: [],

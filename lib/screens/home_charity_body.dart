@@ -36,7 +36,7 @@ class _HomeCharityBodyState extends State<HomeCharityBody> {
 
     /// Init Produce
     Produce produce = context.read<Produce>();
-    await fireStore.produceStream(produce, onData: () {
+    await fireStore.loadProduce(produce, onData: () {
       if (mounted) {
         bool removed = false;
         WishList wishlist = context.read<WishList>();
@@ -60,7 +60,7 @@ class _HomeCharityBodyState extends State<HomeCharityBody> {
     /// Init WishList
     WishList wishList = context.read<WishList>();
     fireStore.wishListStream(wishList, onData: () {
-      fireStore.wishListProduce(wishList, produce, onLoadMore: false);
+      fireStore.loadWishListProduce(wishList, produce, onLoadMore: false);
       wishList.isLoading = false;
     });
   }
@@ -70,7 +70,7 @@ class _HomeCharityBodyState extends State<HomeCharityBody> {
 
     /// Init Donations
     Donations donations = context.read<Donations>();
-    fireStore.donationStreamCharity(donations, onData: () {
+    fireStore.loadCharityDonations(donations, onData: () {
       if (mounted) {
         setState(() => _isLoadingInit = false);
       }
@@ -87,7 +87,7 @@ class _HomeCharityBodyState extends State<HomeCharityBody> {
           }
         });
         int currentSize = donations.map.length;
-        fireStore.donationStreamCharity(donations, onData: () {
+        fireStore.loadCharityDonations(donations, onData: () {
           if (mounted && currentSize < donations.map.length) {
             setState(() => _isLoadingMore = true);
             _loadingTimer.cancel();

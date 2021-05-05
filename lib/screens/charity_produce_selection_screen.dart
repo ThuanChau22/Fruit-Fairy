@@ -51,7 +51,7 @@ class _CharityProduceSelectionScreenState
           }
         });
         int currentSize = produce.set.length;
-        fireStore.produceStream(produce, onData: () {
+        fireStore.loadProduce(produce, onData: () {
           if (mounted) {
             if (currentSize < produce.set.length) {
               _loadingTimer.cancel();
