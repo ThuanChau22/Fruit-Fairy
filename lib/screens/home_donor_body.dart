@@ -7,8 +7,8 @@ import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
 import 'package:fruitfairy/models/donation.dart';
 import 'package:fruitfairy/models/donations.dart';
+import 'package:fruitfairy/models/produce_item.dart';
 import 'package:fruitfairy/models/produce.dart';
-import 'package:fruitfairy/models/status.dart';
 import 'package:fruitfairy/screens/donation_produce_selection_screen.dart';
 import 'package:fruitfairy/screens/donor_donation_detail_screen.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
@@ -26,18 +26,56 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
   final ScrollController _scroll = new ScrollController();
   final double _scrollOffset = 60.0;
 
-  Timer _loadingTimer = Timer(Duration(seconds: 0), () {});
+  Timer _loadingTimer = Timer(Duration.zero, () {});
   bool _isLoadingInit = true;
   bool _isLoadingMore = true;
 
+  void initProduce() async {
+    FireStoreService fireStore = context.read<FireStoreService>();
+
+    /// Init Produce
+    Produce produce = context.read<Produce>();
+    await fireStore.produceStream(produce, onData: () {
+      if (mounted) {
+        bool removed = false;
+        Donation donation = context.read<Donation>();
+        Map<String, ProduceItem> produceStorage = produce.map;
+        for (String produceId in donation.produce.keys.toList()) {
+          bool hasProduce = produceStorage.containsKey(produceId);
+          if (hasProduce && !produceStorage[produceId].enabled) {
+            donation.removeProduce(produceId);
+            removed = true;
+          }
+        }
+        String notifyMessage = 'One or more produce'
+            ' on your basket are no longer available!';
+        if (removed) {
+          MessageBar(context, message: notifyMessage).show();
+        }
+      }
+    });
+
+    /// Init Donation
+    Donation donation = context.read<Donation>();
+    donation.onEmptyBasket(() {
+      Navigator.of(context).popUntil((route) {
+        return route.settings.name == DonationProduceSelectionScreen.id;
+      });
+    });
+  }
+
   void initDonations() {
     FireStoreService fireStore = context.read<FireStoreService>();
+
+    /// Init Donations
     Donations donations = context.read<Donations>();
-    fireStore.donationStreamDonor(donations, onComplete: () {
+    fireStore.donationStreamDonor(donations, onData: () {
       if (mounted) {
         setState(() => _isLoadingInit = false);
       }
     });
+
+    /// Load Donations on Scroll
     _scroll.addListener(() {
       ScrollPosition pos = _scroll.position;
       bool loadTriggered = pos.pixels + _scrollOffset >= pos.maxScrollExtent;
@@ -48,8 +86,8 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
           }
         });
         int currentSize = donations.map.length;
-        fireStore.donationStreamDonor(donations, onComplete: () {
-          if (mounted && currentSize != donations.map.length) {
+        fireStore.donationStreamDonor(donations, onData: () {
+          if (mounted && currentSize < donations.map.length) {
             setState(() => _isLoadingMore = true);
             _loadingTimer.cancel();
           }
@@ -58,49 +96,18 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
     });
   }
 
-  void initDonation() {
-    Donation donation = context.read<Donation>();
-    donation.onEmptyBasket(() {
-      Navigator.of(context).popUntil((route) {
-        return route.settings.name == DonationProduceSelectionScreen.id;
-      });
-    });
-  }
-
-  void initProduce() {
-    FireStoreService fireStore = context.read<FireStoreService>();
-    Donation donation = context.read<Donation>();
-    Produce produce = context.read<Produce>();
-    fireStore.produceStream(produce, onComplete: () {
-      bool removed = false;
-      for (String produceId in donation.produce.keys.toList()) {
-        if (!produce.set.contains(produceId)) {
-          donation.removeProduce(produceId);
-          removed = true;
-        }
-      }
-      if (removed) {
-        MessageBar(
-          context,
-          message:
-              'One or more produce on your basket are no longer available!',
-        ).show();
-      }
-    });
-  }
-
   @override
   void initState() {
     super.initState();
-    initDonations();
-    initDonation();
     initProduce();
+    initDonations();
   }
 
   @override
   void dispose() {
     super.dispose();
     _scroll.dispose();
+    _loadingTimer.cancel();
   }
 
   @override
@@ -198,26 +205,11 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
   }
 
   Widget donationLayout() {
-    Donations donations = context.watch<Donations>();
     if (_isLoadingInit) {
       return Expanded(
         child: Center(
           child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
-          ),
-        ),
-      );
-    }
-    if (donations.map.isEmpty) {
-      // TODO: Message on empty donation
-      return Expanded(
-        child: Center(
-          child: Text(
-            '(Empty)',
-            style: TextStyle(
-              color: kLabelColor.withOpacity(0.5),
-              fontSize: 20.0,
-            ),
+            valueColor: AlwaysStoppedAnimation(kAccentColor),
           ),
         ),
       );
@@ -231,54 +223,31 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
     );
   }
 
+  //TODO: Message on empty history
   List<Widget> donationTiles() {
     List<Widget> donationTiles = [];
-    Donations donations = context.read<Donations>();
+    Donations donations = context.watch<Donations>();
     List<Donation> donationList = donations.map.values.toList();
     donationList.sort();
-    bool hasActive = false;
-    bool hasHistory = false;
-    for (Donation donation in donationList) {
-      Status status = donation.status;
-      if ((status.isPennding || status.isInProgress) && !hasActive) {
-        donationTiles.add(groupLabel('Active'));
-        hasActive = true;
-      }
-      if ((status.isDenied || status.isCompleted) && !hasHistory) {
-        donationTiles.add(groupLabel('History'));
-        hasHistory = true;
-      }
-      donationTiles.add(Padding(
-        padding: EdgeInsets.only(
-          top: 20.0,
-        ),
-        child: DonationTile(
-          status: donation.status,
-          dateTime: donation.createdAt,
-          charityName: donation.charities.first.name,
-          onTap: () {
-            Navigator.of(context).pushNamed(DonorDonationDetailScreen.id);
-            print(donation.id);
-          },
-        ),
-      ));
+    donationTiles.add(groupLabel('Active'));
+    int i = 0;
+    while (i < donationList.length &&
+        (donationList[i].status.isPennding ||
+            donationList[i].status.isInProgress)) {
+      donationTiles.add(donationTile(donationList[i++]));
+    }
+    if (i == 0) {
+      donationTiles.add(emptyLabel('You have no active donation'));
+    }
+    donationTiles.add(groupLabel('History'));
+    if (i == donationList.length) {
+      donationTiles.add(emptyLabel('Empty History'));
+    }
+    while (i < donationList.length) {
+      donationTiles.add(donationTile(donationList[i++]));
     }
     donationTiles.add(loadingTile());
     return donationTiles;
-  }
-
-  Widget loadingTile() {
-    Donations donations = context.read<Donations>();
-    bool underLimit = donations.map.length < Donations.LOAD_LIMIT;
-    return Visibility(
-      visible: !underLimit && _isLoadingMore,
-      child: Padding(
-        padding: EdgeInsets.only(top: 20.0),
-        child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
-        ),
-      ),
-    );
   }
 
   Widget groupLabel(String label) {
@@ -286,6 +255,7 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
     return Padding(
       padding: EdgeInsets.only(
         top: screen.height * 0.03,
+        bottom: 10.0,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -304,6 +274,60 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
             thickness: 2.0,
           ),
         ],
+      ),
+    );
+  }
+
+  Widget emptyLabel(String label) {
+    Size screen = MediaQuery.of(context).size;
+    return Container(
+      height: screen.height * 0.1,
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          vertical: screen.height * 0.025,
+          horizontal: screen.width * 0.1,
+        ),
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: kLabelColor.withOpacity(0.5),
+            fontSize: 20.0,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget donationTile(Donation donation) {
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        vertical: 10.0,
+      ),
+      child: DonationTile(
+        status: donation.status,
+        dateTime: donation.createdAt,
+        userName: donation.charities.first.name,
+        onTap: () {
+          Navigator.of(context).pushNamed(
+            DonorDonationDetailScreen.id,
+            arguments: donation.id,
+          );
+        },
+      ),
+    );
+  }
+
+  Widget loadingTile() {
+    Donations donations = context.read<Donations>();
+    bool underLimit = donations.map.length < Donations.LoadLimit;
+    return Visibility(
+      visible: !underLimit && _isLoadingMore,
+      child: Padding(
+        padding: EdgeInsets.only(top: 20.0),
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation(kAccentColor),
+        ),
       ),
     );
   }

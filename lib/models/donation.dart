@@ -11,8 +11,6 @@ import 'package:fruitfairy/services/firestore_service.dart';
 /// [_needCollected]: specify whether
 /// the donor need help collecting
 /// [_produce]: selected produce
-/// [_donorId]: donor unique id
-/// [_donorName]: donor name
 /// [_address]: donor's address
 /// [_phone]: donor's phone number
 /// [_charities]: selected charities
@@ -20,6 +18,8 @@ import 'package:fruitfairy/services/firestore_service.dart';
 /// [_onEmptyBasket]: a callback that handles when [_produce] is empty
 /// [status]: donation status
 /// [createdAt]: donation created timestamp
+/// [donorId]: donor unique id
+/// [donorName]: donor name
 /// [MaxCharity]: maximum number of charity can be selected
 class Donation extends ChangeNotifier implements Comparable<Donation> {
   static const int MaxCharity = 3;
@@ -29,12 +29,12 @@ class Donation extends ChangeNotifier implements Comparable<Donation> {
   final Map<String, String> _phone = {};
   final List<Charity> _charities = [];
   bool _needCollected = true;
-  String _donorId = '';
-  String _donorName = '';
   bool _updated = false;
   VoidCallback _onEmptyBasket = () {};
   Status status = Status.init();
   DateTime createdAt = DateTime.now();
+  String donorId = '';
+  String donorName = '';
 
   Donation(this.id);
 
@@ -61,16 +61,6 @@ class Donation extends ChangeNotifier implements Comparable<Donation> {
   /// Return a copy of [_needCollected]
   bool get needCollected {
     return _needCollected;
-  }
-
-  /// Return a copy of [_donorId]
-  String get donorId {
-    return _donorId;
-  }
-
-  /// Return a copy of [_donorName]
-  String get donorName {
-    return _donorName;
   }
 
   /// Return [_updated] status
@@ -102,8 +92,6 @@ class Donation extends ChangeNotifier implements Comparable<Donation> {
 
   /// Set donor contact info
   void setContactInfo({
-    @required String donorId,
-    @required String donorName,
     @required String street,
     @required String city,
     @required String state,
@@ -112,29 +100,35 @@ class Donation extends ChangeNotifier implements Comparable<Donation> {
     @required String dialCode,
     @required String phoneNumber,
   }) {
-    String oldStreet = _address[FireStoreService.kAddressStreet];
-    String oldCity = _address[FireStoreService.kAddressCity];
-    String oldState = _address[FireStoreService.kAddressState];
-    String oldZip = _address[FireStoreService.kAddressZip];
-    String oldCountry = _phone[FireStoreService.kPhoneCountry];
-    String oldDialCode = _phone[FireStoreService.kPhoneDialCode];
-    String oldPhoneNumber = _phone[FireStoreService.kPhoneNumber];
-    if (oldStreet != street ||
-        oldCity != city ||
-        oldState != state ||
-        oldZip != zip ||
-        oldCountry != country ||
-        oldDialCode != dialCode ||
-        oldPhoneNumber != phoneNumber) {
-      _donorId = donorId;
-      _donorName = donorName;
-      _address[FireStoreService.kAddressStreet] = street;
-      _address[FireStoreService.kAddressCity] = city;
-      _address[FireStoreService.kAddressState] = state;
-      _address[FireStoreService.kAddressZip] = zip;
-      _phone[FireStoreService.kPhoneCountry] = country;
-      _phone[FireStoreService.kPhoneDialCode] = dialCode;
-      _phone[FireStoreService.kPhoneNumber] = phoneNumber;
+    bool changed = false;
+    Map<String, String> newAddress = {
+      FireStoreService.kAddressStreet: street,
+      FireStoreService.kAddressCity: city,
+      FireStoreService.kAddressState: state,
+      FireStoreService.kAddressZip: zip,
+    };
+    for (String key in newAddress.keys) {
+      if (_address[key] != newAddress[key]) {
+        changed = true;
+      }
+    }
+    Map<String, String> newPhone = {
+      FireStoreService.kPhoneCountry: country,
+      FireStoreService.kPhoneDialCode: dialCode,
+      FireStoreService.kPhoneNumber: phoneNumber,
+    };
+    for (String key in newPhone.keys) {
+      if (_phone[key] != newPhone[key]) {
+        changed = true;
+      }
+    }
+    if (changed) {
+      newAddress.forEach((key, value) {
+        _address[key] = value;
+      });
+      newPhone.forEach((key, value) {
+        _phone[key] = value;
+      });
       _updated = true;
     }
     notifyListeners();
@@ -175,11 +169,11 @@ class Donation extends ChangeNotifier implements Comparable<Donation> {
     _address.clear();
     _phone.clear();
     _needCollected = true;
-    _donorId = '';
-    _donorName = '';
     _updated = false;
     status = Status.init();
     createdAt = DateTime.now();
+    donorId = '';
+    donorName = '';
   }
 
   /// Set object to initial state
