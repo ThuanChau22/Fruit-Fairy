@@ -495,9 +495,9 @@ class FireStoreService {
     QuerySnapshot snapshot,
     Donations donations,
     Function onData,
-  ) {
+  ) async {
     try {
-      for (DocumentChange docChange in snapshot.docChanges) {
+      await Future.wait(snapshot.docChanges.map((docChange) async {
         String donationId = docChange.doc.id;
         if (docChange.type == DocumentChangeType.removed) {
           int currentSize = donations.map.length;
@@ -555,7 +555,7 @@ class FireStoreService {
           donation.pickCharity(charity);
           donations.pickDonation(donation);
         }
-      }
+      }));
       onData();
     } catch (e) {
       print(e);
@@ -638,9 +638,9 @@ class FireStoreService {
     QuerySnapshot snapshot,
     Donations donations,
     Function onData,
-  ) {
+  ) async {
     try {
-      for (DocumentChange docChange in snapshot.docChanges) {
+      await Future.wait(snapshot.docChanges.map((docChange) async {
         String donationId = docChange.doc.id;
         if (docChange.type == DocumentChangeType.removed) {
           int currentSize = donations.map.length;
@@ -698,7 +698,7 @@ class FireStoreService {
           donation.donorName = data[kDonor][kUserName];
           donations.pickDonation(donation);
         }
-      }
+      }));
       onData();
     } catch (e) {
       print(e);
