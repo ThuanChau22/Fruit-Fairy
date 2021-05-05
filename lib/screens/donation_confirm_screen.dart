@@ -70,7 +70,6 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
   }
 
   Widget reviewDetails() {
-    Size screen = MediaQuery.of(context).size;
     List<Widget> widgets = [
       groupLabel('Produce Selected'),
       selectedFruits(),
@@ -81,6 +80,7 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
       appreciation(),
       bottomPadding(),
     ];
+    Size screen = MediaQuery.of(context).size;
     return ListView.builder(
       itemCount: widgets.length,
       itemBuilder: (context, index) {

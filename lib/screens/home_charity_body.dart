@@ -189,7 +189,7 @@ class _HomeCharityBodyState extends State<HomeCharityBody> {
             child: Column(
               children: [
                 Text(
-                  'Review Donation',
+                  'Donation Review',
                   style: TextStyle(
                     fontSize: 30.0,
                     fontWeight: FontWeight.bold,
