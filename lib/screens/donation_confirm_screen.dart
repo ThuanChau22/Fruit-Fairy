@@ -24,7 +24,6 @@ class DonationConfirmScreen extends StatefulWidget {
 
 class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
   bool _showSpinner = false;
-  Map<String, ProduceItem> produceStorage;
 
   void confirm() async {
     setState(() => _showSpinner = true);
@@ -152,7 +151,7 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
   List<Widget> fruitTiles() {
     List<Widget> fruitList = [];
     Produce produce = context.watch<Produce>();
-    produceStorage = produce.map;
+    Map<String, ProduceItem> produceStorage = produce.map;
     Donation donation = context.watch<Donation>();
     donation.produce.forEach((produceId, produceItem) {
       fruitList.add(Container(

@@ -138,7 +138,7 @@ class _CharityProduceSelectionScreenState
   @override
   Widget build(BuildContext context) {
     Produce produce = context.watch<Produce>();
-    _isLoadingInit = produce.map.isEmpty;
+    _isLoadingInit = produce.isLoading;
     return GestureWrapper(
       child: Scaffold(
         appBar: AppBar(

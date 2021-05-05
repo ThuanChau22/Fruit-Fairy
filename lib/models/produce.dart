@@ -13,6 +13,7 @@ import 'package:fruitfairy/models/produce_item.dart';
 /// performs an opperation for each subcription on changes
 /// [startDocument]: A cursor used to traverse DB
 /// [endDocument]: A cursor used to traverse DB
+/// [isLoading]: A flag indicate loading state
 /// [LoadLimit]: Limit amount per donation retrieval
 class Produce extends ChangeNotifier {
   static const LoadLimit = 20;
@@ -22,6 +23,7 @@ class Produce extends ChangeNotifier {
   final List<StreamSubscription> _subscriptions = [];
   DocumentSnapshot startDocument;
   DocumentSnapshot endDocument;
+  bool isLoading = true;
 
   /// Return a copy of [_produceIds]
   UnmodifiableSetView<String> get set {
@@ -90,6 +92,7 @@ class Produce extends ChangeNotifier {
     _produce.clear();
     startDocument = null;
     endDocument = null;
+    isLoading = true;
     notifyListeners();
   }
 }

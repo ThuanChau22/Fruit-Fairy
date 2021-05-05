@@ -37,6 +37,7 @@ class _HomeCharityBodyState extends State<HomeCharityBody> {
     /// Init Produce
     Produce produce = context.read<Produce>();
     await fireStore.loadProduce(produce, onData: () {
+      produce.isLoading = false;
       if (mounted) {
         bool removed = false;
         WishList wishlist = context.read<WishList>();

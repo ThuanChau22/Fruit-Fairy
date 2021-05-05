@@ -36,6 +36,7 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
     /// Init Produce
     Produce produce = context.read<Produce>();
     await fireStore.loadProduce(produce, onData: () {
+      produce.isLoading = false;
       if (mounted) {
         bool removed = false;
         Donation donation = context.read<Donation>();

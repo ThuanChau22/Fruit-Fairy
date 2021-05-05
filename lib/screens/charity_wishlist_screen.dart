@@ -74,7 +74,7 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
   Widget build(BuildContext context) {
     Produce produce = context.watch<Produce>();
     WishList wishList = context.watch<WishList>();
-    _isLoadingInit = produce.map.isEmpty || wishList.isLoading;
+    _isLoadingInit = produce.isLoading || wishList.isLoading;
     return Scaffold(
       appBar: AppBar(
         title: Text('Wish List'),

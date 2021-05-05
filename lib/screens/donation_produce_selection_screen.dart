@@ -116,7 +116,7 @@ class _DonationProduceSelectionScreenState
   @override
   Widget build(BuildContext context) {
     Produce produce = context.watch<Produce>();
-    _isLoadingInit = produce.map.isEmpty;
+    _isLoadingInit = produce.isLoading;
     return WillPopScope(
       onWillPop: () async {
         MessageBar(context).hide();
