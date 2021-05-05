@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
 import 'package:flutter/foundation.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 //
 import 'package:fruitfairy/services/firestore_service.dart';
 
@@ -27,7 +26,7 @@ class Account extends ChangeNotifier {
   String _charityName = '';
   final Map<String, String> _phone = {};
   final Map<String, String> _address = {};
-  final List<StreamSubscription<DocumentSnapshot>> _subscriptions = [];
+  final List<StreamSubscription> _subscriptions = [];
 
   /// Return a copy of [_email]
   String get email {
@@ -67,7 +66,7 @@ class Account extends ChangeNotifier {
   }
 
   /// Add [subscription] to [_subscriptions] list
-  void addStream(StreamSubscription<DocumentSnapshot> subscription) {
+  void addStream(StreamSubscription subscription) {
     _subscriptions.add(subscription);
   }
 
@@ -79,7 +78,7 @@ class Account extends ChangeNotifier {
 
   /// Cancel all subscriptions from [_subscriptions]
   void clearStream() {
-    for (StreamSubscription<DocumentSnapshot> subscription in _subscriptions) {
+    for (StreamSubscription subscription in _subscriptions) {
       subscription.cancel();
     }
     _subscriptions.clear();
@@ -113,25 +112,17 @@ class Account extends ChangeNotifier {
     // Address
     Map<String, dynamic> address = userData[FireStoreService.kAddress];
     if (address != null) {
-      _address[FireStoreService.kAddressStreet] =
-          address[FireStoreService.kAddressStreet];
-      _address[FireStoreService.kAddressCity] =
-          address[FireStoreService.kAddressCity];
-      _address[FireStoreService.kAddressState] =
-          address[FireStoreService.kAddressState];
-      _address[FireStoreService.kAddressZip] =
-          address[FireStoreService.kAddressZip];
+      address.forEach((key, value) {
+        _address[key] = value;
+      });
     }
 
     // Phone number
     Map<String, dynamic> phone = userData[FireStoreService.kPhone];
     if (phone != null) {
-      _phone[FireStoreService.kPhoneCountry] =
-          phone[FireStoreService.kPhoneCountry];
-      _phone[FireStoreService.kPhoneDialCode] =
-          phone[FireStoreService.kPhoneDialCode];
-      _phone[FireStoreService.kPhoneNumber] =
-          phone[FireStoreService.kPhoneNumber];
+      phone.forEach((key, value) {
+        _phone[key] = value;
+      });
     }
     notifyListeners();
   }

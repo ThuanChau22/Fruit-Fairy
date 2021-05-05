@@ -7,6 +7,7 @@ import 'package:fruitfairy/models/account.dart';
 import 'package:fruitfairy/models/charity.dart';
 import 'package:fruitfairy/models/donation.dart';
 import 'package:fruitfairy/models/produce_item.dart';
+import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
 import 'package:fruitfairy/widgets/charity_tile.dart';
@@ -23,14 +24,16 @@ class DonationConfirmScreen extends StatefulWidget {
 
 class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
   bool _showSpinner = false;
+  Map<String, ProduceItem> produceStorage;
 
   void confirm() async {
     setState(() => _showSpinner = true);
     FireStoreService firestore = context.read<FireStoreService>();
+    Account account = context.read<Account>();
     Donation donation = context.read<Donation>();
-    await firestore.addDonation(donation);
+    await firestore.addDonation(account, donation);
+    account.cancelLastSubscription();
     donation.reset();
-    context.read<Account>().cancelLastSubscription();
     Navigator.of(context).popUntil((route) {
       return route.settings.name == HomeScreen.id;
     });
@@ -155,21 +158,23 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
 
   List<Widget> fruitTiles() {
     List<Widget> fruitList = [];
+    Produce produce = context.watch<Produce>();
+    produceStorage = produce.map;
     Donation donation = context.watch<Donation>();
-    for (ProduceItem produceItem in donation.produce.values) {
+    donation.produce.forEach((produceId, produceItem) {
       fruitList.add(Container(
         decoration: BoxDecoration(
           color: kObjectColor,
           borderRadius: BorderRadius.circular(20.0),
         ),
         child: FruitTile(
-          fruitName: produceItem.name,
-          fruitImage: produceItem.imageURL,
-          isLoading: produceItem.isLoading,
+          fruitName: produceStorage[produceId].name,
+          fruitImage: produceStorage[produceId].imageURL,
+          isLoading: produceStorage[produceId].isLoading,
           percentage: donation.needCollected ? '${produceItem.amount}' : '',
         ),
       ));
-    }
+    });
     return fruitList;
   }
 

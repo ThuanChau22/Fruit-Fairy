@@ -53,16 +53,6 @@ class ProduceItem implements Comparable<ProduceItem> {
     _amount = result > Min ? result : Min;
   }
 
-  /// Return a clone of this produce
-  ProduceItem clone() {
-    ProduceItem produceItem = ProduceItem(id);
-    produceItem.name = name;
-    produceItem.imagePath = imagePath;
-    produceItem.imageURL = imageURL;
-    produceItem.isLoading = false;
-    return produceItem;
-  }
-
   @override
   int compareTo(ProduceItem other) {
     return this.name.compareTo(other.name);

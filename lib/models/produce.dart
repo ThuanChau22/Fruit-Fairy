@@ -19,7 +19,7 @@ class Produce extends ChangeNotifier {
   final Set<String> _produceIds = {};
   final Set<String> _searchIds = {};
   final Map<String, ProduceItem> _produce = {};
-  final List<StreamSubscription<QuerySnapshot>> _subscriptions = [];
+  final List<StreamSubscription> _subscriptions = [];
   DocumentSnapshot startDocument;
   DocumentSnapshot endDocument;
 
@@ -69,13 +69,13 @@ class Produce extends ChangeNotifier {
   }
 
   /// Add [subscription] to [_subscriptions] list
-  void addStream(StreamSubscription<QuerySnapshot> subscription) {
+  void addStream(StreamSubscription subscription) {
     _subscriptions.add(subscription);
   }
 
   /// Cancel all subscriptions from [_subscriptions]
   void clearStream() {
-    for (StreamSubscription<QuerySnapshot> subscription in _subscriptions) {
+    for (StreamSubscription subscription in _subscriptions) {
       subscription.cancel();
     }
     _subscriptions.clear();

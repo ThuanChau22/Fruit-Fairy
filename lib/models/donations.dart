@@ -15,7 +15,7 @@ import 'package:fruitfairy/models/donation.dart';
 class Donations extends ChangeNotifier {
   static const LoadLimit = 20;
   final Map<String, Donation> _donations = {};
-  final List<StreamSubscription<QuerySnapshot>> _subscriptions = [];
+  final List<StreamSubscription> _subscriptions = [];
   DocumentSnapshot startDocument;
   DocumentSnapshot endDocument;
 
@@ -39,13 +39,13 @@ class Donations extends ChangeNotifier {
   }
 
   /// Add [subscription] to [_subscriptions] list
-  void addStream(StreamSubscription<QuerySnapshot> subscription) {
+  void addStream(StreamSubscription subscription) {
     _subscriptions.add(subscription);
   }
 
   /// Cancel all subscriptions from [_subscriptions]
   void clearStream() {
-    for (StreamSubscription<QuerySnapshot> subscription in _subscriptions) {
+    for (StreamSubscription subscription in _subscriptions) {
       subscription.cancel();
     }
     _subscriptions.clear();

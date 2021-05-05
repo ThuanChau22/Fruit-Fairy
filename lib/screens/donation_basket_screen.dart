@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 //
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/produce_item.dart';
+import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/models/donation.dart';
 import 'package:fruitfairy/screens/donation_contact_screen.dart';
 import 'package:fruitfairy/widgets/custom_grid.dart';
@@ -21,6 +22,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
   final Color _selectedColor = kAccentColor;
 
   bool _collectOption = true;
+  Map<String, ProduceItem> produceStorage;
 
   @override
   void initState() {
@@ -172,6 +174,8 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
 
   List<Widget> fruitTiles() {
     List<Widget> fruitTiles = [];
+    Produce produce = context.watch<Produce>();
+    produceStorage = produce.map;
     Donation donation = context.watch<Donation>();
     donation.produce.forEach((produceId, produceItem) {
       fruitTiles.add(removableFruitTile(
@@ -214,9 +218,9 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
               child: needCollect
                   ? adjustableFruitTile(produceItem)
                   : FruitTile(
-                      fruitName: produceItem.name,
-                      fruitImage: produceItem.imageURL,
-                      isLoading: produceItem.isLoading,
+                      fruitName: produceStorage[produceItem.id].name,
+                      fruitImage: produceStorage[produceItem.id].imageURL,
+                      isLoading: produceStorage[produceItem.id].isLoading,
                     ),
             ),
           ),
@@ -259,9 +263,9 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
               top: screen.height * 0.01,
             ),
             child: FruitTile(
-              fruitName: produceItem.name,
-              fruitImage: produceItem.imageURL,
-              isLoading: produceItem.isLoading,
+              fruitName: produceStorage[produceItem.id].name,
+              fruitImage: produceStorage[produceItem.id].imageURL,
+              isLoading: produceStorage[produceItem.id].isLoading,
             ),
           ),
         ),

@@ -327,7 +327,9 @@ class _DonationProduceSelectionScreenState
           if (selected) {
             donation.removeProduce(produceItem.id);
           } else {
-            donation.pickProduce(produceItem.clone());
+            ProduceItem newProduceItem = ProduceItem(produceItem.id);
+            newProduceItem.amount = produceItem.amount;
+            donation.pickProduce(newProduceItem);
           }
         });
       },

@@ -1,6 +1,4 @@
 import 'dart:collection';
-//
-import 'package:fruitfairy/services/firestore_service.dart';
 
 /// A class that represents a suggested charity to a donation
 /// [id]: charity document id on database
@@ -43,14 +41,9 @@ class Charity implements Comparable<Charity> {
   /// [address]: A Map with keys that are declared in [FireStoreService]
   set address(Map<String, dynamic> address) {
     if (address != null) {
-      _address[FireStoreService.kAddressStreet] =
-          address[FireStoreService.kAddressStreet];
-      _address[FireStoreService.kAddressCity] =
-          address[FireStoreService.kAddressCity];
-      _address[FireStoreService.kAddressState] =
-          address[FireStoreService.kAddressState];
-      _address[FireStoreService.kAddressZip] =
-          address[FireStoreService.kAddressZip];
+      address.forEach((key, value) {
+        _address[key] = value;
+      });
     }
   }
 
