@@ -206,7 +206,7 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       Map<String, Object> args = ModalRoute.of(context).settings.arguments;
       if (args != null) {
         _rememberMe = false;
