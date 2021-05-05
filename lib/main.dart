@@ -65,7 +65,7 @@ class Authentication extends StatelessWidget {
           centerTitle: true,
         ),
         snackBarTheme: SnackBarThemeData(
-          backgroundColor: kDarkPrimaryColor.withOpacity(0.8),
+          backgroundColor: kSnackbarBackground.withOpacity(0.95),
           actionTextColor: kLabelColor,
           contentTextStyle: TextStyle(
             color: kLabelColor,
