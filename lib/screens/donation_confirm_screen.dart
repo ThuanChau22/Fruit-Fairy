@@ -46,14 +46,7 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
       appBar: AppBar(title: Text('Review and Confirm')),
       body: SafeArea(
         child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              stops: [0.5, 1.0],
-              colors: [kPrimaryColor, kDarkPrimaryColor],
-            ),
-          ),
+          decoration: kGradientBackground,
           child: ModalProgressHUD(
             inAsyncCall: _showSpinner,
             progressIndicator: CircularProgressIndicator(

@@ -19,8 +19,6 @@ class DonationBasketScreen extends StatefulWidget {
 }
 
 class _DonationBasketScreenState extends State<DonationBasketScreen> {
-  final Color _selectedColor = kAccentColor;
-
   bool _collectOption = true;
   Map<String, ProduceItem> produceStorage;
 
@@ -36,14 +34,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
       appBar: AppBar(title: Text('My Basket')),
       body: SafeArea(
         child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              stops: [0.5, 1.0],
-              colors: [kPrimaryColor, kDarkPrimaryColor],
-            ),
-          ),
+          decoration: kGradientBackground,
           child: Stack(
             children: [
               basketSection(),
@@ -146,7 +137,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
         ),
         child: RoundedButton(
           label: label,
-          backgroundColor: selected ? _selectedColor : kObjectColor,
+          backgroundColor: selected ? kAccentColor : kObjectColor,
           onPressed: () {
             setState(() {
               _collectOption = needCollected;

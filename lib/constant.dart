@@ -15,6 +15,15 @@ const Color kCompletedStatus = Color.fromRGBO(46, 184, 46, 1.0);
 const Color kDeniedStatus = Color.fromRGBO(179, 36, 0, 1.0);
 
 // Widget Style
+const kGradientBackground = BoxDecoration(
+  gradient: LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    stops: [0.5, 1.0],
+    colors: [kPrimaryColor, kDarkPrimaryColor],
+  ),
+);
+
 const kTextFieldDecoration = InputDecoration(
   labelStyle: TextStyle(
     color: kLabelColor,

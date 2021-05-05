@@ -27,7 +27,6 @@ class DonationProduceSelectionScreen extends StatefulWidget {
 
 class _DonationProduceSelectionScreenState
     extends State<DonationProduceSelectionScreen> {
-  final Color _selectedColor = Colors.grey.shade700.withOpacity(0.5);
   final TextEditingController _search = TextEditingController();
   final ScrollController _scroll = new ScrollController();
   final double _scrollOffset = 135.0;
@@ -128,14 +127,7 @@ class _DonationProduceSelectionScreenState
           appBar: AppBar(title: Text('Produce Selection')),
           body: SafeArea(
             child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  stops: [0.5, 1.0],
-                  colors: [kPrimaryColor, kDarkPrimaryColor],
-                ),
-              ),
+              decoration: kGradientBackground,
               child: ModalProgressHUD(
                 inAsyncCall: _isLoadingInit,
                 progressIndicator: CircularProgressIndicator(
@@ -335,23 +327,13 @@ class _DonationProduceSelectionScreenState
       },
       child: Container(
         decoration: BoxDecoration(
-          color: kObjectColor,
+          color: selected ? kAccentColor : kObjectColor,
           borderRadius: BorderRadius.circular(20.0),
         ),
-        child: Stack(
-          children: [
-            FruitTile(
-              fruitName: produceItem.name,
-              fruitImage: produceItem.imageURL,
-              isLoading: produceItem.isLoading,
-            ),
-            Container(
-              decoration: BoxDecoration(
-                color: selected ? _selectedColor : Colors.transparent,
-                borderRadius: BorderRadius.circular(20.0),
-              ),
-            ),
-          ],
+        child: FruitTile(
+          fruitName: produceItem.name,
+          fruitImage: produceItem.imageURL,
+          isLoading: produceItem.isLoading,
         ),
       ),
     );

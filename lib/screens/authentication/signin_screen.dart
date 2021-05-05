@@ -241,14 +241,7 @@ class _SignInScreenState extends State<SignInScreen> {
           appBar: AppBar(title: Text(_appBarLabel)),
           body: SafeArea(
             child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  stops: [0.5, 1.0],
-                  colors: [kPrimaryColor, kDarkPrimaryColor],
-                ),
-              ),
+              decoration: kGradientBackground,
               child: ModalProgressHUD(
                 inAsyncCall: _showSpinner,
                 progressIndicator: CircularProgressIndicator(
