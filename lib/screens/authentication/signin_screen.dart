@@ -252,7 +252,7 @@ class _SignInScreenState extends State<SignInScreen> {
               child: ModalProgressHUD(
                 inAsyncCall: _showSpinner,
                 progressIndicator: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
+                  valueColor: AlwaysStoppedAnimation(kAccentColor),
                 ),
                 child: ScrollableLayout(
                   child: Padding(

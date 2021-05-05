@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 /// Color Theme
 const Color kDarkPrimaryColor = Color.fromRGBO(128, 0, 0, 1.0);
 const Color kPrimaryColor = Color.fromRGBO(240, 94, 92, 1.0);
+const Color kAccentColor = Color.fromRGBO(200, 230, 201, 1.0);
 const Color kLabelColor = Colors.white;
 const Color kObjectColor = Colors.white;
 const Color kErrorColor = Colors.white;

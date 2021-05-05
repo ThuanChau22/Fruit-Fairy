@@ -18,7 +18,7 @@ class DonationBasketScreen extends StatefulWidget {
 }
 
 class _DonationBasketScreenState extends State<DonationBasketScreen> {
-  final Color _selectedColor = Colors.green.shade100;
+  final Color _selectedColor = kAccentColor;
 
   bool _collectOption = true;
 

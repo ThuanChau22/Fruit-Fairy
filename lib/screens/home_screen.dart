@@ -88,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: ModalProgressHUD(
             inAsyncCall: _showSpinner,
             progressIndicator: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
+              valueColor: AlwaysStoppedAnimation(kAccentColor),
             ),
             child: roleLayout(role),
           ),

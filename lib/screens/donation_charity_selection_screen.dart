@@ -80,7 +80,7 @@ class _DonationCharitySelectionScreenState
             child: ModalProgressHUD(
               inAsyncCall: _showSpinner,
               progressIndicator: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
+                valueColor: AlwaysStoppedAnimation(kAccentColor),
               ),
               child: Stack(
                 children: [

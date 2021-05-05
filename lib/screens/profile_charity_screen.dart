@@ -459,7 +459,7 @@ class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
               child: ModalProgressHUD(
                 inAsyncCall: _showSpinner,
                 progressIndicator: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
+                  valueColor: AlwaysStoppedAnimation(kAccentColor),
                 ),
                 child: ScrollableLayout(
                   controller: _scroller.controller,
@@ -976,7 +976,7 @@ class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
           height: 50.0,
           child: Center(
             child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
+              valueColor: AlwaysStoppedAnimation(kAccentColor),
             ),
           ),
         );

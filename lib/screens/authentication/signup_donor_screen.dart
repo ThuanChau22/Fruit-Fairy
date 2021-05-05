@@ -113,7 +113,7 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
               child: ModalProgressHUD(
                 inAsyncCall: _showSpinner,
                 progressIndicator: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
+                  valueColor: AlwaysStoppedAnimation(kAccentColor),
                 ),
                 child: ScrollableLayout(
                   child: Padding(

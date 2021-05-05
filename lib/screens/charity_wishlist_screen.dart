@@ -93,7 +93,7 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
           child: ModalProgressHUD(
             inAsyncCall: _isLoadingInit,
             progressIndicator: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
+              valueColor: AlwaysStoppedAnimation(kAccentColor),
             ),
             child: Stack(
               children: [
@@ -198,7 +198,7 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
         padding: EdgeInsets.symmetric(vertical: 10.0),
         child: Center(
           child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
+            valueColor: AlwaysStoppedAnimation(kAccentColor),
           ),
         ),
       ),

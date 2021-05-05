@@ -54,7 +54,7 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
           child: ModalProgressHUD(
             inAsyncCall: _showSpinner,
             progressIndicator: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
+              valueColor: AlwaysStoppedAnimation(kAccentColor),
             ),
             child: Stack(
               children: [

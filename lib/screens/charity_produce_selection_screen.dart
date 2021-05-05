@@ -159,7 +159,7 @@ class _CharityProduceSelectionScreenState
             child: ModalProgressHUD(
               inAsyncCall: _isLoadingInit,
               progressIndicator: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
+                valueColor: AlwaysStoppedAnimation(kAccentColor),
               ),
               child: Stack(
                 children: [
@@ -319,7 +319,7 @@ class _CharityProduceSelectionScreenState
         padding: EdgeInsets.symmetric(vertical: 10.0),
         child: Center(
           child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
+            valueColor: AlwaysStoppedAnimation(kAccentColor),
           ),
         ),
       ),
