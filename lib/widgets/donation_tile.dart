@@ -29,7 +29,7 @@ class DonationTile extends StatelessWidget {
     if (status.isInProgress) {
       statusColor = kInProgressStatus;
     }
-    if (status.isDenied) {
+    if (status.isDeclined) {
       statusColor = kDeniedStatus;
     }
     if (status.isCompleted) {

@@ -16,42 +16,22 @@ class Status implements Comparable<Status> {
     this.subCode, {
     this.isCharity = false,
   }) {
-    //TODO: Message for charity
-    if (isCharity) {
-      if (isPennding) {
-        _description = 'Pending';
-        _message = '';
-      }
-      if (isInProgress) {
-        _description = 'In Progress';
-        _message = '';
-      }
-      if (isDenied) {
-        _description = 'Denied';
-        _message = '';
-      }
-      if (isCompleted) {
-        _description = 'Completed';
-        _message = '';
-      }
-    } else {
-      if (isPennding) {
-        _description = 'Pending';
-        _message = 'Donation waiting for charity approval';
-      }
-      if (isInProgress) {
-        _description = 'In Progress';
-        _message =
-            'Donation accepted. The charity will schedule a pickup with you';
-      }
-      if (isDenied) {
-        _description = 'Denied';
-        _message = 'Donation declined by selected charities';
-      }
-      if (isCompleted) {
-        _description = 'Completed';
-        _message = 'Donation completed';
-      }
+    if (isPennding) {
+      _description = 'Pending';
+      _message = 'Donation waiting for charity approval';
+    }
+    if (isInProgress) {
+      _description = 'In Progress';
+      _message =
+          'Donation accepted. The charity will schedule a pickup with you';
+    }
+    if (isDeclined) {
+      _description = 'Declined';
+      _message = 'Donation declined by selected charities';
+    }
+    if (isCompleted) {
+      _description = 'Completed';
+      _message = 'Donation completed';
     }
   }
 
@@ -67,7 +47,7 @@ class Status implements Comparable<Status> {
   }
 
   /// Return true if donation is denied by charity
-  bool get isDenied {
+  bool get isDeclined {
     return code == 1 && subCode == 0;
   }
 
