@@ -55,11 +55,10 @@ class _DonorDonationDetailScreenState extends State<DonorDonationDetailScreen> {
   Widget donationDetails() {
     Size screen = MediaQuery.of(context).size;
     List<Widget> widgets = [
-      statusTile(),
       groupLabel('Status'),
-      statusMessage(),
+      statusTile(),
       assistanceNeeded(),
-      groupLabel("Charity Name"),
+      groupLabel("Charity"),
       selectedCharity(),
       groupLabel('Produce'),
       selectedFruits(),
@@ -82,7 +81,7 @@ class _DonorDonationDetailScreenState extends State<DonorDonationDetailScreen> {
     Size screen = MediaQuery.of(context).size;
     return Padding(
       padding: EdgeInsets.only(
-        top: screen.height * 0.04,
+        top: screen.height * 0.03,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -135,7 +134,10 @@ class _DonorDonationDetailScreenState extends State<DonorDonationDetailScreen> {
     }
     Size screen = MediaQuery.of(context).size;
     return Padding(
-      padding: EdgeInsets.only(top: screen.height * 0.03),
+      padding: EdgeInsets.symmetric(
+        vertical: screen.height * 0.01,
+        horizontal: screen.width * 0.02,
+      ),
       child: Column(
         children: [
           Row(
@@ -144,14 +146,7 @@ class _DonorDonationDetailScreenState extends State<DonorDonationDetailScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Created on',
-                    style: TextStyle(
-                      color: kLabelColor,
-                      fontSize: 25.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  fieldLabel('Created on'),
                   fieldLabel(DateFormat.yMMMd().add_Hm().format(dateTime)),
                 ],
               ),
@@ -176,31 +171,27 @@ class _DonorDonationDetailScreenState extends State<DonorDonationDetailScreen> {
               ),
             ],
           ),
+          Padding(
+            padding: EdgeInsets.symmetric(
+              vertical: screen.height * 0.01,
+            ),
+            child: fieldLabel(status.message),
+          ),
         ],
       ),
-    );
-  }
-
-  Widget statusMessage() {
-    Size screen = MediaQuery.of(context).size;
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        vertical: screen.height * 0.01,
-        horizontal: screen.width * 0.02,
-      ),
-      child: fieldLabel(_donation.status.message),
     );
   }
 
   Widget selectedCharity() {
     Size screen = MediaQuery.of(context).size;
     return Padding(
-      padding: EdgeInsets.symmetric(
-        vertical: screen.height * 0.015,
-        horizontal: screen.width * 0.02,
+      padding: EdgeInsets.only(
+        top: screen.height * 0.01,
+        bottom: screen.height * 0.02,
+        left: screen.width * 0.02,
+        right: screen.width * 0.02,
       ),
       child: CharityTile(charityName: _donation.charities.first.name),
-      // fieldLabel(_donation.charities.first.name),
     );
   }
 
@@ -209,10 +200,9 @@ class _DonorDonationDetailScreenState extends State<DonorDonationDetailScreen> {
     return Visibility(
       visible: _donation.needCollected,
       child: Padding(
-        padding: EdgeInsets.only(
-          top: screen.height * 0.01,
-          left: screen.width * 0.05,
-          right: screen.width * 0.05,
+        padding: EdgeInsets.symmetric(
+          vertical: screen.height * 0.01,
+          horizontal: screen.width * 0.05,
         ),
         child: Container(
           decoration: BoxDecoration(
