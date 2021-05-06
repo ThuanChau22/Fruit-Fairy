@@ -18,7 +18,7 @@ class Status implements Comparable<Status> {
   }) {
     if (isPennding) {
       _description = 'Pending';
-      _message = 'Donation waiting for charity approval';
+      _message = 'Donation is waiting for charity approval';
     }
     if (isInProgress) {
       _description = 'In Progress';

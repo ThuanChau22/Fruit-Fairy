@@ -20,7 +20,7 @@ class DonationBasketScreen extends StatefulWidget {
 
 class _DonationBasketScreenState extends State<DonationBasketScreen> {
   bool _collectOption = true;
-  Map<String, ProduceItem> produceStorage;
+  Map<String, ProduceItem> _produceStorage;
 
   @override
   void initState() {
@@ -166,7 +166,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
   List<Widget> fruitTiles() {
     List<Widget> fruitTiles = [];
     Produce produce = context.watch<Produce>();
-    produceStorage = produce.map;
+    _produceStorage = produce.map;
     Donation donation = context.watch<Donation>();
     donation.produce.forEach((produceId, produceItem) {
       fruitTiles.add(removableFruitTile(
@@ -209,9 +209,9 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
               child: needCollect
                   ? adjustableFruitTile(produceItem)
                   : FruitTile(
-                      fruitName: produceStorage[produceItem.id].name,
-                      fruitImage: produceStorage[produceItem.id].imageURL,
-                      isLoading: produceStorage[produceItem.id].isLoading,
+                      fruitName: _produceStorage[produceItem.id].name,
+                      fruitImage: _produceStorage[produceItem.id].imageURL,
+                      isLoading: _produceStorage[produceItem.id].isLoading,
                     ),
             ),
           ),
@@ -254,9 +254,9 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
               top: screen.height * 0.01,
             ),
             child: FruitTile(
-              fruitName: produceStorage[produceItem.id].name,
-              fruitImage: produceStorage[produceItem.id].imageURL,
-              isLoading: produceStorage[produceItem.id].isLoading,
+              fruitName: _produceStorage[produceItem.id].name,
+              fruitImage: _produceStorage[produceItem.id].imageURL,
+              isLoading: _produceStorage[produceItem.id].isLoading,
             ),
           ),
         ),

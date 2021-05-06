@@ -13,7 +13,6 @@ import 'package:fruitfairy/widgets/custom_grid.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
 import 'package:fruitfairy/widgets/gesture_wrapper.dart';
 import 'package:fruitfairy/widgets/input_field.dart';
-import 'package:fruitfairy/widgets/message_bar.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
 import 'package:fruitfairy/widgets/rounded_icon_button.dart';
 
@@ -51,10 +50,8 @@ class _CharityProduceSelectionScreenState
         });
         int currentSize = produce.set.length;
         fireStore.loadProduce(produce, onData: () {
-          if (mounted) {
-            if (currentSize < produce.set.length) {
-              _loadingTimer.cancel();
-            }
+          if (mounted && currentSize < produce.set.length) {
+            _loadingTimer.cancel();
           }
         });
       }
@@ -71,33 +68,11 @@ class _CharityProduceSelectionScreenState
       if (searchTerm.isNotEmpty) {
         fireStore.searchProduce(searchTerm, produce, onData: () {
           if (mounted) {
-            checkWishListAvailability();
             setState(() => _isLoadingMore = false);
           }
         });
       }
     });
-  }
-
-  void checkWishListAvailability() {
-    bool removed = false;
-    WishList wishlist = context.read<WishList>();
-    Produce produce = context.read<Produce>();
-    Map<String, ProduceItem> produceStorage = produce.map;
-    for (String produceId in wishlist.produceIds.toList()) {
-      bool hasProduce = produceStorage.containsKey(produceId);
-      if (hasProduce && !produceStorage[produceId].enabled) {
-        wishlist.removeProduce(produceId);
-        removed = true;
-      }
-    }
-    FireStoreService fireStore = context.read<FireStoreService>();
-    fireStore.updateWishList(wishlist.produceIds);
-    String notifyMessage = 'One or more produce'
-        ' on your wish list are no longer available!';
-    if (removed) {
-      MessageBar(context, message: notifyMessage).show();
-    }
   }
 
   void selectAll() async {

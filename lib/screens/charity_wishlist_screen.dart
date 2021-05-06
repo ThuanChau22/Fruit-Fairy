@@ -72,9 +72,8 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Produce produce = context.watch<Produce>();
     WishList wishList = context.watch<WishList>();
-    _isLoadingInit = produce.isLoading || wishList.isLoading;
+    _isLoadingInit = wishList.isLoading;
     return Scaffold(
       appBar: AppBar(
         title: Text('Wish List'),
@@ -201,7 +200,7 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
   List<Widget> fruitTiles() {
     List<Widget> fruitTiles = [];
     FireStoreService fireStore = context.read<FireStoreService>();
-    Produce produce = context.read<Produce>();
+    Produce produce = context.watch<Produce>();
     Map<String, ProduceItem> produceMap = produce.map;
     WishList wishList = context.read<WishList>();
     List<String> produceIdList = wishList.produceIds;

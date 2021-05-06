@@ -50,11 +50,8 @@ class _DonationProduceSelectionScreenState
         });
         int currentSize = produce.set.length;
         fireStore.loadProduce(produce, onData: () {
-          if (mounted) {
-            checkBasketAvailability();
-            if (currentSize < produce.set.length) {
-              _loadingTimer.cancel();
-            }
+          if (mounted && (currentSize < produce.set.length)) {
+            _loadingTimer.cancel();
           }
         });
       }
@@ -71,31 +68,11 @@ class _DonationProduceSelectionScreenState
       if (searchTerm.isNotEmpty) {
         fireStore.searchProduce(searchTerm, produce, onData: () {
           if (mounted) {
-            checkBasketAvailability();
             setState(() => _isLoadingMore = false);
           }
         });
       }
     });
-  }
-
-  void checkBasketAvailability() {
-    bool removed = false;
-    Donation donation = context.read<Donation>();
-    Produce produce = context.read<Produce>();
-    Map<String, ProduceItem> produceStorage = produce.map;
-    for (String produceId in donation.produce.keys.toList()) {
-      bool hasProduce = produceStorage.containsKey(produceId);
-      if (hasProduce && !produceStorage[produceId].enabled) {
-        donation.removeProduce(produceId);
-        removed = true;
-      }
-    }
-    String notifyMessage = 'One or more produce'
-        ' on your basket are no longer available!';
-    if (removed) {
-      MessageBar(context, message: notifyMessage).show();
-    }
   }
 
   @override

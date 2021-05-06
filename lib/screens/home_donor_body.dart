@@ -7,7 +7,6 @@ import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
 import 'package:fruitfairy/models/donation.dart';
 import 'package:fruitfairy/models/donations.dart';
-import 'package:fruitfairy/models/produce_item.dart';
 import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/screens/donation_produce_selection_screen.dart';
 import 'package:fruitfairy/screens/donor_donation_detail_screen.dart';
@@ -29,6 +28,7 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
   Timer _loadingTimer = Timer(Duration.zero, () {});
   bool _isLoadingInit = true;
   bool _isLoadingMore = true;
+  bool _checkProduceAvailability = false;
 
   void initProduce() async {
     FireStoreService fireStore = context.read<FireStoreService>();
@@ -37,23 +37,6 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
     Produce produce = context.read<Produce>();
     await fireStore.loadProduce(produce, onData: () {
       produce.isLoading = false;
-      if (mounted) {
-        bool removed = false;
-        Donation donation = context.read<Donation>();
-        Map<String, ProduceItem> produceStorage = produce.map;
-        for (String produceId in donation.produce.keys.toList()) {
-          bool hasProduce = produceStorage.containsKey(produceId);
-          if (hasProduce && !produceStorage[produceId].enabled) {
-            donation.removeProduce(produceId);
-            removed = true;
-          }
-        }
-        String notifyMessage = 'One or more produce'
-            ' on your basket are no longer available!';
-        if (removed) {
-          MessageBar(context, message: notifyMessage).show();
-        }
-      }
     });
 
     /// Init Donation
@@ -113,6 +96,21 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
 
   @override
   Widget build(BuildContext context) {
+    Donation donation = context.watch<Donation>();
+    if (!_checkProduceAvailability) {
+      FireStoreService fireStore = context.read<FireStoreService>();
+      Produce produce = context.read<Produce>();
+      fireStore.checkDonationAvailability(donation, produce, notify: (removed) {
+        if (removed) {
+          MessageBar(
+            context,
+            message: 'One or more produce on your'
+                ' basket are no longer available!',
+          ).show();
+        }
+      });
+      _checkProduceAvailability = true;
+    }
     Size screen = MediaQuery.of(context).size;
     return ScrollableLayout(
       controller: _scroll,

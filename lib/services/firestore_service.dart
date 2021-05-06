@@ -140,6 +140,40 @@ class FireStoreService {
     }
   }
 
+  Future<void> loadDonationProduce(
+    Donation donation,
+    Produce produce, {
+    Function onData,
+  }) async {
+    onData = onData ?? () {};
+    try {
+      List<String> produceIdList = [];
+      Map<String, ProduceItem> produceStorage = produce.map;
+      for (String produceId in donation.produce.keys) {
+        if (!produceStorage.containsKey(produceId)) {
+          produceIdList.add(produceId);
+        }
+      }
+      if (produceIdList.isNotEmpty) {
+        List<List<String>> lists = Utils.decompose(produceIdList, 10);
+        await Future.wait(lists.map((produceIds) async {
+          Stream<QuerySnapshot> snapshots = _produceDB
+              .where(FieldPath.documentId, whereIn: produceIds)
+              .snapshots();
+          produce.addStream(snapshots.listen((snapshot) {
+            _loadProduceStorage(snapshot, produce, onData);
+          }, onError: (e) {
+            print(e);
+          }));
+        }));
+      } else {
+        onData();
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
   Future<void> loadWishListProduce(
     WishList wishList,
     Produce produce, {
@@ -170,7 +204,7 @@ class FireStoreService {
               .where(FieldPath.documentId, whereIn: produceIds)
               .snapshots();
           produce.addStream(snapshots.listen((snapshot) {
-            _loadWishListProduce(snapshot, produce, onData);
+            _loadProduceStorage(snapshot, produce, onData);
           }, onError: (e) {
             print(e);
           }));
@@ -183,7 +217,7 @@ class FireStoreService {
     }
   }
 
-  Future<void> _loadWishListProduce(
+  Future<void> _loadProduceStorage(
     QuerySnapshot snapshot,
     Produce produce,
     Function onData,
@@ -700,6 +734,56 @@ class FireStoreService {
         }
       }));
       onData();
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<void> checkDonationAvailability(
+    Donation donation,
+    Produce produce, {
+    void notify(bool removed),
+  }) async {
+    try {
+      Query query = _produceDB.where(kProduceEnabled, isEqualTo: true);
+      produce.addStream(query.snapshots().listen((snapshot) {
+        bool removed = false;
+        Set<String> enabledProduceId = snapshot.docs.map((snapshot) {
+          return snapshot.id;
+        }).toSet();
+        for (String produceId in donation.produce.keys.toList()) {
+          if (!enabledProduceId.contains(produceId)) {
+            donation.removeProduce(produceId);
+            removed = true;
+          }
+        }
+        notify(removed);
+      }));
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<void> checkWishListAvailability(
+    WishList wishList,
+    Produce produce, {
+    void notify(bool removed),
+  }) async {
+    try {
+      Query query = _produceDB.where(kProduceEnabled, isEqualTo: true);
+      produce.addStream(query.snapshots().listen((snapshot) {
+        bool removed = false;
+        Set<String> enabledProduceId = snapshot.docs.map((snapshot) {
+          return snapshot.id;
+        }).toSet();
+        for (String produceId in wishList.produceIds.toList()) {
+          if (!enabledProduceId.contains(produceId)) {
+            wishList.removeProduce(produceId);
+            removed = true;
+          }
+        }
+        notify(removed);
+      }));
     } catch (e) {
       print(e);
     }

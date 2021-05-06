@@ -7,7 +7,6 @@ import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
 import 'package:fruitfairy/models/donations.dart';
 import 'package:fruitfairy/models/donation.dart';
-import 'package:fruitfairy/models/produce_item.dart';
 import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/models/wish_list.dart';
 import 'package:fruitfairy/screens/charity_donation_detail_screen.dart';
@@ -30,6 +29,7 @@ class _HomeCharityBodyState extends State<HomeCharityBody> {
   Timer _loadingTimer = Timer(Duration.zero, () {});
   bool _isLoadingInit = true;
   bool _isLoadingMore = true;
+  bool _checkProduceAvailability = false;
 
   void initProduce() async {
     FireStoreService fireStore = context.read<FireStoreService>();
@@ -38,30 +38,12 @@ class _HomeCharityBodyState extends State<HomeCharityBody> {
     Produce produce = context.read<Produce>();
     await fireStore.loadProduce(produce, onData: () {
       produce.isLoading = false;
-      if (mounted) {
-        bool removed = false;
-        WishList wishlist = context.read<WishList>();
-        Map<String, ProduceItem> produceStorage = produce.map;
-        for (String produceId in wishlist.produceIds.toList()) {
-          bool hasProduce = produceStorage.containsKey(produceId);
-          if (hasProduce && !produceStorage[produceId].enabled) {
-            wishlist.removeProduce(produceId);
-            removed = true;
-          }
-        }
-        String notifyMessage = 'One or more produce'
-            ' on your wish list are no longer available!';
-        if (removed) {
-          fireStore.updateWishList(wishlist.produceIds);
-          MessageBar(context, message: notifyMessage).show();
-        }
-      }
     });
 
     /// Init WishList
     WishList wishList = context.read<WishList>();
-    fireStore.wishListStream(wishList, onData: () {
-      fireStore.loadWishListProduce(wishList, produce, onLoadMore: false);
+    fireStore.wishListStream(wishList, onData: () async {
+      await fireStore.loadWishListProduce(wishList, produce, onLoadMore: false);
       wishList.isLoading = false;
     });
   }
@@ -114,6 +96,22 @@ class _HomeCharityBodyState extends State<HomeCharityBody> {
 
   @override
   Widget build(BuildContext context) {
+    WishList wishList = context.watch<WishList>();
+    if (!wishList.isLoading && !_checkProduceAvailability) {
+      FireStoreService fireStore = context.read<FireStoreService>();
+      Produce produce = context.read<Produce>();
+      fireStore.checkWishListAvailability(wishList, produce, notify: (removed) {
+        if (removed) {
+          fireStore.updateWishList(wishList.produceIds);
+          MessageBar(
+            context,
+            message: 'One or more produce on your'
+                ' wish list are no longer available!',
+          ).show();
+        }
+      });
+      _checkProduceAvailability = true;
+    }
     Size screen = MediaQuery.of(context).size;
     return ScrollableLayout(
       controller: _scroll,
