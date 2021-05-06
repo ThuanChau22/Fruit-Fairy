@@ -14,6 +14,7 @@ class InputField extends StatelessWidget {
   final bool readOnly;
   final String prefixText;
   final Icon prefixIcon;
+  final Widget suffixWidget;
   final ValueChanged<String> onChanged;
 
   InputField({
@@ -27,6 +28,7 @@ class InputField extends StatelessWidget {
     this.keyboardType,
     this.prefixText,
     this.prefixIcon,
+    this.suffixWidget,
     this.onChanged,
   });
 
@@ -48,6 +50,7 @@ class InputField extends StatelessWidget {
         prefixText: prefixText,
         prefixIcon: prefixIcon,
         fillColor: kObjectColor.withOpacity(0.2),
+        suffix: suffixWidget,
         enabled: !readOnly,
       ),
     );

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 //
 import 'package:fruitfairy/constant.dart';
-import 'package:fruitfairy/models/fruit.dart';
-import 'package:fruitfairy/models/donation.dart';
+import 'package:fruitfairy/models/produce_item.dart';
 import 'package:fruitfairy/models/produce.dart';
+import 'package:fruitfairy/models/donation.dart';
 import 'package:fruitfairy/screens/donation_contact_screen.dart';
 import 'package:fruitfairy/widgets/custom_grid.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
@@ -19,9 +19,8 @@ class DonationBasketScreen extends StatefulWidget {
 }
 
 class _DonationBasketScreenState extends State<DonationBasketScreen> {
-  final Color _selectedColor = Colors.green.shade100;
-
   bool _collectOption = true;
+  Map<String, ProduceItem> _produceStorage;
 
   @override
   void initState() {
@@ -34,11 +33,19 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
     return Scaffold(
       appBar: AppBar(title: Text('My Basket')),
       body: SafeArea(
-        child: Column(
-          children: [
-            basketSection(),
-            buttonSection(),
-          ],
+        child: Container(
+          decoration: kGradientBackground,
+          child: Stack(
+            children: [
+              basketSection(),
+              Positioned(
+                left: 0.0,
+                right: 0.0,
+                bottom: 0.0,
+                child: buttonSection(),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -48,7 +55,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
     Size screen = MediaQuery.of(context).size;
     List<Widget> widgets = [
       SizedBox(height: screen.height * 0.02),
-      instructionLabel('Do you need help collecting?'),
+      instructionLabel('Need help collecting?'),
       collectOptionTile(),
       Divider(
         color: kLabelColor,
@@ -58,23 +65,22 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
       Visibility(
         visible: context.read<Donation>().needCollected,
         child: instructionLabel(
-          'Adjust percentage of produce you want to donate:',
+          'Adjust donation percentage',
         ),
       ),
       selectedFruits(),
+      bottomPadding(),
     ];
-    return Expanded(
-      child: ListView.builder(
-        itemCount: widgets.length,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: screen.width * 0.1,
-            ),
-            child: widgets[index],
-          );
-        },
-      ),
+    return ListView.builder(
+      itemCount: widgets.length,
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: screen.width * 0.1,
+          ),
+          child: widgets[index],
+        );
+      },
     );
   }
 
@@ -88,7 +94,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
         label,
         textAlign: TextAlign.center,
         style: TextStyle(
-          fontSize: 20.0,
+          fontSize: 25.0,
           fontWeight: FontWeight.bold,
           color: kLabelColor,
         ),
@@ -99,8 +105,9 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
   Widget collectOptionTile() {
     Size screen = MediaQuery.of(context).size;
     return Padding(
-      padding: EdgeInsets.symmetric(
-        vertical: screen.height * 0.02,
+      padding: EdgeInsets.only(
+        top: screen.height * 0.01,
+        bottom: screen.height * 0.03,
       ),
       child: Row(
         children: [
@@ -130,11 +137,11 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
         ),
         child: RoundedButton(
           label: label,
-          backgroundColor: selected ? _selectedColor : kObjectColor,
+          backgroundColor: selected ? kAccentColor : kObjectColor,
           onPressed: () {
             setState(() {
               _collectOption = needCollected;
-              context.read<Donation>().setNeedCollected(_collectOption);
+              context.read<Donation>().needCollected = _collectOption;
             });
           },
         ),
@@ -158,16 +165,15 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
 
   List<Widget> fruitTiles() {
     List<Widget> fruitTiles = [];
-    Produce produce = context.read<Produce>();
-    Map<String, Fruit> fruits = produce.fruits;
-    Donation donation = context.read<Donation>();
-    donation.produce.forEach((fruitId) {
+    Produce produce = context.watch<Produce>();
+    _produceStorage = produce.map;
+    Donation donation = context.watch<Donation>();
+    donation.produce.forEach((produceId, produceItem) {
       fruitTiles.add(removableFruitTile(
-        fruit: fruits[fruitId],
+        produceItem: produceItem,
         onPressed: () {
           setState(() {
-            fruits[fruitId].clear();
-            donation.removeFruit(fruitId);
+            donation.removeProduce(produceId);
           });
         },
       ));
@@ -176,7 +182,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
   }
 
   Widget removableFruitTile({
-    @required Fruit fruit,
+    @required ProduceItem produceItem,
     @required VoidCallback onPressed,
   }) {
     Size screen = MediaQuery.of(context).size;
@@ -201,10 +207,11 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
                 borderRadius: BorderRadius.circular(20.0),
               ),
               child: needCollect
-                  ? adjustableFruitTile(fruit)
+                  ? adjustableFruitTile(produceItem)
                   : FruitTile(
-                      fruitName: fruit.name,
-                      fruitImage: fruit.imageURL,
+                      fruitName: _produceStorage[produceItem.id].name,
+                      fruitImage: _produceStorage[produceItem.id].imageURL,
+                      isLoading: _produceStorage[produceItem.id].isLoading,
                     ),
             ),
           ),
@@ -231,74 +238,69 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
     );
   }
 
-  Widget adjustableFruitTile(Fruit fruit) {
+  Widget adjustableFruitTile(ProduceItem produceItem) {
     Size screen = MediaQuery.of(context).size;
-    return Container(
-      decoration: BoxDecoration(
-        color: kObjectColor,
-        borderRadius: BorderRadius.circular(20.0),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Expanded(
-            flex: 1,
-            child: SizedBox.shrink(),
-          ),
-          Expanded(
-            flex: 4,
-            child: Padding(
-              padding: EdgeInsets.only(
-                top: screen.height * 0.01,
-              ),
-              child: FruitTile(
-                fruitName: fruit.name,
-                fruitImage: fruit.imageURL,
-              ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Expanded(
+          flex: 1,
+          child: SizedBox.shrink(),
+        ),
+        Expanded(
+          flex: 4,
+          child: Padding(
+            padding: EdgeInsets.only(
+              top: screen.height * 0.01,
+            ),
+            child: FruitTile(
+              fruitName: _produceStorage[produceItem.id].name,
+              fruitImage: _produceStorage[produceItem.id].imageURL,
+              isLoading: _produceStorage[produceItem.id].isLoading,
             ),
           ),
-          Expanded(
-            flex: 7,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(left: 20.0),
-                  child: Text(
-                    '${fruit.amount}%',
-                    style: TextStyle(
-                      color: kPrimaryColor,
-                      fontSize: 30.0,
-                      fontWeight: FontWeight.bold,
-                    ),
+        ),
+        Expanded(
+          flex: 7,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                padding: EdgeInsets.only(left: 20.0),
+                child: Text(
+                  '${produceItem.amount}%',
+                  style: TextStyle(
+                    color: kPrimaryColor,
+                    fontSize: 30.0,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    adjustButton(
-                      icon: Icons.remove,
-                      onPressed: () {
-                        setState(() {
-                          fruit.decrease();
-                        });
-                      },
-                    ),
-                    adjustButton(
-                      icon: Icons.add,
-                      onPressed: () {
-                        setState(() {
-                          fruit.increase();
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  adjustButton(
+                    icon: Icons.remove,
+                    onPressed: () {
+                      setState(() {
+                        produceItem.decrease();
+                      });
+                    },
+                  ),
+                  adjustButton(
+                    icon: Icons.add,
+                    onPressed: () {
+                      setState(() {
+                        produceItem.increase();
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -319,19 +321,31 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
     );
   }
 
+  Widget bottomPadding() {
+    Size screen = MediaQuery.of(context).size;
+    EdgeInsets view = MediaQuery.of(context).viewInsets;
+    return Visibility(
+      visible: view.bottom == 0.0,
+      child: SizedBox(height: 60 + screen.height * 0.03),
+    );
+  }
+
   Widget buttonSection() {
     EdgeInsets view = MediaQuery.of(context).viewInsets;
     return Visibility(
       visible: view.bottom == 0.0,
-      child: Column(
-        children: [
-          Divider(
-            color: kLabelColor,
-            height: 5.0,
-            thickness: 2.0,
-          ),
-          nextButton(),
-        ],
+      child: Container(
+        color: kDarkPrimaryColor.withOpacity(0.75),
+        child: Column(
+          children: [
+            Divider(
+              color: kLabelColor,
+              height: 5.0,
+              thickness: 2.0,
+            ),
+            nextButton(),
+          ],
+        ),
       ),
     );
   }
@@ -340,7 +354,7 @@ class _DonationBasketScreenState extends State<DonationBasketScreen> {
     Size screen = MediaQuery.of(context).size;
     return Padding(
       padding: EdgeInsets.symmetric(
-        vertical: screen.height * 0.03,
+        vertical: screen.height * 0.015,
         horizontal: screen.width * 0.25,
       ),
       child: RoundedButton(

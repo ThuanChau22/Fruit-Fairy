@@ -29,7 +29,7 @@ class FireAuthService {
 
       // Create a document in users collection on Firestore
       FireStoreService fireStoreService = FireStoreService();
-      fireStoreService.uid(user.uid);
+      fireStoreService.setUID(user.uid);
       await fireStoreService.addDonorAccount(
         email: email,
         firstName: firstName,
@@ -64,7 +64,7 @@ class FireAuthService {
 
       // Create a document in users collection on Firestore
       FireStoreService fireStoreService = FireStoreService();
-      fireStoreService.uid(user.uid);
+      fireStoreService.setUID(user.uid);
       await fireStoreService.addCharityAccount(
         email: email,
         ein: ein,
@@ -368,7 +368,6 @@ class FireAuthService {
   Future<void> deleteAccount({
     @required String email,
     @required String password,
-    bool isCharity = false,
   }) async {
     try {
       // Re-authenticate user to verified user's action
@@ -380,11 +379,8 @@ class FireAuthService {
 
       // Remove user information on Firestore
       FireStoreService fireStoreService = FireStoreService();
-      fireStoreService.uid(user.uid);
+      fireStoreService.setUID(user.uid);
       await fireStoreService.deleteAccount();
-      if (isCharity) {
-        await fireStoreService.deleteWishList();
-      }
 
       // Remove user from Authentication
       await user.delete();

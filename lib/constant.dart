@@ -3,11 +3,27 @@ import 'package:flutter/material.dart';
 /// Color Theme
 const Color kDarkPrimaryColor = Color.fromRGBO(128, 0, 0, 1.0);
 const Color kPrimaryColor = Color.fromRGBO(240, 94, 92, 1.0);
+const Color kAccentColor = Color.fromRGBO(200, 230, 201, 1.0);
 const Color kLabelColor = Colors.white;
 const Color kObjectColor = Colors.white;
 const Color kErrorColor = Colors.white;
+const Color kDisabledColor = Color.fromRGBO(179, 179, 179, 1.0);
+const Color kSnackbarBackground = Color.fromRGBO(255, 112, 67, 1.0);
+const Color kPendingStatus = Color.fromRGBO(255, 166, 77, 1.0);
+const Color kInProgressStatus = Color.fromRGBO(255, 209, 26, 1.0);
+const Color kCompletedStatus = Color.fromRGBO(46, 184, 46, 1.0);
+const Color kDeniedStatus = Color.fromRGBO(179, 36, 0, 1.0);
 
 // Widget Style
+const kGradientBackground = BoxDecoration(
+  gradient: LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    stops: [0.5, 1.0],
+    colors: [kPrimaryColor, kDarkPrimaryColor],
+  ),
+);
+
 const kTextFieldDecoration = InputDecoration(
   labelStyle: TextStyle(
     color: kLabelColor,

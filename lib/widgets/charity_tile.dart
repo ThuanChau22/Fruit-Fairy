@@ -7,23 +7,27 @@ class CharityTile extends StatelessWidget {
   final String charityName;
   final String selectedOrder;
   final VoidCallback onTap;
+  final bool disabled;
 
   CharityTile({
     @required this.charityName,
     @required this.selectedOrder,
     @required this.onTap,
+    this.disabled = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        HapticFeedback.mediumImpact();
-        onTap();
-      },
+      onTap: disabled
+          ? null
+          : () {
+              HapticFeedback.mediumImpact();
+              onTap();
+            },
       child: Container(
         constraints: BoxConstraints(
-          minHeight: 60.0,
+          minHeight: 80.0,
         ),
         decoration: BoxDecoration(
           color: kObjectColor,
@@ -32,11 +36,11 @@ class CharityTile extends StatelessWidget {
         child: Row(
           children: [
             Expanded(
-              flex: 2,
+              flex: 4,
               child: selectedIcon(),
             ),
             Expanded(
-              flex: 7,
+              flex: 10,
               child: Text(
                 charityName,
                 textAlign: TextAlign.center,
@@ -48,7 +52,7 @@ class CharityTile extends StatelessWidget {
               ),
             ),
             Expanded(
-              flex: 2,
+              flex: 4,
               child: SizedBox.shrink(),
             ),
           ],

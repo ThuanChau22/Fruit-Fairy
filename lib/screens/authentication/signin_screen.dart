@@ -194,7 +194,9 @@ class _SignInScreenState extends State<SignInScreen> {
       );
     }
     String uid = context.read<FireAuthService>().user.uid;
-    context.read<FireStoreService>().uid(uid);
+    FireStoreService fireStore = context.read<FireStoreService>();
+    fireStore.setUID(uid);
+    fireStore.updateLastSignedIn();
     Navigator.of(context).pushNamedAndRemoveUntil(
       HomeScreen.id,
       (route) => false,
@@ -204,7 +206,7 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       Map<String, Object> args = ModalRoute.of(context).settings.arguments;
       if (args != null) {
         _rememberMe = false;
@@ -238,24 +240,27 @@ class _SignInScreenState extends State<SignInScreen> {
         child: Scaffold(
           appBar: AppBar(title: Text(_appBarLabel)),
           body: SafeArea(
-            child: ModalProgressHUD(
-              inAsyncCall: _showSpinner,
-              progressIndicator: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
-              ),
-              child: ScrollableLayout(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    vertical: screen.height * 0.03,
-                    horizontal: screen.width * 0.15,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      fairyLogo(),
-                      SizedBox(height: screen.height * 0.03),
-                      layoutMode(),
-                    ],
+            child: Container(
+              decoration: kGradientBackground,
+              child: ModalProgressHUD(
+                inAsyncCall: _showSpinner,
+                progressIndicator: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation(kAccentColor),
+                ),
+                child: ScrollableLayout(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      vertical: screen.height * 0.03,
+                      horizontal: screen.width * 0.15,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        fairyLogo(),
+                        SizedBox(height: screen.height * 0.03),
+                        layoutMode(),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -378,6 +383,7 @@ class _SignInScreenState extends State<SignInScreen> {
           keyboardType: TextInputType.visiblePassword,
           errorMessage: _passwordError,
           obscureText: _obscurePassword,
+          suffixWidget: SizedBox(width: 20.0),
           onChanged: (value) {
             setState(() {
               _passwordError = Validate.checkPassword(_password.text);

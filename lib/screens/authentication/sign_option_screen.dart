@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fruitfairy/constant.dart';
 //
 import 'package:fruitfairy/screens/authentication/signin_screen.dart';
 import 'package:fruitfairy/screens/authentication/signup_role_screen.dart';
@@ -18,28 +19,31 @@ class _SignOptionScreenState extends State<SignOptionScreen> {
     Size screen = MediaQuery.of(context).size;
     return Scaffold(
       body: SafeArea(
-        child: ScrollableLayout(
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              vertical: screen.height * 0.03,
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                fairyLogo(),
-                SizedBox(height: screen.height * 0.03),
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: screen.width * 0.25,
-                  ),
-                  child: Column(
-                    children: [
-                      signInButton(context),
-                      signUpButton(context),
-                    ],
-                  ),
-                )
-              ],
+        child: Container(
+          decoration: kGradientBackground,
+          child: ScrollableLayout(
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: screen.height * 0.03,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  fairyLogo(),
+                  SizedBox(height: screen.height * 0.03),
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: screen.width * 0.25,
+                    ),
+                    child: Column(
+                      children: [
+                        signInButton(context),
+                        signUpButton(context),
+                      ],
+                    ),
+                  )
+                ],
+              ),
             ),
           ),
         ),

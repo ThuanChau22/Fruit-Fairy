@@ -40,9 +40,9 @@ class CustomGrid extends StatelessWidget {
       );
     });
     List<Widget> columnList = [];
-    rowList.forEach((row) {
+    for (List<Widget> row in rowList) {
       columnList.add(Row(children: row));
-    });
+    }
     return Column(children: columnList);
   }
 }

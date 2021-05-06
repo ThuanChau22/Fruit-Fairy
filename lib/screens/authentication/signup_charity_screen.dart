@@ -109,29 +109,32 @@ class _SignUpCharityScreenState extends State<SignUpCharityScreen> {
             actions: [helpButton()],
           ),
           body: SafeArea(
-            child: ModalProgressHUD(
-              inAsyncCall: _showSpinner,
-              progressIndicator: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
-              ),
-              child: ScrollableLayout(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    vertical: screen.height * 0.06,
-                    horizontal: screen.width * 0.15,
-                  ),
-                  child: Column(
-                    children: [
-                      einInputField(),
-                      inputFieldSizeBox(),
-                      emailInputField(),
-                      inputFieldSizeBox(),
-                      passwordInputField(),
-                      inputFieldSizeBox(),
-                      confirmPasswordInputField(),
-                      SizedBox(height: screen.height * 0.05),
-                      signUpButton(context),
-                    ],
+            child: Container(
+              decoration: kGradientBackground,
+              child: ModalProgressHUD(
+                inAsyncCall: _showSpinner,
+                progressIndicator: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation(kAccentColor),
+                ),
+                child: ScrollableLayout(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      vertical: screen.height * 0.06,
+                      horizontal: screen.width * 0.15,
+                    ),
+                    child: Column(
+                      children: [
+                        einInputField(),
+                        inputFieldSizeBox(),
+                        emailInputField(),
+                        inputFieldSizeBox(),
+                        passwordInputField(),
+                        inputFieldSizeBox(),
+                        confirmPasswordInputField(),
+                        SizedBox(height: screen.height * 0.05),
+                        signUpButton(context),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -156,8 +159,11 @@ class _SignUpCharityScreenState extends State<SignUpCharityScreen> {
         MessageBar(context).hide();
         PopUpDialog(
           context,
-          message:
-              'Your charity is verified using the domain name of your charity’s email. For example, if your charity’s website is charity.org then please use an email from the same domain such as john@charity.org.\nIf your charity does not have a website, please contact us at fruitfairyhelp@gmail.com.',
+          message: 'Your charity is verified using the domain name of your'
+              ' charity’s email. For example, if your charity’s website'
+              ' is charity.org then please use an email from the same'
+              ' domain such as john@charity.org.\nIf your charity does not'
+              ' have a website, please contact us at fruitfairyhelp@gmail.com.',
         ).show();
       },
     );
@@ -205,6 +211,7 @@ class _SignUpCharityScreenState extends State<SignUpCharityScreen> {
           keyboardType: TextInputType.visiblePassword,
           errorMessage: _passwordError,
           obscureText: _obscurePassword,
+          suffixWidget: SizedBox(width: 20.0),
           onChanged: (value) {
             setState(() {
               String password = _password.text;

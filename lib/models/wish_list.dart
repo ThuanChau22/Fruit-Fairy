@@ -1,46 +1,68 @@
+import 'dart:async';
 import 'dart:collection';
 import 'package:flutter/foundation.dart';
-//
-import 'package:fruitfairy/services/firestore_service.dart';
 
 /// A class that represents a charity's wishlist
-/// [_produce]: list of produce ids selected by the charity
+/// [_produce]: List of produce ids selected by the charity
+/// [_subscriptions]: List of stream subcriptions that
+/// performs an opperation for each subcription on changes
+/// [isAllSelected]: Indicate whether all produce is on wishlist
+/// [isLoading]: A flag indicate loading state
+/// [cursor]: A cursor used to traverse internal list
+/// [LoadLimit]: Limit amount per Produce retrieval
 class WishList extends ChangeNotifier {
-  final List<String> _produce = [];
+  static const LoadLimit = 20;
+  final List<String> _produceIds = [];
+  final List<StreamSubscription> _subscriptions = [];
+  bool isAllSelected = false;
+  bool isLoading = true;
+  int endCursor = LoadLimit;
 
-  /// Return a copy of [_produce] sorted in alphabetical order
-  UnmodifiableListView<String> get produce {
-    _produce.sort();
-    return UnmodifiableListView(_produce);
+  /// Return a copy of [_produceIds] sorted in alphabetical order
+  UnmodifiableListView<String> get produceIds {
+    _produceIds.sort();
+    return UnmodifiableListView(_produceIds);
   }
 
-  /// Add [fruitId] to list
-  void pickFruit(String fruitId) {
-    _produce.add(fruitId);
+  /// Add [produceId] to list
+  void pickProduce(String produceId) {
+    _produceIds.add(produceId);
     notifyListeners();
   }
 
-  /// Remove [fruitId] from list
-  void removeFruit(String fruitId) {
-    _produce.remove(fruitId);
+  /// Remove [produceId] from list
+  void removeProduce(String produceId) {
+    _produceIds.remove(produceId);
     notifyListeners();
   }
 
-  /// Parse [fruitId] from database
-  /// [wishlistData]: A Map with keys that are declared in [FireStoreService]
-  void fromDB(Map<String, dynamic> wishlistData) {
-    _produce.clear();
-    if (wishlistData != null) {
-      wishlistData[FireStoreService.kProduceIds].forEach((fruitId) {
-        _produce.add(fruitId);
-      });
+  /// Remove all [produceId] from list
+  void removeAllProduce() {
+    _produceIds.clear();
+    notifyListeners();
+  }
+
+  /// Add [subscription] to [_subscriptions] list
+  void addStream(StreamSubscription subscription) {
+    _subscriptions.add(subscription);
+  }
+
+  /// Cancel all subscriptions from [_subscriptions]
+  void clearStream() {
+    for (StreamSubscription subscription in _subscriptions) {
+      subscription.cancel();
     }
-    notifyListeners();
+    _subscriptions.clear();
   }
 
-  /// Set [_produce] to default value
+  /// Set object to initial state
+  /// Cancel all [_subscriptions]
   void clear() {
-    _produce.clear();
+    clearStream();
+    _produceIds.clear();
+    isAllSelected = false;
+    isLoading = true;
+    endCursor = LoadLimit;
     notifyListeners();
   }
 }
