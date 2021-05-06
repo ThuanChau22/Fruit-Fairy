@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_circular_text/circular_text.dart';
+//
+import 'package:fruitfairy/constant.dart';
 
 class FruitFairyLogo extends StatelessWidget {
   static const String id = 'fruit_fairy_logo';
@@ -45,7 +47,7 @@ class FruitFairyLogo extends StatelessWidget {
           CircleAvatar(
             radius: radius,
             backgroundImage: AssetImage('images/Logo-Dark.png'),
-            backgroundColor: Colors.green.shade100,
+            backgroundColor: kAccentColor,
           ),
         ],
       ),
