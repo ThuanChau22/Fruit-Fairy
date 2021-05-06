@@ -172,19 +172,13 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
 
   Widget selectedCharities() {
     List<Widget> selectedCharity = [];
-    int priority = 1;
     Donation donation = context.read<Donation>();
     for (Charity charity in donation.charities) {
       selectedCharity.add(Padding(
         padding: EdgeInsets.symmetric(
           vertical: 10.0,
         ),
-        child: CharityTile(
-          charityName: charity.name,
-          selectedOrder: '${priority++}',
-          onTap: () {},
-          disabled: true,
-        ),
+        child: CharityTile(charityName: charity.name),
       ));
     }
     Size screen = MediaQuery.of(context).size;

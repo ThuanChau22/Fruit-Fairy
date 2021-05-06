@@ -10,6 +10,7 @@ import 'package:fruitfairy/models/produce_item.dart';
 import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/models/status.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
+import 'package:fruitfairy/widgets/charity_tile.dart';
 import 'package:fruitfairy/widgets/custom_grid.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
 
@@ -55,11 +56,11 @@ class _DonorDonationDetailScreenState extends State<DonorDonationDetailScreen> {
     Size screen = MediaQuery.of(context).size;
     List<Widget> widgets = [
       statusTile(),
-      groupLabel("Selected Charity"),
-      selectedCharity(),
-      assistanceNeeded(),
       groupLabel('Status'),
       statusMessage(),
+      assistanceNeeded(),
+      groupLabel("Charity Name"),
+      selectedCharity(),
       groupLabel('Produce'),
       selectedFruits(),
       SizedBox(height: screen.height * 0.06),
@@ -180,14 +181,26 @@ class _DonorDonationDetailScreenState extends State<DonorDonationDetailScreen> {
     );
   }
 
-  Widget selectedCharity() {
+  Widget statusMessage() {
     Size screen = MediaQuery.of(context).size;
     return Padding(
       padding: EdgeInsets.symmetric(
         vertical: screen.height * 0.01,
         horizontal: screen.width * 0.02,
       ),
-      child: fieldLabel('${_donation.charities.first.name}'),
+      child: fieldLabel(_donation.status.message),
+    );
+  }
+
+  Widget selectedCharity() {
+    Size screen = MediaQuery.of(context).size;
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        vertical: screen.height * 0.015,
+        horizontal: screen.width * 0.02,
+      ),
+      child: CharityTile(charityName: _donation.charities.first.name),
+      // fieldLabel(_donation.charities.first.name),
     );
   }
 
@@ -220,17 +233,6 @@ class _DonorDonationDetailScreenState extends State<DonorDonationDetailScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget statusMessage() {
-    Size screen = MediaQuery.of(context).size;
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        vertical: screen.height * 0.01,
-        horizontal: screen.width * 0.02,
-      ),
-      child: fieldLabel('${_donation.status.message}'),
     );
   }
 

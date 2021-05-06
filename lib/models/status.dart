@@ -31,7 +31,7 @@ class Status implements Comparable<Status> {
     }
     if (isCompleted) {
       _description = 'Completed';
-      _message = 'Donation completed';
+      _message = 'Donation picked up by charity';
     }
   }
 
