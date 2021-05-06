@@ -3,37 +3,40 @@ import 'package:flutter/foundation.dart';
 //
 import 'package:fruitfairy/models/charity.dart';
 import 'package:fruitfairy/models/produce_item.dart';
+import 'package:fruitfairy/models/status.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
 
 /// A class that represents a dontation
+/// [_id]: donation id
 /// [_needCollected]: specify whether
 /// the donor need help collecting
-/// [_produce]: selected produce IDs
-/// [_charities]: selected charities
+/// [_produce]: selected produce
 /// [_address]: donor's address
 /// [_phone]: donor's phone number
+/// [_charities]: selected charities
 /// [_updated]: object state's update status
 /// [_onEmptyBasket]: a callback that handles when [_produce] is empty
+/// [status]: donation status
+/// [createdAt]: donation created timestamp
+/// [donorId]: donor unique id
+/// [donorName]: donor name
 /// [MaxCharity]: maximum number of charity can be selected
-class Donation extends ChangeNotifier {
+class Donation extends ChangeNotifier implements Comparable<Donation> {
   static const int MaxCharity = 3;
-  final List<Charity> _charities = [];
-  final Map<String, ProduceItem> _produce = {};
+  final String id;
+  final Map<String, ProduceItem> _produce = SplayTreeMap();
   final Map<String, String> _address = {};
   final Map<String, String> _phone = {};
+  final List<Charity> _charities = [];
   bool _needCollected = true;
   bool _updated = false;
-  VoidCallback _onEmptyBasket;
+  VoidCallback _onEmptyBasket = () {};
+  Status status = Status.init();
+  DateTime createdAt = DateTime.now();
+  String donorId = '';
+  String donorName = '';
 
-  /// Return a copy of [_needCollected]
-  bool get needCollected {
-    return _needCollected;
-  }
-
-  /// Return a copy of [_charities]
-  UnmodifiableListView<Charity> get charities {
-    return UnmodifiableListView(_charities);
-  }
+  Donation(this.id);
 
   /// Return a copy of [_produce]
   UnmodifiableMapView<String, ProduceItem> get produce {
@@ -50,35 +53,38 @@ class Donation extends ChangeNotifier {
     return UnmodifiableMapView(_phone);
   }
 
+  /// Return a copy of [_charities]
+  UnmodifiableListView<Charity> get charities {
+    return UnmodifiableListView(_charities);
+  }
+
+  /// Return a copy of [_needCollected]
+  bool get needCollected {
+    return _needCollected;
+  }
+
   /// Return [_updated] status
   bool get isUpdated {
     return _updated;
   }
 
-  /// Listen to callback when [_produce] is empty
-  void onEmptyBasket(VoidCallback action) {
-    _onEmptyBasket = () {
-      if (_produce.isEmpty) action();
-    };
-    addListener(_onEmptyBasket);
-  }
-
   /// Set collecting option
-  void setNeedCollected(bool option) {
+  set needCollected(bool option) {
     _needCollected = option;
     notifyListeners();
   }
 
-  /// Add [produceId] to list
-  void pickProduce(String produceId, ProduceItem produceItem) {
-    _produce[produceId] = produceItem;
+  /// Add [produceItem] to map [_produce]
+  /// access through [produceItem.id]
+  void pickProduce(ProduceItem produceItem) {
+    _produce[produceItem.id] = produceItem;
     _updated = true;
     notifyListeners();
   }
 
-  /// Remove [produceId] from list
+  /// Remove [ProduceItem] from map [_produce]
+  /// through [produceId]
   void removeProduce(String produceId) {
-    _produce[produceId].clear();
     _produce.remove(produceId);
     _updated = true;
     notifyListeners();
@@ -94,27 +100,35 @@ class Donation extends ChangeNotifier {
     @required String dialCode,
     @required String phoneNumber,
   }) {
-    String oldStreet = _address[FireStoreService.kAddressStreet];
-    String oldCity = _address[FireStoreService.kAddressCity];
-    String oldState = _address[FireStoreService.kAddressState];
-    String oldZip = _address[FireStoreService.kAddressZip];
-    String oldCountry = _phone[FireStoreService.kPhoneCountry];
-    String oldDialCode = _phone[FireStoreService.kPhoneDialCode];
-    String oldPhoneNumber = _phone[FireStoreService.kPhoneNumber];
-    if (oldStreet != street ||
-        oldCity != city ||
-        oldState != state ||
-        oldZip != zip ||
-        oldCountry != country ||
-        oldDialCode != dialCode ||
-        oldPhoneNumber != phoneNumber) {
-      _address[FireStoreService.kAddressStreet] = street;
-      _address[FireStoreService.kAddressCity] = city;
-      _address[FireStoreService.kAddressState] = state;
-      _address[FireStoreService.kAddressZip] = zip;
-      _phone[FireStoreService.kPhoneCountry] = country;
-      _phone[FireStoreService.kPhoneDialCode] = dialCode;
-      _phone[FireStoreService.kPhoneNumber] = phoneNumber;
+    bool changed = false;
+    Map<String, String> newAddress = {
+      FireStoreService.kAddressStreet: street,
+      FireStoreService.kAddressCity: city,
+      FireStoreService.kAddressState: state,
+      FireStoreService.kAddressZip: zip,
+    };
+    for (String key in newAddress.keys) {
+      if (_address[key] != newAddress[key]) {
+        changed = true;
+      }
+    }
+    Map<String, String> newPhone = {
+      FireStoreService.kPhoneCountry: country,
+      FireStoreService.kPhoneDialCode: dialCode,
+      FireStoreService.kPhoneNumber: phoneNumber,
+    };
+    for (String key in newPhone.keys) {
+      if (_phone[key] != newPhone[key]) {
+        changed = true;
+      }
+    }
+    if (changed) {
+      newAddress.forEach((key, value) {
+        _address[key] = value;
+      });
+      newPhone.forEach((key, value) {
+        _phone[key] = value;
+      });
       _updated = true;
     }
     notifyListeners();
@@ -134,6 +148,14 @@ class Donation extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Listen to callback when [_produce] is empty
+  void onEmptyBasket(VoidCallback action) {
+    _onEmptyBasket = () {
+      if (_produce.isEmpty) action();
+    };
+    addListener(_onEmptyBasket);
+  }
+
   /// Reset update status and clear [_charities]
   void clearUpdated() {
     _updated = false;
@@ -142,12 +164,16 @@ class Donation extends ChangeNotifier {
 
   /// Set all fields to default values
   void reset() {
-    _needCollected = true;
-    _updated = false;
     _produce.clear();
     _charities.clear();
     _address.clear();
     _phone.clear();
+    _needCollected = true;
+    _updated = false;
+    status = Status.init();
+    createdAt = DateTime.now();
+    donorId = '';
+    donorName = '';
   }
 
   /// Set object to initial state
@@ -155,5 +181,11 @@ class Donation extends ChangeNotifier {
     reset();
     removeListener(_onEmptyBasket);
     notifyListeners();
+  }
+
+  @override
+  int compareTo(Donation other) {
+    int result = this.status.compareTo(other.status);
+    return result == 0 ? other.createdAt.compareTo(this.createdAt) : result;
   }
 }

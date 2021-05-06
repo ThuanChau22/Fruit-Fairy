@@ -44,7 +44,7 @@ class FruitFairyLogo extends StatelessWidget {
           ),
           CircleAvatar(
             radius: radius,
-            backgroundImage: AssetImage('images/Fairy-Fruit.png'),
+            backgroundImage: AssetImage('images/Logo-Dark.png'),
             backgroundColor: Colors.green.shade100,
           ),
         ],

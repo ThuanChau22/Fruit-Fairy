@@ -3,6 +3,7 @@ import 'package:meta/meta.dart';
 import 'package:http/http.dart' as http;
 //
 import 'package:fruitfairy/api_keys.dart';
+import 'package:fruitfairy/services/utils.dart';
 
 /// A class that performs map related operations such as look up addresses
 /// or calulate distances by utilizing Google Map API
@@ -121,27 +122,24 @@ class MapService {
     @required List<String> destinations,
   }) async {
     List<double> results = [];
-
-    // Break number of destinations into groups of 25 each request
-    List<String> requests = [];
-    int index = 0;
-    while (index < destinations.length) {
-      String requestURL =
-          'https://maps.googleapis.com/maps/api/distancematrix/json?';
-      requestURL += 'origins=$origin';
-      requestURL += '&destinations=';
-      for (int i = 0; i < 25 && index < destinations.length; i++) {
-        requestURL += '${destinations[index++]}|';
-      }
-      requestURL += '&units=imperial';
-      requestURL += '&key=$PLACES_API_KEY';
-      requests.add(requestURL);
-    }
-
     try {
+      // Break number of destinations into groups of 25 each request
+      List<List<String>> lists = Utils.decompose(destinations, 25);
+
       // Execute all API calls at the same time and wait for responses
       List<http.Response> responses = await Future.wait(
-        requests.map((requestURL) => http.get(requestURL)),
+        lists.map((destinationList) {
+          String requestURL =
+              'https://maps.googleapis.com/maps/api/distancematrix/json?';
+          requestURL += 'origins=$origin';
+          requestURL += '&destinations=';
+          for (String destination in destinationList) {
+            requestURL += '$destination|';
+          }
+          requestURL += '&units=imperial';
+          requestURL += '&key=$PLACES_API_KEY';
+          return http.get(requestURL);
+        }),
       );
       // Parse each response into results list
       for (http.Response response in responses) {

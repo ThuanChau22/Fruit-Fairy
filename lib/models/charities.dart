@@ -18,7 +18,7 @@ class Charities extends ChangeNotifier {
   }
 
   /// Set suggested charities to a list
-  void setList(List<Charity> charities) {
+  set list(List<Charity> charities) {
     _charities.addAll(charities);
     notifyListeners();
   }

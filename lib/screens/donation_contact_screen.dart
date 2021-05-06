@@ -1,6 +1,4 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
 //
@@ -63,21 +61,14 @@ class _ContactConfirmation extends State<DonationContactScreen> {
   bool _showVerifyPhone = false;
   bool _phoneVerified = false;
 
-  StreamSubscription<DocumentSnapshot> _subscription;
-
   Future<String> Function(String smsCode) _verifyCode;
 
-  void _fillInputFields() {
-    if (_updated.isEmpty) {
+  void _updateInputFields() {
+    if (_updated.contains(Field.Address)) {
       fillAddress();
+    }
+    if (_updated.contains(Field.Phone)) {
       fillPhone();
-    } else {
-      if (_updated.contains(Field.Address)) {
-        fillAddress();
-      }
-      if (_updated.contains(Field.Phone)) {
-        fillPhone();
-      }
     }
     setState(() {});
   }
@@ -287,8 +278,11 @@ class _ContactConfirmation extends State<DonationContactScreen> {
     super.initState();
     fillAddress();
     fillPhone();
-    _subscription = context.read<FireStoreService>().userStream((userData) {
-      _fillInputFields();
+    FireStoreService fireStore = context.read<FireStoreService>();
+    fireStore.accountStream(context.read<Account>(), onComplete: () {
+      if (mounted) {
+        _updateInputFields();
+      }
     });
   }
 
@@ -302,7 +296,6 @@ class _ContactConfirmation extends State<DonationContactScreen> {
     _zipCode.dispose();
     _phoneNumber.dispose();
     _confirmCode.dispose();
-    _subscription.cancel();
   }
 
   @override
@@ -310,22 +303,31 @@ class _ContactConfirmation extends State<DonationContactScreen> {
     return WillPopScope(
       onWillPop: () async {
         MessageBar(context).hide();
+        context.read<Account>().cancelLastSubscription();
         return true;
       },
       child: GestureWrapper(
         child: Scaffold(
           appBar: AppBar(title: Text('Contact Infomation')),
           body: SafeArea(
-            child: ModalProgressHUD(
-              inAsyncCall: _showSpinner,
-              progressIndicator: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
-              ),
-              child: Column(
-                children: [
-                  contactInfo(),
-                  buttonSection(),
-                ],
+            child: Container(
+              decoration: kGradientBackground,
+              child: ModalProgressHUD(
+                inAsyncCall: _showSpinner,
+                progressIndicator: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation(kAccentColor),
+                ),
+                child: Stack(
+                  children: [
+                    contactInfo(),
+                    Positioned(
+                      left: 0.0,
+                      right: 0.0,
+                      bottom: 0.0,
+                      child: buttonSection(),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -356,20 +358,19 @@ class _ContactConfirmation extends State<DonationContactScreen> {
       ),
       phoneNumberField(),
       verifyCodeField(),
+      bottomPadding(),
     ];
-    return Expanded(
-      child: ListView.builder(
-        controller: _scroller.controller,
-        itemCount: widgets.length,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: screen.width * 0.15,
-            ),
-            child: widgets[index],
-          );
-        },
-      ),
+    return ListView.builder(
+      controller: _scroller.controller,
+      itemCount: widgets.length,
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: screen.width * 0.15,
+          ),
+          child: widgets[index],
+        );
+      },
     );
   }
 
@@ -643,19 +644,31 @@ class _ContactConfirmation extends State<DonationContactScreen> {
     );
   }
 
+  Widget bottomPadding() {
+    Size screen = MediaQuery.of(context).size;
+    EdgeInsets view = MediaQuery.of(context).viewInsets;
+    return Visibility(
+      visible: view.bottom == 0.0,
+      child: SizedBox(height: 60 + screen.height * 0.03),
+    );
+  }
+
   Widget buttonSection() {
     EdgeInsets view = MediaQuery.of(context).viewInsets;
     return Visibility(
       visible: view.bottom == 0.0,
-      child: Column(
-        children: [
-          Divider(
-            color: kLabelColor,
-            height: 5.0,
-            thickness: 2.0,
-          ),
-          nextButton(),
-        ],
+      child: Container(
+        color: kDarkPrimaryColor.withOpacity(0.75),
+        child: Column(
+          children: [
+            Divider(
+              color: kLabelColor,
+              height: 5.0,
+              thickness: 2.0,
+            ),
+            nextButton(),
+          ],
+        ),
       ),
     );
   }
@@ -664,7 +677,7 @@ class _ContactConfirmation extends State<DonationContactScreen> {
     Size screen = MediaQuery.of(context).size;
     return Padding(
       padding: EdgeInsets.symmetric(
-        vertical: screen.height * 0.03,
+        vertical: screen.height * 0.015,
         horizontal: screen.width * 0.25,
       ),
       child: RoundedButton(

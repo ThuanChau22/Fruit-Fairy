@@ -101,31 +101,34 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
         child: Scaffold(
           appBar: AppBar(title: Text('Donor')),
           body: SafeArea(
-            child: ModalProgressHUD(
-              inAsyncCall: _showSpinner,
-              progressIndicator: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
-              ),
-              child: ScrollableLayout(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    vertical: screen.height * 0.06,
-                    horizontal: screen.width * 0.15,
-                  ),
-                  child: Column(
-                    children: [
-                      firstNameInputField(),
-                      inputFieldSizeBox(),
-                      lastNameInputField(),
-                      inputFieldSizeBox(),
-                      emailInputField(),
-                      inputFieldSizeBox(),
-                      passwordInputField(),
-                      inputFieldSizeBox(),
-                      confirmPasswordInputField(),
-                      SizedBox(height: screen.height * 0.05),
-                      signUpButton(context),
-                    ],
+            child: Container(
+              decoration: kGradientBackground,
+              child: ModalProgressHUD(
+                inAsyncCall: _showSpinner,
+                progressIndicator: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation(kAccentColor),
+                ),
+                child: ScrollableLayout(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      vertical: screen.height * 0.06,
+                      horizontal: screen.width * 0.15,
+                    ),
+                    child: Column(
+                      children: [
+                        firstNameInputField(),
+                        inputFieldSizeBox(),
+                        lastNameInputField(),
+                        inputFieldSizeBox(),
+                        emailInputField(),
+                        inputFieldSizeBox(),
+                        passwordInputField(),
+                        inputFieldSizeBox(),
+                        confirmPasswordInputField(),
+                        SizedBox(height: screen.height * 0.05),
+                        signUpButton(context),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -198,6 +201,7 @@ class _SignUpDonorScreenState extends State<SignUpDonorScreen> {
           keyboardType: TextInputType.visiblePassword,
           errorMessage: _passwordError,
           obscureText: _obscurePassword,
+          suffixWidget: SizedBox(width: 20.0),
           onChanged: (value) {
             setState(() {
               String password = _password.text;

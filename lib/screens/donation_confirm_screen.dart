@@ -3,7 +3,11 @@ import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
 //
 import 'package:fruitfairy/constant.dart';
+import 'package:fruitfairy/models/account.dart';
+import 'package:fruitfairy/models/charity.dart';
 import 'package:fruitfairy/models/donation.dart';
+import 'package:fruitfairy/models/produce_item.dart';
+import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
 import 'package:fruitfairy/widgets/charity_tile.dart';
@@ -23,12 +27,11 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
 
   void confirm() async {
     setState(() => _showSpinner = true);
+    FireStoreService firestore = context.read<FireStoreService>();
+    Account account = context.read<Account>();
     Donation donation = context.read<Donation>();
-    FireStoreService fireStoreService = context.read<FireStoreService>();
-    await fireStoreService.addDonation(donation);
-    donation.produce.values.forEach((produceItem) {
-      produceItem.clear();
-    });
+    await firestore.addDonation(account, donation);
+    account.cancelLastSubscription();
     donation.reset();
     Navigator.of(context).popUntil((route) {
       return route.settings.name == HomeScreen.id;
@@ -41,16 +44,24 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
     return Scaffold(
       appBar: AppBar(title: Text('Review and Confirm')),
       body: SafeArea(
-        child: ModalProgressHUD(
-          inAsyncCall: _showSpinner,
-          progressIndicator: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
-          ),
-          child: Column(
-            children: [
-              reviewDetails(),
-              buttonSection(),
-            ],
+        child: Container(
+          decoration: kGradientBackground,
+          child: ModalProgressHUD(
+            inAsyncCall: _showSpinner,
+            progressIndicator: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation(kAccentColor),
+            ),
+            child: Stack(
+              children: [
+                reviewDetails(),
+                Positioned(
+                  left: 0.0,
+                  right: 0.0,
+                  bottom: 0.0,
+                  child: buttonSection(),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -58,7 +69,6 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
   }
 
   Widget reviewDetails() {
-    Size screen = MediaQuery.of(context).size;
     List<Widget> widgets = [
       groupLabel('Produce Selected'),
       selectedFruits(),
@@ -67,19 +77,19 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
       groupLabel('Contact Information'),
       contactInfo(),
       appreciation(),
+      bottomPadding(),
     ];
-    return Expanded(
-      child: ListView.builder(
-        itemCount: widgets.length,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: screen.width * 0.1,
-            ),
-            child: widgets[index],
-          );
-        },
-      ),
+    Size screen = MediaQuery.of(context).size;
+    return ListView.builder(
+      itemCount: widgets.length,
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: screen.width * 0.1,
+          ),
+          child: widgets[index],
+        );
+      },
     );
   }
 
@@ -140,18 +150,20 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
 
   List<Widget> fruitTiles() {
     List<Widget> fruitList = [];
+    Produce produce = context.watch<Produce>();
+    Map<String, ProduceItem> produceStorage = produce.map;
     Donation donation = context.watch<Donation>();
-    donation.produce.values.forEach((produceItem) {
-      int amount = produceItem.amount;
+    donation.produce.forEach((produceId, produceItem) {
       fruitList.add(Container(
         decoration: BoxDecoration(
           color: kObjectColor,
           borderRadius: BorderRadius.circular(20.0),
         ),
         child: FruitTile(
-          fruitName: produceItem.name,
-          fruitImage: produceItem.imageURL,
-          percentage: donation.needCollected ? '$amount' : '',
+          fruitName: produceStorage[produceId].name,
+          fruitImage: produceStorage[produceId].imageURL,
+          isLoading: produceStorage[produceId].isLoading,
+          percentage: donation.needCollected ? '${produceItem.amount}' : '',
         ),
       ));
     });
@@ -162,7 +174,7 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
     List<Widget> selectedCharity = [];
     int priority = 1;
     Donation donation = context.read<Donation>();
-    donation.charities.forEach((charity) {
+    for (Charity charity in donation.charities) {
       selectedCharity.add(Padding(
         padding: EdgeInsets.symmetric(
           vertical: 10.0,
@@ -174,7 +186,7 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
           disabled: true,
         ),
       ));
-    });
+    }
     Size screen = MediaQuery.of(context).size;
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -237,19 +249,31 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
     );
   }
 
+  Widget bottomPadding() {
+    Size screen = MediaQuery.of(context).size;
+    EdgeInsets view = MediaQuery.of(context).viewInsets;
+    return Visibility(
+      visible: view.bottom == 0.0,
+      child: SizedBox(height: 60 + screen.height * 0.03),
+    );
+  }
+
   Widget buttonSection() {
     EdgeInsets view = MediaQuery.of(context).viewInsets;
     return Visibility(
       visible: view.bottom == 0.0,
-      child: Column(
-        children: [
-          Divider(
-            color: kLabelColor,
-            height: 5.0,
-            thickness: 2.0,
-          ),
-          confirmButton(),
-        ],
+      child: Container(
+        color: kDarkPrimaryColor.withOpacity(0.75),
+        child: Column(
+          children: [
+            Divider(
+              color: kLabelColor,
+              height: 5.0,
+              thickness: 2.0,
+            ),
+            confirmButton(),
+          ],
+        ),
       ),
     );
   }
@@ -258,7 +282,7 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
     Size screen = MediaQuery.of(context).size;
     return Padding(
       padding: EdgeInsets.symmetric(
-        vertical: screen.height * 0.03,
+        vertical: screen.height * 0.015,
         horizontal: screen.width * 0.25,
       ),
       child: RoundedButton(

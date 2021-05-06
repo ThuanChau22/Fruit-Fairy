@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
@@ -8,6 +9,7 @@ import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/models/wish_list.dart';
 import 'package:fruitfairy/screens/charity_produce_selection_screen.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
+import 'package:fruitfairy/widgets/custom_grid.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
 import 'package:fruitfairy/widgets/popup_diaglog.dart';
 import 'package:fruitfairy/widgets/rounded_button.dart';
@@ -21,27 +23,81 @@ class CharityWishListScreen extends StatefulWidget {
 }
 
 class _CharityWishListScreenState extends State<CharityWishListScreen> {
+  final ScrollController _scroll = new ScrollController();
+  final double _scrollOffset = 135.0;
+
+  Timer _loadingTimer = Timer(Duration.zero, () {});
+  bool _isLoadingInit = true;
+  bool _isLoadingMore = true;
+
   String _buttonLabel = '';
+
+  void initWishList() {
+    FireStoreService fireStore = context.read<FireStoreService>();
+    WishList wishList = context.read<WishList>();
+    Produce produce = context.read<Produce>();
+    _scroll.addListener(() {
+      ScrollPosition pos = _scroll.position;
+      bool loadTriggered = pos.pixels + _scrollOffset >= pos.maxScrollExtent;
+      if (loadTriggered && !_loadingTimer.isActive) {
+        _loadingTimer = Timer(Duration(seconds: 2), () {
+          if (mounted) {
+            setState(() => _isLoadingMore = false);
+          }
+        });
+        int currentSize = wishList.produceIds.length;
+        fireStore.loadWishListProduce(wishList, produce, onData: () {
+          if (mounted) {
+            if (currentSize < wishList.produceIds.length) {
+              _loadingTimer.cancel();
+            }
+          }
+        });
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initWishList();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _scroll.dispose();
+    _loadingTimer.cancel();
+  }
 
   @override
   Widget build(BuildContext context) {
-    Produce produce = context.watch<Produce>();
+    WishList wishList = context.watch<WishList>();
+    _isLoadingInit = wishList.isLoading;
     return Scaffold(
       appBar: AppBar(
         title: Text('Wish List'),
         actions: [helpButton()],
       ),
       body: SafeArea(
-        child: ModalProgressHUD(
-          inAsyncCall: produce.map.isEmpty,
-          progressIndicator: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
-          ),
-          child: Column(
-            children: [
-              layoutMode(),
-              buttonSection(),
-            ],
+        child: Container(
+          decoration: kGradientBackground,
+          child: ModalProgressHUD(
+            inAsyncCall: _isLoadingInit,
+            progressIndicator: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation(kAccentColor),
+            ),
+            child: Stack(
+              children: [
+                layoutMode(),
+                Positioned(
+                  left: 0.0,
+                  right: 0.0,
+                  bottom: 0.0,
+                  child: buttonSection(),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -61,71 +117,107 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
       onPressed: () {
         PopUpDialog(
           context,
-          message:
-              'The purpose of a wish list is to match donors to charities based on a charity\'s needs. If your needs change, you can manage your wish list accordingly.',
+          message: 'The purpose of a wish list is to'
+              ' match donors to charities based on a'
+              ' charity\'s needs. If your needs change,'
+              ' you can manage your wish list accordingly.',
         ).show();
       },
     );
   }
 
   Widget layoutMode() {
-    WishList wishList = context.watch<WishList>();
+    if (_isLoadingInit) return Container();
+    WishList wishList = context.read<WishList>();
     bool isEmpty = wishList.produceIds.isEmpty;
     _buttonLabel = '${isEmpty ? 'Create' : 'Edit'} Wish List';
-    return isEmpty ? emptyWishList() : selectedFruits();
+    if (isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              '(Empty)',
+              style: TextStyle(
+                color: kLabelColor.withOpacity(0.5),
+                fontSize: 20.0,
+              ),
+            ),
+            bottomPadding(),
+          ],
+        ),
+      );
+    }
+    return selectedFruits();
   }
 
-  Widget emptyWishList() {
-    return Expanded(
-      child: Center(
-        child: Text(
-          '(Empty)',
-          style: TextStyle(
-            color: kLabelColor.withOpacity(0.5),
-            fontSize: 20.0,
+  Widget selectedFruits() {
+    Size screen = MediaQuery.of(context).size;
+    int axisCount = screen.width >= 600 ? 5 : 3;
+    double padding = screen.width * 0.02;
+    List<Widget> widgets = [
+      Padding(
+        padding: EdgeInsets.only(top: screen.height * 0.03),
+        child: CustomGrid(
+          assistPadding: padding,
+          crossAxisCount: axisCount,
+          children: fruitTiles(),
+        ),
+      ),
+      loadingTile(),
+      bottomPadding(),
+    ];
+    return ListView.builder(
+      controller: _scroll,
+      itemCount: widgets.length,
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: padding,
+          ),
+          child: widgets[index],
+        );
+      },
+    );
+  }
+
+  Widget loadingTile() {
+    WishList wishList = context.read<WishList>();
+    bool underLimit = wishList.produceIds.length < Produce.LoadLimit;
+    return Visibility(
+      visible: !_isLoadingInit && !underLimit && _isLoadingMore,
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 10.0),
+        child: Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation(kAccentColor),
           ),
         ),
       ),
     );
   }
 
-  Widget selectedFruits() {
-    Size screen = MediaQuery.of(context).size;
-    int axisCount = screen.width >= 600 ? 5 : 3;
-    return Expanded(
-      child: GridView.count(
-        primary: false,
-        padding: EdgeInsets.only(
-          top: screen.height * 0.03,
-          left: screen.width * 0.02,
-          right: screen.width * 0.02,
-        ),
-        crossAxisCount: axisCount,
-        children: fruitTiles(),
-      ),
-    );
-  }
-
   List<Widget> fruitTiles() {
     List<Widget> fruitTiles = [];
-    FireStoreService fireStoreService = context.read<FireStoreService>();
-    Produce produce = context.read<Produce>();
+    FireStoreService fireStore = context.read<FireStoreService>();
+    Produce produce = context.watch<Produce>();
     Map<String, ProduceItem> produceMap = produce.map;
     WishList wishList = context.read<WishList>();
-    wishList.produceIds.forEach((produceId) {
+    List<String> produceIdList = wishList.produceIds;
+    for (int i = 0; i < wishList.endCursor && i < produceIdList.length; i++) {
+      String produceId = produceIdList[i];
       if (produceMap.containsKey(produceId)) {
         fruitTiles.add(removableFruitTile(
           produceItem: produceMap[produceId],
           onPressed: () {
             setState(() {
-              produceMap[produceId].clear();
               wishList.removeProduce(produceId);
-              fireStoreService.updateWishList(wishList.produceIds);
+              fireStore.updateWishList(wishList.produceIds);
             });
           },
         ));
       }
-    });
+    }
     return fruitTiles;
   }
 
@@ -150,6 +242,7 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
             child: FruitTile(
               fruitName: produceItem.name,
               fruitImage: produceItem.imageURL,
+              isLoading: produceItem.isLoading,
             ),
           ),
         ),
@@ -175,19 +268,31 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
     );
   }
 
+  Widget bottomPadding() {
+    Size screen = MediaQuery.of(context).size;
+    EdgeInsets view = MediaQuery.of(context).viewInsets;
+    return Visibility(
+      visible: view.bottom == 0.0,
+      child: SizedBox(height: 60 + screen.height * 0.03),
+    );
+  }
+
   Widget buttonSection() {
     EdgeInsets view = MediaQuery.of(context).viewInsets;
     return Visibility(
       visible: view.bottom == 0.0,
-      child: Column(
-        children: [
-          Divider(
-            color: kLabelColor,
-            height: 5.0,
-            thickness: 2.0,
-          ),
-          nextButton(),
-        ],
+      child: Container(
+        color: kDarkPrimaryColor.withOpacity(0.75),
+        child: Column(
+          children: [
+            Divider(
+              color: kLabelColor,
+              height: 5.0,
+              thickness: 2.0,
+            ),
+            nextButton(),
+          ],
+        ),
       ),
     );
   }
@@ -196,7 +301,7 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
     Size screen = MediaQuery.of(context).size;
     return Padding(
       padding: EdgeInsets.symmetric(
-        vertical: screen.height * 0.03,
+        vertical: screen.height * 0.015,
         horizontal: screen.width * 0.25,
       ),
       child: RoundedButton(

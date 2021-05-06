@@ -29,25 +29,29 @@ class _DonationCharitySelectionScreenState
   ViewMode _mode = ViewMode.Init;
   bool _showSpinner = false;
 
+  void suggestCharities() async {
+    setState(() => _showSpinner = true);
+    FireStoreService fireStore = context.read<FireStoreService>();
+    Charities charities = context.read<Charities>();
+    Donation donation = context.read<Donation>();
+    if (donation.isUpdated) {
+      charities.clear();
+      charities.list = await fireStore.charitySuggestions(
+        donation: donation,
+        limitDistance: Charities.MaxDistance,
+        limitCharity: Charities.MaxCharity,
+      );
+      donation.clearUpdated();
+    }
+    _mode = charities.list.isEmpty ? ViewMode.Empty : ViewMode.Suggestion;
+    setState(() => _showSpinner = false);
+  }
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      setState(() => _showSpinner = true);
-      FireStoreService fireStore = context.read<FireStoreService>();
-      Charities charities = context.read<Charities>();
-      Donation donation = context.read<Donation>();
-      if (donation.isUpdated) {
-        charities.clear();
-        charities.setList(await fireStore.charitySuggestions(
-          donation: donation,
-          limitDistance: Charities.MaxDistance,
-          limitCharity: Charities.MaxCharity,
-        ));
-        donation.clearUpdated();
-      }
-      _mode = charities.list.isEmpty ? ViewMode.Empty : ViewMode.Suggestion;
-      setState(() => _showSpinner = false);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      suggestCharities();
     });
   }
 
@@ -64,16 +68,24 @@ class _DonationCharitySelectionScreenState
           actions: [helpButton()],
         ),
         body: SafeArea(
-          child: ModalProgressHUD(
-            inAsyncCall: _showSpinner,
-            progressIndicator: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
-            ),
-            child: Column(
-              children: [
-                layoutMode(),
-                buttonSection(),
-              ],
+          child: Container(
+            decoration: kGradientBackground,
+            child: ModalProgressHUD(
+              inAsyncCall: _showSpinner,
+              progressIndicator: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation(kAccentColor),
+              ),
+              child: Stack(
+                children: [
+                  layoutMode(),
+                  Positioned(
+                    left: 0.0,
+                    right: 0.0,
+                    bottom: 0.0,
+                    child: buttonSection(),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -85,20 +97,22 @@ class _DonationCharitySelectionScreenState
     Size screen = MediaQuery.of(context).size;
     switch (_mode) {
       case ViewMode.Init:
-        return Expanded(
-          child: Container(),
-        );
+        return Container();
         break;
 
       case ViewMode.Empty:
-        return Expanded(
-          child: Center(
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: screen.width * 0.05,
-              ),
-              child: Text(
-                'No charities in our system match your donation. The produce you wish to donate does not match any charities within a 20 mile radius.\n\nPlease try again at a later time!',
+        return Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: screen.width * 0.05,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'No charities in our system match your donation.'
+                ' The produce you wish to donate does not match'
+                ' any charities within a 20 mile radius.'
+                '\n\nPlease try again at a later time!',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: kLabelColor,
@@ -106,7 +120,8 @@ class _DonationCharitySelectionScreenState
                   fontSize: 20.0,
                 ),
               ),
-            ),
+              bottomPadding(),
+            ],
           ),
         );
         break;
@@ -118,22 +133,21 @@ class _DonationCharitySelectionScreenState
   }
 
   Widget charityOptions() {
+    Size screen = MediaQuery.of(context).size;
     List<Widget> widgets = [instructionSection()];
     widgets.addAll(charityTiles());
-    Size screen = MediaQuery.of(context).size;
-    return Expanded(
-      child: ListView.builder(
-        itemCount: widgets.length,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: EdgeInsets.symmetric(
-              vertical: screen.height * 0.01,
-              horizontal: screen.width * 0.1,
-            ),
-            child: widgets[index],
-          );
-        },
-      ),
+    widgets.add(bottomPadding());
+    return ListView.builder(
+      itemCount: widgets.length,
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: EdgeInsets.symmetric(
+            vertical: screen.height * 0.01,
+            horizontal: screen.width * 0.1,
+          ),
+          child: widgets[index],
+        );
+      },
     );
   }
 
@@ -144,7 +158,7 @@ class _DonationCharitySelectionScreenState
         top: screen.height * 0.02,
       ),
       child: Text(
-        'Select 3 charities:',
+        'Select 3 charities',
         textAlign: TextAlign.center,
         style: TextStyle(
           color: kLabelColor,
@@ -168,8 +182,10 @@ class _DonationCharitySelectionScreenState
       onPressed: () {
         PopUpDialog(
           context,
-          message:
-              'Please select the top three charities to donate to. If your first prioritized charity does not accept your donation, it will be offered to the second prioritized charity and so on.',
+          message: 'Please select the top three charities to'
+              ' donate to. If your first prioritized charity'
+              ' does not accept your donation, it will be offered'
+              ' to the second prioritized charity and so on.',
         ).show();
       },
     );
@@ -180,7 +196,7 @@ class _DonationCharitySelectionScreenState
     Donation donation = context.read<Donation>();
     List<Charity> selectedCharities = donation.charities;
     Charities charities = context.read<Charities>();
-    charities.list.forEach((charity) {
+    for (Charity charity in charities.list) {
       bool selected = selectedCharities.contains(charity);
       int selectedOrder = selectedCharities.indexOf(charity) + 1;
       charityTiles.add(CharityTile(
@@ -197,23 +213,35 @@ class _DonationCharitySelectionScreenState
           });
         },
       ));
-    });
+    }
     return charityTiles;
+  }
+
+  Widget bottomPadding() {
+    Size screen = MediaQuery.of(context).size;
+    EdgeInsets view = MediaQuery.of(context).viewInsets;
+    return Visibility(
+      visible: view.bottom == 0.0,
+      child: SizedBox(height: 60 + screen.height * 0.03),
+    );
   }
 
   Widget buttonSection() {
     EdgeInsets view = MediaQuery.of(context).viewInsets;
     return Visibility(
       visible: view.bottom == 0.0,
-      child: Column(
-        children: [
-          Divider(
-            color: kLabelColor,
-            height: 5.0,
-            thickness: 2.0,
-          ),
-          nextButton(),
-        ],
+      child: Container(
+        color: kDarkPrimaryColor.withOpacity(0.75),
+        child: Column(
+          children: [
+            Divider(
+              color: kLabelColor,
+              height: 5.0,
+              thickness: 2.0,
+            ),
+            nextButton(),
+          ],
+        ),
       ),
     );
   }
@@ -222,7 +250,7 @@ class _DonationCharitySelectionScreenState
     Size screen = MediaQuery.of(context).size;
     return Padding(
       padding: EdgeInsets.symmetric(
-        vertical: screen.height * 0.03,
+        vertical: screen.height * 0.015,
         horizontal: screen.width * 0.25,
       ),
       child: RoundedButton(

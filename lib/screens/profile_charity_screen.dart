@@ -1,13 +1,15 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 //
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
+import 'package:fruitfairy/models/produce.dart';
+import 'package:fruitfairy/models/wish_list.dart';
+import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
+import 'package:fruitfairy/screens/authentication/signin_screen.dart';
 import 'package:fruitfairy/services/map_service.dart';
 import 'package:fruitfairy/services/fireauth_service.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
@@ -28,7 +30,6 @@ enum DeleteMode { Input, Loading, Success }
 
 class ProfileCharityScreen extends StatefulWidget {
   static const String id = 'profile_charity_screen';
-  static const String signOut = 'sign_out';
 
   @override
   _ProfileCharityScreenState createState() => _ProfileCharityScreenState();
@@ -84,31 +85,20 @@ class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
   DeleteMode _deleteMode = DeleteMode.Input;
   bool _obscureDeletePassword = true;
 
-  StreamSubscription<DocumentSnapshot> _userStream;
-
   Future<String> Function(String smsCode) _verifyCode;
 
   StateSetter _setDialogState;
 
-  Function _signOut;
-
   void _updateInputFields() {
     fillEmail();
-    if (_updated.isEmpty) {
+    if (_updated.contains(Field.Name)) {
       fillName();
+    }
+    if (_updated.contains(Field.Address)) {
       fillAddress();
+    }
+    if (_updated.contains(Field.Phone)) {
       fillPhone();
-    } else {
-      if (_updated.contains(Field.Name)) {
-        fillName();
-      }
-      if (_updated.contains(Field.Address)) {
-        fillAddress();
-      }
-      if (_updated.contains(Field.Phone)) {
-        fillPhone();
-      }
-      _updated.remove(Field.Password);
     }
     setState(() {});
   }
@@ -161,20 +151,19 @@ class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
     if (errorMessage.isEmpty) {
       errorMessage = await _updatePassword();
     }
-    String updateMessage;
+    String notifyMessage;
     if (errorMessage.isEmpty) {
-      updateMessage = _updated.contains(Field.Name) ||
-              _updated.contains(Field.Address) ||
-              _updated.contains(Field.Password)
-          ? 'Profile updated'
-          : 'Profile is up-to-date';
-      _updated.removeAll([Field.Name, Field.Address, Field.Password]);
+      notifyMessage = 'Profile is up-to-date';
+      if (_updated.isNotEmpty) {
+        notifyMessage = 'Profile updated';
+        _updated.clear();
+      }
     } else {
       _scrollToError();
-      updateMessage = errorMessage;
+      notifyMessage = errorMessage;
     }
     setState(() => _showSpinner = false);
-    MessageBar(context, message: updateMessage).show();
+    MessageBar(context, message: notifyMessage).show();
   }
 
   Future<String> _updateName() async {
@@ -394,9 +383,17 @@ class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
               email: _email.text.trim(),
               password: password,
             );
+        context.read<Account>().clear();
+        context.read<WishList>().clear();
+        context.read<Produce>().clear();
+        context.read<FireStoreService>().clear();
         _setDialogState(() => _deleteMode = DeleteMode.Success);
         await Future.delayed(Duration(milliseconds: 1500));
-        _signOut();
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          SignOptionScreen.id,
+          (route) => false,
+        );
+        Navigator.of(context).pushNamed(SignInScreen.id);
       } catch (errorMessage) {
         _deleteError = errorMessage;
         _setDialogState(() => _deleteMode = DeleteMode.Input);
@@ -408,16 +405,15 @@ class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      Map<String, Object> args = ModalRoute.of(context).settings.arguments;
-      _signOut = args[ProfileCharityScreen.signOut];
-    });
     fillEmail();
     fillName();
     fillAddress();
     fillPhone();
-    _userStream = context.read<FireStoreService>().userStream((userData) {
-      _updateInputFields();
+    FireStoreService fireStore = context.read<FireStoreService>();
+    fireStore.accountStream(context.read<Account>(), onComplete: () {
+      if (mounted) {
+        _updateInputFields();
+      }
     });
   }
 
@@ -436,7 +432,6 @@ class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
     _state.dispose();
     _zipCode.dispose();
     _deleteConfirm.dispose();
-    _userStream.cancel();
   }
 
   @override
@@ -445,67 +440,71 @@ class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
     return WillPopScope(
       onWillPop: () async {
         MessageBar(context).hide();
+        context.read<Account>().cancelLastSubscription();
         return true;
       },
       child: GestureWrapper(
         child: Scaffold(
           appBar: AppBar(title: Text('Profile')),
           body: SafeArea(
-            child: ModalProgressHUD(
-              inAsyncCall: _showSpinner,
-              progressIndicator: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
-              ),
-              child: ScrollableLayout(
-                controller: _scroller.controller,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    vertical: screen.height * 0.03,
-                    horizontal: screen.width * 0.15,
-                  ),
-                  child: Column(
-                    children: [
-                      inputGroupLabel(
-                        'Account',
-                        tag: Field.Name,
-                      ),
-                      emailInputField(),
-                      inputFieldSizedBox(),
-                      charityNameInputField(),
-                      inputFieldSizedBox(),
-                      inputGroupLabel(
-                        'Address',
-                        tag: Field.Address,
-                      ),
-                      streetInputField(),
-                      inputFieldSizedBox(),
-                      cityInputField(),
-                      inputFieldSizedBox(),
-                      stateInputField(),
-                      inputFieldSizedBox(),
-                      zipInputField(),
-                      inputFieldSizedBox(),
-                      inputGroupLabel(
-                        'Phone Number',
-                        tag: Field.Phone,
-                      ),
-                      phoneNumberField(),
-                      verifyCodeField(),
-                      inputFieldSizedBox(),
-                      inputGroupLabel(
-                        'Change Password',
-                        tag: Field.Password,
-                      ),
-                      currentPasswordInputField(),
-                      inputFieldSizedBox(),
-                      newPasswordInputField(),
-                      inputFieldSizedBox(),
-                      confirmPasswordInputField(),
-                      inputFieldSizedBox(),
-                      saveButton(),
-                      SizedBox(height: screen.height * 0.05),
-                      deleteAccountLink(),
-                    ],
+            child: Container(
+              decoration: kGradientBackground,
+              child: ModalProgressHUD(
+                inAsyncCall: _showSpinner,
+                progressIndicator: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation(kAccentColor),
+                ),
+                child: ScrollableLayout(
+                  controller: _scroller.controller,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      vertical: screen.height * 0.03,
+                      horizontal: screen.width * 0.15,
+                    ),
+                    child: Column(
+                      children: [
+                        inputGroupLabel(
+                          'Account',
+                          tag: Field.Name,
+                        ),
+                        emailInputField(),
+                        inputFieldSizedBox(),
+                        charityNameInputField(),
+                        inputFieldSizedBox(),
+                        inputGroupLabel(
+                          'Address',
+                          tag: Field.Address,
+                        ),
+                        streetInputField(),
+                        inputFieldSizedBox(),
+                        cityInputField(),
+                        inputFieldSizedBox(),
+                        stateInputField(),
+                        inputFieldSizedBox(),
+                        zipInputField(),
+                        inputFieldSizedBox(),
+                        inputGroupLabel(
+                          'Phone Number',
+                          tag: Field.Phone,
+                        ),
+                        phoneNumberField(),
+                        verifyCodeField(),
+                        inputFieldSizedBox(),
+                        inputGroupLabel(
+                          'Change Password',
+                          tag: Field.Password,
+                        ),
+                        currentPasswordInputField(),
+                        inputFieldSizedBox(),
+                        newPasswordInputField(),
+                        inputFieldSizedBox(),
+                        confirmPasswordInputField(),
+                        inputFieldSizedBox(),
+                        saveButton(),
+                        SizedBox(height: screen.height * 0.05),
+                        deleteAccountLink(),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -803,6 +802,7 @@ class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
           keyboardType: TextInputType.visiblePassword,
           errorMessage: _oldPasswordError,
           obscureText: _obscureOldPassword,
+          suffixWidget: SizedBox(width: 20.0),
           onChanged: (value) {
             setState(() {
               _oldPasswordError = '';
@@ -837,6 +837,7 @@ class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
           keyboardType: TextInputType.visiblePassword,
           errorMessage: _newPasswordError,
           obscureText: _obscureNewPassword,
+          suffixWidget: SizedBox(width: 20.0),
           onChanged: (value) {
             setState(() {
               String oldPassword = _oldPassword.text;
@@ -968,7 +969,7 @@ class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
           height: 50.0,
           child: Center(
             child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(kDarkPrimaryColor),
+              valueColor: AlwaysStoppedAnimation(kAccentColor),
             ),
           ),
         );

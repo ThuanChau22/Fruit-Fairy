@@ -1,32 +1,25 @@
 import 'dart:collection';
-//
-import 'package:fruitfairy/services/firestore_service.dart';
 
 /// A class that represents a suggested charity to a donation
 /// [id]: charity document id on database
-/// [_produce]: a set of produceIds from charity wishlist
+/// [_name]: charity name
 /// [_address]: charity address
-/// [_name]: charity display name
+/// [_wishlist]: a set of produce ids from charity wishlist
 /// [_score]: a value that is used to rank charity suggestion priorrity
 class Charity implements Comparable<Charity> {
   /// Set default values for all fields
   final String id;
-  final Set<String> _produce = {};
+  final Set<String> _wishlist = {};
   final Map<String, String> _address = {};
-  String _name = '';
-  double _score = 0;
+  String name = '';
+  double score = 0;
 
   /// Instantiate with charity document [id]
   Charity(this.id);
 
-  /// Return a copy of [_name]
-  String get name {
-    return _name;
-  }
-
-  /// Return a copy of [_produce] as a set
-  UnmodifiableSetView<String> get produce {
-    return UnmodifiableSetView(_produce);
+  /// Return a copy of [_wishlist] as a set
+  UnmodifiableSetView<String> get wishlist {
+    return UnmodifiableSetView(_wishlist);
   }
 
   /// Return a copy of [_address]
@@ -35,46 +28,27 @@ class Charity implements Comparable<Charity> {
     return UnmodifiableMapView(_address);
   }
 
-  /// Return a copy of [_score]
-  double get score {
-    return _score;
+  /// Set charity wishlist
+  set wishList(List<dynamic> wishlist) {
+    if (wishlist != null) {
+      for (dynamic produceId in wishlist) {
+        _wishlist.add(produceId);
+      }
+    }
   }
 
-  /// Parse account information from database
-  /// [userData]: A Map with keys that are declared in [FireStoreService]
-  void fromUsersDB(Map<String, dynamic> userData) {
-    // Charity name
-    _name = userData[FireStoreService.kCharityName];
-
-    // Address
-    Map<String, dynamic> address = userData[FireStoreService.kAddress];
+  /// Set charity address
+  /// [address]: A Map with keys that are declared in [FireStoreService]
+  set address(Map<String, dynamic> address) {
     if (address != null) {
-      _address[FireStoreService.kAddressStreet] =
-          address[FireStoreService.kAddressStreet];
-      _address[FireStoreService.kAddressCity] =
-          address[FireStoreService.kAddressCity];
-      _address[FireStoreService.kAddressState] =
-          address[FireStoreService.kAddressState];
-      _address[FireStoreService.kAddressZip] =
-          address[FireStoreService.kAddressZip];
-    }
-
-    // Wishlist
-    List<dynamic> wishlist = userData[FireStoreService.kWishList];
-    if (wishlist != null) {
-      wishlist.forEach((produceId) {
-        _produce.add(produceId);
+      address.forEach((key, value) {
+        _address[key] = value;
       });
     }
   }
 
-  /// Set new ranking score
-  void setScore(double score) {
-    _score = score;
-  }
-
   @override
   int compareTo(Charity other) {
-    return other._score.compareTo(this._score);
+    return other.score.compareTo(this.score);
   }
 }
