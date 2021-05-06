@@ -1,129 +1,275 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:intl/intl.dart';
 //
 import 'package:fruitfairy/constant.dart';
-import 'package:fruitfairy/widgets/scrollable_layout.dart';
+import 'package:fruitfairy/models/donation.dart';
+import 'package:fruitfairy/models/donations.dart';
+import 'package:fruitfairy/models/produce_item.dart';
+import 'package:fruitfairy/models/produce.dart';
+import 'package:fruitfairy/models/status.dart';
+import 'package:fruitfairy/services/firestore_service.dart';
+import 'package:fruitfairy/widgets/custom_grid.dart';
+import 'package:fruitfairy/widgets/fruit_tile.dart';
 
-//TODO This screen needs to get the corresponding data from the database of a chosen donation. It needs the donation number,data,status,charity name, and the picture of fruit and percentage donated
-
-class DonorDonationDetailScreen extends StatelessWidget {
+class DonorDonationDetailScreen extends StatefulWidget {
   static const String id = 'donor_donation_detail_screen';
 
   @override
+  _DonorDonationDetailScreenState createState() =>
+      _DonorDonationDetailScreenState();
+}
+
+class _DonorDonationDetailScreenState extends State<DonorDonationDetailScreen> {
+  bool _showSpinner = false;
+  Donation _donation;
+
+  @override
   Widget build(BuildContext context) {
-    Size screen = MediaQuery.of(context).size;
+    Produce produce = context.watch<Produce>();
+    Donations donations = context.watch<Donations>();
+    _donation = donations.map[ModalRoute.of(context).settings.arguments];
+    bool loadingDonation = _donation == null || produce.isLoading;
+    if (!loadingDonation) {
+      context.read<FireStoreService>().loadDonationProduce(_donation, produce);
+    }
     return Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: AppBar(),
+      appBar: AppBar(title: Text('Donation Details')),
       body: SafeArea(
-        child: ScrollableLayout(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                'Donation Details',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 35.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: screen.height * 0.02),
-              divider(),
-              SizedBox(height: screen.height * 0.02),
-              // HistoryTile(),
-              SizedBox(height: screen.height * 0.04),
-              subtitle("Selected Charity:"),
-              SizedBox(height: screen.height * 0.02),
-              //TODO get charity name from DB
-              subtitle("charity Name"),
-              SizedBox(height: screen.height * 0.04),
-              subtitle("Status: From Database"),
-              SizedBox(height: screen.height * 0.04),
-              subtitle("Produce"),
-              SizedBox(height: screen.height * 0.04),
-              fruitTile(screen),
-            ],
+        child: Container(
+          decoration: kGradientBackground,
+          child: ModalProgressHUD(
+            inAsyncCall: _showSpinner || loadingDonation,
+            progressIndicator: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation(kAccentColor),
+            ),
+            child: loadingDonation ? Container() : donationDetails(),
           ),
         ),
       ),
     );
   }
 
-  Widget divider() {
-    return Divider(
-      color: kLabelColor,
-      height: 1.0,
-      thickness: 2.0,
-      indent: 35.0,
-      endIndent: 35.0,
+  Widget donationDetails() {
+    Size screen = MediaQuery.of(context).size;
+    List<Widget> widgets = [
+      statusTile(),
+      groupLabel("Selected Charity"),
+      selectedCharity(),
+      assistanceNeeded(),
+      groupLabel('Status'),
+      statusMessage(),
+      groupLabel('Produce'),
+      selectedFruits(),
+      SizedBox(height: screen.height * 0.06),
+    ];
+    return ListView.builder(
+      itemCount: widgets.length,
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: screen.width * 0.1,
+          ),
+          child: widgets[index],
+        );
+      },
     );
   }
 
-  Widget subtitle(String label) {
+  Widget groupLabel(String label) {
+    Size screen = MediaQuery.of(context).size;
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 50.0),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Text(
-          label,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 25.0,
-            fontWeight: FontWeight.bold,
+      padding: EdgeInsets.only(
+        top: screen.height * 0.04,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: kLabelColor,
+              fontSize: 25.0,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
+          Divider(
+            color: kLabelColor,
+            height: 2.0,
+            thickness: 2.0,
+          ),
+        ],
       ),
     );
   }
 
-  Widget fruitTile(Size screen) {
-    return Container(
-      height: screen.height * 0.3,
-      width: screen.width * 0.8,
-      child: Expanded(
-        child: GridView.count(
-          primary: false,
-          crossAxisSpacing: 5,
-          mainAxisSpacing: 5,
-          crossAxisCount: 2,
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                color: kObjectColor,
-                borderRadius: BorderRadius.circular(20.0),
-              ),
-              height: screen.height * 0.08,
-              width: screen.height * 0.05,
-              child: Column(
+  Widget fieldLabel(String label) {
+    return Text(
+      label,
+      style: TextStyle(
+        color: kLabelColor,
+        fontSize: 20.0,
+        fontWeight: FontWeight.bold,
+        height: 1.5,
+      ),
+    );
+  }
+
+  Widget statusTile() {
+    DateTime dateTime = _donation.createdAt;
+    Status status = _donation.status;
+    Color statusColor;
+    if (status.isPennding) {
+      statusColor = kPendingStatus;
+    }
+    if (status.isInProgress) {
+      statusColor = kInProgressStatus;
+    }
+    if (status.isDeclined) {
+      statusColor = kDeniedStatus;
+    }
+    if (status.isCompleted) {
+      statusColor = kCompletedStatus;
+    }
+    Size screen = MediaQuery.of(context).size;
+    return Padding(
+      padding: EdgeInsets.only(top: screen.height * 0.03),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Fruit Name', //TODO: get fruit name from database
+                    'Created on',
                     style: TextStyle(
-                      color: kPrimaryColor,
-                      fontSize: 15.0,
+                      color: kLabelColor,
+                      fontSize: 25.0,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(
-                    height: screen.height * 0.1,
-                  ),
-                  Text(
-                    'Number %',
-                    //TODO: get percentage from database
+                  fieldLabel(DateFormat.yMMMd().add_Hm().format(dateTime)),
+                ],
+              ),
+              Container(
+                width: 125,
+                decoration: BoxDecoration(
+                  color: kObjectColor,
+                  borderRadius: BorderRadius.circular(20.0),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8.0),
+                  child: Text(
+                    status.description,
+                    textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: kPrimaryColor,
-                      fontSize: 15.0,
+                      color: statusColor,
                       fontWeight: FontWeight.bold,
+                      fontSize: 20.0,
                     ),
-                  )
-                ], //TODO: get correct fruit pictures from database and add them to container and also get the percentage from the database
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget selectedCharity() {
+    Size screen = MediaQuery.of(context).size;
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        vertical: screen.height * 0.01,
+        horizontal: screen.width * 0.02,
+      ),
+      child: fieldLabel('${_donation.charities.first.name}'),
+    );
+  }
+
+  Widget assistanceNeeded() {
+    Size screen = MediaQuery.of(context).size;
+    return Visibility(
+      visible: _donation.needCollected,
+      child: Padding(
+        padding: EdgeInsets.only(
+          top: screen.height * 0.01,
+          left: screen.width * 0.05,
+          right: screen.width * 0.05,
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: kObjectColor,
+            borderRadius: BorderRadius.circular(20.0),
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(12.0),
+            child: Text(
+              'Assistance Requested',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: kCompletedStatus,
+                fontWeight: FontWeight.bold,
+                fontSize: 20.0,
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
+  }
+
+  Widget statusMessage() {
+    Size screen = MediaQuery.of(context).size;
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        vertical: screen.height * 0.01,
+        horizontal: screen.width * 0.02,
+      ),
+      child: fieldLabel('${_donation.status.message}'),
+    );
+  }
+
+  Widget selectedFruits() {
+    Size screen = MediaQuery.of(context).size;
+    int axisCount = screen.width >= 600 ? 4 : 2;
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        vertical: screen.height * 0.01,
+      ),
+      child: CustomGrid(
+        padding: EdgeInsets.all(10.0),
+        assistPadding: screen.width * 0.1,
+        crossAxisCount: axisCount,
+        children: fruitTiles(),
+      ),
+    );
+  }
+
+  List<Widget> fruitTiles() {
+    List<Widget> fruitList = [];
+    Produce produce = context.read<Produce>();
+    Map<String, ProduceItem> produceStorage = produce.map;
+    _donation.produce.forEach((produceId, produceItem) {
+      if (produceStorage.containsKey(produceId)) {
+        fruitList.add(Container(
+          decoration: BoxDecoration(
+            color: kObjectColor,
+            borderRadius: BorderRadius.circular(20.0),
+          ),
+          child: FruitTile(
+            fruitName: produceStorage[produceId].name,
+            fruitImage: produceStorage[produceId].imageURL,
+            isLoading: produceStorage[produceId].isLoading,
+            percentage: _donation.needCollected ? '${produceItem.amount}' : '',
+          ),
+        ));
+      }
+    });
+    return fruitList;
   }
 }
