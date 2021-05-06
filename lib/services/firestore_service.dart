@@ -704,11 +704,14 @@ class FireStoreService {
         } else {
           Map<String, dynamic> data = docChange.doc.data();
           Donation donation = Donation(donationId);
-          donation.status = Status(
-            data[kStatus],
-            data[kSubStatus],
-            isCharity: true,
-          );
+          donation.status = Status.declined();
+          if (data[kRequestedCharities].last == _uid) {
+            donation.status = Status(
+              data[kStatus],
+              data[kSubStatus],
+              isCharity: true,
+            );
+          }
           Timestamp timeStamp = data[kCreatedAt] ?? Timestamp.now();
           donation.createdAt = timeStamp.toDate();
           donation.needCollected = data[kNeedCollected];

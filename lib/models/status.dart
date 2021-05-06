@@ -71,6 +71,10 @@ class Status implements Comparable<Status> {
     return Status(0, 0);
   }
 
+  static Status declined() {
+    return Status(1, 0, isCharity: true);
+  }
+
   @override
   int compareTo(Status other) {
     return this.code - other.code;
