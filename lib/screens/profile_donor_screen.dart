@@ -310,15 +310,23 @@ class _ProfileDonorScreenState extends State<ProfileDonorScreen> {
       String notifyMessage = '';
       if (insert || update) {
         notifyMessage = await auth.registerPhone(
-          phoneNumber: '$_dialCode$phoneNumber',
+          country: _isoCode,
+          dialCode: _dialCode,
+          phoneNumber: phoneNumber,
           codeSent: (verifyCode) async {
             _verifyCode = verifyCode;
           },
-          completed: (result) async {
+          completed: (register) async {
             setState(() => _showSpinner = true);
-            String errorMessage = await result();
+            _updated.add(Field.Phone);
+            String errorMessage = await register();
+            _updated.remove(Field.Phone);
             if (errorMessage.isEmpty) {
-              errorMessage = await updatePhoneNumber();
+              _confirmCode.clear();
+              _verifyCode = null;
+              _showVerifyPhone = false;
+              _phoneButtonLabel = 'Remove';
+              errorMessage = 'Phone number updated';
             }
             MessageBar(context, message: errorMessage).show();
             setState(() => _showSpinner = false);
@@ -339,45 +347,28 @@ class _ProfileDonorScreenState extends State<ProfileDonorScreen> {
   }
 
   void _updatePhoneVerify() async {
-    setState(() => _showSpinner = true);
     if (_verifyCode != null) {
+      setState(() => _showSpinner = true);
+      _updated.add(Field.Phone);
       String errorMessage = await _verifyCode(_confirmCode.text.trim());
+      _updated.remove(Field.Phone);
       if (errorMessage.isEmpty) {
-        errorMessage = await updatePhoneNumber();
+        _confirmCode.clear();
+        _verifyCode = null;
+        _showVerifyPhone = false;
+        _phoneButtonLabel = 'Remove';
+        errorMessage = 'Phone number updated';
       }
       MessageBar(context, message: errorMessage).show();
+      setState(() => _showSpinner = false);
     }
-    setState(() => _showSpinner = false);
-  }
-
-  Future<String> updatePhoneNumber() async {
-    try {
-      _updated.add(Field.Phone);
-      String phoneNumber = _phoneNumber.text.trim();
-      await context.read<FireStoreService>().updatePhoneNumber(
-            country: _isoCode,
-            dialCode: _dialCode,
-            phoneNumber: phoneNumber,
-          );
-      _phoneNumber.text = phoneNumber;
-      _confirmCode.clear();
-      _showVerifyPhone = false;
-      _phoneButtonLabel = 'Remove';
-      _verifyCode = null;
-    } catch (errorMessage) {
-      return errorMessage;
-    } finally {
-      _updated.remove(Field.Phone);
-    }
-    return 'Phone number updated';
   }
 
   Future<String> deletePhoneNumber() async {
     String notifyMessage = 'Phone number removed';
     try {
       _updated.add(Field.Phone);
-      await context.read<FireAuthService>().removePhone();
-      await context.read<FireStoreService>().updatePhoneNumber(
+      await context.read<FireAuthService>().removePhone(
             country: _isoCode,
             dialCode: _dialCode,
             phoneNumber: '',

@@ -30,14 +30,14 @@ class FireAuthService {
       // Create a document in users collection on Firestore
       FireStoreService fireStoreService = FireStoreService();
       fireStoreService.setUID(user.uid);
-      await fireStoreService.addDonorAccount(
+      fireStoreService.addDonorAccount(
         email: email,
         firstName: firstName,
         lastName: lastName,
       );
 
       //Send verification link to registered email
-      await user.sendEmailVerification();
+      user.sendEmailVerification();
       return 'Please check your email for a verification link!';
     } catch (e) {
       throw e.message;
@@ -65,7 +65,7 @@ class FireAuthService {
       // Create a document in users collection on Firestore
       FireStoreService fireStoreService = FireStoreService();
       fireStoreService.setUID(user.uid);
-      await fireStoreService.addCharityAccount(
+      fireStoreService.addCharityAccount(
         email: email,
         ein: ein,
         charityName: charityName,
@@ -76,7 +76,7 @@ class FireAuthService {
       );
 
       //Send verification link to registered email
-      await user.sendEmailVerification();
+      user.sendEmailVerification();
       return 'Please check your email for a verification link!';
     } catch (e) {
       throw e.message;
@@ -126,7 +126,7 @@ class FireAuthService {
     @required String phoneNumber,
     @required
         Function(Future<String> Function(String smsCode) verifyCode) codeSent,
-    @required Function(Future<String> Function() result) completed,
+    @required Function(Future<String> Function() authenticate) completed,
     @required Function(Future<String> Function() errorMessage) failed,
   }) async {
     // Initialize with Firebase Auth's function
@@ -208,15 +208,17 @@ class FireAuthService {
   /// Create a phone credential and link it
   /// with current user account
   Future<String> registerPhone({
+    @required String country,
+    @required String dialCode,
     @required String phoneNumber,
     @required
         Function(Future<String> Function(String smsCode) verifyCode) codeSent,
-    @required Function(Future<String> Function() result) completed,
+    @required Function(Future<String> Function() register) completed,
     @required Function(Future<String> Function() errorMessage) failed,
   }) async {
     // Initialize with Firebase Auth's function
     await _firebaseAuth.verifyPhoneNumber(
-      phoneNumber: phoneNumber,
+      phoneNumber: '$dialCode$phoneNumber',
       // Send sms code to user and wait for user's input to proceed
       codeSent: (String verificationId, int resendToken) {
         // Pass a callback to link phone number
@@ -231,17 +233,30 @@ class FireAuthService {
               smsCode: smsCode,
             );
 
+            FireStoreService fireStoreService = FireStoreService();
+            fireStoreService.setUID(user.uid);
+
             // Update current phone number
             // if user previously had one linked
             for (UserInfo userInfo in user.providerData) {
               if (userInfo.providerId == PhoneAuthProvider.PROVIDER_ID) {
                 await user.updatePhoneNumber(credential);
+                await fireStoreService.updatePhoneNumber(
+                  country: country,
+                  dialCode: dialCode,
+                  phoneNumber: phoneNumber,
+                );
                 return '';
               }
             }
 
             // Link a new phone number to user account
             await user.linkWithCredential(credential);
+            await fireStoreService.updatePhoneNumber(
+              country: country,
+              dialCode: dialCode,
+              phoneNumber: phoneNumber,
+            );
             return '';
           } catch (e) {
             if (e.code == 'invalid-verification-code' ||
@@ -267,17 +282,30 @@ class FireAuthService {
         // on a different user account
         completed(() async {
           try {
+            FireStoreService fireStoreService = FireStoreService();
+            fireStoreService.setUID(user.uid);
+
             // Update current phone number
             // if user previously had one linked
             for (UserInfo userInfo in user.providerData) {
               if (userInfo.providerId == PhoneAuthProvider.PROVIDER_ID) {
                 await user.updatePhoneNumber(credential);
+                await fireStoreService.updatePhoneNumber(
+                  country: country,
+                  dialCode: dialCode,
+                  phoneNumber: phoneNumber,
+                );
                 return '';
               }
             }
 
             // Link a new phone number to user account
             await user.linkWithCredential(credential);
+            await fireStoreService.updatePhoneNumber(
+              country: country,
+              dialCode: dialCode,
+              phoneNumber: phoneNumber,
+            );
             return '';
           } catch (e) {
             if (e.code == 'credential-already-in-use') {
@@ -309,10 +337,22 @@ class FireAuthService {
   /// Remove phone number from a user account
   /// Throw error if the user updated phone number
   /// on the same account on different devices
-  Future<void> removePhone() async {
+  Future<void> removePhone({
+    @required String country,
+    @required String dialCode,
+    @required String phoneNumber,
+  }) async {
     try {
+      FireStoreService fireStoreService = FireStoreService();
+      fireStoreService.setUID(user.uid);
+
       // Remove credential with phone number
       await user.unlink(PhoneAuthProvider.PROVIDER_ID);
+      await fireStoreService.updatePhoneNumber(
+        country: country,
+        dialCode: dialCode,
+        phoneNumber: phoneNumber,
+      );
     } catch (e) {
       throw 'Your phone number has been updated, please sign in again!';
     }
@@ -380,10 +420,10 @@ class FireAuthService {
       // Remove user information on Firestore
       FireStoreService fireStoreService = FireStoreService();
       fireStoreService.setUID(user.uid);
-      await fireStoreService.deleteAccount();
+      fireStoreService.deleteAccount();
 
       // Remove user from Authentication
-      await user.delete();
+      user.delete();
     } catch (e) {
       if (e.code == 'wrong-password') {
         throw 'Incorrect password!';

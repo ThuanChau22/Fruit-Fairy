@@ -131,8 +131,8 @@ class _SignInScreenState extends State<SignInScreen> {
                 });
               }
             },
-            completed: (result) async {
-              String errorMessage = await result();
+            completed: (authenticate) async {
+              String errorMessage = await authenticate();
               if (errorMessage.isEmpty) {
                 await _signInSuccess();
               } else {
