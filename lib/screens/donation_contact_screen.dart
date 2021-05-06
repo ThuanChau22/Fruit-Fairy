@@ -64,6 +64,10 @@ class _ContactConfirmation extends State<DonationContactScreen> {
   Future<String> Function(String smsCode) _verifyCode;
 
   void _updateInputFields() {
+    if (_updated.isEmpty) {
+      fillAddress();
+      fillPhone();
+    }
     if (_updated.contains(Field.Address)) {
       fillAddress();
     }

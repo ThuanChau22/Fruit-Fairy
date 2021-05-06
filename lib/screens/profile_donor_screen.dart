@@ -94,6 +94,11 @@ class _ProfileDonorScreenState extends State<ProfileDonorScreen> {
 
   void _updateInputFields() {
     fillEmail();
+    if (_updated.isEmpty) {
+      fillName();
+      fillAddress();
+      fillPhone();
+    }
     if (_updated.contains(Field.Name)) {
       fillName();
     }

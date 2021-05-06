@@ -91,6 +91,11 @@ class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
 
   void _updateInputFields() {
     fillEmail();
+    if (_updated.isEmpty) {
+      fillName();
+      fillAddress();
+      fillPhone();
+    }
     if (_updated.contains(Field.Name)) {
       fillName();
     }

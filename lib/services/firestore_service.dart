@@ -742,7 +742,7 @@ class FireStoreService {
   Future<void> checkDonationAvailability(
     Donation donation,
     Produce produce, {
-    void notify(bool removed),
+    Function(bool removed) notify,
   }) async {
     try {
       Query query = _produceDB.where(kProduceEnabled, isEqualTo: true);
@@ -767,7 +767,7 @@ class FireStoreService {
   Future<void> checkWishListAvailability(
     WishList wishList,
     Produce produce, {
-    void notify(bool removed),
+    Function(bool removed) notify,
   }) async {
     try {
       Query query = _produceDB.where(kProduceEnabled, isEqualTo: true);
