@@ -19,7 +19,6 @@ import 'package:fruitfairy/services/utils.dart';
 
 class FireStoreService {
   /// Database fields
-
   /// donations
   static const String kDonations = 'donations';
   static const String kDonor = 'donor';
@@ -59,11 +58,11 @@ class FireStoreService {
   static const String kAddressZip = 'zip';
   static const String kWishList = 'wishlist';
   static const String kLastSignedIn = 'lastSignedIn';
-
+  static const String kDeviceTokens = 'deviceTokens';
   ///////////////
 
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseStorage _storage = FirebaseStorage.instance;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  final FirebaseStorage storage = FirebaseStorage.instance;
 
   CollectionReference _usersDB;
   CollectionReference _produceDB;
@@ -72,13 +71,9 @@ class FireStoreService {
   String _uid;
 
   FireStoreService() {
-    _usersDB = _firestore.collection(kUsers);
-    _produceDB = _firestore.collection(kProduce);
-    _donationsDB = _firestore.collection(kDonations);
-  }
-
-  FirebaseFirestore get instance {
-    return _firestore;
+    _usersDB = firestore.collection(kUsers);
+    _produceDB = firestore.collection(kProduce);
+    _donationsDB = firestore.collection(kDonations);
   }
 
   String get uid {
@@ -804,7 +799,7 @@ class FireStoreService {
 
   Future<String> imageURL(String path) async {
     try {
-      return await _storage.refFromURL(path).getDownloadURL();
+      return await storage.refFromURL(path).getDownloadURL();
     } catch (e) {
       print(e);
       return '';
@@ -941,6 +936,20 @@ class FireStoreService {
         );
       }
       sessionToken.clear();
+    } catch (e) {
+      throw e.message;
+    }
+  }
+
+  Future<void> storeDeviceToken(String token) async {
+    if (_uid == null) {
+      print('UID Unset');
+      return;
+    }
+    try {
+      await _usersDB.doc(_uid).update({
+        kDeviceTokens: FieldValue.arrayUnion([token]),
+      });
     } catch (e) {
       throw e.message;
     }

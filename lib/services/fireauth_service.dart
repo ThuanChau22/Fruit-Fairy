@@ -6,11 +6,11 @@ import 'package:fruitfairy/services/firestore_service.dart';
 /// A wrapper class for Firebase Authentication service
 /// that handles all Auth related operations
 class FireAuthService {
-  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final FirebaseAuth auth = FirebaseAuth.instance;
 
   /// Return information of current user
   User get user {
-    return _firebaseAuth.currentUser;
+    return auth.currentUser;
   }
 
   /// Sign user up as a Donor
@@ -22,7 +22,7 @@ class FireAuthService {
   }) async {
     try {
       // Create a user account on Firebase Authentication
-      await _firebaseAuth.createUserWithEmailAndPassword(
+      await auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
@@ -57,7 +57,7 @@ class FireAuthService {
   }) async {
     try {
       // Create a user account on Firebase Authentication
-      await _firebaseAuth.createUserWithEmailAndPassword(
+      await auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
@@ -94,7 +94,7 @@ class FireAuthService {
   }) async {
     try {
       // Sign in with given email and password
-      await _firebaseAuth.signInWithEmailAndPassword(
+      await auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
@@ -129,7 +129,7 @@ class FireAuthService {
     @required void Function(Future<String> Function()) failed,
   }) async {
     // Initialize with Firebase Auth's function
-    await _firebaseAuth.verifyPhoneNumber(
+    await auth.verifyPhoneNumber(
       phoneNumber: phoneNumber,
       // Send sms code to user and wait for user's input to sign in
       codeSent: (String verificationId, int resendToken) {
@@ -146,7 +146,7 @@ class FireAuthService {
 
             // Attempt to sign the user in and check whether
             // the account is linked with an email
-            await _firebaseAuth.signInWithCredential(credential);
+            await auth.signInWithCredential(credential);
             if (user.email == null) {
               // Remove newly created account
               await user.delete();
@@ -173,7 +173,7 @@ class FireAuthService {
           try {
             // Attempt to sign the user in and check whether
             // the account is linked with an email
-            await _firebaseAuth.signInWithCredential(credential);
+            await auth.signInWithCredential(credential);
             if (user.email == null) {
               // Remove newly created account
               await user.delete();
@@ -215,7 +215,7 @@ class FireAuthService {
     @required void Function(Future<String> Function()) failed,
   }) async {
     // Initialize with Firebase Auth's function
-    await _firebaseAuth.verifyPhoneNumber(
+    await auth.verifyPhoneNumber(
       phoneNumber: '$dialCode$phoneNumber',
       // Send sms code to user and wait for user's input to proceed
       codeSent: (String verificationId, int resendToken) {
@@ -384,7 +384,7 @@ class FireAuthService {
   /// Send a password-reset link to registered email
   Future<String> resetPassword(String email) async {
     try {
-      await _firebaseAuth.sendPasswordResetEmail(email: email);
+      await auth.sendPasswordResetEmail(email: email);
       return 'Reset password email sent';
     } catch (e) {
       print(e);
@@ -395,7 +395,7 @@ class FireAuthService {
   /// Sign out current user
   Future<void> signOut() async {
     try {
-      await _firebaseAuth.signOut();
+      await auth.signOut();
     } catch (e) {
       print(e);
     }
