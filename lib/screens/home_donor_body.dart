@@ -222,7 +222,6 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
     );
   }
 
-  //TODO: Message on empty history
   List<Widget> donationTiles() {
     List<Widget> donationTiles = [];
     Donations donations = context.watch<Donations>();
@@ -236,11 +235,11 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
       donationTiles.add(donationTile(donationList[i++]));
     }
     if (i == 0) {
-      donationTiles.add(emptyLabel('You have no active donation'));
+      donationTiles.add(emptyLabel('You have no active donations'));
     }
     donationTiles.add(groupLabel('History'));
     if (i == donationList.length) {
-      donationTiles.add(emptyLabel('Empty History'));
+      donationTiles.add(emptyLabel('You have no previous donations'));
     }
     while (i < donationList.length) {
       donationTiles.add(donationTile(donationList[i++]));
