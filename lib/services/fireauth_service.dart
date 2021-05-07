@@ -124,10 +124,9 @@ class FireAuthService {
   /// IOS: ???
   Future<String> signInWithPhone({
     @required String phoneNumber,
-    @required
-        Function(Future<String> Function(String smsCode) verifyCode) codeSent,
-    @required Function(Future<String> Function() authenticate) completed,
-    @required Function(Future<String> Function() errorMessage) failed,
+    @required void Function(Future<String> Function(String)) codeSent,
+    @required void Function(Future<String> Function()) completed,
+    @required void Function(Future<String> Function()) failed,
   }) async {
     // Initialize with Firebase Auth's function
     await _firebaseAuth.verifyPhoneNumber(
@@ -211,10 +210,9 @@ class FireAuthService {
     @required String country,
     @required String dialCode,
     @required String phoneNumber,
-    @required
-        Function(Future<String> Function(String smsCode) verifyCode) codeSent,
-    @required Function(Future<String> Function() register) completed,
-    @required Function(Future<String> Function() errorMessage) failed,
+    @required void Function(Future<String> Function(String)) codeSent,
+    @required void Function(Future<String> Function()) completed,
+    @required void Function(Future<String> Function()) failed,
   }) async {
     // Initialize with Firebase Auth's function
     await _firebaseAuth.verifyPhoneNumber(
