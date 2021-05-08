@@ -25,7 +25,7 @@ class DonationConfirmScreen extends StatefulWidget {
 class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
   bool _showSpinner = false;
 
-  void confirm() async {
+  void _confirm() async {
     setState(() => _showSpinner = true);
     FireStoreService firestore = context.read<FireStoreService>();
     Account account = context.read<Account>();
@@ -172,19 +172,13 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
 
   Widget selectedCharities() {
     List<Widget> selectedCharity = [];
-    int priority = 1;
     Donation donation = context.read<Donation>();
     for (Charity charity in donation.charities) {
       selectedCharity.add(Padding(
         padding: EdgeInsets.symmetric(
           vertical: 10.0,
         ),
-        child: CharityTile(
-          charityName: charity.name,
-          selectedOrder: '${priority++}',
-          onTap: () {},
-          disabled: true,
-        ),
+        child: CharityTile(charityName: charity.name),
       ));
     }
     Size screen = MediaQuery.of(context).size;
@@ -288,7 +282,7 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
       child: RoundedButton(
         label: 'Confirm',
         onPressed: () {
-          confirm();
+          _confirm();
         },
       ),
     );

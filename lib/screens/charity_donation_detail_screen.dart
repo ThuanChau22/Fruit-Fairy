@@ -29,9 +29,16 @@ class _CharityDonationDetailScreenState
 
   @override
   Widget build(BuildContext context) {
-    Produce produce = context.watch<Produce>();
+    FireStoreService fireStore = context.read<FireStoreService>();
     Donations donations = context.watch<Donations>();
-    _donation = donations.map[ModalRoute.of(context).settings.arguments];
+    Map<String, dynamic> donationStorage = donations.map;
+    String donationId = ModalRoute.of(context).settings.arguments;
+    if (!donationStorage.containsKey(donationId)) {
+      fireStore.loadDonationDetails(donationId, donations, isCharity: true);
+    } else {
+      _donation = donationStorage[donationId];
+    }
+    Produce produce = context.watch<Produce>();
     bool loadingDonation = _donation == null || produce.isLoading;
     if (!loadingDonation) {
       context.read<FireStoreService>().loadDonationProduce(_donation, produce);
@@ -55,6 +62,7 @@ class _CharityDonationDetailScreenState
 
   Widget donationDetails() {
     List<Widget> widgets = [
+      groupLabel('Status'),
       statusTile(),
       groupLabel('Donor Information'),
       donorInfo(),
@@ -81,7 +89,7 @@ class _CharityDonationDetailScreenState
     Size screen = MediaQuery.of(context).size;
     return Padding(
       padding: EdgeInsets.only(
-        top: screen.height * 0.04,
+        top: screen.height * 0.03,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -134,7 +142,10 @@ class _CharityDonationDetailScreenState
     }
     Size screen = MediaQuery.of(context).size;
     return Padding(
-      padding: EdgeInsets.only(top: screen.height * 0.03),
+      padding: EdgeInsets.symmetric(
+        vertical: screen.height * 0.01,
+        horizontal: screen.width * 0.02,
+      ),
       child: Column(
         children: [
           Row(
@@ -143,14 +154,7 @@ class _CharityDonationDetailScreenState
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Created on',
-                    style: TextStyle(
-                      color: kLabelColor,
-                      fontSize: 25.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  fieldLabel('Created on'),
                   fieldLabel(DateFormat.yMMMd().add_Hm().format(dateTime)),
                 ],
               ),
@@ -217,10 +221,9 @@ class _CharityDonationDetailScreenState
     return Visibility(
       visible: _donation.needCollected,
       child: Padding(
-        padding: EdgeInsets.only(
-          top: screen.height * 0.01,
-          left: screen.width * 0.05,
-          right: screen.width * 0.05,
+        padding: EdgeInsets.symmetric(
+          vertical: screen.height * 0.01,
+          horizontal: screen.width * 0.05,
         ),
         child: Container(
           decoration: BoxDecoration(
@@ -230,7 +233,7 @@ class _CharityDonationDetailScreenState
           child: Padding(
             padding: EdgeInsets.all(12.0),
             child: Text(
-              'Assistance Required',
+              'Assistance Requested',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: kCompletedStatus,

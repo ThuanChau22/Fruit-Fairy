@@ -29,7 +29,7 @@ class _DonationCharitySelectionScreenState
   ViewMode _mode = ViewMode.Init;
   bool _showSpinner = false;
 
-  void suggestCharities() async {
+  void _suggestCharities() async {
     setState(() => _showSpinner = true);
     FireStoreService fireStore = context.read<FireStoreService>();
     Charities charities = context.read<Charities>();
@@ -51,7 +51,7 @@ class _DonationCharitySelectionScreenState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      suggestCharities();
+      _suggestCharities();
     });
   }
 

@@ -36,7 +36,7 @@ class _CharityProduceSelectionScreenState
   bool _isLoadingInit = true;
   bool _isLoadingMore = true;
 
-  void initProduce() {
+  void _initProduce() {
     FireStoreService fireStore = context.read<FireStoreService>();
     Produce produce = context.read<Produce>();
     _scroll.addListener(() {
@@ -58,7 +58,7 @@ class _CharityProduceSelectionScreenState
     });
   }
 
-  void searchProduce() {
+  void _searchProduce() {
     setState(() => _isLoadingMore = true);
     _searchTimer.cancel();
     _searchTimer = Timer(Duration(milliseconds: 500), () {
@@ -75,7 +75,7 @@ class _CharityProduceSelectionScreenState
     });
   }
 
-  void selectAll() async {
+  void _selectAll() async {
     if (!_selectAllTimer.isActive) {
       _selectAllTimer = Timer(Duration(seconds: 2), () {});
       FireStoreService fireStore = context.read<FireStoreService>();
@@ -97,7 +97,7 @@ class _CharityProduceSelectionScreenState
   @override
   void initState() {
     super.initState();
-    initProduce();
+    _initProduce();
   }
 
   @override
@@ -164,7 +164,7 @@ class _CharityProduceSelectionScreenState
       hitBoxPadding: 5.0,
       buttonColor: Colors.transparent,
       onPressed: () {
-        selectAll();
+        _selectAll();
       },
     );
   }
@@ -209,7 +209,7 @@ class _CharityProduceSelectionScreenState
             ),
             suffixWidget: SizedBox(width: 20.0),
             onChanged: (value) {
-              searchProduce();
+              _searchProduce();
             },
           ),
           Positioned(

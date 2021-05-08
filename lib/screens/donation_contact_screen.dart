@@ -65,19 +65,19 @@ class _ContactConfirmation extends State<DonationContactScreen> {
 
   void _updateInputFields() {
     if (_updated.isEmpty) {
-      fillAddress();
-      fillPhone();
+      _fillAddress();
+      _fillPhone();
     }
     if (_updated.contains(Field.Address)) {
-      fillAddress();
+      _fillAddress();
     }
     if (_updated.contains(Field.Phone)) {
-      fillPhone();
+      _fillPhone();
     }
     setState(() {});
   }
 
-  void fillAddress() {
+  void _fillAddress() {
     Map<String, String> address = context.read<Account>().address;
     if (address.isNotEmpty) {
       _street.text = address[FireStoreService.kAddressStreet];
@@ -92,7 +92,7 @@ class _ContactConfirmation extends State<DonationContactScreen> {
     }
   }
 
-  void fillPhone() {
+  void _fillPhone() {
     Map<String, String> phone = context.read<Account>().phone;
     if (phone.isNotEmpty) {
       _isoCode = phone[FireStoreService.kPhoneCountry];
@@ -108,7 +108,7 @@ class _ContactConfirmation extends State<DonationContactScreen> {
     }
   }
 
-  void confirm() async {
+  void _confirm() async {
     setState(() => _showSpinner = true);
     String addressError = await _updateAddress();
     _phoneError = await Validate.phoneNumber(
@@ -188,21 +188,27 @@ class _ContactConfirmation extends State<DonationContactScreen> {
     );
     if (_phoneError.isEmpty) {
       FireAuthService auth = context.read<FireAuthService>();
-      if (isNewPhone(phoneNumber)) {
+      if (_isNewPhone(phoneNumber)) {
         String notifyMessage = await auth.registerPhone(
-          phoneNumber: '$_dialCode$phoneNumber',
+          country: _isoCode,
+          dialCode: _dialCode,
+          phoneNumber: phoneNumber,
           codeSent: (verifyCode) async {
             _verifyCode = verifyCode;
           },
-          completed: (result) async {
+          completed: (register) async {
             setState(() => _showSpinner = true);
-            String errorMessage = await result();
+            _updated.add(Field.Phone);
+            String errorMessage = await register();
+            _updated.remove(Field.Phone);
             if (errorMessage.isEmpty) {
-              errorMessage = await updatePhoneNumber();
+              _confirmCode.clear();
+              _verifyCode = null;
+              _showVerifyPhone = false;
+              _phoneButtonLabel = 'Remove';
+              errorMessage = 'Phone number updated';
             }
-            if (errorMessage.isNotEmpty) {
-              MessageBar(context, message: errorMessage).show();
-            }
+            MessageBar(context, message: errorMessage).show();
             setState(() => _showSpinner = false);
           },
           failed: (errorMessage) async {
@@ -218,7 +224,7 @@ class _ContactConfirmation extends State<DonationContactScreen> {
     setState(() => _showSpinner = false);
   }
 
-  bool isNewPhone(String phoneNumber) {
+  bool _isNewPhone(String phoneNumber) {
     Account account = context.read<Account>();
     Map<String, String> phone = account.phone;
     bool insert = phone.isEmpty;
@@ -229,39 +235,23 @@ class _ContactConfirmation extends State<DonationContactScreen> {
   }
 
   void _verifyPhoneConfirm() async {
-    setState(() => _showSpinner = true);
     if (_verifyCode != null) {
+      setState(() => _showSpinner = true);
+      _updated.add(Field.Phone);
       String errorMessage = await _verifyCode(_confirmCode.text.trim());
+      _updated.remove(Field.Phone);
       if (errorMessage.isEmpty) {
-        errorMessage = await updatePhoneNumber();
+        _confirmCode.clear();
+        _verifyCode = null;
+        _showVerifyPhone = false;
+        _phoneButtonLabel = 'Remove';
+        errorMessage = 'Phone number updated';
       }
       if (errorMessage.isNotEmpty) {
         MessageBar(context, message: errorMessage).show();
       }
+      setState(() => _showSpinner = false);
     }
-    setState(() => _showSpinner = false);
-  }
-
-  Future<String> updatePhoneNumber() async {
-    try {
-      _updated.add(Field.Phone);
-      String phoneNumber = _phoneNumber.text.trim();
-      await context.read<FireStoreService>().updatePhoneNumber(
-            country: _isoCode,
-            dialCode: _dialCode,
-            phoneNumber: phoneNumber,
-          );
-      _phoneNumber.text = phoneNumber;
-      _confirmCode.clear();
-      _showVerifyPhone = false;
-      _phoneVerified = true;
-      _verifyCode = null;
-    } catch (errorMessage) {
-      return errorMessage;
-    } finally {
-      _updated.remove(Field.Phone);
-    }
-    return '';
   }
 
   void _scrollToError() async {
@@ -280,8 +270,8 @@ class _ContactConfirmation extends State<DonationContactScreen> {
   @override
   void initState() {
     super.initState();
-    fillAddress();
-    fillPhone();
+    _fillAddress();
+    _fillPhone();
     FireStoreService fireStore = context.read<FireStoreService>();
     fireStore.accountStream(context.read<Account>(), onComplete: () {
       if (mounted) {
@@ -557,7 +547,7 @@ class _ContactConfirmation extends State<DonationContactScreen> {
                   );
                   _showVerifyPhone = false;
                   _phoneVerified = true;
-                  if (isNewPhone(phoneNumber)) {
+                  if (_isNewPhone(phoneNumber)) {
                     _phoneButtonLabel = 'Add';
                     _phoneVerified = false;
                   }
@@ -687,7 +677,7 @@ class _ContactConfirmation extends State<DonationContactScreen> {
       child: RoundedButton(
         label: 'Next',
         onPressed: () {
-          confirm();
+          _confirm();
         },
       ),
     );

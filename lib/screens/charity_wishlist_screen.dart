@@ -32,7 +32,7 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
 
   String _buttonLabel = '';
 
-  void initWishList() {
+  void _initWishList() {
     FireStoreService fireStore = context.read<FireStoreService>();
     WishList wishList = context.read<WishList>();
     Produce produce = context.read<Produce>();
@@ -60,7 +60,7 @@ class _CharityWishListScreenState extends State<CharityWishListScreen> {
   @override
   void initState() {
     super.initState();
-    initWishList();
+    _initWishList();
   }
 
   @override

@@ -10,6 +10,7 @@ import 'package:fruitfairy/models/produce_item.dart';
 import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/models/status.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
+import 'package:fruitfairy/widgets/charity_tile.dart';
 import 'package:fruitfairy/widgets/custom_grid.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
 
@@ -27,12 +28,19 @@ class _DonorDonationDetailScreenState extends State<DonorDonationDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Produce produce = context.watch<Produce>();
+    FireStoreService fireStore = context.read<FireStoreService>();
     Donations donations = context.watch<Donations>();
-    _donation = donations.map[ModalRoute.of(context).settings.arguments];
+    Map<String, dynamic> donationStorage = donations.map;
+    String donationId = ModalRoute.of(context).settings.arguments;
+    if (!donationStorage.containsKey(donationId)) {
+      fireStore.loadDonationDetails(donationId, donations);
+    } else {
+      _donation = donationStorage[donationId];
+    }
+    Produce produce = context.watch<Produce>();
     bool loadingDonation = _donation == null || produce.isLoading;
     if (!loadingDonation) {
-      context.read<FireStoreService>().loadDonationProduce(_donation, produce);
+      fireStore.loadDonationProduce(_donation, produce);
     }
     return Scaffold(
       appBar: AppBar(title: Text('Donation Details')),
@@ -54,12 +62,11 @@ class _DonorDonationDetailScreenState extends State<DonorDonationDetailScreen> {
   Widget donationDetails() {
     Size screen = MediaQuery.of(context).size;
     List<Widget> widgets = [
-      statusTile(),
-      groupLabel("Selected Charity"),
-      selectedCharity(),
-      assistanceNeeded(),
       groupLabel('Status'),
-      statusMessage(),
+      statusTile(),
+      assistanceNeeded(),
+      groupLabel("Charity"),
+      selectedCharity(),
       groupLabel('Produce'),
       selectedFruits(),
       SizedBox(height: screen.height * 0.06),
@@ -81,7 +88,7 @@ class _DonorDonationDetailScreenState extends State<DonorDonationDetailScreen> {
     Size screen = MediaQuery.of(context).size;
     return Padding(
       padding: EdgeInsets.only(
-        top: screen.height * 0.04,
+        top: screen.height * 0.03,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -134,7 +141,10 @@ class _DonorDonationDetailScreenState extends State<DonorDonationDetailScreen> {
     }
     Size screen = MediaQuery.of(context).size;
     return Padding(
-      padding: EdgeInsets.only(top: screen.height * 0.03),
+      padding: EdgeInsets.symmetric(
+        vertical: screen.height * 0.01,
+        horizontal: screen.width * 0.02,
+      ),
       child: Column(
         children: [
           Row(
@@ -143,14 +153,7 @@ class _DonorDonationDetailScreenState extends State<DonorDonationDetailScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Created on',
-                    style: TextStyle(
-                      color: kLabelColor,
-                      fontSize: 25.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  fieldLabel('Created on'),
                   fieldLabel(DateFormat.yMMMd().add_Hm().format(dateTime)),
                 ],
               ),
@@ -175,6 +178,12 @@ class _DonorDonationDetailScreenState extends State<DonorDonationDetailScreen> {
               ),
             ],
           ),
+          Padding(
+            padding: EdgeInsets.symmetric(
+              vertical: screen.height * 0.01,
+            ),
+            child: fieldLabel(status.message),
+          ),
         ],
       ),
     );
@@ -183,11 +192,13 @@ class _DonorDonationDetailScreenState extends State<DonorDonationDetailScreen> {
   Widget selectedCharity() {
     Size screen = MediaQuery.of(context).size;
     return Padding(
-      padding: EdgeInsets.symmetric(
-        vertical: screen.height * 0.01,
-        horizontal: screen.width * 0.02,
+      padding: EdgeInsets.only(
+        top: screen.height * 0.01,
+        bottom: screen.height * 0.02,
+        left: screen.width * 0.02,
+        right: screen.width * 0.02,
       ),
-      child: fieldLabel('${_donation.charities.first.name}'),
+      child: CharityTile(charityName: _donation.charities.first.name),
     );
   }
 
@@ -196,10 +207,9 @@ class _DonorDonationDetailScreenState extends State<DonorDonationDetailScreen> {
     return Visibility(
       visible: _donation.needCollected,
       child: Padding(
-        padding: EdgeInsets.only(
-          top: screen.height * 0.01,
-          left: screen.width * 0.05,
-          right: screen.width * 0.05,
+        padding: EdgeInsets.symmetric(
+          vertical: screen.height * 0.01,
+          horizontal: screen.width * 0.05,
         ),
         child: Container(
           decoration: BoxDecoration(
@@ -220,17 +230,6 @@ class _DonorDonationDetailScreenState extends State<DonorDonationDetailScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget statusMessage() {
-    Size screen = MediaQuery.of(context).size;
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        vertical: screen.height * 0.01,
-        horizontal: screen.width * 0.02,
-      ),
-      child: fieldLabel('${_donation.status.message}'),
     );
   }
 

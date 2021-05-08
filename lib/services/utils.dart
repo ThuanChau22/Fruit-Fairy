@@ -147,7 +147,7 @@ class Utils {
     ];
     List<String> produce = [];
     CollectionReference produceDB =
-        fireStore.instance.collection(FireStoreService.kProduce);
+        fireStore.firestore.collection(FireStoreService.kProduce);
     QuerySnapshot snapshot = await produceDB.get();
     for (QueryDocumentSnapshot doc in snapshot.docs) {
       produce.add(doc.id);

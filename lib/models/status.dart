@@ -31,7 +31,7 @@ class Status implements Comparable<Status> {
     }
     if (isCompleted) {
       _description = 'Completed';
-      _message = 'Donation completed';
+      _message = 'Donation picked up by charity';
     }
   }
 
@@ -69,6 +69,10 @@ class Status implements Comparable<Status> {
   /// Return initial status code
   static Status init() {
     return Status(0, 0);
+  }
+
+  static Status declined() {
+    return Status(1, 0, isCharity: true);
   }
 
   @override

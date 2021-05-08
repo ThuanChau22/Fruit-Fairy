@@ -13,6 +13,7 @@ import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
 import 'package:fruitfairy/screens/authentication/signin_screen.dart';
 import 'package:fruitfairy/services/map_service.dart';
 import 'package:fruitfairy/services/fireauth_service.dart';
+import 'package:fruitfairy/services/firemessaging_service.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
 import 'package:fruitfairy/services/session_token.dart';
 import 'package:fruitfairy/services/validation.dart';
@@ -93,35 +94,35 @@ class _ProfileDonorScreenState extends State<ProfileDonorScreen> {
   StateSetter _setDialogState;
 
   void _updateInputFields() {
-    fillEmail();
+    _fillEmail();
     if (_updated.isEmpty) {
-      fillName();
-      fillAddress();
-      fillPhone();
+      _fillName();
+      _fillAddress();
+      _fillPhone();
     }
     if (_updated.contains(Field.Name)) {
-      fillName();
+      _fillName();
     }
     if (_updated.contains(Field.Address)) {
-      fillAddress();
+      _fillAddress();
     }
     if (_updated.contains(Field.Phone)) {
-      fillPhone();
+      _fillPhone();
     }
     setState(() {});
   }
 
-  void fillEmail() {
+  void _fillEmail() {
     _email.text = context.read<Account>().email;
   }
 
-  void fillName() {
+  void _fillName() {
     Account account = context.read<Account>();
     _firstName.text = account.firstName;
     _lastName.text = account.lastName;
   }
 
-  void fillAddress() {
+  void _fillAddress() {
     Map<String, String> address = context.read<Account>().address;
     if (address.isNotEmpty) {
       _street.text = address[FireStoreService.kAddressStreet];
@@ -136,7 +137,7 @@ class _ProfileDonorScreenState extends State<ProfileDonorScreen> {
     }
   }
 
-  void fillPhone() {
+  void _fillPhone() {
     Map<String, String> phone = context.read<Account>().phone;
     if (phone.isNotEmpty) {
       _isoCode = phone[FireStoreService.kPhoneCountry];
@@ -310,15 +311,23 @@ class _ProfileDonorScreenState extends State<ProfileDonorScreen> {
       String notifyMessage = '';
       if (insert || update) {
         notifyMessage = await auth.registerPhone(
-          phoneNumber: '$_dialCode$phoneNumber',
+          country: _isoCode,
+          dialCode: _dialCode,
+          phoneNumber: phoneNumber,
           codeSent: (verifyCode) async {
             _verifyCode = verifyCode;
           },
-          completed: (result) async {
+          completed: (register) async {
             setState(() => _showSpinner = true);
-            String errorMessage = await result();
+            _updated.add(Field.Phone);
+            String errorMessage = await register();
+            _updated.remove(Field.Phone);
             if (errorMessage.isEmpty) {
-              errorMessage = await updatePhoneNumber();
+              _confirmCode.clear();
+              _verifyCode = null;
+              _showVerifyPhone = false;
+              _phoneButtonLabel = 'Remove';
+              errorMessage = 'Phone number updated';
             }
             MessageBar(context, message: errorMessage).show();
             setState(() => _showSpinner = false);
@@ -331,7 +340,7 @@ class _ProfileDonorScreenState extends State<ProfileDonorScreen> {
         _showVerifyPhone = true;
         _phoneButtonLabel = 'Re-send';
       } else {
-        notifyMessage = await deletePhoneNumber();
+        notifyMessage = await _deletePhoneNumber();
       }
       MessageBar(context, message: notifyMessage).show();
     }
@@ -339,45 +348,28 @@ class _ProfileDonorScreenState extends State<ProfileDonorScreen> {
   }
 
   void _updatePhoneVerify() async {
-    setState(() => _showSpinner = true);
     if (_verifyCode != null) {
+      setState(() => _showSpinner = true);
+      _updated.add(Field.Phone);
       String errorMessage = await _verifyCode(_confirmCode.text.trim());
+      _updated.remove(Field.Phone);
       if (errorMessage.isEmpty) {
-        errorMessage = await updatePhoneNumber();
+        _confirmCode.clear();
+        _verifyCode = null;
+        _showVerifyPhone = false;
+        _phoneButtonLabel = 'Remove';
+        errorMessage = 'Phone number updated';
       }
       MessageBar(context, message: errorMessage).show();
+      setState(() => _showSpinner = false);
     }
-    setState(() => _showSpinner = false);
   }
 
-  Future<String> updatePhoneNumber() async {
-    try {
-      _updated.add(Field.Phone);
-      String phoneNumber = _phoneNumber.text.trim();
-      await context.read<FireStoreService>().updatePhoneNumber(
-            country: _isoCode,
-            dialCode: _dialCode,
-            phoneNumber: phoneNumber,
-          );
-      _phoneNumber.text = phoneNumber;
-      _confirmCode.clear();
-      _showVerifyPhone = false;
-      _phoneButtonLabel = 'Remove';
-      _verifyCode = null;
-    } catch (errorMessage) {
-      return errorMessage;
-    } finally {
-      _updated.remove(Field.Phone);
-    }
-    return 'Phone number updated';
-  }
-
-  Future<String> deletePhoneNumber() async {
+  Future<String> _deletePhoneNumber() async {
     String notifyMessage = 'Phone number removed';
     try {
       _updated.add(Field.Phone);
-      await context.read<FireAuthService>().removePhone();
-      await context.read<FireStoreService>().updatePhoneNumber(
+      await context.read<FireAuthService>().removePhone(
             country: _isoCode,
             dialCode: _dialCode,
             phoneNumber: '',
@@ -423,7 +415,9 @@ class _ProfileDonorScreenState extends State<ProfileDonorScreen> {
         context.read<Donation>().clear();
         context.read<Produce>().clear();
         context.read<Charities>().clear();
-        context.read<FireStoreService>().clear();
+        FireStoreService fireStore = context.read<FireStoreService>();
+        await context.read<FireMessagingService>().clear(fireStore);
+        fireStore.clear();
         _setDialogState(() => _deleteMode = DeleteMode.Success);
         await Future.delayed(Duration(milliseconds: 1500));
         Navigator.of(context).pushNamedAndRemoveUntil(
@@ -442,10 +436,10 @@ class _ProfileDonorScreenState extends State<ProfileDonorScreen> {
   @override
   void initState() {
     super.initState();
-    fillEmail();
-    fillName();
-    fillAddress();
-    fillPhone();
+    _fillEmail();
+    _fillName();
+    _fillAddress();
+    _fillPhone();
     FireStoreService fireStore = context.read<FireStoreService>();
     fireStore.accountStream(context.read<Account>(), onComplete: () {
       if (mounted) {

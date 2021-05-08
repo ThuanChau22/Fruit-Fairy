@@ -19,7 +19,6 @@ import 'package:fruitfairy/services/utils.dart';
 
 class FireStoreService {
   /// Database fields
-
   /// donations
   static const String kDonations = 'donations';
   static const String kDonor = 'donor';
@@ -59,11 +58,11 @@ class FireStoreService {
   static const String kAddressZip = 'zip';
   static const String kWishList = 'wishlist';
   static const String kLastSignedIn = 'lastSignedIn';
-
+  static const String kDeviceTokens = 'deviceTokens';
   ///////////////
 
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseStorage _storage = FirebaseStorage.instance;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  final FirebaseStorage storage = FirebaseStorage.instance;
 
   CollectionReference _usersDB;
   CollectionReference _produceDB;
@@ -72,13 +71,9 @@ class FireStoreService {
   String _uid;
 
   FireStoreService() {
-    _usersDB = _firestore.collection(kUsers);
-    _produceDB = _firestore.collection(kProduce);
-    _donationsDB = _firestore.collection(kDonations);
-  }
-
-  FirebaseFirestore get instance {
-    return _firestore;
+    _usersDB = firestore.collection(kUsers);
+    _produceDB = firestore.collection(kProduce);
+    _donationsDB = firestore.collection(kDonations);
   }
 
   String get uid {
@@ -565,6 +560,9 @@ class FireStoreService {
             data[kStatus],
             data[kSubStatus],
           );
+          Charity charity = Charity(data[kCharity][kUserId]);
+          charity.name = data[kCharity][kUserName];
+          donation.pickCharity(charity);
           Timestamp timeStamp = data[kCreatedAt] ?? Timestamp.now();
           donation.createdAt = timeStamp.toDate();
           donation.needCollected = data[kNeedCollected];
@@ -584,9 +582,6 @@ class FireStoreService {
             dialCode: data[kPhone][kPhoneDialCode],
             phoneNumber: data[kPhone][kPhoneNumber],
           );
-          Charity charity = Charity(data[kCharity][kUserId]);
-          charity.name = data[kCharity][kUserName];
-          donation.pickCharity(charity);
           donations.pickDonation(donation);
         }
       }));
@@ -704,11 +699,16 @@ class FireStoreService {
         } else {
           Map<String, dynamic> data = docChange.doc.data();
           Donation donation = Donation(donationId);
-          donation.status = Status(
-            data[kStatus],
-            data[kSubStatus],
-            isCharity: true,
-          );
+          donation.status = Status.declined();
+          if (data[kRequestedCharities].last == _uid) {
+            donation.status = Status(
+              data[kStatus],
+              data[kSubStatus],
+              isCharity: true,
+            );
+          }
+          donation.donorId = data[kDonor][kUserId];
+          donation.donorName = data[kDonor][kUserName];
           Timestamp timeStamp = data[kCreatedAt] ?? Timestamp.now();
           donation.createdAt = timeStamp.toDate();
           donation.needCollected = data[kNeedCollected];
@@ -728,8 +728,6 @@ class FireStoreService {
             dialCode: data[kPhone][kPhoneDialCode],
             phoneNumber: data[kPhone][kPhoneNumber],
           );
-          donation.donorId = data[kDonor][kUserId];
-          donation.donorName = data[kDonor][kUserName];
           donations.pickDonation(donation);
         }
       }));
@@ -739,7 +737,69 @@ class FireStoreService {
     }
   }
 
-  Future<void> checkDonationAvailability(
+  Future<void> loadDonationDetails(
+    String donationId,
+    Donations donations, {
+    Function onData,
+    bool isCharity = false,
+  }) async {
+    onData = onData ?? () {};
+    try {
+      Stream<DocumentSnapshot> snapshots =
+          _donationsDB.doc(donationId).snapshots();
+      donations.addStream(snapshots.listen((snapshot) {
+        Map<String, dynamic> data = snapshot.data();
+        Donation donation = Donation(donationId);
+        if (isCharity) {
+          donation.status = Status.declined();
+          if (data[kRequestedCharities].last == _uid) {
+            donation.status = Status(
+              data[kStatus],
+              data[kSubStatus],
+              isCharity: true,
+            );
+          }
+          donation.donorId = data[kDonor][kUserId];
+          donation.donorName = data[kDonor][kUserName];
+        } else {
+          donation.status = Status(
+            data[kStatus],
+            data[kSubStatus],
+          );
+          Charity charity = Charity(data[kCharity][kUserId]);
+          charity.name = data[kCharity][kUserName];
+          donation.pickCharity(charity);
+        }
+        Timestamp timeStamp = data[kCreatedAt] ?? Timestamp.now();
+        donation.createdAt = timeStamp.toDate();
+        donation.needCollected = data[kNeedCollected];
+        for (Map<String, dynamic> produce in data[kProduce]) {
+          ProduceItem produceItem = ProduceItem(produce[kProduceId]);
+          if (donation.needCollected) {
+            produceItem.amount = produce[kAmount];
+          }
+          donation.pickProduce(produceItem);
+        }
+        donation.setContactInfo(
+          street: data[kAddress][kAddressStreet],
+          city: data[kAddress][kAddressCity],
+          state: data[kAddress][kAddressState],
+          zip: data[kAddress][kAddressZip],
+          country: data[kPhone][kPhoneCountry],
+          dialCode: data[kPhone][kPhoneDialCode],
+          phoneNumber: data[kPhone][kPhoneNumber],
+        );
+        donations.pickDonation(donation);
+        onData();
+      }, onError: (e) {
+        print(e);
+      }));
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<void> checkProduceAvailability(
     Donation donation,
     Produce produce, {
     Function(bool removed) notify,
@@ -801,7 +861,7 @@ class FireStoreService {
 
   Future<String> imageURL(String path) async {
     try {
-      return await _storage.refFromURL(path).getDownloadURL();
+      return await storage.refFromURL(path).getDownloadURL();
     } catch (e) {
       print(e);
       return '';
@@ -938,6 +998,34 @@ class FireStoreService {
         );
       }
       sessionToken.clear();
+    } catch (e) {
+      throw e.message;
+    }
+  }
+
+  Future<void> storeDeviceToken(String token) async {
+    if (_uid == null) {
+      print('UID Unset');
+      return;
+    }
+    try {
+      await _usersDB.doc(_uid).update({
+        kDeviceTokens: FieldValue.arrayUnion([token]),
+      });
+    } catch (e) {
+      throw e.message;
+    }
+  }
+
+  Future<void> removeDeviceToken(String token) async {
+    if (_uid == null) {
+      print('UID Unset');
+      return;
+    }
+    try {
+      await _usersDB.doc(_uid).update({
+        kDeviceTokens: FieldValue.arrayRemove([token]),
+      });
     } catch (e) {
       throw e.message;
     }
