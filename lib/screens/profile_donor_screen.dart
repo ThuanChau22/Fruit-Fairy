@@ -13,6 +13,7 @@ import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
 import 'package:fruitfairy/screens/authentication/signin_screen.dart';
 import 'package:fruitfairy/services/map_service.dart';
 import 'package:fruitfairy/services/fireauth_service.dart';
+import 'package:fruitfairy/services/firemessaging_service.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
 import 'package:fruitfairy/services/session_token.dart';
 import 'package:fruitfairy/services/validation.dart';
@@ -414,7 +415,9 @@ class _ProfileDonorScreenState extends State<ProfileDonorScreen> {
         context.read<Donation>().clear();
         context.read<Produce>().clear();
         context.read<Charities>().clear();
-        context.read<FireStoreService>().clear();
+        FireStoreService fireStore = context.read<FireStoreService>();
+        await context.read<FireMessagingService>().clear(fireStore);
+        fireStore.clear();
         _setDialogState(() => _deleteMode = DeleteMode.Success);
         await Future.delayed(Duration(milliseconds: 1500));
         Navigator.of(context).pushNamedAndRemoveUntil(

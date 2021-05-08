@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:provider/provider.dart';
 import 'package:strings/strings.dart';
 //
@@ -11,6 +10,8 @@ import 'package:fruitfairy/models/donations.dart';
 import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/screens/donation_produce_selection_screen.dart';
 import 'package:fruitfairy/screens/donor_donation_detail_screen.dart';
+import 'package:fruitfairy/screens/home_screen.dart';
+import 'package:fruitfairy/services/firemessaging_service.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
 import 'package:fruitfairy/widgets/donation_tile.dart';
 import 'package:fruitfairy/widgets/message_bar.dart';
@@ -82,27 +83,17 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
   }
 
   void _initMessaging() async {
-    _showDonationDetails(await FirebaseMessaging.instance.getInitialMessage());
-    context.read<Account>().addStream(
-      FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-        _showDonationDetails(message);
-      }),
-    );
-  }
-
-  void _showDonationDetails(RemoteMessage message) async {
-    Map<String, dynamic> data = message?.data;
-    if (data != null) {
-      Navigator.of(context).pushNamed(
-        DonorDonationDetailScreen.id,
-        arguments: data['id'],
-      );
-
-      // Flush remaining messages (Dirty Code)
-      do {
-        message = await FirebaseMessaging.instance.getInitialMessage();
-      } while (message != null);
-    }
+    FireMessagingService fireMessaging = context.read<FireMessagingService>();
+    await fireMessaging.initSettings();
+    fireMessaging.handleNotification((donationId) {
+      if (donationId.isNotEmpty) {
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          DonorDonationDetailScreen.id,
+          (route) => route.settings.name == HomeScreen.id,
+          arguments: donationId,
+        );
+      }
+    });
   }
 
   @override

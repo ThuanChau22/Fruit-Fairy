@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 //
@@ -19,6 +17,7 @@ import 'package:fruitfairy/screens/home_donor_body.dart';
 import 'package:fruitfairy/screens/profile_charity_screen.dart';
 import 'package:fruitfairy/screens/profile_donor_screen.dart';
 import 'package:fruitfairy/services/fireauth_service.dart';
+import 'package:fruitfairy/services/firemessaging_service.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
 
 enum Profile { Edit, SignOut }
@@ -32,16 +31,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final AndroidNotificationChannel _channel = AndroidNotificationChannel(
-    'donation_status', // id
-    'Donation Status', // title
-    'This channel is used to notify donation status.', // description
-    importance: Importance.max,
-  );
-  final FlutterLocalNotificationsPlugin _notificationsPlugin =
-      FlutterLocalNotificationsPlugin();
-  final FirebaseMessaging _messaging = FirebaseMessaging.instance;
-
   bool _showSpinner = false;
 
   Future<void> _signOut() async {
@@ -53,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
     context.read<Produce>().clear();
     context.read<WishList>().clear();
     FireStoreService fireStore = context.read<FireStoreService>();
-    fireStore.removeDeviceToken(await _messaging.getToken());
+    await context.read<FireMessagingService>().clear(fireStore);
     fireStore.clear();
     await context.read<FireAuthService>().signOut();
     Navigator.of(context).pushNamedAndRemoveUntil(
@@ -67,57 +56,13 @@ class _HomeScreenState extends State<HomeScreen> {
   void _initAccount() async {
     FireStoreService fireStore = context.read<FireStoreService>();
     fireStore.accountStream(context.read<Account>());
-  }
-
-  void _initMessaging() async {
-    await _messaging.requestPermission();
-    await _messaging.setForegroundNotificationPresentationOptions(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
-    await _notificationsPlugin
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(_channel);
-
-    _notificationsPlugin.initialize(InitializationSettings(
-      android: AndroidInitializationSettings('ic_launcher_notification'),
-      iOS: IOSInitializationSettings(),
-    ));
-
-    context.read<Account>().addStream(
-      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-        RemoteNotification notification = message.notification;
-        AndroidNotification android = message.notification?.android;
-        if (notification != null && android != null) {
-          _notificationsPlugin.show(
-            notification.hashCode,
-            notification.title,
-            notification.body,
-            NotificationDetails(
-              android: AndroidNotificationDetails(
-                _channel.id,
-                _channel.name,
-                _channel.description,
-                icon: android?.smallIcon,
-                color: kDarkPrimaryColor,
-              ),
-            ),
-          );
-        }
-      }),
-    );
-
-    FireStoreService fireStore = context.read<FireStoreService>();
-    fireStore.storeDeviceToken(await _messaging.getToken());
+    context.read<FireMessagingService>().initToken(fireStore);
   }
 
   @override
   void initState() {
     super.initState();
     _initAccount();
-    _initMessaging();
   }
 
   @override
