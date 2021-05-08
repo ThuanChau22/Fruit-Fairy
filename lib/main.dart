@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:provider/provider.dart';
 //
 import 'package:fruitfairy/constant.dart';
@@ -13,6 +14,7 @@ import 'package:fruitfairy/models/wish_list.dart';
 import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
 import 'package:fruitfairy/services/fireauth_service.dart';
+import 'package:fruitfairy/services/firefunctions_service.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
 import 'package:fruitfairy/services/route_generator.dart';
 
@@ -20,8 +22,11 @@ void main() async {
   // Initialize app with Firebase
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  FirebaseMessaging.onBackgroundMessage(_backgroundMessageHandler);
   runApp(FruitFairy());
 }
+
+Future<void> _backgroundMessageHandler(RemoteMessage message) async {}
 
 class FruitFairy extends StatelessWidget {
   @override
@@ -29,6 +34,7 @@ class FruitFairy extends StatelessWidget {
     return MultiProvider(
       providers: [
         Provider<FireAuthService>(create: (_) => FireAuthService()),
+        Provider<FireFunctionsService>(create: (_) => FireFunctionsService()),
         Provider<FireStoreService>(create: (_) => FireStoreService()),
         ChangeNotifierProvider<Account>(create: (_) => Account()),
         ChangeNotifierProvider<Charities>(create: (_) => Charities()),
@@ -54,6 +60,7 @@ class Authentication extends StatelessWidget {
       fireStore.updateLastSignedIn();
     }
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       initialRoute: signedIn ? HomeScreen.id : SignOptionScreen.id,
       onGenerateRoute: RouteGenerator.generate,
       theme: Theme.of(context).copyWith(
@@ -65,7 +72,7 @@ class Authentication extends StatelessWidget {
           centerTitle: true,
         ),
         snackBarTheme: SnackBarThemeData(
-          backgroundColor: kSnackbarBackground.withOpacity(0.95),
+          backgroundColor: kSnackbarBackground.withOpacity(0.9),
           actionTextColor: kLabelColor,
           contentTextStyle: TextStyle(
             color: kLabelColor,

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:provider/provider.dart';
 import 'package:strings/strings.dart';
 //
@@ -30,7 +31,7 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
   bool _isLoadingMore = true;
   bool _checkProduceAvailability = false;
 
-  void initProduce() async {
+  void _initProduce() async {
     FireStoreService fireStore = context.read<FireStoreService>();
 
     /// Init Produce
@@ -48,7 +49,7 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
     });
   }
 
-  void initDonations() {
+  void _initDonations() {
     FireStoreService fireStore = context.read<FireStoreService>();
 
     /// Init Donations
@@ -80,11 +81,36 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
     });
   }
 
+  void _initMessaging() async {
+    _showDonationDetails(await FirebaseMessaging.instance.getInitialMessage());
+    context.read<Account>().addStream(
+      FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+        _showDonationDetails(message);
+      }),
+    );
+  }
+
+  void _showDonationDetails(RemoteMessage message) async {
+    Map<String, dynamic> data = message?.data;
+    if (data != null) {
+      Navigator.of(context).pushNamed(
+        DonorDonationDetailScreen.id,
+        arguments: data['id'],
+      );
+
+      // Flush remaining messages (Dirty Code)
+      do {
+        message = await FirebaseMessaging.instance.getInitialMessage();
+      } while (message != null);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    initProduce();
-    initDonations();
+    _initProduce();
+    _initDonations();
+    _initMessaging();
   }
 
   @override
@@ -100,7 +126,7 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
     if (!_checkProduceAvailability) {
       FireStoreService fireStore = context.read<FireStoreService>();
       Produce produce = context.read<Produce>();
-      fireStore.checkDonationAvailability(donation, produce, notify: (removed) {
+      fireStore.checkProduceAvailability(donation, produce, notify: (removed) {
         if (removed) {
           MessageBar(
             context,
