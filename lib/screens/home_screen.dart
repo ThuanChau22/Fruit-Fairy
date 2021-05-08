@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 //
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/account.dart';
@@ -17,6 +17,7 @@ import 'package:fruitfairy/screens/home_donor_body.dart';
 import 'package:fruitfairy/screens/profile_charity_screen.dart';
 import 'package:fruitfairy/screens/profile_donor_screen.dart';
 import 'package:fruitfairy/services/fireauth_service.dart';
+import 'package:fruitfairy/services/firemessaging_service.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
 
 enum Profile { Edit, SignOut }
@@ -40,7 +41,9 @@ class _HomeScreenState extends State<HomeScreen> {
     context.read<Donations>().clear();
     context.read<Produce>().clear();
     context.read<WishList>().clear();
-    context.read<FireStoreService>().clear();
+    FireStoreService fireStore = context.read<FireStoreService>();
+    await context.read<FireMessagingService>().clear(fireStore);
+    fireStore.clear();
     await context.read<FireAuthService>().signOut();
     Navigator.of(context).pushNamedAndRemoveUntil(
       SignOptionScreen.id,
@@ -50,11 +53,16 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => _showSpinner = false);
   }
 
+  void _initAccount() async {
+    FireStoreService fireStore = context.read<FireStoreService>();
+    fireStore.accountStream(context.read<Account>());
+    context.read<FireMessagingService>().initToken(fireStore);
+  }
+
   @override
   void initState() {
     super.initState();
-    FireStoreService fireStore = context.read<FireStoreService>();
-    fireStore.accountStream(context.read<Account>());
+    _initAccount();
   }
 
   @override

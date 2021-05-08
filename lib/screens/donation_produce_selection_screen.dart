@@ -36,7 +36,7 @@ class _DonationProduceSelectionScreenState
   bool _isLoadingInit = true;
   bool _isLoadingMore = true;
 
-  void initProduce() {
+  void _initProduce() {
     FireStoreService fireStore = context.read<FireStoreService>();
     Produce produce = context.read<Produce>();
     _scroll.addListener(() {
@@ -58,7 +58,7 @@ class _DonationProduceSelectionScreenState
     });
   }
 
-  void searchProduce() {
+  void _searchProduce() {
     setState(() => _isLoadingMore = true);
     _searchTimer.cancel();
     _searchTimer = Timer(Duration(milliseconds: 500), () {
@@ -78,7 +78,7 @@ class _DonationProduceSelectionScreenState
   @override
   void initState() {
     super.initState();
-    initProduce();
+    _initProduce();
   }
 
   @override
@@ -175,7 +175,7 @@ class _DonationProduceSelectionScreenState
             ),
             suffixWidget: SizedBox(width: 20.0),
             onChanged: (value) {
-              searchProduce();
+              _searchProduce();
             },
           ),
           Positioned(

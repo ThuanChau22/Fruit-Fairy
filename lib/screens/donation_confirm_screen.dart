@@ -25,7 +25,7 @@ class DonationConfirmScreen extends StatefulWidget {
 class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
   bool _showSpinner = false;
 
-  void confirm() async {
+  void _confirm() async {
     setState(() => _showSpinner = true);
     FireStoreService firestore = context.read<FireStoreService>();
     Account account = context.read<Account>();
@@ -282,7 +282,7 @@ class _DonationConfirmScreenState extends State<DonationConfirmScreen> {
       child: RoundedButton(
         label: 'Confirm',
         onPressed: () {
-          confirm();
+          _confirm();
         },
       ),
     );

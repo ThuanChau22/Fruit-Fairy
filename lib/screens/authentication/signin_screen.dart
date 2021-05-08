@@ -102,7 +102,7 @@ class _SignInScreenState extends State<SignInScreen> {
     return errors.isEmpty;
   }
 
-  void submit() async {
+  void _submit() async {
     if (await _validate()) {
       setState(() => _showSpinner = true);
       switch (_mode) {
@@ -472,7 +472,7 @@ class _SignInScreenState extends State<SignInScreen> {
       child: RoundedButton(
         label: _buttonLabel,
         onPressed: () {
-          submit();
+          _submit();
         },
       ),
     );

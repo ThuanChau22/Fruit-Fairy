@@ -28,12 +28,19 @@ class _DonorDonationDetailScreenState extends State<DonorDonationDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Produce produce = context.watch<Produce>();
+    FireStoreService fireStore = context.read<FireStoreService>();
     Donations donations = context.watch<Donations>();
-    _donation = donations.map[ModalRoute.of(context).settings.arguments];
+    Map<String, dynamic> donationStorage = donations.map;
+    String donationId = ModalRoute.of(context).settings.arguments;
+    if (!donationStorage.containsKey(donationId)) {
+      fireStore.loadDonationDetails(donationId, donations);
+    } else {
+      _donation = donationStorage[donationId];
+    }
+    Produce produce = context.watch<Produce>();
     bool loadingDonation = _donation == null || produce.isLoading;
     if (!loadingDonation) {
-      context.read<FireStoreService>().loadDonationProduce(_donation, produce);
+      fireStore.loadDonationProduce(_donation, produce);
     }
     return Scaffold(
       appBar: AppBar(title: Text('Donation Details')),

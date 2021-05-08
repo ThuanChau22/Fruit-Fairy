@@ -11,6 +11,8 @@ import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/models/wish_list.dart';
 import 'package:fruitfairy/screens/charity_donation_detail_screen.dart';
 import 'package:fruitfairy/screens/charity_wishlist_screen.dart';
+import 'package:fruitfairy/screens/home_screen.dart';
+import 'package:fruitfairy/services/firemessaging_service.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
 import 'package:fruitfairy/widgets/donation_tile.dart';
 import 'package:fruitfairy/widgets/message_bar.dart';
@@ -31,7 +33,7 @@ class _HomeCharityBodyState extends State<HomeCharityBody> {
   bool _isLoadingMore = true;
   bool _checkProduceAvailability = false;
 
-  void initProduce() async {
+  void _initProduce() async {
     FireStoreService fireStore = context.read<FireStoreService>();
 
     /// Init Produce
@@ -48,7 +50,7 @@ class _HomeCharityBodyState extends State<HomeCharityBody> {
     });
   }
 
-  void initDonations() {
+  void _initDonations() {
     FireStoreService fireStore = context.read<FireStoreService>();
 
     /// Init Donations
@@ -80,11 +82,26 @@ class _HomeCharityBodyState extends State<HomeCharityBody> {
     });
   }
 
+  void _initMessaging() async {
+    FireMessagingService fireMessaging = context.read<FireMessagingService>();
+    await fireMessaging.initSettings();
+    fireMessaging.handleNotification((donationId) {
+      if (donationId.isNotEmpty) {
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          CharityDonationDetailScreen.id,
+          (route) => route.settings.name == HomeScreen.id,
+          arguments: donationId,
+        );
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
-    initProduce();
-    initDonations();
+    _initProduce();
+    _initDonations();
+    _initMessaging();
   }
 
   @override
@@ -223,7 +240,6 @@ class _HomeCharityBodyState extends State<HomeCharityBody> {
     );
   }
 
-  //TODO: Message on empty history
   List<Widget> donationTiles() {
     List<Widget> donationTiles = [];
     Donations donations = context.watch<Donations>();
@@ -237,11 +253,11 @@ class _HomeCharityBodyState extends State<HomeCharityBody> {
       donationTiles.add(donationTile(donationList[i++]));
     }
     if (i == 0) {
-      donationTiles.add(emptyLabel('You have no active donation'));
+      donationTiles.add(emptyLabel('You have no active donations'));
     }
     donationTiles.add(groupLabel('History'));
     if (i == donationList.length) {
-      donationTiles.add(emptyLabel('Empty History'));
+      donationTiles.add(emptyLabel('You have no previous donations'));
     }
     while (i < donationList.length) {
       donationTiles.add(donationTile(donationList[i++]));
