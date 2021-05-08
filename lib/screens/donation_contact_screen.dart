@@ -65,19 +65,19 @@ class _ContactConfirmation extends State<DonationContactScreen> {
 
   void _updateInputFields() {
     if (_updated.isEmpty) {
-      fillAddress();
-      fillPhone();
+      _fillAddress();
+      _fillPhone();
     }
     if (_updated.contains(Field.Address)) {
-      fillAddress();
+      _fillAddress();
     }
     if (_updated.contains(Field.Phone)) {
-      fillPhone();
+      _fillPhone();
     }
     setState(() {});
   }
 
-  void fillAddress() {
+  void _fillAddress() {
     Map<String, String> address = context.read<Account>().address;
     if (address.isNotEmpty) {
       _street.text = address[FireStoreService.kAddressStreet];
@@ -92,7 +92,7 @@ class _ContactConfirmation extends State<DonationContactScreen> {
     }
   }
 
-  void fillPhone() {
+  void _fillPhone() {
     Map<String, String> phone = context.read<Account>().phone;
     if (phone.isNotEmpty) {
       _isoCode = phone[FireStoreService.kPhoneCountry];
@@ -108,7 +108,7 @@ class _ContactConfirmation extends State<DonationContactScreen> {
     }
   }
 
-  void confirm() async {
+  void _confirm() async {
     setState(() => _showSpinner = true);
     String addressError = await _updateAddress();
     _phoneError = await Validate.phoneNumber(
@@ -188,7 +188,7 @@ class _ContactConfirmation extends State<DonationContactScreen> {
     );
     if (_phoneError.isEmpty) {
       FireAuthService auth = context.read<FireAuthService>();
-      if (isNewPhone(phoneNumber)) {
+      if (_isNewPhone(phoneNumber)) {
         String notifyMessage = await auth.registerPhone(
           country: _isoCode,
           dialCode: _dialCode,
@@ -224,7 +224,7 @@ class _ContactConfirmation extends State<DonationContactScreen> {
     setState(() => _showSpinner = false);
   }
 
-  bool isNewPhone(String phoneNumber) {
+  bool _isNewPhone(String phoneNumber) {
     Account account = context.read<Account>();
     Map<String, String> phone = account.phone;
     bool insert = phone.isEmpty;
@@ -270,8 +270,8 @@ class _ContactConfirmation extends State<DonationContactScreen> {
   @override
   void initState() {
     super.initState();
-    fillAddress();
-    fillPhone();
+    _fillAddress();
+    _fillPhone();
     FireStoreService fireStore = context.read<FireStoreService>();
     fireStore.accountStream(context.read<Account>(), onComplete: () {
       if (mounted) {
@@ -547,7 +547,7 @@ class _ContactConfirmation extends State<DonationContactScreen> {
                   );
                   _showVerifyPhone = false;
                   _phoneVerified = true;
-                  if (isNewPhone(phoneNumber)) {
+                  if (_isNewPhone(phoneNumber)) {
                     _phoneButtonLabel = 'Add';
                     _phoneVerified = false;
                   }
@@ -677,7 +677,7 @@ class _ContactConfirmation extends State<DonationContactScreen> {
       child: RoundedButton(
         label: 'Next',
         onPressed: () {
-          confirm();
+          _confirm();
         },
       ),
     );

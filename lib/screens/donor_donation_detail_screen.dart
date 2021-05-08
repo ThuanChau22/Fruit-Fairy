@@ -27,11 +27,6 @@ class _DonorDonationDetailScreenState extends State<DonorDonationDetailScreen> {
   Donation _donation;
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     FireStoreService fireStore = context.read<FireStoreService>();
     Donations donations = context.watch<Donations>();

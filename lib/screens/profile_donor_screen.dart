@@ -93,35 +93,35 @@ class _ProfileDonorScreenState extends State<ProfileDonorScreen> {
   StateSetter _setDialogState;
 
   void _updateInputFields() {
-    fillEmail();
+    _fillEmail();
     if (_updated.isEmpty) {
-      fillName();
-      fillAddress();
-      fillPhone();
+      _fillName();
+      _fillAddress();
+      _fillPhone();
     }
     if (_updated.contains(Field.Name)) {
-      fillName();
+      _fillName();
     }
     if (_updated.contains(Field.Address)) {
-      fillAddress();
+      _fillAddress();
     }
     if (_updated.contains(Field.Phone)) {
-      fillPhone();
+      _fillPhone();
     }
     setState(() {});
   }
 
-  void fillEmail() {
+  void _fillEmail() {
     _email.text = context.read<Account>().email;
   }
 
-  void fillName() {
+  void _fillName() {
     Account account = context.read<Account>();
     _firstName.text = account.firstName;
     _lastName.text = account.lastName;
   }
 
-  void fillAddress() {
+  void _fillAddress() {
     Map<String, String> address = context.read<Account>().address;
     if (address.isNotEmpty) {
       _street.text = address[FireStoreService.kAddressStreet];
@@ -136,7 +136,7 @@ class _ProfileDonorScreenState extends State<ProfileDonorScreen> {
     }
   }
 
-  void fillPhone() {
+  void _fillPhone() {
     Map<String, String> phone = context.read<Account>().phone;
     if (phone.isNotEmpty) {
       _isoCode = phone[FireStoreService.kPhoneCountry];
@@ -339,7 +339,7 @@ class _ProfileDonorScreenState extends State<ProfileDonorScreen> {
         _showVerifyPhone = true;
         _phoneButtonLabel = 'Re-send';
       } else {
-        notifyMessage = await deletePhoneNumber();
+        notifyMessage = await _deletePhoneNumber();
       }
       MessageBar(context, message: notifyMessage).show();
     }
@@ -364,7 +364,7 @@ class _ProfileDonorScreenState extends State<ProfileDonorScreen> {
     }
   }
 
-  Future<String> deletePhoneNumber() async {
+  Future<String> _deletePhoneNumber() async {
     String notifyMessage = 'Phone number removed';
     try {
       _updated.add(Field.Phone);
@@ -433,10 +433,10 @@ class _ProfileDonorScreenState extends State<ProfileDonorScreen> {
   @override
   void initState() {
     super.initState();
-    fillEmail();
-    fillName();
-    fillAddress();
-    fillPhone();
+    _fillEmail();
+    _fillName();
+    _fillAddress();
+    _fillPhone();
     FireStoreService fireStore = context.read<FireStoreService>();
     fireStore.accountStream(context.read<Account>(), onComplete: () {
       if (mounted) {

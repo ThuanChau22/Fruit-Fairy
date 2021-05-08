@@ -90,34 +90,34 @@ class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
   StateSetter _setDialogState;
 
   void _updateInputFields() {
-    fillEmail();
+    _fillEmail();
     if (_updated.isEmpty) {
-      fillName();
-      fillAddress();
-      fillPhone();
+      _fillName();
+      _fillAddress();
+      _fillPhone();
     }
     if (_updated.contains(Field.Name)) {
-      fillName();
+      _fillName();
     }
     if (_updated.contains(Field.Address)) {
-      fillAddress();
+      _fillAddress();
     }
     if (_updated.contains(Field.Phone)) {
-      fillPhone();
+      _fillPhone();
     }
     setState(() {});
   }
 
-  void fillEmail() {
+  void _fillEmail() {
     _email.text = context.read<Account>().email;
   }
 
-  void fillName() {
+  void _fillName() {
     Account account = context.read<Account>();
     _charityName.text = account.charityName;
   }
 
-  void fillAddress() {
+  void _fillAddress() {
     Map<String, String> address = context.read<Account>().address;
     if (address.isNotEmpty) {
       _street.text = address[FireStoreService.kAddressStreet];
@@ -132,7 +132,7 @@ class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
     }
   }
 
-  void fillPhone() {
+  void _fillPhone() {
     Map<String, String> phone = context.read<Account>().phone;
     if (phone.isNotEmpty) {
       _isoCode = phone[FireStoreService.kPhoneCountry];
@@ -308,7 +308,7 @@ class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
         _showVerifyPhone = true;
         _phoneButtonLabel = 'Re-send';
       } else {
-        notifyMessage = await deletePhoneNumber();
+        notifyMessage = await _deletePhoneNumber();
       }
       MessageBar(context, message: notifyMessage).show();
     }
@@ -333,7 +333,7 @@ class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
     }
   }
 
-  Future<String> deletePhoneNumber() async {
+  Future<String> _deletePhoneNumber() async {
     String notifyMessage = 'Phone number removed';
     try {
       _updated.add(Field.Phone);
@@ -401,10 +401,10 @@ class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
   @override
   void initState() {
     super.initState();
-    fillEmail();
-    fillName();
-    fillAddress();
-    fillPhone();
+    _fillEmail();
+    _fillName();
+    _fillAddress();
+    _fillPhone();
     FireStoreService fireStore = context.read<FireStoreService>();
     fireStore.accountStream(context.read<Account>(), onComplete: () {
       if (mounted) {
