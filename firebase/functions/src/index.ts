@@ -105,7 +105,7 @@ async function sendNotification(
   data: admin.messaging.DataMessagePayload,
 ) {
   try {
-    if (tokens.length > 0){
+    if (tokens?.length > 0){
       await fcm.sendToDevice(
         tokens,
         {
