@@ -44,33 +44,40 @@ export const donationUpdate = functions.firestore
           donationRounting(change.after);
         } else {
           // Notify donor
-          const tokens = await validatedTokens(donorId, userData![kDeviceTokens]);
-          await sendNotification(
-            tokens,
-            'Your donation was not accepted at this time',
-            { id: change.after.id },
-          );
+          const tokens = userData![kDeviceTokens];
+          if (tokens?.length > 0) {
+            await sendNotification(
+              await validatedTokens(donorId, tokens),
+              'Your donation was not accepted at this time',
+              { id: change.after.id },
+            );
+          }
         }
       }
 
       // Accept
       if (donationData[kStatus] == 0 && donationData[kSubStatus] == 1) {
-        const tokens = await validatedTokens(donorId, userData![kDeviceTokens]);
-        await sendNotification(
-          tokens,
-          'Your donation was accepted',
-          { id: change.after.id },
-        );
+        const tokens = userData![kDeviceTokens];
+        if (tokens?.length > 0){
+          await sendNotification(
+            await validatedTokens(donorId, tokens),
+            'Your donation was accepted',
+            { id: change.after.id },
+          );
+        }
       }
 
       // Completed
       if (donationData[kStatus] == 1 && donationData[kSubStatus] == 1) {
-        const tokens = await validatedTokens(donorId, userData![kDeviceTokens]);
-        await sendNotification(
-          tokens,
-          'Your donation was collected',
-          { id: change.after.id },
-        );
+        const tokens = userData![kDeviceTokens];
+        if (tokens?.length > 0) {
+          await sendNotification(
+            await validatedTokens(donorId, tokens),
+            'Your donation was collected',
+            { id: change.after.id },
+          );
+        }
+
       }
     } catch (error) {
       console.log('Error: ', error);
@@ -91,12 +98,14 @@ async function donationRounting(
   });
 
   // Notify requested charity
-  const tokens = await validatedTokens(charityId, userData![kDeviceTokens]);
-  await sendNotification(
-    tokens,
-    'You have a new donation request',
-    { id: snapshot.id },
-  );
+  const tokens = userData![kDeviceTokens];
+  if (tokens?.length > 0) {
+    await sendNotification(
+      await validatedTokens(charityId, tokens),
+      'You have a new donation request',
+      { id: snapshot.id },
+    );
+  }
 }
 
 async function sendNotification(
@@ -105,21 +114,19 @@ async function sendNotification(
   data: admin.messaging.DataMessagePayload,
 ) {
   try {
-    if (tokens?.length > 0){
-      await fcm.sendToDevice(
-        tokens,
-        {
-          notification: {
-            body: message,
-          },
-          data: data,
+    await fcm.sendToDevice(
+      tokens,
+      {
+        notification: {
+          body: message,
         },
-        {
-          contentAvailable: true,
-          priority: 'high',
-        },
-      );
-    }
+        data: data,
+      },
+      {
+        contentAvailable: true,
+        priority: 'high',
+      },
+    );
   } catch (error) {
     console.log('Error: ', error);
   }
