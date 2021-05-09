@@ -431,41 +431,56 @@ class _CharityDonationDetailScreenState
         isCloseButton: false,
         isButtonVisible: false,
       ),
-      content: Padding(
-        padding: EdgeInsets.only(
-          top: screen.height * 0.03,
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: screen.width * 0.02,
-                ),
-                child: RoundedButton(
-                  label: 'Confirm',
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    _donation.status = status;
-                    _updateDonation();
-                  },
+      content: Container(
+        height: 80.0,
+        child: Padding(
+          padding: EdgeInsets.only(
+            top: screen.height * 0.03,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                flex: 1,
+                child: SizedBox.shrink(),
+              ),
+              Expanded(
+                flex: 5,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: screen.width * 0.02,
+                        ),
+                        child: RoundedButton(
+                          label: 'Confirm',
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            _donation.status = status;
+                            _updateDonation();
+                          },
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: screen.width * 0.02,
+                        ),
+                        child: RoundedButton(
+                          label: 'Cancel',
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: screen.width * 0.02,
-                ),
-                child: RoundedButton(
-                  label: 'Cancel',
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     ).show();
