@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:intl/intl.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 //
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/donation.dart';
@@ -341,8 +342,10 @@ class _CharityDonationDetailScreenState
               child: RoundedButton(
                 label: 'Accept',
                 onPressed: () {
-                  _donation.status = Status.accept();
-                  _updateDonation();
+                  showConfirmDialog(
+                    'Are you sure you want to accept?',
+                    Status.accept(),
+                  );
                 },
               ),
             ),
@@ -355,8 +358,10 @@ class _CharityDonationDetailScreenState
               child: RoundedButton(
                 label: 'Decline',
                 onPressed: () {
-                  _donation.status = Status.declined();
-                  _updateDonation();
+                  showConfirmDialog(
+                    'Are you sure you want to decline?',
+                    Status.declined(),
+                  );
                 },
               ),
             ),
@@ -378,8 +383,10 @@ class _CharityDonationDetailScreenState
           child: RoundedButton(
             label: 'Mark as Completed',
             onPressed: () {
-              _donation.status = Status.completed();
-              _updateDonation();
+              showConfirmDialog(
+                'Was the donation collected?',
+                Status.completed(),
+              );
             },
           ),
         ),
@@ -391,12 +398,76 @@ class _CharityDonationDetailScreenState
           child: RoundedButton(
             label: 'Decline',
             onPressed: () {
-              _donation.status = Status.declined();
-              _updateDonation();
+              showConfirmDialog(
+                'Are you sure you want to decline?',
+                Status.declined(),
+              );
             },
           ),
         ),
       ],
     );
+  }
+
+  void showConfirmDialog(
+    String label,
+    Status status,
+  ) {
+    Size screen = MediaQuery.of(context).size;
+    Alert(
+      context: context,
+      title: label,
+      style: AlertStyle(
+        alertBorder: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        titleStyle: TextStyle(
+          color: kLabelColor,
+          fontWeight: FontWeight.bold,
+        ),
+        backgroundColor: kPrimaryColor,
+        overlayColor: Colors.black.withOpacity(0.50),
+        isOverlayTapDismiss: false,
+        isCloseButton: false,
+        isButtonVisible: false,
+      ),
+      content: Padding(
+        padding: EdgeInsets.only(
+          top: screen.height * 0.03,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: screen.width * 0.02,
+                ),
+                child: RoundedButton(
+                  label: 'Confirm',
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _donation.status = status;
+                    _updateDonation();
+                  },
+                ),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: screen.width * 0.02,
+                ),
+                child: RoundedButton(
+                  label: 'Cancel',
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ).show();
   }
 }

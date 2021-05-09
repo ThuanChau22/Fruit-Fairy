@@ -5,9 +5,7 @@ import * as admin from 'firebase-admin';
 /// donations
 const kDonations = 'donations';
 const kDonor = 'donor';
-const kCharity = 'charity';
 const kUserId = 'userId';
-const kUserName = 'userName';
 const kSelectedCharities = 'selectedCharities';
 const kStatus = 'status';
 const kSubStatus = 'subStatus';
@@ -36,36 +34,37 @@ export const donationUpdate = functions.firestore
   .document(`${kDonations}/{id}`)
   .onUpdate(async (change, context) => {
     try {
-      let message = '';
       const donationData = change.after.data();
+      const donorId = donationData[kDonor][kUserId];
+      const userData = (await db.collection('users').doc(donorId).get()).data();
 
       // Declined
       if (donationData[kStatus] == 1 && donationData[kSubStatus] == 0) {
-        message = `Your donation has been declined`;
         if (donationData![kSelectedCharities][0]) {
           donationRounting(change.after);
-          return;
+        } else {
+          // Notify donor
+          await sendNotification(
+            'Your donation was not accepted at this time',
+            { id: change.after.id },
+            await validatedTokens(donorId, userData![kDeviceTokens]),
+          );
         }
       }
 
-      const charityName = donationData[kCharity][kUserName];
       // Accept
       if (donationData[kStatus] == 0 && donationData[kSubStatus] == 1) {
-        message = `${charityName} has accepted your donation`;
+        await sendNotification(
+          'Your donation was accepted',
+          { id: change.after.id },
+          await validatedTokens(donorId, userData![kDeviceTokens]),
+        );
       }
 
       // Completed
       if (donationData[kStatus] == 1 && donationData[kSubStatus] == 1) {
-        message = `${charityName} has completed your donation`;
-      }
-
-      const donorId = donationData[kDonor][kUserId];
-      const userData = (await db.collection('users').doc(donorId).get()).data();
-
-      // Notify donor
-      if (message) {
         await sendNotification(
-          message,
+          'Your donation was collected',
           { id: change.after.id },
           await validatedTokens(donorId, userData![kDeviceTokens]),
         );

@@ -242,7 +242,7 @@ class _HomeCharityBodyState extends State<HomeCharityBody> {
               horizontal: screen.width * 0.1,
             ),
             child: Text(
-              'Donation requests have yet\nto appear',
+              'Donation requests will\nshow here',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: kLabelColor.withOpacity(0.5),
