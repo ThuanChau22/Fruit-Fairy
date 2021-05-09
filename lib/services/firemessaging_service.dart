@@ -19,10 +19,10 @@ class FireMessagingService {
 
   void initToken(FireStoreService fireStore) async {
     // Get and store device token to db
-    fireStore.storeDeviceToken(await _messaging.getToken());
+    await fireStore.storeDeviceToken(await _messaging.getToken());
     // Store device token on refresh
-    _subscriptions.add(_messaging.onTokenRefresh.listen((newToken) {
-      fireStore.storeDeviceToken(newToken);
+    _subscriptions.add(_messaging.onTokenRefresh.listen((newToken) async {
+      await fireStore.storeDeviceToken(newToken);
     }));
   }
 
@@ -107,7 +107,7 @@ class FireMessagingService {
   }
 
   Future<void> clear(FireStoreService fireStore) async {
-    fireStore.removeDeviceToken(await _messaging.getToken());
+    await fireStore.removeDeviceToken(await _messaging.getToken());
     for (StreamSubscription subscription in _subscriptions) {
       subscription.cancel();
     }
