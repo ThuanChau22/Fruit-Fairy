@@ -44,29 +44,32 @@ export const donationUpdate = functions.firestore
           donationRounting(change.after);
         } else {
           // Notify donor
+          const tokens = await validatedTokens(donorId, userData![kDeviceTokens]);
           await sendNotification(
+            tokens,
             'Your donation was not accepted at this time',
             { id: change.after.id },
-            await validatedTokens(donorId, userData![kDeviceTokens]),
           );
         }
       }
 
       // Accept
       if (donationData[kStatus] == 0 && donationData[kSubStatus] == 1) {
+        const tokens = await validatedTokens(donorId, userData![kDeviceTokens]);
         await sendNotification(
+          tokens,
           'Your donation was accepted',
           { id: change.after.id },
-          await validatedTokens(donorId, userData![kDeviceTokens]),
         );
       }
 
       // Completed
       if (donationData[kStatus] == 1 && donationData[kSubStatus] == 1) {
+        const tokens = await validatedTokens(donorId, userData![kDeviceTokens]);
         await sendNotification(
+          tokens,
           'Your donation was collected',
           { id: change.after.id },
-          await validatedTokens(donorId, userData![kDeviceTokens]),
         );
       }
     } catch (error) {
@@ -88,17 +91,18 @@ async function donationRounting(
   });
 
   // Notify requested charity
+  const tokens = await validatedTokens(charityId, userData![kDeviceTokens]);
   await sendNotification(
+    tokens,
     'You have a new donation request',
     { id: snapshot.id },
-    await validatedTokens(charityId, userData![kDeviceTokens]),
   );
 }
 
 async function sendNotification(
+  tokens: string[],
   message: string,
   data: admin.messaging.DataMessagePayload,
-  tokens: string[],
 ) {
   try {
     await fcm.sendToDevice(
@@ -135,16 +139,22 @@ async function validatedTokens(
         }
       }
     }
-    for (const token of badTokens) {
-      tokens.splice(tokens.indexOf(token, 1));
-    }
     if (badTokens.length > 0) {
-      await db.collection('users').doc(userId).update({
+      db.collection(kUsers).doc(userId).update({
         deviceTokens: admin.firestore.FieldValue.arrayRemove(...badTokens),
       });
+    }
+    for (const token of badTokens) {
+      tokens = listRemove(tokens, token);
     }
   } catch (error) {
     console.log('Error: ', error);
   }
   return tokens;
+}
+
+function listRemove(list: string[], item: string) {
+  return list.filter(function (i) {
+    return i != item;
+  });
 }
