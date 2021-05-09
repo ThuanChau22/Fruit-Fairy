@@ -105,19 +105,21 @@ async function sendNotification(
   data: admin.messaging.DataMessagePayload,
 ) {
   try {
-    await fcm.sendToDevice(
-      tokens,
-      {
-        notification: {
-          body: message,
+    if (tokens.length > 0){
+      await fcm.sendToDevice(
+        tokens,
+        {
+          notification: {
+            body: message,
+          },
+          data: data,
         },
-        data: data,
-      },
-      {
-        contentAvailable: true,
-        priority: 'high',
-      },
-    );
+        {
+          contentAvailable: true,
+          priority: 'high',
+        },
+      );
+    }
   } catch (error) {
     console.log('Error: ', error);
   }

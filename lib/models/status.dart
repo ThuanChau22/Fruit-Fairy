@@ -18,20 +18,20 @@ class Status implements Comparable<Status> {
   }) {
     if (isPennding) {
       _description = 'Pending';
-      _message = 'Donation is waiting for charity approval';
+      _message = 'Donation is waiting for charity approval.';
     }
     if (isInProgress) {
       _description = 'In Progress';
       _message =
-          'Donation accepted. The charity will schedule a pickup with you';
+          'Donation accepted. The charity will schedule a pickup with you.';
     }
     if (isDeclined) {
       _description = 'Declined';
-      _message = 'Donation declined by selected charities';
+      _message = 'Donation declined by selected charities.';
     }
     if (isCompleted) {
       _description = 'Completed';
-      _message = 'Donation picked up by charity';
+      _message = 'Donation picked up by charity.';
     }
   }
 
