@@ -9,6 +9,7 @@ import 'package:fruitfairy/models/donations.dart';
 import 'package:fruitfairy/models/produce_item.dart';
 import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/models/status.dart';
+import 'package:fruitfairy/screens/home_screen.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
 import 'package:fruitfairy/widgets/custom_grid.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
@@ -34,7 +35,16 @@ class _CharityDonationDetailScreenState
     Map<String, dynamic> donationStorage = donations.map;
     String donationId = ModalRoute.of(context).settings.arguments;
     if (!donationStorage.containsKey(donationId)) {
-      fireStore.loadDonationDetails(donationId, donations, isCharity: true);
+      fireStore.loadDonationDetails(
+        donationId,
+        donations,
+        isCharity: true,
+        notify: (removed) {
+          Navigator.of(context).popUntil((route) {
+            return route.settings.name == HomeScreen.id;
+          });
+        },
+      );
     } else {
       _donation = donationStorage[donationId];
     }

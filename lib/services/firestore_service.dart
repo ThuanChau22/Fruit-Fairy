@@ -740,60 +740,64 @@ class FireStoreService {
   Future<void> loadDonationDetails(
     String donationId,
     Donations donations, {
-    Function onData,
+    Function(bool) notify,
     bool isCharity = false,
   }) async {
-    onData = onData ?? () {};
     try {
-      Stream<DocumentSnapshot> snapshots =
-          _donationsDB.doc(donationId).snapshots();
-      donations.addStream(snapshots.listen((snapshot) {
-        Map<String, dynamic> data = snapshot.data();
-        Donation donation = Donation(donationId);
-        if (isCharity) {
-          donation.status = Status.declined();
-          if (data[kRequestedCharities].last == _uid) {
-            donation.status = Status(
-              data[kStatus],
-              data[kSubStatus],
-              isCharity: true,
+      DocumentReference doc = _donationsDB.doc(donationId);
+      if ((await doc.get()).exists) {
+        donations.addStream(doc.snapshots().listen((snapshot) {
+          donations.removeDonation(donationId);
+          if (snapshot.exists) {
+            Map<String, dynamic> data = snapshot.data();
+            Donation donation = Donation(donationId);
+            if (isCharity) {
+              donation.status = Status.declined();
+              if (data[kRequestedCharities].last == _uid) {
+                donation.status = Status(
+                  data[kStatus],
+                  data[kSubStatus],
+                  isCharity: true,
+                );
+              }
+              donation.donorId = data[kDonor][kUserId];
+              donation.donorName = data[kDonor][kUserName];
+            } else {
+              donation.status = Status(
+                data[kStatus],
+                data[kSubStatus],
+              );
+              Charity charity = Charity(data[kCharity][kUserId]);
+              charity.name = data[kCharity][kUserName];
+              donation.pickCharity(charity);
+            }
+            Timestamp timeStamp = data[kCreatedAt] ?? Timestamp.now();
+            donation.createdAt = timeStamp.toDate();
+            donation.needCollected = data[kNeedCollected];
+            for (Map<String, dynamic> produce in data[kProduce]) {
+              ProduceItem produceItem = ProduceItem(produce[kProduceId]);
+              if (donation.needCollected) {
+                produceItem.amount = produce[kAmount];
+              }
+              donation.pickProduce(produceItem);
+            }
+            donation.setContactInfo(
+              street: data[kAddress][kAddressStreet],
+              city: data[kAddress][kAddressCity],
+              state: data[kAddress][kAddressState],
+              zip: data[kAddress][kAddressZip],
+              country: data[kPhone][kPhoneCountry],
+              dialCode: data[kPhone][kPhoneDialCode],
+              phoneNumber: data[kPhone][kPhoneNumber],
             );
+            donations.pickDonation(donation);
           }
-          donation.donorId = data[kDonor][kUserId];
-          donation.donorName = data[kDonor][kUserName];
-        } else {
-          donation.status = Status(
-            data[kStatus],
-            data[kSubStatus],
-          );
-          Charity charity = Charity(data[kCharity][kUserId]);
-          charity.name = data[kCharity][kUserName];
-          donation.pickCharity(charity);
-        }
-        Timestamp timeStamp = data[kCreatedAt] ?? Timestamp.now();
-        donation.createdAt = timeStamp.toDate();
-        donation.needCollected = data[kNeedCollected];
-        for (Map<String, dynamic> produce in data[kProduce]) {
-          ProduceItem produceItem = ProduceItem(produce[kProduceId]);
-          if (donation.needCollected) {
-            produceItem.amount = produce[kAmount];
-          }
-          donation.pickProduce(produceItem);
-        }
-        donation.setContactInfo(
-          street: data[kAddress][kAddressStreet],
-          city: data[kAddress][kAddressCity],
-          state: data[kAddress][kAddressState],
-          zip: data[kAddress][kAddressZip],
-          country: data[kPhone][kPhoneCountry],
-          dialCode: data[kPhone][kPhoneDialCode],
-          phoneNumber: data[kPhone][kPhoneNumber],
-        );
-        donations.pickDonation(donation);
-        onData();
-      }, onError: (e) {
-        print(e);
-      }));
+        }, onError: (e) {
+          print(e);
+        }));
+      } else {
+        notify(true);
+      }
     } catch (e) {
       print(e);
     }
@@ -1186,7 +1190,7 @@ class FireStoreService {
         }).toList(),
         kAddress: donation.address,
         kPhone: donation.phone,
-        kSelectedCharities: donation.charities.map((charity) {
+        kSelectedCharities: charities.map((charity) {
           return charity.id;
         }).toList(),
         kRequestedCharities: [],
