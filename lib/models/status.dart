@@ -66,13 +66,24 @@ class Status implements Comparable<Status> {
     return _message;
   }
 
-  /// Return initial status code
+  /// Return initial status
   static Status init() {
     return Status(0, 0);
   }
 
+  /// Return accepted status
+  static Status accept() {
+    return Status(0, 1, isCharity: true);
+  }
+
+  /// Return declined status
   static Status declined() {
     return Status(1, 0, isCharity: true);
+  }
+
+  /// Return completed status
+  static Status completed() {
+    return Status(1, 1, isCharity: true);
   }
 
   @override

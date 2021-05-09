@@ -8,6 +8,7 @@ import 'package:fruitfairy/models/account.dart';
 import 'package:fruitfairy/models/donation.dart';
 import 'package:fruitfairy/models/donations.dart';
 import 'package:fruitfairy/models/produce.dart';
+import 'package:fruitfairy/models/status.dart';
 import 'package:fruitfairy/screens/donation_produce_selection_screen.dart';
 import 'package:fruitfairy/screens/donor_donation_detail_screen.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
@@ -221,6 +222,7 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
   }
 
   Widget donationLayout() {
+    Donations donations = context.watch<Donations>();
     if (_isLoadingInit) {
       return Expanded(
         child: Center(
@@ -231,6 +233,25 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
       );
     }
     Size screen = MediaQuery.of(context).size;
+    if (donations.map.isEmpty) {
+      return Expanded(
+        child: Center(
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: screen.width * 0.1,
+            ),
+            child: Text(
+              'We reserve this space for your\ngenerous donations',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: kLabelColor.withOpacity(0.5),
+                fontSize: 22.0,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: screen.width * 0.08,
@@ -241,26 +262,25 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
 
   List<Widget> donationTiles() {
     List<Widget> donationTiles = [];
-    Donations donations = context.watch<Donations>();
+    Donations donations = context.read<Donations>();
     List<Donation> donationList = donations.map.values.toList();
     donationList.sort();
-    donationTiles.add(groupLabel('Active'));
-    int i = 0;
-    while (i < donationList.length &&
-        (donationList[i].status.isPennding ||
-            donationList[i].status.isInProgress)) {
-      donationTiles.add(donationTile(donationList[i++]));
-    }
-    if (i == 0) {
-      donationTiles.add(emptyLabel('You have no active donations'));
-    }
-    donationTiles.add(groupLabel('History'));
-    if (i == donationList.length) {
-      donationTiles.add(emptyLabel('You have no previous donations'));
-    }
-    while (i < donationList.length) {
-      donationTiles.add(donationTile(donationList[i++]));
-    }
+    bool hasActive = false;
+    bool hasHistory = false;
+    donationList.forEach((donation) {
+      Status status = donation.status;
+      bool isActive = status.isPennding || status.isInProgress;
+      if (isActive && !hasActive) {
+        donationTiles.add(groupLabel('Active'));
+        hasActive = true;
+      }
+      bool isHistory = status.isCompleted || status.isDeclined;
+      if (isHistory && !hasHistory) {
+        donationTiles.add(groupLabel('History'));
+        hasHistory = true;
+      }
+      donationTiles.add(donationTile(donation));
+    });
     donationTiles.add(loadingTile());
     return donationTiles;
   }
@@ -289,27 +309,6 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
             thickness: 2.0,
           ),
         ],
-      ),
-    );
-  }
-
-  Widget emptyLabel(String label) {
-    Size screen = MediaQuery.of(context).size;
-    return Container(
-      height: screen.height * 0.1,
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          vertical: screen.height * 0.025,
-          horizontal: screen.width * 0.1,
-        ),
-        child: Text(
-          label,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: kLabelColor.withOpacity(0.5),
-            fontSize: 20.0,
-          ),
-        ),
       ),
     );
   }

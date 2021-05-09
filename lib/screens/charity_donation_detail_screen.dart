@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:intl/intl.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 //
 import 'package:fruitfairy/constant.dart';
 import 'package:fruitfairy/models/donation.dart';
@@ -9,6 +10,7 @@ import 'package:fruitfairy/models/donations.dart';
 import 'package:fruitfairy/models/produce_item.dart';
 import 'package:fruitfairy/models/produce.dart';
 import 'package:fruitfairy/models/status.dart';
+import 'package:fruitfairy/screens/home_screen.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
 import 'package:fruitfairy/widgets/custom_grid.dart';
 import 'package:fruitfairy/widgets/fruit_tile.dart';
@@ -27,6 +29,13 @@ class _CharityDonationDetailScreenState
   bool _showSpinner = false;
   Donation _donation;
 
+  void _updateDonation() async {
+    setState(() => _showSpinner = true);
+    FireStoreService fireStore = context.read<FireStoreService>();
+    await fireStore.updateDonation(_donation);
+    setState(() => _showSpinner = false);
+  }
+
   @override
   Widget build(BuildContext context) {
     FireStoreService fireStore = context.read<FireStoreService>();
@@ -34,7 +43,16 @@ class _CharityDonationDetailScreenState
     Map<String, dynamic> donationStorage = donations.map;
     String donationId = ModalRoute.of(context).settings.arguments;
     if (!donationStorage.containsKey(donationId)) {
-      fireStore.loadDonationDetails(donationId, donations, isCharity: true);
+      fireStore.loadDonationDetails(
+        donationId,
+        donations,
+        isCharity: true,
+        notify: (removed) {
+          Navigator.of(context).popUntil((route) {
+            return route.settings.name == HomeScreen.id;
+          });
+        },
+      );
     } else {
       _donation = donationStorage[donationId];
     }
@@ -308,7 +326,6 @@ class _CharityDonationDetailScreenState
     );
   }
 
-  //TODO: Handle donation status from charity's action
   Widget pendingState() {
     Size screen = MediaQuery.of(context).size;
     return Padding(
@@ -324,7 +341,12 @@ class _CharityDonationDetailScreenState
               ),
               child: RoundedButton(
                 label: 'Accept',
-                onPressed: () {},
+                onPressed: () {
+                  showConfirmDialog(
+                    'Are you sure you want to accept?',
+                    Status.accept(),
+                  );
+                },
               ),
             ),
           ),
@@ -335,7 +357,12 @@ class _CharityDonationDetailScreenState
               ),
               child: RoundedButton(
                 label: 'Decline',
-                onPressed: () {},
+                onPressed: () {
+                  showConfirmDialog(
+                    'Are you sure you want to decline?',
+                    Status.declined(),
+                  );
+                },
               ),
             ),
           ),
@@ -355,7 +382,12 @@ class _CharityDonationDetailScreenState
           ),
           child: RoundedButton(
             label: 'Mark as Completed',
-            onPressed: () {},
+            onPressed: () {
+              showConfirmDialog(
+                'Was the donation collected?',
+                Status.completed(),
+              );
+            },
           ),
         ),
         Padding(
@@ -365,10 +397,77 @@ class _CharityDonationDetailScreenState
           ),
           child: RoundedButton(
             label: 'Decline',
-            onPressed: () {},
+            onPressed: () {
+              showConfirmDialog(
+                'Are you sure you want to decline?',
+                Status.declined(),
+              );
+            },
           ),
         ),
       ],
     );
+  }
+
+  void showConfirmDialog(
+    String label,
+    Status status,
+  ) {
+    Size screen = MediaQuery.of(context).size;
+    Alert(
+      context: context,
+      title: label,
+      style: AlertStyle(
+        alertBorder: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        titleStyle: TextStyle(
+          color: kLabelColor,
+          fontWeight: FontWeight.bold,
+        ),
+        backgroundColor: kPrimaryColor,
+        overlayColor: Colors.black.withOpacity(0.50),
+        isOverlayTapDismiss: false,
+        isCloseButton: false,
+        isButtonVisible: false,
+      ),
+      content: Padding(
+        padding: EdgeInsets.only(
+          top: screen.height * 0.03,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: screen.width * 0.02,
+                ),
+                child: RoundedButton(
+                  label: 'Confirm',
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _donation.status = status;
+                    _updateDonation();
+                  },
+                ),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: screen.width * 0.02,
+                ),
+                child: RoundedButton(
+                  label: 'Cancel',
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ).show();
   }
 }

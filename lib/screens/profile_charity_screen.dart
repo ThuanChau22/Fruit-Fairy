@@ -935,6 +935,7 @@ class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
         backgroundColor: kPrimaryColor,
         overlayColor: Colors.black.withOpacity(0.50),
         isOverlayTapDismiss: false,
+        isButtonVisible: false,
       ),
       closeIcon: Icon(
         Icons.close_rounded,
@@ -957,7 +958,6 @@ class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
           );
         },
       ),
-      buttons: [],
     ).show();
   }
 
