@@ -14,7 +14,6 @@ import 'package:fruitfairy/models/wish_list.dart';
 import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
 import 'package:fruitfairy/screens/home_screen.dart';
 import 'package:fruitfairy/services/fireauth_service.dart';
-import 'package:fruitfairy/services/firefunctions_service.dart';
 import 'package:fruitfairy/services/firemessaging_service.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
 import 'package:fruitfairy/services/route_generator.dart';
@@ -37,7 +36,6 @@ class FruitFairy extends StatelessWidget {
     return MultiProvider(
       providers: [
         Provider<FireAuthService>(create: (_) => FireAuthService()),
-        Provider<FireFunctionsService>(create: (_) => FireFunctionsService()),
         Provider<FireMessagingService>(create: (_) => FireMessagingService()),
         Provider<FireStoreService>(create: (_) => FireStoreService()),
         ChangeNotifierProvider<Account>(create: (_) => Account()),

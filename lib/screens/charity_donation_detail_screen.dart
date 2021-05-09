@@ -28,6 +28,13 @@ class _CharityDonationDetailScreenState
   bool _showSpinner = false;
   Donation _donation;
 
+  void _updateDonation() async {
+    setState(() => _showSpinner = true);
+    FireStoreService fireStore = context.read<FireStoreService>();
+    await fireStore.updateDonation(_donation);
+    setState(() => _showSpinner = false);
+  }
+
   @override
   Widget build(BuildContext context) {
     FireStoreService fireStore = context.read<FireStoreService>();
@@ -318,7 +325,6 @@ class _CharityDonationDetailScreenState
     );
   }
 
-  //TODO: Handle donation status from charity's action
   Widget pendingState() {
     Size screen = MediaQuery.of(context).size;
     return Padding(
@@ -334,7 +340,10 @@ class _CharityDonationDetailScreenState
               ),
               child: RoundedButton(
                 label: 'Accept',
-                onPressed: () {},
+                onPressed: () {
+                  _donation.status = Status.accept();
+                  _updateDonation();
+                },
               ),
             ),
           ),
@@ -345,7 +354,10 @@ class _CharityDonationDetailScreenState
               ),
               child: RoundedButton(
                 label: 'Decline',
-                onPressed: () {},
+                onPressed: () {
+                  _donation.status = Status.declined();
+                  _updateDonation();
+                },
               ),
             ),
           ),
@@ -365,7 +377,10 @@ class _CharityDonationDetailScreenState
           ),
           child: RoundedButton(
             label: 'Mark as Completed',
-            onPressed: () {},
+            onPressed: () {
+              _donation.status = Status.completed();
+              _updateDonation();
+            },
           ),
         ),
         Padding(
@@ -375,7 +390,10 @@ class _CharityDonationDetailScreenState
           ),
           child: RoundedButton(
             label: 'Decline',
-            onPressed: () {},
+            onPressed: () {
+              _donation.status = Status.declined();
+              _updateDonation();
+            },
           ),
         ),
       ],

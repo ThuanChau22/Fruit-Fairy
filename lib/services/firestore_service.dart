@@ -1204,6 +1204,24 @@ class FireStoreService {
     }
   }
 
+  Future<void> updateDonation(
+    Donation donation,
+  ) async {
+    if (_uid == null) {
+      print('UID Unset');
+      return;
+    }
+    try {
+      await _donationsDB.doc(donation.id).update({
+        kStatus: donation.status.code,
+        kSubStatus: donation.status.subCode,
+      });
+    } catch (e) {
+      print(e);
+      throw e.message;
+    }
+  }
+
   Future<void> deleteAccount() async {
     if (_uid == null) {
       print('UID Unset');
