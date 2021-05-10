@@ -25,13 +25,15 @@ class HomeDonorBody extends StatefulWidget {
 }
 
 class _HomeDonorBodyState extends State<HomeDonorBody> {
+  final GlobalKey _donateButtonKey = GlobalKey();
   final ScrollController _scroll = new ScrollController();
-  final double _scrollOffset = 60.0;
+  final double _scrollOffset = 120.0;
 
   Timer _loadingTimer = Timer(Duration.zero, () {});
   bool _isLoadingInit = true;
   bool _isLoadingMore = true;
   bool _checkProduceAvailability = false;
+  bool _showFloatButton = false;
 
   void _initProduce() async {
     FireStoreService fireStore = context.read<FireStoreService>();
@@ -103,6 +105,11 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
     _initProduce();
     _initDonations();
     _initMessaging();
+    _scroll.addListener(() {
+      RenderBox box = _donateButtonKey.currentContext.findRenderObject();
+      Offset pos = box.localToGlobal(Offset.zero);
+      setState(() => _showFloatButton = pos.dy <= 0);
+    });
   }
 
   @override
@@ -130,22 +137,33 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
       _checkProduceAvailability = true;
     }
     Size screen = MediaQuery.of(context).size;
-    return ScrollableLayout(
-      controller: _scroll,
-      child: Padding(
-        padding: EdgeInsets.only(
-          top: screen.height * 0.03,
-        ),
-        child: IntrinsicHeight(
-          child: Column(
-            children: [
-              greeting(),
-              donateButton(),
-              donationSection(),
-            ],
+    double padding = screen.height * 0.03;
+    return Stack(
+      children: [
+        ScrollableLayout(
+          controller: _scroll,
+          child: Padding(
+            padding: EdgeInsets.only(
+              top: padding,
+            ),
+            child: IntrinsicHeight(
+              child: Column(
+                children: [
+                  greeting(),
+                  donateButton(),
+                  donationSection(),
+                ],
+              ),
+            ),
           ),
         ),
-      ),
+        Positioned(
+          left: screen.width - (padding + 125.0),
+          right: padding,
+          bottom: padding,
+          child: floatButton(),
+        ),
+      ],
     );
   }
 
@@ -167,12 +185,28 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
   Widget donateButton() {
     Size screen = MediaQuery.of(context).size;
     return Padding(
+      key: _donateButtonKey,
       padding: EdgeInsets.symmetric(
         vertical: 16.0,
         horizontal: screen.width * 0.25,
       ),
       child: RoundedButton(
         label: 'Donate',
+        onPressed: () {
+          Navigator.of(context).pushNamed(DonationProduceSelectionScreen.id);
+        },
+      ),
+    );
+  }
+
+  Widget floatButton() {
+    return AnimatedOpacity(
+      opacity: _showFloatButton ? 1.0 : 0.0,
+      duration: Duration(milliseconds: 300),
+      child: RoundedButton(
+        label: 'Donate',
+        labelColor: kLabelColor,
+        backgroundColor: kPrimaryColor,
         onPressed: () {
           Navigator.of(context).pushNamed(DonationProduceSelectionScreen.id);
         },
@@ -213,6 +247,7 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
                   ),
                 ),
                 donationLayout(),
+                SizedBox(height: screen.height * 0.05),
               ],
             ),
           ),
