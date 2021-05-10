@@ -13,7 +13,6 @@ import 'package:fruitfairy/screens/authentication/sign_option_screen.dart';
 import 'package:fruitfairy/screens/authentication/signin_screen.dart';
 import 'package:fruitfairy/services/map_service.dart';
 import 'package:fruitfairy/services/fireauth_service.dart';
-import 'package:fruitfairy/services/firemessaging_service.dart';
 import 'package:fruitfairy/services/firestore_service.dart';
 import 'package:fruitfairy/services/session_token.dart';
 import 'package:fruitfairy/services/validation.dart';
