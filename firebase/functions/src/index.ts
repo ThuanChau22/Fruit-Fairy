@@ -37,18 +37,19 @@ export const donationUpdate = functions.firestore
       const donationData = change.after.data();
       const donorId = donationData[kDonor][kUserId];
       const userData = (await db.collection('users').doc(donorId).get()).data();
-
+      const charityName = userData![kCharityName];
+      const tokens = userData![kDeviceTokens];
+      
       // Declined
       if (donationData[kStatus] == 1 && donationData[kSubStatus] == 0) {
         if (donationData![kSelectedCharities][0]) {
           donationRounting(change.after);
         } else {
           // Notify donor
-          const tokens = userData![kDeviceTokens];
           if (tokens?.length > 0) {
             await sendNotification(
               await validatedTokens(donorId, tokens),
-              'Your donation was not accepted at this time',
+              { title: charityName, body: 'Your donation was not accepted at this time' },
               { id: change.after.id },
             );
           }
@@ -57,11 +58,10 @@ export const donationUpdate = functions.firestore
 
       // Accept
       if (donationData[kStatus] == 0 && donationData[kSubStatus] == 1) {
-        const tokens = userData![kDeviceTokens];
-        if (tokens?.length > 0){
+        if (tokens?.length > 0) {
           await sendNotification(
             await validatedTokens(donorId, tokens),
-            'Your donation was accepted',
+            { title: charityName, body: 'Your donation was accepted' },
             { id: change.after.id },
           );
         }
@@ -69,11 +69,10 @@ export const donationUpdate = functions.firestore
 
       // Completed
       if (donationData[kStatus] == 1 && donationData[kSubStatus] == 1) {
-        const tokens = userData![kDeviceTokens];
         if (tokens?.length > 0) {
           await sendNotification(
             await validatedTokens(donorId, tokens),
-            'Your donation was collected',
+            { title: charityName, body: 'Your donation was collected' },
             { id: change.after.id },
           );
         }
@@ -89,20 +88,23 @@ async function donationRounting(
 ) {
   const charityId = snapshot.data()![kSelectedCharities][0];
   const userData = (await db.collection(kUsers).doc(charityId).get()).data();
+  const charityName = userData![kCharityName];
+  const tokens = userData![kDeviceTokens];
+
+  // Pick requested charity
   await db.doc(`${kDonations}/${snapshot.id}`).update({
     requestedCharities: admin.firestore.FieldValue.arrayUnion(charityId),
     selectedCharities: admin.firestore.FieldValue.arrayRemove(charityId),
-    charity: { userId: charityId, userName: userData![kCharityName] },
+    charity: { userId: charityId, userName: charityName },
     status: 0,
     subStatus: 0,
   });
 
   // Notify requested charity
-  const tokens = userData![kDeviceTokens];
   if (tokens?.length > 0) {
     await sendNotification(
       await validatedTokens(charityId, tokens),
-      'You have a new donation request',
+      { title: userData![kCharityName], body: 'You have a new donation request' },
       { id: snapshot.id },
     );
   }
@@ -110,16 +112,14 @@ async function donationRounting(
 
 async function sendNotification(
   tokens: string[],
-  message: string,
+  notification: admin.messaging.NotificationMessagePayload,
   data: admin.messaging.DataMessagePayload,
 ) {
   try {
     await fcm.sendToDevice(
       tokens,
       {
-        notification: {
-          body: message,
-        },
+        notification: notification,
         data: data,
       },
       {
