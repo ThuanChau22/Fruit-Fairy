@@ -5,7 +5,9 @@ import * as admin from 'firebase-admin';
 /// donations
 const kDonations = 'donations';
 const kDonor = 'donor';
+const kCharity = 'charity';
 const kUserId = 'userId';
+const kUserName = 'userName';
 const kSelectedCharities = 'selectedCharities';
 const kStatus = 'status';
 const kSubStatus = 'subStatus';
@@ -36,10 +38,10 @@ export const donationUpdate = functions.firestore
     try {
       const donationData = change.after.data();
       const donorId = donationData[kDonor][kUserId];
+      const charityName = donationData[kCharity][kUserName];
       const userData = (await db.collection('users').doc(donorId).get()).data();
-      const charityName = userData![kCharityName];
       const tokens = userData![kDeviceTokens];
-      
+
       // Declined
       if (donationData[kStatus] == 1 && donationData[kSubStatus] == 0) {
         if (donationData![kSelectedCharities][0]) {
@@ -104,7 +106,7 @@ async function donationRounting(
   if (tokens?.length > 0) {
     await sendNotification(
       await validatedTokens(charityId, tokens),
-      { title: userData![kCharityName], body: 'You have a new donation request' },
+      { body: 'You have a new donation request' },
       { id: snapshot.id },
     );
   }

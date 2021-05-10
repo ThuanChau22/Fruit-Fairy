@@ -383,9 +383,7 @@ class _ProfileCharityScreenState extends State<ProfileCharityScreen> {
         context.read<Account>().clear();
         context.read<WishList>().clear();
         context.read<Produce>().clear();
-        FireStoreService fireStore = context.read<FireStoreService>();
-        await context.read<FireMessagingService>().clear(fireStore);
-        fireStore.clear();
+        context.read<FireStoreService>().clear();
         _setDialogState(() => _deleteMode = DeleteMode.Success);
         await Future.delayed(Duration(milliseconds: 1500));
         Navigator.of(context).pushNamedAndRemoveUntil(
