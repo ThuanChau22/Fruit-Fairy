@@ -64,7 +64,7 @@ class DonationTile extends StatelessWidget {
                       style: TextStyle(
                         color: kPrimaryColor,
                         fontWeight: FontWeight.bold,
-                        fontSize: 24.0,
+                        fontSize: 22.0,
                       ),
                     ),
                   ),
