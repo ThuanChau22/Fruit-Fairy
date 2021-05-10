@@ -45,44 +45,39 @@ class FruitFairy extends StatelessWidget {
         ChangeNotifierProvider<Produce>(create: (_) => Produce()),
         ChangeNotifierProvider<WishList>(create: (_) => WishList()),
       ],
-      child: Authentication(),
-    );
-  }
-}
-
-class Authentication extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    // Check user authentication status
-    User user = context.read<FireAuthService>().user;
-    bool signedIn = user != null && user.emailVerified;
-    if (signedIn) {
-      FireStoreService fireStore = context.read<FireStoreService>();
-      fireStore.setUID(user.uid);
-      fireStore.updateLastSignedIn();
-    }
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      initialRoute: signedIn ? HomeScreen.id : SignOptionScreen.id,
-      onGenerateRoute: RouteGenerator.generate,
-      theme: Theme.of(context).copyWith(
-        accentColor: kDarkPrimaryColor,
-        scaffoldBackgroundColor: kPrimaryColor,
-        appBarTheme: AppBarTheme(
-          brightness: Brightness.dark,
-          backgroundColor: kDarkPrimaryColor,
-          centerTitle: true,
-        ),
-        snackBarTheme: SnackBarThemeData(
-          backgroundColor: kSnackbarBackground.withOpacity(0.9),
-          actionTextColor: kLabelColor,
-          contentTextStyle: TextStyle(
-            color: kLabelColor,
-            fontSize: 16.0,
-            fontWeight: FontWeight.bold,
+      child: Builder(builder: (context) {
+        // Check user authentication status
+        User user = context.read<FireAuthService>().user;
+        bool signedIn = user != null && user.emailVerified;
+        if (signedIn) {
+          FireStoreService fireStore = context.read<FireStoreService>();
+          fireStore.setUID(user.uid);
+          fireStore.updateLastSignedIn();
+        }
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          initialRoute: signedIn ? HomeScreen.id : SignOptionScreen.id,
+          onGenerateRoute: RouteGenerator.generate,
+          theme: Theme.of(context).copyWith(
+            accentColor: kDarkPrimaryColor,
+            scaffoldBackgroundColor: kPrimaryColor,
+            appBarTheme: AppBarTheme(
+              brightness: Brightness.dark,
+              backgroundColor: kDarkPrimaryColor,
+              centerTitle: true,
+            ),
+            snackBarTheme: SnackBarThemeData(
+              backgroundColor: kSnackbarBackground.withOpacity(0.9),
+              actionTextColor: kLabelColor,
+              contentTextStyle: TextStyle(
+                color: kLabelColor,
+                fontSize: 16.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 }
