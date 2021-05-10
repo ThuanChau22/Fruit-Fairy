@@ -415,9 +415,7 @@ class _ProfileDonorScreenState extends State<ProfileDonorScreen> {
         context.read<Donation>().clear();
         context.read<Produce>().clear();
         context.read<Charities>().clear();
-        FireStoreService fireStore = context.read<FireStoreService>();
-        await context.read<FireMessagingService>().clear(fireStore);
-        fireStore.clear();
+        context.read<FireStoreService>().clear();
         _setDialogState(() => _deleteMode = DeleteMode.Success);
         await Future.delayed(Duration(milliseconds: 1500));
         Navigator.of(context).pushNamedAndRemoveUntil(
