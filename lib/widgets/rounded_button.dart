@@ -5,6 +5,7 @@ import 'package:fruitfairy/constant.dart';
 
 class RoundedButton extends StatelessWidget {
   final String label;
+  final Color labelColor;
   final Color backgroundColor;
   final Widget leading;
   final Widget trailing;
@@ -14,6 +15,7 @@ class RoundedButton extends StatelessWidget {
   RoundedButton({
     @required this.label,
     @required this.onPressed,
+    this.labelColor,
     this.backgroundColor,
     this.leading,
     this.trailing,
@@ -48,7 +50,8 @@ class RoundedButton extends StatelessWidget {
                 label,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: disabled ? kDisabledColor : kPrimaryColor,
+                  color:
+                      disabled ? kDisabledColor : labelColor ?? kPrimaryColor,
                   fontSize: 20.0,
                   fontWeight: FontWeight.bold,
                 ),
