@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:strings/strings.dart';
 import 'package:intl/intl.dart';
 //
 import 'package:fruitfairy/constant.dart';
@@ -57,13 +58,13 @@ class DonationTile extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      userName,
+                      camelize(userName),
                       overflow: TextOverflow.fade,
                       softWrap: false,
                       style: TextStyle(
                         color: kPrimaryColor,
                         fontWeight: FontWeight.bold,
-                        fontSize: 24.0,
+                        fontSize: 22.0,
                       ),
                     ),
                   ),

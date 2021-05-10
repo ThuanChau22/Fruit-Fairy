@@ -26,13 +26,15 @@ class HomeCharityBody extends StatefulWidget {
 }
 
 class _HomeCharityBodyState extends State<HomeCharityBody> {
+  final GlobalKey _wishlistButtonKey = GlobalKey();
   final ScrollController _scroll = new ScrollController();
-  final int _scrollOffset = 60;
+  final int _scrollOffset = 120;
 
   Timer _loadingTimer = Timer(Duration.zero, () {});
   bool _isLoadingInit = true;
   bool _isLoadingMore = true;
   bool _checkProduceAvailability = false;
+  bool _showFloatButton = false;
 
   void _initProduce() async {
     FireStoreService fireStore = context.read<FireStoreService>();
@@ -103,6 +105,11 @@ class _HomeCharityBodyState extends State<HomeCharityBody> {
     _initProduce();
     _initDonations();
     _initMessaging();
+    _scroll.addListener(() {
+      RenderBox box = _wishlistButtonKey.currentContext.findRenderObject();
+      Offset pos = box.localToGlobal(Offset.zero);
+      setState(() => _showFloatButton = pos.dy <= 0);
+    });
   }
 
   @override
@@ -131,22 +138,33 @@ class _HomeCharityBodyState extends State<HomeCharityBody> {
       _checkProduceAvailability = true;
     }
     Size screen = MediaQuery.of(context).size;
-    return ScrollableLayout(
-      controller: _scroll,
-      child: Padding(
-        padding: EdgeInsets.only(
-          top: screen.height * 0.03,
-        ),
-        child: IntrinsicHeight(
-          child: Column(
-            children: [
-              greeting(),
-              wishListButton(),
-              donationSection(),
-            ],
+    double padding = screen.height * 0.03;
+    return Stack(
+      children: [
+        ScrollableLayout(
+          controller: _scroll,
+          child: Padding(
+            padding: EdgeInsets.only(
+              top: padding,
+            ),
+            child: IntrinsicHeight(
+              child: Column(
+                children: [
+                  greeting(),
+                  wishListButton(),
+                  donationSection(),
+                ],
+              ),
+            ),
           ),
         ),
-      ),
+        Positioned(
+          left: screen.width - (padding + 125.0),
+          right: padding,
+          bottom: padding,
+          child: floatButton(),
+        ),
+      ],
     );
   }
 
@@ -168,12 +186,28 @@ class _HomeCharityBodyState extends State<HomeCharityBody> {
   Padding wishListButton() {
     Size size = MediaQuery.of(context).size;
     return Padding(
+      key: _wishlistButtonKey,
       padding: EdgeInsets.symmetric(
         vertical: 16.0,
         horizontal: size.width * 0.25,
       ),
       child: RoundedButton(
         label: 'Wish List',
+        onPressed: () {
+          Navigator.of(context).pushNamed(CharityWishListScreen.id);
+        },
+      ),
+    );
+  }
+
+  Widget floatButton() {
+    return AnimatedOpacity(
+      opacity: _showFloatButton ? 1.0 : 0.0,
+      duration: Duration(milliseconds: 300),
+      child: RoundedButton(
+        label: 'Wish List',
+        labelColor: kLabelColor,
+        backgroundColor: kPrimaryColor,
         onPressed: () {
           Navigator.of(context).pushNamed(CharityWishListScreen.id);
         },
@@ -214,6 +248,7 @@ class _HomeCharityBodyState extends State<HomeCharityBody> {
                   ),
                 ),
                 donationLayout(),
+                SizedBox(height: screen.height * 0.05),
               ],
             ),
           ),

@@ -155,6 +155,7 @@ class _DonorDonationDetailScreenState extends State<DonorDonationDetailScreen> {
         horizontal: screen.width * 0.02,
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

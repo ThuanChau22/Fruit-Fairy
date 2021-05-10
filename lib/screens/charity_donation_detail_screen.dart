@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:strings/strings.dart';
 import 'package:intl/intl.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 //
@@ -225,7 +226,7 @@ class _CharityDonationDetailScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          fieldLabel('${_donation.donorName}'),
+          fieldLabel(camelize(_donation.donorName)),
           fieldLabel('$street'),
           fieldLabel('$city, $state, $zip'),
           fieldLabel('Phone: $intlPhoneNumber'),
