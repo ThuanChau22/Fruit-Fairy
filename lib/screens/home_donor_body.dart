@@ -27,7 +27,7 @@ class HomeDonorBody extends StatefulWidget {
 class _HomeDonorBodyState extends State<HomeDonorBody> {
   final GlobalKey _donateButtonKey = GlobalKey();
   final ScrollController _scroll = new ScrollController();
-  final double _scrollOffset = 120.0;
+  final double _scrollOffset = 0.75;
 
   Timer _loadingTimer = Timer(Duration.zero, () {});
   bool _isLoadingInit = true;
@@ -67,7 +67,7 @@ class _HomeDonorBodyState extends State<HomeDonorBody> {
     /// Load Donations on Scroll
     _scroll.addListener(() {
       ScrollPosition pos = _scroll.position;
-      bool loadTriggered = pos.pixels + _scrollOffset >= pos.maxScrollExtent;
+      bool loadTriggered = pos.pixels > _scrollOffset * pos.maxScrollExtent;
       if (loadTriggered && !_loadingTimer.isActive) {
         _loadingTimer = Timer(Duration(seconds: 2), () {
           if (mounted) {
